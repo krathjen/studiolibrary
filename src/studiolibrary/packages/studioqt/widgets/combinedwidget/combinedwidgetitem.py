@@ -387,10 +387,11 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         self._size = size
 
-    def sizeHint(self):
+    def sizeHint(self, column=0):
         """
         Return the current size of the item.
 
+        :type column: int
         :rtype: QtCore.QSize
         """
         if self.stretchToWidget():

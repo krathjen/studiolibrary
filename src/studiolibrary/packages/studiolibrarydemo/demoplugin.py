@@ -21,10 +21,10 @@ NOTE: You don't need to be in Maya to run this demo.
 
 import logging
 
-from studioqt import QtWidgets
+import studiolibrary
 
 import studioqt
-import studiolibrary
+from studioqt import QtWidgets
 
 
 __all__ = ["Plugin"]
