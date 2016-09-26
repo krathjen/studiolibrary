@@ -37,47 +37,46 @@ def migrate():
 
 def migrateLibraries():
     """
-    Migrate old libraries to new 1.21+ library location.
+    Migrate all the old libraries to the new 1.21+ library location.
 
     :rtype: None
     """
     HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
-    LIBRARIES_PATH = HOME_PATH + "/StudioLibrary/Libraries"
     OLD_LIBRARIES_PATH = HOME_PATH + "/StudioLibrary/Library"
+    NEW_LIBRARIES_PATH = HOME_PATH + "/StudioLibrary/Libraries"
 
-    for filename in os.listdir(OLD_LIBRARIES_PATH):
+    if os.path.exists(OLD_LIBRARIES_PATH):
+        for filename in os.listdir(OLD_LIBRARIES_PATH):
 
-        libraryName = filename.replace(".dict", "").replace(".json", "")
+            libraryName = filename.replace(".dict", "").replace(".json", "")
 
-        oldDictPath = os.path.join(OLD_LIBRARIES_PATH, libraryName + ".dict")
-        oldJsonPath = os.path.join(OLD_LIBRARIES_PATH, libraryName + ".json")
-        migratedPath = os.path.join(OLD_LIBRARIES_PATH, libraryName + ".migrated")
+            oldDictPath = os.path.join(OLD_LIBRARIES_PATH, libraryName + ".dict")
+            oldJsonPath = os.path.join(OLD_LIBRARIES_PATH, libraryName + ".json")
+            migratedPath = os.path.join(OLD_LIBRARIES_PATH, libraryName + ".migrated")
 
-        newJsonPath = os.path.join(LIBRARIES_PATH, libraryName, "library.json")
+            newJsonPath = os.path.join(NEW_LIBRARIES_PATH, libraryName, "library.json")
 
-        if os.path.exists(newJsonPath) or os.path.exists(migratedPath):
-            continue
+            if os.path.exists(newJsonPath) or os.path.exists(migratedPath):
+                continue
 
-        msg = "Migrating old library: {0} -> {1}..."
+            msg = "Migrating old library: {0} -> {1}..."
 
-        if os.path.exists(oldJsonPath):
-            msg.format(oldJsonPath, newJsonPath)
-            logger.info(msg)
+            if os.path.exists(oldJsonPath):
+                msg = msg.format(oldJsonPath, newJsonPath)
+                logger.info(msg)
 
-            data = studiolibrary.readJson(oldJsonPath)
-            studiolibrary.saveJson(newJsonPath, data)
-            studiolibrary.saveJson(migratedPath, data)
+                data = studiolibrary.readJson(oldJsonPath)
+                studiolibrary.saveJson(newJsonPath, data)
+                studiolibrary.saveJson(migratedPath, data)
 
-        elif os.path.exists(oldDictPath):
-            msg.format(oldDictPath, newJsonPath)
-            logger.info(msg)
+            elif os.path.exists(oldDictPath):
+                msg = msg.format(oldDictPath, newJsonPath)
+                logger.info(msg)
 
-            data = studiolibrary.readDict(oldJsonPath)
-            studiolibrary.saveJson(newJsonPath, data)
-            studiolibrary.saveJson(migratedPath, data)
+                data = studiolibrary.readDict(oldJsonPath)
+                studiolibrary.saveJson(newJsonPath, data)
+                studiolibrary.saveJson(migratedPath, data)
 
 
 if __name__ == "__main__":
     migrate()
-
-

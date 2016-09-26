@@ -68,7 +68,7 @@ __all__ = ["MirrorTable", "MirrorPlane", "MirrorOption", "Axis"]
 logger = logging.getLogger(__name__)
 
 
-RE_LEFT_SIDE = "Lf|lf_|_lf|_l_|_L|L_|left|Left"
+RE_LEFT_SIDE = "Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|left|Left"
 RE_RIGHT_SIDE = "Rt|rt_|_rt|_r_|_R|R_|right|Right"
 
 
@@ -596,7 +596,7 @@ class MirrorTable(mutils.SelectionSet):
         :rtype: bool
         """
         if side:
-            return side in obj
+            return side in name
 
         return False
 
