@@ -1,0 +1,149 @@
+{
+  "metadata": {
+    "angularUnit": "deg", 
+    "description": "test shot", 
+    "user": "testuser", 
+    "startTime": 1, 
+    "mayaSceneFile": "/norman/work/krathjen/git/sandbox/site-packages/mutils/tests/data/test_pose.ma", 
+    "timeUnit": "film", 
+    "cTime": 646464451, 
+    "mayaVersion": "2013 Service Pack 2P12 x64", 
+    "linearUnit": "cm", 
+    "version": "1.0.0", 
+    "endTime": 48
+  }
+,
+  "objects": {
+    "srcSphere:offset": {
+      "attrs": {}
+    }, 
+    "srcSphere:sphere": {
+      "attrs": {
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 45.0
+        }, 
+        "testEnum": {
+          "type": "enum", 
+          "value": 1
+        }, 
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 8.0
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": -12.0
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 25.0
+        }, 
+        "testFloat": {
+          "type": "double", 
+          "value": 0.66600000000000004
+        }, 
+        "testAnimated": {
+          "type": "double", 
+          "value": 0.0
+        }, 
+        "scaleX": {
+          "type": "double", 
+          "value": 0.25
+        }, 
+        "scaleY": {
+          "type": "double", 
+          "value": 1.5
+        }, 
+        "visibility": {
+          "type": "bool", 
+          "value": true
+        }, 
+        "testString": {
+          "type": "string", 
+          "value": "Hello world"
+        }, 
+        "testVectorX": {
+          "type": "double", 
+          "value": 0.20000000000000001
+        }, 
+        "testVectorY": {
+          "type": "double", 
+          "value": 1.3999999999999999
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 90.0
+        }, 
+        "testVectorZ": {
+          "type": "double", 
+          "value": 2.6000000000000001
+        }, 
+        "scaleZ": {
+          "type": "double", 
+          "value": 0.5
+        }, 
+        "testInteger": {
+          "type": "long", 
+          "value": 5
+        }, 
+        "testBoolean": {
+          "type": "bool", 
+          "value": true
+        }, 
+        "testConnect": {
+          "type": "double", 
+          "value": 8.0
+        }
+      }
+    }, 
+    "srcSphere:lockedNode": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "scaleX": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "scaleY": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "visibility": {
+          "type": "bool", 
+          "value": true
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "scaleZ": {
+          "type": "double", 
+          "value": 1.0
+        }
+      }
+    }
+  }
+}

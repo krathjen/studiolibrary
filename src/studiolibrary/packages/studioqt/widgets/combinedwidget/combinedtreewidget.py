@@ -1,0 +1,933 @@
+# Copyright 2016 by Kurt Rathjen. All Rights Reserved.
+#
+# Permission to use, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted,
+# provided that the above copyright notice appear in all copies and that
+# both that copyright notice and this permission notice appear in
+# supporting documentation, and that the name of Kurt Rathjen
+# not be used in advertising or publicity pertaining to distribution
+# of the software without specific, written prior permission.
+# KURT RATHJEN DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+# KURT RATHJEN BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+# OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+import logging
+
+from functools import partial
+from collections import OrderedDict
+
+import studioqt
+
+from studioqt import QtGui
+from studioqt import QtCore
+from studioqt import QtWidgets
+
+from .combineditemviewmixin import CombinedItemViewMixin
+
+
+logger = logging.getLogger(__name__)
+
+
+class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
+
+    def __init__(self, *args):
+        QtWidgets.QTreeWidget.__init__(self, *args)
+        CombinedItemViewMixin.__init__(self)
+
+        self._sortColumn = None
+
+        self._groupItems = []
+        self._groupColumn = None
+        self._groupOrder = QtCore.Qt.AscendingOrder
+
+        self._headerLabels = []
+        self._hiddenColumns = {}
+        self._validGroupByColumns = []
+
+        self.setMouseTracking(True)
+        self.setSortingEnabled(True)
+        self.setSelectionMode(QtWidgets.QListWidget.ExtendedSelection)
+        self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
+
+        header = self.header()
+        header.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        header.customContextMenuRequested.connect(self.showHeaderMenu)
+
+        self.itemClicked.connect(self._itemClicked)
+        self.itemDoubleClicked.connect(self._itemDoubleClicked)
+
+    def drawRow(self, painter, options, index):
+        item = self.itemFromIndex(index)
+        item.paintRow(painter, options, index)
+
+    def _itemClicked(self, item):
+        """
+        Triggered when the user clicks on an item.
+
+        :type item: QtWidgets.QTreeWidgetItem
+        :rtype: None
+        """
+        item.clicked()
+
+    def _itemDoubleClicked(self, item):
+        """
+        Triggered when the user double clicks on an item.
+
+        :type item: QtWidgets.QTreeWidgetItem
+        :rtype: None
+        """
+        item.doubleClicked()
+
+    def clear(self, *args):
+        """
+        Reimplementing so that all dirty objects can be removed.
+
+        :param args:
+        :rtype: None
+        """
+        QtWidgets.QTreeWidget.clear(self, *args)
+        self.cleanDirtyObjects()
+        self._groupItems = []
+
+    def setItemsSelected(self, items, value, scrollTo=True):
+        """
+        Select the given items.
+
+        :type items: list[studioqt.CombinedWidget]
+        :type value: bool
+
+        :rtype: None
+        """
+        for item in items:
+            self.setItemSelected(item, value)
+
+        if scrollTo:
+            self.combinedWidget().scrollToItem(items[-1])
+
+    def selectedItem(self):
+        """
+        Return the last selected non-hidden item.
+
+        :rtype: studioqt.CombinedWidgetItem
+        """
+        items = self.selectedItems()
+
+        if items:
+            return items[-1]
+
+        return None
+
+    def selectedItems(self):
+        """
+        Return all the selected items.
+
+        :rtype: list[studioqt.CombinedWidgetItem]
+        """
+        items = []
+        items_ = QtWidgets.QTreeWidget.selectedItems(self)
+
+        for item in items_:
+            if not isinstance(item, studioqt.CombinedWidgetItemGroup):
+                items.append(item)
+
+        return items
+
+    def rowAt(self, pos):
+        """
+        Return the row for the given pos.
+
+        :type pos: QtCore.QPoint
+        :rtype: int
+        """
+        item = self.itemAt(pos)
+        return self.itemRow(item)
+
+    def itemRow(self, item):
+        """
+        Return the row for the given item.
+
+        :type item: studioqt.TreeWidgetItem
+        :rtype: int
+        """
+        index = self.indexFromItem(item)
+        return index.row()
+
+    def items(self):
+        """
+        Return a list of all the items in the tree widget.
+
+        :rtype: lsit[studioqt.TreeWidgetItem]
+        """
+        items = []
+
+        for item in self._items():
+            if not isinstance(item, studioqt.CombinedWidgetItemGroup):
+                items.append(item)
+
+        return items
+
+    def _items(self):
+        """
+        Return a list of all the items in the tree widget.
+
+        :rtype: lsit[studioqt.TreeWidgetItem]
+        """
+        return self.findItems(
+            "*",
+            QtCore.Qt.MatchWildcard | QtCore.Qt.MatchRecursive
+        )
+
+    def takeTopLevelItems(self):
+        """
+        Take all items from the tree widget.
+
+        :rtype: list[QtWidgets.QTreeWidgetItem]
+        """
+        items = []
+        for item in self._items():
+            # For some reason its faster to take from index 1.
+            items.append(self.takeTopLevelItem(1))
+        items.append(self.takeTopLevelItem(0))
+        return items
+
+    def textFromColumn(self, column):
+        """
+        Return all data for the given column
+
+        :type column: int
+        :rtype: list[object]
+        """
+        result = []
+        for item in self.items():
+            text = item.text(column)
+            if text:
+                result.append(text)
+
+        return result
+
+    def columnLabels(self):
+        """
+        Return all header labels for the tree widget.
+
+        :rtype: list[str]
+        """
+        labels = []
+
+        for column in range(self.columnCount()):
+            label = self.headerItem().text(column)
+            labels.append(label)
+
+        return labels
+
+    def updateData(self):
+        """
+        Update all item data to the correct column.
+
+        :rtype: None
+        """
+        items = self.items()
+        for item in items:
+            item.updateData()
+
+    def labelFromColumn(self, column):
+        """
+        Return the column label for the given column.
+
+        :type column: int
+        :rtype: str
+        """
+        return self.headerItem().text(column)
+
+    def setHeaderLabels(self, *args):
+        """
+        Adds a column in the header for each item in the labels list.
+
+        :type args:
+        :rtype: None
+        """
+        QtWidgets.QTreeWidget.setHeaderLabels(self, *args)
+        self.updateHeaderLabels()
+        self.updateColumnHidden()
+        self.updateData()
+
+    def updateHeaderLabels(self):
+        """
+        Add a column in the header for the data in the items.
+
+        :rtype: None
+        """
+        self._headerLabels = []
+
+        for column in range(self.columnCount()):
+            label = self.headerItem().text(column)
+            self._headerLabels.append(label)
+
+    def columnFromLabel(self, label):
+        """
+        Return the column for the given label.
+
+        :type label: str
+        :rtype: int
+        """
+        if label not in self._headerLabels:
+            self.updateHeaderLabels()
+
+        try:
+            return self._headerLabels.index(label)
+        except ValueError:
+            return -1
+
+    def showAllColumns(self):
+        """
+        Show all available columns.
+
+        :rtype: None
+        """
+        for column in range(self.columnCount()):
+            self.setColumnHidden(column, False)
+
+    def hideAllColumns(self):
+        """
+        Hide all available columns.
+
+        :rtype: None
+        """
+        for column in range(1, self.columnCount()):
+            self.setColumnHidden(column, True)
+
+    def updateColumnHidden(self):
+        self.showAllColumns()
+        columnLabels = self._hiddenColumns.keys()
+
+        for columnLabel in columnLabels:
+            column = self.columnFromLabel(columnLabel)
+            self.setColumnHidden(column, self._hiddenColumns[columnLabel])
+
+    def setColumnHidden(self, column, value):
+        """
+        Set the give column to show or hide depending on the specified value.
+
+        :type column: int or str
+        :type value: bool
+        :rtype: None
+        """
+        if isinstance(column, basestring):
+            column = self.columnFromLabel(column)
+
+        label = self.labelFromColumn(column)
+        self._hiddenColumns[label] = value
+
+        QtWidgets.QTreeWidget.setColumnHidden(self, column, value)
+
+    def resizeColumnToContents(self, column):
+        """
+        Resize the given column to the data of that column.
+
+        :type column: int or text
+        :rtype: None
+        """
+        width = 0
+        for item in self.items():
+            text = item.text(column)
+            font = item.font(column)
+            metrics = QtGui.QFontMetricsF(font)
+            textWidth = metrics.width(text) + item.padding()
+            width = max(width, textWidth)
+
+        self.setColumnWidth(column, width)
+
+    # ----------------------------------------------------------------------
+    # Support for custom orders
+    # ----------------------------------------------------------------------
+
+    def isSortByCustomOrder(self):
+        """
+        Return true if items are currently sorted by custom order.
+
+        :rtype: bool
+        """
+        sortColumnLabel = self.sortColumnLabel()
+        return sortColumnLabel == "Custom Order"
+
+    def setItemsCustomOrder(self, items, row=1, padding=5):
+        """
+        Set the custom order for the given items by their list order.
+
+        :rtype: None
+        """
+        column = self.columnFromLabel("Custom Order")
+
+        for item in items:
+            item.setText(column, str(row).zfill(padding))
+            row += 1
+
+    def updateCustomOrder(self):
+        """
+        Update any empty custom orders.
+
+        :rtype: None
+        """
+        row = 1
+        padding = 5
+
+        items = self.items()
+        column = self.columnFromLabel("Custom Order")
+
+        for item in items:
+            customOrder = item.text(column)
+            if not customOrder:
+                item.setText(column, str(row).zfill(padding))
+            row += 1
+
+    def itemsCustomOrder(self):
+        """
+        Return the items sorted by the custom order data.
+
+        :rtype: list[studioqt.CombinedWidgetItem]
+        """
+        items = self.items()
+        column = self.columnFromLabel("Custom Order")
+        customOrder = sorted(items, key=lambda item: item.text(column))
+
+        return customOrder
+
+    def moveItems(self, items, itemAt):
+        """
+        Move the given items to the position of the destination row.
+
+        :type items: list[studioqt.CombinedWidgetItem]
+        :type itemAt: studioqt.CombinedWidgetItem
+        :rtype: None
+        """
+        row = 0
+        column = self.columnFromLabel("Custom Order")
+        orderedItems = self.itemsCustomOrder()
+
+        if itemAt:
+            row = orderedItems.index(itemAt)
+
+        removedItems = []
+        for item in items:
+            index = orderedItems.index(item)
+            removedItems.append(orderedItems.pop(index))
+
+        for item in removedItems:
+            orderedItems.insert(row, item)
+
+        self.setItemsCustomOrder(orderedItems)
+        self.sortByColumn(column, QtCore.Qt.AscendingOrder)
+
+        for item in items:
+            self.setItemSelected(item, True)
+
+    # ----------------------------------------------------------------------
+    # Support for menus
+    # ----------------------------------------------------------------------
+
+    def showHeaderMenu(self, pos):
+        """
+        Creates and show the header menu at the cursor pos.
+
+        :rtype: QtWidgets.QMenu
+        """
+        header = self.header()
+        column = header.logicalIndexAt(pos)
+
+        menu = self.createHeaderMenu(column)
+
+        menu.addSeparator()
+
+        submenu = self.createHideColumnMenu()
+        menu.addMenu(submenu)
+
+        point = QtGui.QCursor.pos()
+        menu.exec_(point)
+
+    def createHeaderMenu(self, column):
+        """
+        Creates a new header menu.
+
+        :rtype: QtWidgets.QMenu
+        """
+        menu = QtWidgets.QMenu(self)
+        label = self.labelFromColumn(column)
+
+        action = menu.addAction("Hide '{0}'".format(label))
+        callback = partial(self.setColumnHidden, column, True)
+        action.triggered.connect(callback)
+
+        menu.addSeparator()
+
+        action = menu.addAction('Sort Ascending')
+        callback = partial(self.sortByColumn, column, QtCore.Qt.AscendingOrder)
+        action.triggered.connect(callback)
+
+        action = menu.addAction('Sort Descending')
+        callback = partial(self.sortByColumn, column, QtCore.Qt.DescendingOrder)
+        action.triggered.connect(callback)
+
+        menu.addSeparator()
+
+        action = menu.addAction('Resize to Contents')
+        callback = partial(self.resizeColumnToContents, column)
+        action.triggered.connect(callback)
+
+        return menu
+
+    def createHideColumnMenu(self):
+        """
+        Create the hide column menu.
+
+        :rtype: QtWidgets.QMenu
+        """
+        menu = QtWidgets.QMenu("Show/Hide Column", self)
+
+        action = menu.addAction("Show All")
+        action.triggered.connect(self.showAllColumns)
+
+        action = menu.addAction("Hide All")
+        action.triggered.connect(self.hideAllColumns)
+
+        menu.addSeparator()
+
+        for column in range(self.columnCount()):
+
+            label = self.labelFromColumn(column)
+            isHidden = self.isColumnHidden(column)
+
+            action = menu.addAction(label)
+            action.setCheckable(True)
+            action.setChecked(not isHidden)
+
+            callback = partial(self.setColumnHidden, column, not isHidden)
+            action.triggered.connect(callback)
+
+        return menu
+
+    # ----------------------------------------------------------------------
+    # Support for copying item data to the clipboard.
+    # ----------------------------------------------------------------------
+
+    def createCopyTextMenu(self):
+        """
+        Create a menu to copy the selected items data to the clipboard.
+
+        :rtype: QtWidgets.QMenu
+        """
+        menu = QtWidgets.QMenu("Copy Text", self)
+
+        if self.selectedItems():
+
+            for column in range(self.columnCount()):
+                label = self.labelFromColumn(column)
+                action = menu.addAction(label)
+                callback = partial(self.copyText, column)
+                action.triggered.connect(callback)
+
+        else:
+            action = menu.addAction("No items selected")
+            action.setEnabled(False)
+
+        return menu
+
+    def copyText(self, column):
+        """
+        Copy the given column text to clipboard.
+
+        :type column: int or text
+        :rtype: None
+        """
+        items = self.selectedItems()
+        text = "\n".join([item.text(column) for item in items])
+
+        clipBoard = QtWidgets.QApplication.clipboard()
+        clipBoard.setText(text, QtGui.QClipboard.Clipboard)
+
+    # ----------------------------------------------------------------------
+    # Support for sorting items.
+    # ----------------------------------------------------------------------
+
+    def sortColumnLabel(self):
+        """
+        Return the current sort column label.
+
+        :rtype: str
+        """
+        column = self.sortColumn()
+        return self.labelFromColumn(column)
+
+    def refreshSortBy(self):
+        """
+        Refresh the sort order of the current sorted column.
+
+        :rtype: None
+        """
+        sortOrder = self.sortOrder()
+        sortColumn = self.sortColumn()
+        self.sortByColumn(sortColumn, sortOrder)
+
+    def sortOrderToInt(self, sortOrder):
+        """
+        Convert the sort order to an int.
+
+        :type sortOrder: QtCore.Qt.AscendingOrder or QtCore.Qt.DescendingOrder
+        :rtype: int
+        """
+        if sortOrder == QtCore.Qt.AscendingOrder:
+            return 0
+        else:
+            return 1  # QtCore.Qt.DescendingOrder
+
+    def intToSortOrder(self, value):
+        """
+        Convert the given int to a sort order.
+
+        :type value: QtCore.Qt
+        :rtype: QtCore.Qt.AscendingOrder or QtCore.Qt.DescendingOrder
+        """
+        if value == 0:
+            return QtCore.Qt.AscendingOrder
+        else:
+            return QtCore.Qt.DescendingOrder
+
+    def sortOrder(self):
+        """
+        Return the current sort order.
+
+        :rtype: int
+        """
+        sortOrder = self.header().sortIndicatorOrder()
+        return self.sortOrderToInt(sortOrder)
+
+    def sortByColumn(self, column, sortOrder, groupColumn=False, groupOrder=False):
+        """
+        Sort by the given column.
+
+        :type column: int
+        :type sortOrder: int
+        :type groupColumn: bool
+
+        :rtype: None
+        """
+        self._sortColumn = column
+        self.setSortingEnabled(True)
+
+        sortColumnLabel = self.labelFromColumn(column)
+        if sortColumnLabel == "Custom Order":
+            sortOrder = QtCore.Qt.AscendingOrder
+
+        sortOrder = self.intToSortOrder(sortOrder)
+        QtWidgets.QTreeWidget.sortByColumn(self, column, sortOrder)
+
+        if groupOrder is False:
+            groupOrder = self.groupOrder()
+
+        groupOrder = self.intToSortOrder(groupOrder)
+
+        if groupColumn is False:
+            groupColumn = self.groupColumn()
+
+        self._groupOrder = groupOrder
+        self._groupColumn = groupColumn
+
+        self._groupByColumn(groupColumn, groupOrder)
+
+    def createSortByMenu(self):
+        """
+        Create a new instance of the sort by menu.
+
+        :rtype: QtWidgets.QMenu
+        """
+        menu = QtWidgets.QMenu("Sort By", self)
+
+        sortOrder = self.sortOrder()
+        sortColumn = self.sortColumn()
+
+        for column in range(self.columnCount()):
+
+            label = self.labelFromColumn(column)
+
+            action = menu.addAction(label)
+            action.setCheckable(True)
+
+            if column == sortColumn:
+                action.setChecked(True)
+            else:
+                action.setChecked(False)
+
+            callback = partial(self.sortByColumn, column, sortOrder)
+            action.triggered.connect(callback)
+
+        menu.addSeparator()
+
+        action = menu.addAction("Ascending")
+        action.setCheckable(True)
+        action.setChecked(sortOrder == QtCore.Qt.AscendingOrder)
+
+        callback = partial(self.sortByColumn, sortColumn, QtCore.Qt.AscendingOrder)
+        action.triggered.connect(callback)
+
+        action = menu.addAction("Descending")
+        action.setCheckable(True)
+        action.setChecked(sortOrder == QtCore.Qt.DescendingOrder)
+
+        callback = partial(self.sortByColumn, sortColumn, QtCore.Qt.DescendingOrder)
+        action.triggered.connect(callback)
+
+        return menu
+
+    # ----------------------------------------------------------------------
+    # Support for grouping items.
+    # ----------------------------------------------------------------------
+
+    def groupOrder(self):
+        """
+        Return the current group order.
+
+        :rtype: int
+        """
+        return self.sortOrderToInt(self._groupOrder)
+
+    def groupColumn(self):
+        """
+        return the current group by column.
+
+        :type column: int
+        :type sortOrder: int
+        :type groupColumn: bool
+
+        :rtype: None
+        """
+        return self._groupColumn
+
+    def createGroupItem(self, text, children):
+        """
+        Create a new group item for the given text and children.
+
+        :type text: str
+        :type children: list[studioqt.CombinedWidgetItem]
+        :rtype: studioqt.CombinedWidgetItemGroup
+        """
+        groupItem = studioqt.CombinedWidgetItemGroup()
+        groupItem.setText(0, text)
+        groupItem.setText(1, text)
+
+        groupItem.setStretchToWidget(self.parent())
+        groupItem.setChildren(children)
+        return groupItem
+
+    def addGroupItem(self, text, children):
+        """
+        Add a new group item for the given text and children.
+
+        :type text: str
+        :type children: list[studioqt.CombinedWidgetItem]
+        :rtype: studioqt.CombinedWidgetItemGroup
+        """
+        groupItem = self.createGroupItem(text, children)
+        self.addTopLevelItem(groupItem)
+        self._groupItems.append(groupItem)
+        return groupItem
+
+    def refreshGroupBy(self):
+        """
+        Refresh the grouping of the current group column.
+
+        :rtype: None
+        """
+        for groupItem in self._groupItems:
+            groupItem.updateChildren()
+
+    def groupColumn(self):
+        """
+        Return the current group column.
+
+        :rtype: int
+        """
+        return self._groupColumn
+
+    def itemsGroupByColumn(self, groupColumn, groupOrder, items=None):
+        """
+        Return a list of items grouped by the given column.
+
+        :type column: int
+        :type items: None or list[studioqt.CombinedWidgetItem]
+        :rtype: dict
+        """
+        items = items or self.items()
+
+        groupItems = {}
+        orderedGroups = OrderedDict()
+
+        if isinstance(groupColumn, basestring):
+            groupColumn = self.columnFromLabel(groupColumn)
+
+        if groupColumn:
+            reverse = groupOrder == QtCore.Qt.DescendingOrder
+            items_ = sorted(items, key=lambda item: item.text(groupColumn).lower(), reverse=reverse)
+
+            for item in items_:
+                text = item.displayText(groupColumn)
+                orderedGroups.setdefault(text, [])
+        else:
+            orderedGroups.setdefault("None", [])
+
+        for item in items:
+            if groupColumn is not None:
+                text = item.displayText(groupColumn)
+            else:
+                text = "None"
+
+            groupItems.setdefault(text, [])
+            groupItems[text].append((item, item.isHidden()))
+
+        for key in orderedGroups:
+            orderedGroups[key] = groupItems.get(key, [])
+
+        return orderedGroups
+
+    @studioqt.showWaitCursor
+    def groupByColumn(self, groupColumn, groupOrder):
+        """
+        Group the items on the data in the given column.
+
+        :type column: int
+        :rtype: None
+        """
+        sortOrder = self.sortOrder()
+        sortColumn = self.sortColumn()
+
+        self.sortByColumn(sortColumn, sortOrder, groupColumn=groupColumn, groupOrder=groupOrder)
+
+    def _groupByColumn(self, groupColumn, groupOrder):
+        """
+        Group the items on the data in the given column.
+
+        Note: The complexity of this method needs to be simplified!
+
+        :type column: int
+        :rtype: None
+        """
+        if isinstance(groupColumn, basestring):
+            column = self.columnFromLabel(groupColumn)
+
+        self._groupItems = []
+        self._groupColumn = groupColumn
+
+        groupItems = self.itemsGroupByColumn(groupColumn, groupOrder)
+
+        selectedItems = self.selectedItems()
+        self.setSortingEnabled(False)
+        self.takeTopLevelItems()
+
+        for groupText in groupItems.keys():
+
+            children = [item[0] for item in groupItems[groupText]]
+
+            if groupColumn is not None:
+                groupItem = self.addGroupItem(groupText, children)
+
+            for item, isHidden in groupItems[groupText]:
+                self.addTopLevelItem(item)
+                item.setHidden(isHidden)
+
+            if groupColumn is not None:
+                groupItem.updateChildren()
+
+        if groupColumn is None:
+            for groupItem in self._groupItems:
+                groupItem.setHidden(True)
+
+        if selectedItems:
+            self.setItemsSelected(selectedItems, True)
+
+    def setValidGroupByColumns(self, columns):
+        self._validGroupByColumns = columns
+
+    def groupByOrder(self):
+        return QtCore.Qt.DescendingOrder
+
+    def createGroupByMenu(self):
+        """
+        Create a new instance of the group by menu.
+
+        :rtype: QtWidgets.QMenu
+        """
+        menu = QtWidgets.QMenu("Group By", self)
+
+        groupOrder = self._groupOrder
+        groupColumn = self._groupColumn
+
+        action = menu.addAction("None")
+        action.setCheckable(True)
+
+        callback = partial(self.groupByColumn, None, groupOrder)
+        action.triggered.connect(callback)
+
+        validGroupColumns = self._validGroupByColumns
+
+        currentGroupCollumn = self.groupColumn()
+        if currentGroupCollumn is None:
+            action.setChecked(True)
+
+        for column in range(self.columnCount()):
+
+            label = self.labelFromColumn(column)
+
+            if validGroupColumns and label not in validGroupColumns:
+                continue
+
+            action = menu.addAction(label)
+            action.setCheckable(True)
+
+            if currentGroupCollumn == column:
+                action.setChecked(True)
+
+            callback = partial(self.groupByColumn, column, groupOrder)
+            action.triggered.connect(callback)
+
+        menu.addSeparator()
+
+        action = menu.addAction("Ascending")
+        action.setCheckable(True)
+        action.setChecked(groupOrder == QtCore.Qt.AscendingOrder)
+
+        callback = partial(self.groupByColumn, groupColumn, QtCore.Qt.AscendingOrder)
+        action.triggered.connect(callback)
+
+        action = menu.addAction("Descending")
+        action.setCheckable(True)
+        action.setChecked(groupOrder == QtCore.Qt.DescendingOrder)
+
+        callback = partial(self.groupByColumn, groupColumn, QtCore.Qt.DescendingOrder)
+        action.triggered.connect(callback)
+
+        return menu
+
+    # ----------------------------------------------------------------------
+    # Override events for mixin.
+    # ----------------------------------------------------------------------
+
+    def mouseMoveEvent(self, event):
+        """
+        Triggered when the user moves the mouse over the current viewport.
+
+        :type event: QtWidgets.QMouseEvent
+        :rtype: None
+        """
+        CombinedItemViewMixin.mouseMoveEvent(self, event)
+        QtWidgets.QTreeWidget.mouseMoveEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        """
+        Triggered when the user releases the mouse button on the viewport.
+
+        :type event: QtWidgets.QMouseEvent
+        :rtype: None
+        """
+        CombinedItemViewMixin.mouseReleaseEvent(self, event)
+        QtWidgets.QTreeWidget.mouseReleaseEvent(self, event)
+

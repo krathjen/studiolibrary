@@ -1,0 +1,166 @@
+{
+  "metadata": {
+    "angularUnit": "deg", 
+    "description": "test shot", 
+    "user": "testuser", 
+    "startTime": 1, 
+    "mayaSceneFile": "/norman/work/krathjen/git/sandbox/site-packages/mutils/tests/data/test_anim.ma", 
+    "timeUnit": "film", 
+    "cTime": 646464451, 
+    "mayaVersion": "2013 Service Pack 2P12 x64", 
+    "linearUnit": "cm", 
+    "version": "1.0.0", 
+    "endTime": 48
+  }
+,
+  "objects": {
+    "srcSphere:offset": {
+      "attrs": {}
+    }, 
+    "srcSphere:sphere": {
+      "attrs": {
+        "rotateX": {
+          "curve": "CURVE1", 
+          "type": "doubleAngle", 
+          "value": 45.0
+        }, 
+        "testEnum": {
+          "curve": "CURVE2", 
+          "type": "enum", 
+          "value": 1
+        }, 
+        "translateX": {
+          "curve": "CURVE3", 
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateY": {
+          "curve": "CURVE4", 
+          "type": "doubleLinear", 
+          "value": 8.0
+        }, 
+        "translateZ": {
+          "curve": "CURVE5", 
+          "type": "doubleLinear", 
+          "value": -12.0
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 50.0
+        }, 
+        "testFloat": {
+          "curve": "CURVE6", 
+          "type": "double", 
+          "value": 0.66600000000000004
+        }, 
+        "testAnimated": {
+          "curve": "CURVE7", 
+          "type": "double", 
+          "value": 0.0
+        }, 
+        "scaleX": {
+          "curve": "CURVE8", 
+          "type": "double", 
+          "value": 0.25
+        }, 
+        "scaleY": {
+          "type": "double", 
+          "value": 4.6600000000000001
+        }, 
+        "visibility": {
+          "curve": "CURVE9", 
+          "type": "bool", 
+          "value": true
+        }, 
+        "testString": {
+          "type": "string", 
+          "value": "Hello world"
+        }, 
+        "testVectorX": {
+          "curve": "CURVE10", 
+          "type": "double", 
+          "value": 0.20000000000000001
+        }, 
+        "testVectorY": {
+          "curve": "CURVE11", 
+          "type": "double", 
+          "value": 1.3999999999999999
+        }, 
+        "rotateZ": {
+          "curve": "CURVE12", 
+          "type": "doubleAngle", 
+          "value": 90.0
+        }, 
+        "testVectorZ": {
+          "curve": "CURVE13", 
+          "type": "double", 
+          "value": 2.6000000000000001
+        }, 
+        "scaleZ": {
+          "curve": "CURVE14", 
+          "type": "double", 
+          "value": 0.5
+        }, 
+        "testInteger": {
+          "curve": "CURVE15", 
+          "type": "long", 
+          "value": 5
+        }, 
+        "testBoolean": {
+          "curve": "CURVE16", 
+          "type": "bool", 
+          "value": true
+        }, 
+        "testConnect": {
+          "type": "double", 
+          "value": 8.0
+        }
+      }
+    }, 
+    "srcSphere:lockedNode": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 5.0
+        }, 
+        "translateZ": {
+          "curve": "CURVE18", 
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "scaleX": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "scaleY": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "visibility": {
+          "type": "bool", 
+          "value": true
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "scaleZ": {
+          "type": "double", 
+          "value": 1.0
+        }
+      }
+    }
+  }
+}

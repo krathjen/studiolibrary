@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "user": "Hovel", 
+    "mayaSceneFile": "C:/Users/hovel/Dropbox/git/mutils/src/mutils/tests/data/test_pose.ma", 
+    "ctime": "1470728826", 
+    "version": "1.0.0", 
+    "mayaVersion": "2016"
+  }
+,
+  "objects": {
+    "srcSphere:offset": {
+      "attrs": {}
+    }, 
+    "srcSphere:sphere": {
+      "attrs": {
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 45.0
+        }, 
+        "testEnum": {
+          "type": "enum", 
+          "value": 1
+        }, 
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 8.0
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": -12.0
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 25.0
+        }, 
+        "testFloat": {
+          "type": "double", 
+          "value": 0.666
+        }, 
+        "testAnimated": {
+          "type": "double", 
+          "value": 0.0
+        }, 
+        "scaleX": {
+          "type": "double", 
+          "value": 0.25
+        }, 
+        "scaleY": {
+          "type": "double", 
+          "value": 1.5
+        }, 
+        "visibility": {
+          "type": "bool", 
+          "value": true
+        }, 
+        "testString": {
+          "type": "string", 
+          "value": "Hello world"
+        }, 
+        "testVectorX": {
+          "type": "double", 
+          "value": 0.2
+        }, 
+        "testVectorY": {
+          "type": "double", 
+          "value": 1.4
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 90.0
+        }, 
+        "testVectorZ": {
+          "type": "double", 
+          "value": 2.6
+        }, 
+        "scaleZ": {
+          "type": "double", 
+          "value": 0.5
+        }, 
+        "testInteger": {
+          "type": "long", 
+          "value": 5
+        }, 
+        "testBoolean": {
+          "type": "bool", 
+          "value": true
+        }, 
+        "testConnect": {
+          "type": "double", 
+          "value": 8.0
+        }
+      }
+    }, 
+    "srcSphere:lockedNode": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "scaleX": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "scaleY": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "visibility": {
+          "type": "bool", 
+          "value": true
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "scaleZ": {
+          "type": "double", 
+          "value": 1.0
+        }
+      }
+    }
+  }
+}
