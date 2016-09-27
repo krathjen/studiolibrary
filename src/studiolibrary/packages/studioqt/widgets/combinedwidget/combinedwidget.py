@@ -82,8 +82,8 @@ class CombinedWidget(QtWidgets.QWidget):
         self._toastWidget.hide()
         self._toastEnabled = True
 
-        self._textColor = QtGui.QColor(255, 255, 255)
-        self._textSelectedColor = QtGui.QColor(255, 255, 255)
+        self._textColor = QtGui.QColor(255, 255, 255, 200)
+        self._textSelectedColor = QtGui.QColor(255, 255, 255, 200)
         self._backgroundColor = QtGui.QColor(255, 255, 255, 30)
         self._backgroundHoverColor = QtGui.QColor(255, 255, 255, 35)
         self._backgroundSelectedColor = QtGui.QColor(30, 150, 255)
@@ -382,14 +382,28 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         return self._treeWidget.itemFromIndex(index)
 
-    def textFromColumn(self, column):
+    def textFromItems(self, *args, **kwargs):
         """
-        Return all data for the given column
+        Return all data for the given items and given column.
 
-        :type column: int
-        :rtype: list[object]
+        :type items: list[CombinedWidgetItem]
+        :type column: int or str
+        :type split: str
+        :type duplicates: bool
+        :rtype: list[str]
         """
-        return self._treeWidget.textFromColumn(column)
+        return self.treeWidget().textFromItems(*args, **kwargs)
+
+    def textFromColumn(self, *args, **kwargs):
+        """
+        Return all data for the given column.
+
+        :type column: int or str
+        :type split: str
+        :type duplicates: bool
+        :rtype: list[str]
+        """
+        return self.treeWidget().textFromColumn(*args, **kwargs)
 
     def toggleTextVisible(self):
         """
@@ -447,16 +461,13 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         settings = {}
 
+        settings["columnLabels"] = self.columnLabels()
         settings["padding"] = self.padding()
         settings["spacing"] = self.spacing()
         settings["zoomAmount"] = self.zoomAmount()
-        settings["sortOrder"] = self.sortOrder()
-        settings["sortColumn"] = self.sortColumn()
-        settings["columnLabels"] = self.treeWidget().columnLabels()
-        settings["groupOrder"] = self.treeWidget().groupOrder()
-        settings["groupColumn"] = self.treeWidget().groupColumn()
         settings["selectedPaths"] = self.selectedPaths()
         settings["itemTextVisible"] = self.isItemTextVisible()
+        settings["treeWidget"] = self.treeWidget().settings()
 
         return settings
 
@@ -469,14 +480,9 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         self.setToastEnabled(False)
 
+        # Must set the column labels first for sorting and grouping.
         columnLabels = settings.get("columnLabels", [])
         self.setColumnLabels(columnLabels)
-
-        sortOrder = settings.get("sortOrder", 0)
-        sortColumn = settings.get("sortColumn", 0)
-        groupOrder = settings.get("groupOrder", 0)
-        groupColumn = settings.get("groupColumn", None)
-        self.sortByColumn(sortColumn, sortOrder, groupColumn, groupOrder)
 
         padding = settings.get("padding", 5)
         self.setPadding(padding)
@@ -492,6 +498,9 @@ class CombinedWidget(QtWidgets.QWidget):
 
         itemTextVisible = settings.get("itemTextVisible", True)
         self.setItemTextVisible(itemTextVisible)
+
+        treeWidgetSettings = settings.get("treeWidget", {})
+        self.treeWidget().setSettings(treeWidgetSettings)
 
         self.setToastEnabled(True)
 
@@ -510,13 +519,8 @@ class CombinedWidget(QtWidgets.QWidget):
 
         menu = QtWidgets.QMenu("Item View", self)
 
-        action = QtWidgets.QAction("Show labels", menu)
-        action.setCheckable(True)
-        action.setChecked(self.isItemTextVisible())
-        action.triggered[bool].connect(self.setItemTextVisible)
+        action = studioqt.SeparatorAction("View Settings", menu)
         menu.addAction(action)
-
-        menu.addSeparator()
 
         action = studioqt.SliderAction("Size", menu)
         action.slider().setMinimum(10)
@@ -537,6 +541,15 @@ class CombinedWidget(QtWidgets.QWidget):
         action.slider().setMaximum(self.DEFAULT_MAX_SPACING)
         action.slider().setValue(self.spacing())
         action.slider().valueChanged.connect(self.setSpacing)
+        menu.addAction(action)
+
+        action = studioqt.SeparatorAction("Item Options", menu)
+        menu.addAction(action)
+
+        action = QtWidgets.QAction("Show labels", menu)
+        action.setCheckable(True)
+        action.setChecked(self.isItemTextVisible())
+        action.triggered[bool].connect(self.setItemTextVisible)
         menu.addAction(action)
 
         return menu
@@ -702,6 +715,33 @@ class CombinedWidget(QtWidgets.QWidget):
             data = studioqt.readJson(path)
             self.setCustomSortOrder(data)
 
+    def updateColumns(self):
+        """
+        Update the column labels with the current item data.
+
+        :rtype: None
+        """
+        self.treeWidget().updateHeaderLabels()
+
+    def columnLabels(self):
+        """
+        Set all the column labels.
+
+        :rtype: list[str]
+        """
+        return self.treeWidget().columnLabels()
+
+    def _removeDuplicates(self, labels):
+        """
+        Removes duplicates from a list in Python, whilst preserving order.
+
+        :type labels: list[str]
+        :rtype: list[str]
+        """
+        s = set()
+        sadd = s.add
+        return [x for x in labels if not (x in s or sadd(x))]
+
     def setColumnLabels(self, labels):
         """
         Set the columns for the widget.
@@ -709,6 +749,8 @@ class CombinedWidget(QtWidgets.QWidget):
         :type labels: list[str]
         :rtype: None
         """
+        labels = self._removeDuplicates(labels)
+
         if "Custom Order" not in labels:
             labels.append("Custom Order")
 

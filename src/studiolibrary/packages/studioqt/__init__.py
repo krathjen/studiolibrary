@@ -15,8 +15,6 @@
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-
-
 try:
     from PySide import QtGui
     from PySide import QtCore
@@ -51,9 +49,9 @@ from studioqt.decorators import showWaitCursor
 from studioqt.imagesequence import ImageSequence
 from studioqt.imagesequence import ImageSequenceWidget
 
+from studioqt.widgets.hcolorbar import HColorBar
 from studioqt.widgets.messagebox import MessageBox
 from studioqt.widgets.toastwidget import ToastWidget
-
 from studioqt.widgets.statuswidget import StatusWidget
 from studioqt.widgets.menubarwidget import MenuBarWidget
 
@@ -66,8 +64,9 @@ from studioqt.widgets.combinedwidget.combinedwidgetitemgroup import CombinedWidg
 
 from studioqt.widgets.folderswidget import FoldersWidget
 
-from studioqt.action.slideraction import SliderAction
-
+# Custom qt actions
+from studioqt.actions.slideraction import SliderAction
+from studioqt.actions.separatoraction import SeparatorAction
 
 PATH = os.path.abspath(__file__)
 DIRNAME = os.path.dirname(PATH).replace('\\', '/')

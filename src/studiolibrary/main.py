@@ -14,7 +14,6 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import studioqt
 import studiolibrary
 
 
@@ -22,9 +21,7 @@ def main(
     name=None,
     path=None,
     show=True,
-    plugins=None,
     analytics=True,
-    root=None,  # Legacy
     **kwargs
 ):
     """
@@ -46,21 +43,14 @@ def main(
     else:
         library = studiolibrary.Library.instance(name)
 
-    if plugins is None:
-        library.setPlugins(studiolibrary.Library.DEFAULT_PLUGINS)
-    else:
-        library.setPlugins(plugins)
-
-    if root:  # Legacy
-        path = root
-
     if path:
         library.setPath(path)
+
+    library.setKwargs(kwargs)
 
     studiolibrary.enableMayaClosedEvent()
 
     if show:
-        with studioqt.app():
-            library.show(**kwargs)
+        library.show()
 
     return library

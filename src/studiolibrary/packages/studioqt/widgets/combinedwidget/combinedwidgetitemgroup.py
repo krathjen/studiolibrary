@@ -18,9 +18,12 @@ import studioqt
 
 from studioqt import QtGui
 from studioqt import QtCore
+from studioqt import QtWidgets
 
 
 class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
+
+    DEFAULT_FONT_SIZE = 24
 
     def __init__(self, *args):
         studioqt.CombinedWidgetItem.__init__(self, *args)
@@ -73,15 +76,15 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         else:
             self.setHidden(False)
 
-    def fontSize(self):
+    def textAlignment(self, column):
         """
-        Return the font size for the item.
+        Return the font alignment for the given column.
 
-        :rtype: int
+        :type column: int
         """
-        return 24
+        return QtWidgets.QTreeWidgetItem.textAlignment(self, column)
 
-    def sizeHint(self):
+    def sizeHint(self, column=0):
         """
         Return the size of the item.
 

@@ -29,6 +29,3 @@ class PreviewWidget(QtWidgets.QWidget):
     def __init__(self, *args):
         QtWidgets.QWidget.__init__(self, *args)
         studioqt.loadUi(self)
-
-    def window(self):
-        return self.parent().window()

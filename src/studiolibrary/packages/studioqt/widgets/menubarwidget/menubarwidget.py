@@ -31,9 +31,9 @@ class MenuBarWidget(QtWidgets.QFrame):
 
     ICON_COLOR = QtGui.QColor(255, 255, 255)
 
-    SPACING = 5
+    SPACING = 4
 
-    DEFAULT_EXPANDED_HEIGHT = 38
+    DEFAULT_EXPANDED_HEIGHT = 36
     DEFAULT_COLLAPSED_HEIGHT = 10
 
     def __init__(self, parent=None):
@@ -58,6 +58,39 @@ class MenuBarWidget(QtWidgets.QFrame):
 
         self.layout().addWidget(self._leftToolBar)
         self.layout().addWidget(self._rightToolBar)
+
+    def addAction(self, name, icon=None, tip=None, callback=None, side="Right"):
+        """
+        Add a button/action to menu bar widget.
+
+        :type name: str
+        :type icon: QtWidget.QIcon
+        :param tip: str
+        :param side: str
+        :param callback: func
+        :rtype: QtWidget.QAction
+        """
+
+        # The method below is needed to fix an issue with PySide2.
+        def _callback():
+            callback()
+
+        if side == "Left":
+            action = self.addLeftAction(name)
+        else:
+            action = self.addRightAction(name)
+
+        if icon:
+            action.setIcon(icon)
+
+        if tip:
+            action.setToolTip(tip)
+            action.setStatusTip(tip)
+
+        if callback:
+            action.triggered.connect(_callback)
+
+        return action
 
     def dpi(self):
         return self._dpi
@@ -103,12 +136,28 @@ class MenuBarWidget(QtWidgets.QFrame):
 
         return widgets
 
+    def findAction(self, text):
+
+        action1 = self._findAction(self._leftToolBar, text)
+        action2 = self._findAction(self._rightToolBar, text)
+
+        return action1 or action2
+
+    def _findAction(self, toolBar, text):
+
+        for child in toolBar.children():
+            if isinstance(child, QtWidgets.QAction):
+                if child.text() == text:
+                    return child
+
     def findToolButton(self, text):
 
         button1 = self._findToolButton(self._leftToolBar, text)
         button2 = self._findToolButton(self._rightToolBar, text)
 
-        return button1 or button2
+        button = button1 or button2
+
+        return button
 
     def _findToolButton(self, toolBar, text):
 
@@ -172,13 +221,16 @@ class MenuBarWidget(QtWidgets.QFrame):
         for w in self.widgets():
             w.setFixedHeight(height)
 
-        width = height + (self.SPACING*self.dpi())
+        padding = self.SPACING * self.dpi()
+
+        width = height + (padding * 2)
+        height = height - padding
 
         self._leftToolBar.setFixedHeight(height)
-        self._leftToolBar.setIconSize(QtCore.QSize(width, height - 5))
+        self._leftToolBar.setIconSize(QtCore.QSize(width, height))
 
         self._rightToolBar.setFixedHeight(height)
-        self._rightToolBar.setIconSize(QtCore.QSize(width, height - 5))
+        self._rightToolBar.setIconSize(QtCore.QSize(width, height))
 
     def resizeEvent(self, *args, **kwargs):
         self.refreshSize()
@@ -211,7 +263,7 @@ def showExample():
 
         lineedit = QtWidgets.QLineEdit()
         widget.layout().insertWidget(1, lineedit)
-        widget.setExpandedHeight(35)
+        widget.setExpandedHeight(50)
 
         icon = studioqt.icon("settings")
         action = widget.addRightAction("Settings")

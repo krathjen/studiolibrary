@@ -55,7 +55,7 @@ class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
         :type index: QtCore.QModelIndex
         :rtype: QtCore.QSize
         """
-        # This will be called for each column.
+        # This will be called for each row.
         item = self.combinedWidget().itemFromIndex(index)
         return item.sizeHint()
 

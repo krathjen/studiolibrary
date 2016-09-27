@@ -26,19 +26,9 @@ import studioqt
 import studiolibrary
 
 
-__all__ = ["Library", "LibraryError"]
+__all__ = ["Library"]
 
 logger = logging.getLogger(__name__)
-
-
-class LibraryError(Exception):
-    """"""
-    pass
-
-
-class LibraryValidateError(LibraryError):
-    """"""
-    pass
 
 
 class Library(QtCore.QObject):
@@ -46,15 +36,13 @@ class Library(QtCore.QObject):
     _instances = {}
 
     DEFAULT_NAME = "Default"
-    DEFAULT_PLUGINS = []
-
     ITEM_DATA_PATH = "{localPath}/item_data.json"
     FOLDER_DATA_PATH = "{localPath}/folder_data.json"
 
     @classmethod
     def instance(cls, name=None):
         """
-        Return the library instance by name.
+        Return the library instance for the given name.
 
         :type name: str
         :rtype: Library
@@ -79,7 +67,9 @@ class Library(QtCore.QObject):
             if library.isDefault():
                 return library
 
-        return cls.instance(Library.DEFAULT_NAME)
+        library = cls.instance(Library.DEFAULT_NAME)
+        library.setDefault(True)
+        return library
 
     @classmethod
     def libraries(cls):
@@ -95,25 +85,15 @@ class Library(QtCore.QObject):
 
     @classmethod
     def initLibraries(cls):
-        """
-        Initialise all library instances.
-
-        :rtype: None
-        """
-        path = studiolibrary.LIBRARIES_PATH
+        """Initialise all library instances."""
+        path = unicode(studiolibrary.LIBRARIES_PATH)
         if os.path.exists(path):
             for name in os.listdir(path):
-
                 filename, extension = os.path.splitext(name)
-
-                try:
-                    studiolibrary.validateString(filename)
-                    library_ = cls.instance(filename)
-                except studiolibrary.ValidateStringError, e:
-                    logger.debug(e)
+                library_ = cls.instance(filename)
 
     @staticmethod
-    def windows():
+    def libraryWidgets():
         """
         Return all library widgets that have been loaded.
 
@@ -126,25 +106,25 @@ class Library(QtCore.QObject):
         return result
 
     def __init__(self, name):
+        """Create a new library instance."""
+
         super(Library, self).__init__()
 
-        self.validateName(name)
+        studiolibrary.validateName(name)
 
         self._name = name
-        self._debug = False
         self._theme = None
         self._settings = {}
         self._isDefault = False
         self._libraryWidget = None
-        self._settingsDialog = None
-        self._pluginManager = studiolibrary.PluginManager()
 
         self.loadSettings()
 
-    def format(self, value, **kwargs):
+    def formatPath(self, value, **kwargs):
         """
-        :type value: str
+        Resolve the given destination path.
 
+        :type value: str
         :rtype: str
         """
         kwargs_ = {
@@ -157,88 +137,23 @@ class Library(QtCore.QObject):
         if kwargs:
             kwargs_.update(kwargs)
 
-        return value.format(**kwargs_)
+        return unicode(value).format(**kwargs_)
 
     def folderDataPath(self):
         """
-        Return the formatted path for the folder data.
+        Return the resolved path for the folder data.
 
         :rtype: str
         """
-        return self.format(self.FOLDER_DATA_PATH)
+        return self.formatPath(self.FOLDER_DATA_PATH)
 
     def itemDataPath(self):
         """
-        Return the formatted path for the item data.
+        Return the resolved path for the item data.
 
         :rtype: str
         """
-        return self.format(self.ITEM_DATA_PATH)
-
-    def isDebug(self):
-        """
-        Return True if debug mode is enabled.
-
-        :rtype: bool
-        """
-        return self._debug
-
-    def setLoggerLevel(self, level):
-        """
-        Set the logging level for the studiolibrary and plugins.
-
-        :type level: int
-        """
-        logger = logging.getLogger("studiolibrary")
-        logger.setLevel(level)
-        for plugin in self.pluginManager().plugins().values():
-            plugin.setLoggerLevel(level)
-
-    def recordFromPath(self, path):
-        """
-        Return the record for the given path.
-
-        :type path: str
-        :rtype: studiolibrary.Record
-        """
-        plugin = self.pluginFromPath(path)
-        if plugin:
-            return plugin.record(path)
-        logger.debug('Cannot find plugin for path extension "%s"' % path)
-
-    def recordsFromPaths(self, paths):
-        """
-        Return the records for the given paths.
-
-        :type paths: list[str]
-        :rtype: list[studiolibrary.Record]
-        """
-        records = []
-        for path in paths:
-            record = self.recordFromPath(path)
-            if record:
-                records.append(record)
-        return records
-
-    def loadRecords(self, path, direction=studiolibrary.Direction.Down, depth=3):
-        """
-        Load the records for the given path by walking the tree.
-
-        :type path: str
-        :type direction: studiolibrary.Direction
-        :rtype: list[studiolibrary.Record]
-        """
-        match = lambda path: self.pluginFromPath(path)
-
-        paths = studiolibrary.findPaths(
-            path,
-            match=match,
-            ignore=[".studioLibrary"],
-            direction=direction,
-            depth=depth
-        )
-
-        return self.recordsFromPaths(paths)
+        return self.formatPath(self.ITEM_DATA_PATH)
 
     def name(self):
         """
@@ -253,12 +168,11 @@ class Library(QtCore.QObject):
         Set the name of the library.
 
         :type name: str
-        :rtype: None
         """
         if self.name() == name:
             return
 
-        self.validateName(name)
+        studiolibrary.validateName(name)
 
         if self._name in self._instances:
             self._instances[name] = self._instances.pop(self.name())
@@ -272,68 +186,37 @@ class Library(QtCore.QObject):
             newLocalPath = self.localPath()
             os.rename(oldLocalPath, newLocalPath)
 
-    def validateName(self, name, caseSensitive=True):
-        """
-        :type name: str
-        """
-        libraries = {}
-
-        if not name or not name.strip():
-            raise LibraryValidateError('Cannot use an empty name!')
-
-        try:
-            name.decode('ascii')
-        except UnicodeDecodeError:
-            raise LibraryValidateError('The name "%s" is not an ascii-encoded string!' % name)
-
-        studiolibrary.validateString(name)
-
-        if name in Library._instances:
-            if self != Library._instances[name]:
-                raise LibraryValidateError('The Library "%s" already exists!' % name)
-
-        if caseSensitive:
-            for n in Library._instances:
-                libraries[n.lower()] = Library._instances[n]
-
-            if name.lower() in libraries:
-                if self != libraries[name.lower()]:
-                    raise LibraryValidateError('The Library "%s" already exists. It is case sensitive!' % name)
-
-    @staticmethod
-    def validatePath(path):
-        """
-        :type path: str
-        """
-        if "\\" in path:
-            raise LibraryValidateError("Please use '/' instead of '\\'. Invalid token found for path '%s'!" % path)
-
-        if not path or not path.strip():
-            raise LibraryValidateError("Cannot set an empty path '%s'!" % path)
-
-        if not os.path.exists(path):
-            raise LibraryValidateError("Cannot find folder path '%s'!" % path)
+        if self.libraryWidget():
+            self.libraryWidget().updateWindowTitle()
 
     def path(self):
         """
+        Return the location path on disc.
+
         :rtype: str
         """
         return self.settings().get("path", "")
 
     def setPath(self, path):
         """
+        Set the path location on disc.
+
         :type path: str
         """
         if path.endswith("/"):
             path = path[:-1]
 
-        self.validatePath(path)
+        studiolibrary.validatePath(path)
         self.settings()["path"] = path
+
+        if self.libraryWidget():
+            self.libraryWidget().reload()
 
     def setDefault(self, value):
         """
+        Set this library as the default library.
+
         :type value: bool
-        :rtype: None
         """
         for library in self.libraries():
             library._setDefault(False)
@@ -342,12 +225,13 @@ class Library(QtCore.QObject):
     def _setDefault(self, value):
         """
         :type value: bool
-        :rtype: None
         """
         self.settings()["isDefault"] = value
 
     def isDefault(self):
         """
+        Return True if this is the default library.
+
         :rtype: bool
         """
         return self.settings().get("isDefault", False)
@@ -355,7 +239,6 @@ class Library(QtCore.QObject):
     def setKwargs(self, kwargs):
         """
         :type kwargs: dict
-        :rtype: None
         """
         self.settings()["kwargs"] = kwargs
 
@@ -422,63 +305,8 @@ class Library(QtCore.QObject):
         try:
             data = studiolibrary.readJson(path)
             self.setSettings(data)
-        except:
-            pass
-
-    # ------------------------------------------------------------------
-    # Support for plugin framework
-    # ------------------------------------------------------------------
-
-    def pluginFromPath(self, path):
-        """
-        :type path: str
-        :rtype: studiolibrary.Plugin
-        """
-        plugins = self.pluginManager().plugins().values()
-        for plugin in plugins:
-            if plugin.match(path):
-                return plugin
-        return None
-
-    def pluginManager(self):
-        """
-        :rtype: studiolibrary.PluginManager
-        """
-        return self._pluginManager
-
-    def plugins(self):
-        """
-        :rtype: list[str]
-        """
-        return self.settings().get("plugins", Library.DEFAULT_PLUGINS)
-
-    def setPlugins(self, plugins):
-        """
-        :type plugins: list[str]
-        :rtype: None
-        """
-        self.settings()["plugins"] = plugins
-
-    def loadPlugin(self, name):
-
-        """
-        :type name: str
-        :rtype: None
-        """
-        return self.pluginManager().loadPlugin(name, library=self)
-
-    def loadPlugins(self):
-        """
-        :rtype: None
-        """
-        for name in self.plugins():
-            self.loadPlugin(name)
-
-    def loadedPlugins(self):
-        """
-        :rtype: dict[studiolibrary.Plugin]
-        """
-        return self.pluginManager().plugins()
+        except Exception, e:
+            logger.exception(e)
 
     # ------------------------------------------------------------------
     # Support for themes and custom stylesheets
@@ -496,20 +324,20 @@ class Library(QtCore.QObject):
             # Load legacy theme data.
             settings = self.settings()
 
-            color = settings.get("color", None)
+            color = settings.get("color")
             if color:
                 self._theme.setAccentColor(color)
 
-            color = settings.get("accentColor", None)
+            color = settings.get("accentColor")
             if color:
                 self._theme.setAccentColor(color)
 
-            color = settings.get("backgroundColor", None)
+            color = settings.get("backgroundColor")
             if color:
                 self._theme.setBackgroundColor(color)
 
             # Load new theme data.
-            themeSettings = settings.get("theme", None)
+            themeSettings = settings.get("theme")
             if themeSettings:
                 self._theme.setSettings(themeSettings)
 
@@ -560,12 +388,64 @@ class Library(QtCore.QObject):
     # Misc
     # ------------------------------------------------------------------
 
-    def showDeleteDialog(self):
+    def libraryWidget(self):
         """
+        :rtype: studiolibrary.LibraryWidget
+        """
+        return self._libraryWidget
+
+    def setLibraryWidget(self, libraryWidget):
+        """
+        :type libraryWidget: studiolibrary.LibraryWidget
+        """
+        self._libraryWidget = libraryWidget
+
+    def createLibraryWidget(self):
+        """
+        :rtype: studiolibrary.LibraryWidget
+        """
+        return studiolibrary.LibraryWidget(library=self)
+
+    def reset(self):
+        """
+        Reset the library to the default settings.
+
         :rtype: None
         """
-        message = """Would you like to remove the "%s" library from the manager?
-This does not modify or delete the contents of the library.""" % self.name()
+        kwargs = self.kwargs()
+        self.delete(deleteInstance=False)
+        self.show(**kwargs)
+
+    def delete(self, deleteInstance=True):
+        """
+        Delete this library from the users local settings.
+
+        :rtype: None
+        """
+        logger.debug("Deleting library: %s" % self.name())
+
+        if self.libraryWidget():
+            self.libraryWidget().close()
+            self.setLibraryWidget(None)
+
+        if os.path.exists(self.localPath()):
+            shutil.rmtree(self.localPath())
+
+        if deleteInstance:
+            if self.name() in Library._instances:
+                del Library._instances[self.name()]
+
+        logger.debug("Deleted library: %s" % self.name())
+
+    def showDeleteDialog(self):
+        """
+        Show the delete dialog for deleting this library.
+
+        :rtype: int
+        """
+        message = u'''Would you like to remove the "{0}" library from the manager?
+This does not modify or delete the contents of the library.'''.format(
+            self.name())
 
         result = studioqt.MessageBox.question(
             None,
@@ -579,82 +459,23 @@ This does not modify or delete the contents of the library.""" % self.name()
 
         return result
 
-    def delete(self, deleteInstance=True):
-        """
-        :rtype: None
-        """
-        logger.debug("Deleting library: %s" % self.name())
+    def show(self):
+        """Show the library widget/window for this library."""
+        result = None
+        name = self.name()
+        path = self.path()
 
-        if self.libraryWidget():
-            self.libraryWidget().close()
-            self.setLibraryWidget(None)
+        if not path:
+            result = studiolibrary.showWelcomeDialog(name, path, validNames=[name])
 
-        if self.settingsDialog():
-            self.settingsDialog().close()
-            self.setSettingsDialog(None)
+        elif not os.path.exists(path):
+            result = self.settingsDialog().exec_()
 
-        if os.path.exists(self.localPath()):
-            shutil.rmtree(self.localPath())
+        if result == QtWidgets.QDialog.Rejected:
+            logger.debug("Dialog was canceled")
+            return
 
-        if deleteInstance:
-            del Library._instances[self.name()]
-
-        logger.debug("Deleted library: %s" % self.name())
-
-    def reset(self):
-        """
-        Reset the library to the default settings.
-
-        :rtype: None
-        """
-        kwargs = self.kwargs()
-
-        self.delete(deleteInstance=False)
-
-        self.show(**kwargs)
-
-    def libraryWidget(self):
-        """
-        :rtype: studiolibrary.LibraryWidget
-        """
-        return self._libraryWidget
-
-    def setLibraryWidget(self, libraryWidget):
-        """
-        :type libraryWidget: studiolibrary.LibraryWidget
-        """
-        self._libraryWidget = libraryWidget
-
-    def load(self):
-        """
-        :rtype: None
-        """
-        self.show(**self.kwargs())
-
-    def createLibraryWidget(self):
-        """
-        :rtype: studiolibrary.LibraryWidget
-        """
-        return studiolibrary.LibraryWidget(library=self)
-
-    def show(self, **kwargs):
-        """
-        :rtype: None
-        """
-        if not self.path():
-            result = self.execWelcomeDialog()
-            if result == QtWidgets.QDialog.Rejected:
-                logger.debug("Dialog was canceled")
-                return
-
-        elif not os.path.exists(self.path()):
-            result = self.execSettingsDialog()
-            if result == QtWidgets.QDialog.Rejected:
-                logger.debug("Dialog was canceled")
-                return
-
-        logger.debug("Showing library '%s'" % self.path())
-        self.setKwargs(kwargs)
+        logger.debug("Showing library '%s'" % path)
 
         # Create a new window
         if not self.libraryWidget():
@@ -668,123 +489,61 @@ This does not modify or delete the contents of the library.""" % self.name()
 
     def settingsDialog(self):
         """
+        Return a new instance of the settings dialog for this library.
+
         :rtype: studiolibrary.SettingsDialog
         """
-        if not self._settingsDialog:
-            self._settingsDialog = studiolibrary.SettingsDialog(None, library=self)
-        return self._settingsDialog
-
-    def setSettingsDialog(self, dialog):
-        """
-        :type dialog: studiolibrary.SettingsDialog
-        """
-        self._settingsDialog = dialog
-
-    def execSettingsDialog(self):
-        """
-        :rtype: bool
-        """
-        self.showSettingsDialog()
-        return self._execSettingsDialog()
-
-    def execWelcomeDialog(self):
-        """
-        :rtype: bool
-        """
-        self.showWelcomeDialog()
-        return self._execSettingsDialog()
-
-    def _execSettingsDialog(self):
-        """
-        :rtype: bool
-        """
-        color = self.accentColor()
-        backgroundColor = self.backgroundColor()
-        result = self.settingsDialog().exec_()
-
-        if result == QtWidgets.QDialog.Accepted:
-            self.saveSettingsDialog()
-        else:
-            self.setAccentColor(color)
-            self.setBackgroundColor(backgroundColor)
-
-        return result
-
-    @staticmethod
-    def showNewLibraryDialog():
-        """
-        :rtype: None
-        """
-        library = Library("None")
-
-        settingsDialog = studiolibrary.SettingsDialog(None, library=library)
-        settingsDialog.setTitle("New Library!")
-        settingsDialog.setHeader("Create a new library")
-        settingsDialog.setText(
-            "Create a new library with a different folder location and switch between them. "
-            "For example; This could be useful when working on different film productions, "
-            "or for having a shared library and a local library."
-        )
-
-        result = settingsDialog.exec_()
-
-        if result == QtWidgets.QDialog.Accepted:
+        def validator():
             name = settingsDialog.name()
-            path = settingsDialog.location()
+            path = settingsDialog.path()
 
-            library.validateName(name)
-            library.validatePath(path)
+            name = self.name()
 
-            library = Library.instance(name)
+            studiolibrary.validateName(name, valid=[name])
+            studiolibrary.validatePath(path)
 
-            library.setPath(path)
-            library.setAccentColor(settingsDialog.color())
-            library.setBackgroundColor(settingsDialog.backgroundColor())
+        parent = self.libraryWidget()
+        settingsDialog = studiolibrary.SettingsDialog(parent)
 
-            library.show()
+        settingsDialog.close()
+        settingsDialog.setTitle("Settings")
+        settingsDialog.setHeader("Local Library Settings")
+        settingsDialog.setText("All changes will be saved to your local settings.")
+        settingsDialog.setName(self.name())
+        settingsDialog.setPath(self.path())
+        settingsDialog.setValidator(validator)
+        settingsDialog.setAccentColor(self.accentColor())
+        settingsDialog.setBackgroundColor(self.backgroundColor())
 
-            return library
-        else:
-            logger.info("New library dialog was canceled!")
+        settingsDialog.accentColorChanged.connect(self.setAccentColor)
+        settingsDialog.backgroundColorChanged.connect(self.setBackgroundColor)
 
-    def showWelcomeDialog(self):
-        """
-        :rtype: studiolibrary.SettingsDialog
-        """
-        self.showSettingsDialog()
-        self.settingsDialog().setTitle("Hello!")
-        self.settingsDialog().setHeader("Welcome to the Studio Library")
-        self.settingsDialog().setText("""Before you get started please choose a folder location for storing the data. \
-A network folder is recommended for sharing within a studio.""")
-        return self.settingsDialog()
+        return settingsDialog
 
     def showSettingsDialog(self):
         """
-        :rtype: studiolibrary.SettingsDialog
-        """
-        self.settingsDialog().close()
+        Show the settings dialog for this library.
 
-        self.settingsDialog().setTitle("Settings")
-        self.settingsDialog().setHeader("Local Library Settings")
-        self.settingsDialog().setText("All changes will be saved to your local settings.")
-
-        self.settingsDialog().setName(self.name())
-        self.settingsDialog().setLocation(self.path())
-        self.settingsDialog().updateStyleSheet()
-
-        self.settingsDialog().showNormal()
-        return self.settingsDialog()
-
-    def saveSettingsDialog(self):
-        """
         :rtype: None
         """
-        if len(Library.libraries()) == 1:
-            self.setDefault(True)
+        path = self.path()
+        name = self.name()
+        accentColor = self.accentColor()
+        backgroundColor = self.backgroundColor()
 
-        self.setName(self.settingsDialog().name())
-        self.setAccentColor(self.settingsDialog().color())
-        self.setPath(self.settingsDialog().location())
-        self.setBackgroundColor(self.settingsDialog().backgroundColor())
-        self.settingsDialog().close()
-        self.saveSettings()
+        dialog = self.settingsDialog()
+        result = dialog.exec_()
+
+        if result == QtWidgets.QDialog.Accepted:
+
+            if path != dialog.path():
+                self.setPath(dialog.path())
+
+            if name != dialog.name():
+                self.setName(dialog.name())
+
+            self.saveSettings()
+
+        else:
+            self.setAccentColor(accentColor)
+            self.setBackgroundColor(backgroundColor)

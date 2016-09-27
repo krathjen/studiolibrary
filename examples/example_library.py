@@ -1,5 +1,4 @@
-"""
-"""
+# -*- coding: UTF8 -*-
 import logging
 
 import studiolibrary
@@ -15,13 +14,10 @@ logging.basicConfig(
 logger = logging.getLogger("test_library")
 
 
+from studioqt import QtWidgets
+
 if __name__ == "__main__":
-
-    from studiolibraryplugins import lockplugin
-
-    # plugins = [lockplugin.Plugin()]
 
     with studioqt.app():
         path = "C:/Users/Hovel/Dropbox/libraries"
-        studiolibrary.main("HEYHEY", path=path, lockFolder="Malcolm")
-        # studiolibrary.main("HEYHEY", show=True)
+        library = studiolibrary.main("Hello", path=path, lockFolder="Malcolm")

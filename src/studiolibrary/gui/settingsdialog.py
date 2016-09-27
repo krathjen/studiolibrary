@@ -14,6 +14,8 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+from functools import partial
+
 from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
@@ -25,31 +27,43 @@ import studiolibrary
 __all__ = ["SettingsDialog"]
 
 
-class SettingsDialogSignal(QtCore.QObject):
-    """
-    """
-    onNameChanged = QtCore.Signal(object)
-    onPathChanged = QtCore.Signal(object)
-    onColorChanged = QtCore.Signal(object)
-    onBackgroundColorChanged = QtCore.Signal(object)
-
-
 class SettingsDialog(QtWidgets.QDialog):
-    """
-    """
-    signal = SettingsDialogSignal()
-    onNameChanged = signal.onNameChanged
-    onPathChanged = signal.onPathChanged
-    onColorChanged = signal.onColorChanged
-    onBackgroundColorChanged = signal.onBackgroundColorChanged
 
-    def __init__(self, parent, library):
+    DEFAULT_ACCENT_COLOR = QtGui.QColor(20, 175, 250)
+    DEFAULT_BACKGROUND_COLOR = QtGui.QColor(70, 70, 80)
+
+    DEFAULT_ACCENT_COLORS = [
+        QtGui.QColor(230, 75, 75),
+        QtGui.QColor(235, 100, 70),
+        QtGui.QColor(240, 125, 100),
+        QtGui.QColor(240, 190, 40),
+        QtGui.QColor(80, 200, 140),
+        QtGui.QColor(20, 175, 250),
+        QtGui.QColor(110, 110, 240),
+    ]
+
+    DEFAULT_BACKGROUND_COLORS = [
+        QtGui.QColor(70, 70, 80),
+        QtGui.QColor(65, 65, 75),
+        QtGui.QColor(55, 55, 65),
+        QtGui.QColor(50, 50, 57),
+        QtGui.QColor(40, 40, 47),
+    ]
+
+    accentColorChanged = QtCore.Signal(object)
+    backgroundColorChanged = QtCore.Signal(object)
+
+    def __init__(self, parent=None):
         """
         :type parent: QtWidgets.QWidget
         :type library: studiolibrary.Library
         """
         QtWidgets.QDialog.__init__(self, parent)
         studioqt.loadUi(self)
+
+        self._validator = None
+        self._accentColor = self.DEFAULT_ACCENT_COLOR
+        self._backgroundColor = self.DEFAULT_BACKGROUND_COLOR
 
         resource = studiolibrary.resource()
         self.setWindowIcon(resource.icon("icon_black"))
@@ -58,236 +72,53 @@ class SettingsDialog(QtWidgets.QDialog):
         windowTitle = windowTitle.format(version=studiolibrary.version())
         self.setWindowTitle(windowTitle)
 
+        self.createAccentColorBar()
+        self.createBackgroundColorBar()
+
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.rejectButton.clicked.connect(self.close)
+        self.ui.browsePathButton.clicked.connect(self.browsePath)
 
-        self.ui.browseColorButton.clicked.connect(self.browseColor)
-        self.ui.browseLocationButton.clicked.connect(self.browseLocation)
-        self.ui.browseBackgroundColorButton.clicked.connect(self.browseBackgroundColor)
-
-        self.ui.theme1Button.clicked.connect(self.setTheme1)
-        self.ui.theme2Button.clicked.connect(self.setTheme2)
-        self.ui.theme3Button.clicked.connect(self.setTheme3)
-        self.ui.theme4Button.clicked.connect(self.setTheme4)
-        self.ui.theme5Button.clicked.connect(self.setTheme5)
-        self.ui.theme6Button.clicked.connect(self.setTheme6)
-        self.ui.theme7Button.clicked.connect(self.setTheme7)
-
-        self.ui.background1Button.clicked.connect(self.setBackground1)
-        self.ui.background2Button.clicked.connect(self.setBackground2)
-        self.ui.background3Button.clicked.connect(self.setBackground3)
-        self.ui.background4Button.clicked.connect(self.setBackground4)
-
-        self._library = library
         self.updateStyleSheet()
         self.center()
 
-    def acceptButton(self):
+    def resizeEvent(self, event):
         """
-        :rtype: QtWidgets.QPushButton
-        """
-        return self.ui.acceptButton
+        Reimplemented to support the logo scaling on DPI screens.
 
-    def rejectButton(self):
-        """
-        :rtype: QtWidgets.QPushButton
-        """
-        return self.ui.rejectButton
-
-    def accept(self):
-        """
-        Hides the modal dialog and sets the result code to Accepted.
-
+        :type event: QtGui.QEvent
         :rtype: None
         """
-        self.validate()
-        QtWidgets.QDialog.accept(self)
+        scaleFactor = 1.4
+        height = self.ui.headerFrame.height()
+        self.ui.logo.setFixedWidth(height / scaleFactor)
+        self.ui.logo.setFixedHeight(height / scaleFactor)
 
-    def validate(self):
+    def _accentColorChanged(self, color):
         """
-        :rtype: None
-        """
-        try:
-            library = self.library()
-            library.validateName(self.name())
-            library.validatePath(self.location())
-        except Exception, e:
-            QtWidgets.QMessageBox.critical(self, "Validate Error", str(e))
-            raise
+        Triggered when the user clicks/changes the accent color.
 
-    def center(self, width=600, height=435):
-        """
-        :rtype: None
-        """
-        desktopRect = QtWidgets.QApplication.desktop().availableGeometry()
-        center = desktopRect.center()
-        self.setGeometry(0, 0, width, height)
-        self.move(center.x() - self.width() * 0.5, center.y() - self.height() * 0.5)
-
-    def library(self):
-        """
-        :rtype: studiolibrary.Library
-        """
-        return self._library
-
-    def setTitle(self, text):
-        """
-        :type text: str
-        :rtype: None
-        """
-        self.ui.title.setText(text)
-
-    def setText(self, text):
-        """
-        :type text: str
-        :rtype: None
-        """
-        self.ui.text.setText(text)
-
-    def setHeader(self, text):
-        """
-        :type text: str
-        :rtype: None
-        """
-        self.ui.header.setText(text)
-
-    def color(self):
-        """
-        :rtype: studioqt.Color
-        """
-        return self.library().accentColor()
-
-    def backgroundColor(self):
-        """
-        :rtype: studioqt.Color
-        """
-        return self.library().backgroundColor()
-
-    def name(self):
-        """
-        :rtype: str
-        """
-        return str(self.ui.nameEdit.text())
-
-    def setName(self, name):
-        """
-        :type name: str
-        :rtype: None
-        """
-        self.ui.nameEdit.setText(name)
-
-    def setLocation(self, path):
-        """
-        :type path: str
-        """
-        self.ui.locationEdit.setText(path)
-
-    def location(self):
-        """
-        :rtype: str
-        """
-        return str(self.ui.locationEdit.text())
-
-    def setUpdateEnabled(self, value):
-        """
-        :type value: bool
-        :rtype: None
-        """
-        self._update = value
-
-    def setTheme1(self):
-        """
-        """
-        c = studioqt.Color(230, 60, 60, 255)
-        self.setColor(c)
-
-    def setTheme2(self):
-        """
-        """
-        c = studioqt.Color(255, 90, 40)
-        self.setColor(c)
-
-    def setTheme3(self):
-        """
-        """
-        c = studioqt.Color(255, 125, 100, 255)
-        self.setColor(c)
-
-    def setTheme4(self):
-        """
-        """
-        c = studioqt.Color(250, 200, 0, 255)
-        self.setColor(c)
-
-    def setTheme5(self):
-        """
-        """
-        c = studioqt.Color(80, 200, 140, 255)
-        self.setColor(c)
-
-    def setTheme6(self):
-        """
-        """
-        c = studioqt.Color(50, 180, 240, 255)
-        self.setColor(c)
-
-    def setTheme7(self):
-        """
-        """
-        c = studioqt.Color(110, 110, 240, 255)
-        self.setColor(c)
-
-    def setBackground1(self):
-        """
-        """
-        c = studioqt.Color(80, 80, 80)
-        self.setBackgroundColor(c)
-
-    def setBackground2(self):
-        """
-        """
-        c = studioqt.Color(65, 65, 65)
-        self.setBackgroundColor(c)
-
-    def setBackground3(self):
-        """
-        """
-        c = studioqt.Color(50, 50, 52)
-        self.setBackgroundColor(c)
-
-    def setBackground4(self):
-        """
-        """
-        c = studioqt.Color(40, 40, 50)
-        self.setBackgroundColor(c)
-
-    def setColor(self, color):
-        """
         :type color: studioqt.Color
         :rtype: None
         """
-        self.library().setAccentColor(color)
-        self.updateStyleSheet()
-        self.onColorChanged.emit(self)
+        self.setAccentColor(color)
 
-    def setBackgroundColor(self, color):
+    def _backgroundColorClicked(self, color):
         """
+        Triggered when the user clicks/changes the background color.
+
         :type color: studioqt.Color
         :rtype: None
         """
-        self.library().setBackgroundColor(color)
-        self.updateStyleSheet()
-        self.onBackgroundColorChanged.emit(self)
+        self.setBackgroundColor(color)
 
-    def browseColor(self):
+    def createAccentColorBar(self):
         """
+        Create and setup the accent color bar.
+
         :rtype: None
         """
-        color = self.color()
-        d = QtWidgets.QColorDialog(self)
-        d.setCurrentColor(color)
-
-        colors = [
+        browserColors_ = [
             # Top row, Bottom row
             (230, 60, 60), (250, 80, 130),
             (255, 90, 40), (240, 100, 170),
@@ -299,59 +130,36 @@ class SettingsDialog(QtWidgets.QDialog):
             (180, 110, 240), (210, 110, 255),
         ]
 
-        index = -1
-
-        for colorR, colorG, colorB in colors:
-
+        browserColors = []
+        for colorR, colorG, colorB in browserColors_:
             for i in range(0, 3):
-                index += 1
 
-                if colorR < 0:
-                    colorR = 0
+                colorR = colorR if colorR > 0 else 0
+                colorG = colorG if colorG > 0 else 0
+                colorB = colorB if colorB > 0 else 0
 
-                if colorG < 0:
-                    colorG = 0
-
-                if colorB < 0:
-                    colorB = 0
-
-                try:
-                    standardColor = QtGui.QColor(colorR, colorG, colorB)
-                    d.setStandardColor(index, standardColor)
-                except:
-                    standardColor = QtGui.QColor(colorR, colorG, colorB).rgba()
-                    d.setStandardColor(index, standardColor)
+                color = QtGui.QColor(colorR, colorG, colorB).rgba()
+                browserColors.append(color)
 
                 colorR -= 20
                 colorB -= 20
                 colorG -= 20
 
-        d.currentColorChanged.connect(self.setColor)
+        hColorBar = studioqt.HColorBar()
+        hColorBar.setColors(self.DEFAULT_ACCENT_COLORS)
+        hColorBar.setCurrentColor(self.DEFAULT_ACCENT_COLOR)
+        hColorBar.setBrowserColors(browserColors)
+        hColorBar.colorChanged.connect(self._accentColorChanged)
 
-        # PySide2 doesn't support d.open(), so we need to pass a blank slot.
-        d.open(self, QtCore.SLOT("blankSlot()"))
+        self.ui.accentColorBarFrame.layout().addWidget(hColorBar)
 
-        if d.exec_():
-            self.setColor(d.selectedColor())
-        else:
-            self.setColor(color)
-
-    @QtCore.Slot()
-    def blankSlot(self):
+    def createBackgroundColorBar(self):
         """
-        Blank slot to fix an issue with PySide2.QColorDialog.open()
-        """
-        pass
+        Create and setup the background color bar.
 
-    def browseBackgroundColor(self):
-        """
         :rtype: None
         """
-        color = self.backgroundColor()
-        d = QtWidgets.QColorDialog(self)
-        d.setCurrentColor(color)
-
-        colors = [
+        browserColors_ = [
             (0, 0, 0),
             (20, 20, 30),
             (0, 30, 60),
@@ -362,59 +170,249 @@ class SettingsDialog(QtWidgets.QDialog):
             (40, 15, 5),
         ]
 
-        index = -1
-
-        for colorR, colorG, colorB in colors:
+        browserColors = []
+        for colorR, colorG, colorB in browserColors_:
             for i in range(0, 6):
-                index += 1
 
-                try:
-                    standardColor = QtGui.QColor(colorR, colorG, colorB)
-                    d.setStandardColor(index, standardColor)
-                except:
-                    standardColor = QtGui.QColor(colorR, colorG, colorB).rgba()
-                    d.setStandardColor(index, standardColor)
+                color = QtGui.QColor(colorR, colorG, colorB).rgba()
+                browserColors.append(color)
 
                 colorR += 20
                 colorB += 20
                 colorG += 20
 
-        d.currentColorChanged.connect(self.setBackgroundColor)
+        hColorBar = studioqt.HColorBar()
+        hColorBar.setColors(self.DEFAULT_BACKGROUND_COLORS)
+        hColorBar.setCurrentColor(self.DEFAULT_BACKGROUND_COLOR)
+        hColorBar.setBrowserColors(browserColors)
+        hColorBar.colorChanged.connect(self._backgroundColorClicked)
 
-        # PySide2 doesn't support d.open(), so we need to pass a blank slot.
-        d.open(self, QtCore.SLOT("blankSlot()"))
+        self.ui.backgroundColorBarFrame.layout().addWidget(hColorBar)
 
-        if d.exec_():
-            self.setBackgroundColor(d.selectedColor())
-        else:
-            self.setBackgroundColor(color)
+    def accept(self):
+        """
+        Hides the modal dialog and sets the result code to Accepted.
+
+        :rtype: None
+        """
+        self.validate()
+        QtWidgets.QDialog.accept(self)
+
+    def setValidator(self, validator):
+        """
+        Set the validator for the dialog.
+
+        :type validator: func
+        :rtype: None
+        """
+        self._validator = validator
+
+    def validator(self):
+        """
+        Return the validator for the dialog.
+
+        :rtype: func
+        """
+        return self._validator
+
+    def validate(self):
+        """
+        Run the validate.
+
+        :rtype: None
+        """
+        try:
+            validator = self.validator()
+            if validator:
+                validator()
+        except Exception, e:
+            QtWidgets.QMessageBox.critical(self, "Validate Error", str(e))
+            raise
+
+    def setTitle(self, text):
+        """
+        Set the title for the dialog.
+
+        :type text: str
+        :rtype: None
+        """
+        self.ui.title.setText(text)
+
+    def setText(self, text):
+        """
+        Set the message for the dialog.
+
+        :type text: str
+        :rtype: None
+        """
+        self.ui.text.setText(text)
+
+    def setHeader(self, text):
+        """
+        Set the header for the dialog.
+
+        :type text: str
+        :rtype: None
+        """
+        self.ui.header.setText(text)
+
+    def name(self):
+        """
+        Return the text in the name field.
+
+        :rtype: str
+        """
+        return self.ui.nameEdit.text()
+
+    def setName(self, name):
+        """
+        Set the text in the name field.
+
+        :type name: str
+        :rtype: None
+        """
+        self.ui.nameEdit.setText(name)
+
+    def path(self):
+        """
+        Return the text in the path field.
+
+        :rtype: str
+        """
+        return self.ui.pathEdit.text()
+
+    def setPath(self, path):
+        """
+        Set the text in the name field.
+
+        :type path: str
+        :rtype: None
+        """
+        self.ui.pathEdit.setText(path)
+
+    def setAccentColor(self, color):
+        """
+        Set the current accent color.
+
+        :type color: studioqt.Color
+        :rtype: None
+        """
+        self._accentColor = color
+        self.updateStyleSheet()
+        self.accentColorChanged.emit(color)
+
+    def setBackgroundColor(self, color):
+        """
+        Set the current background color.
+
+        :type color: studioqt.Color
+        :rtype: None
+        """
+        self._backgroundColor = color
+        self.updateStyleSheet()
+        self.backgroundColorChanged.emit(color)
+
+    def accentColor(self):
+        """
+        Return the current accent color.
+
+        :rtype: studioqt.Color
+        """
+        return self._accentColor
+
+    def backgroundColor(self):
+        """
+        Return the current background color.
+
+        :rtype: studioqt.Color
+        """
+        return self._backgroundColor
 
     def updateStyleSheet(self):
         """
+        Update the style sheet with the current accent and background colors.
+
         :rtype: None
         """
-        self.setStyleSheet(self.library().theme().styleSheet())
+        theme = studioqt.Theme()
+        theme.setAccentColor(self.accentColor())
+        theme.setBackgroundColor(self.backgroundColor())
+        self.setStyleSheet(theme.styleSheet())
 
-    def browseLocation(self):
-        """
-        :rtype: None
-        """
-        path = self.location()
-        path = self.browse(path, title="Browse Location")
-        if path:
-            self.setLocation(path)
+        # Update the font size to use "pt" for higher dpi screens.
+        self.ui.text.setStyleSheet("font:11pt;")
+        self.ui.title.setStyleSheet("font:22pt;")
+        self.ui.header.setStyleSheet("font:15pt;")
+        self.ui.nameEdit.setStyleSheet("font:12pt;")
+        self.ui.pathEdit.setStyleSheet("font:12pt;")
+        self.ui.nameLabel.setStyleSheet("font:14pt;")
+        self.ui.themeLabel.setStyleSheet("font:14pt;")
+        self.ui.locationLabel.setStyleSheet("font:14pt;")
 
-    @staticmethod
-    def browse(path, title="Browse Location"):
+    def browsePath(self):
         """
-        :type path: str
-        :type title: str
+        Open the file dialog for setting a new path.
+
         :rtype: str
         """
+        path = self.path()
+        title = "Browse Location"
+
         if not path:
             from os.path import expanduser
             path = expanduser("~")
 
-        path = str(QtWidgets.QFileDialog.getExistingDirectory(None, title, path))
+        path = QtWidgets.QFileDialog.getExistingDirectory(None, title, path)
         path = path.replace("\\", "/")
+
+        if path:
+            self.setPath(path)
+
         return path
+
+    def center(self, width=600, height=435):
+        """
+        Center the dialog in the center of the active screen.
+
+        :type width: int
+        :type height: int
+        :rtype: None
+        """
+        self.setGeometry(0, 0, width, height)
+        geometry = self.frameGeometry()
+        pos = QtWidgets.QApplication.desktop().cursor().pos()
+        screen = QtWidgets.QApplication.desktop().screenNumber(pos)
+        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        centerPoint.setY(centerPoint.y() / 1.2)
+        geometry.moveCenter(centerPoint)
+        self.move(geometry.topLeft())
+
+
+def example():
+    """
+    Example to show/test the SettingsDialog.
+
+    :rtype: None
+    """
+    def _accentColorChanged(color):
+        print "accent", color
+
+    def _backgroundColorChanged(color):
+        print "background:", color
+
+    theme = studioqt.Theme()
+
+    dialog = SettingsDialog()
+    dialog.accentColorChanged.connect(_accentColorChanged)
+    dialog.backgroundColorChanged.connect(_backgroundColorChanged)
+    dialog.exec_()
+
+    print dialog.name()
+    print dialog.path()
+    print dialog.accentColor()
+    print dialog.backgroundColor()
+
+
+if __name__ == "__main__":
+    with studioqt.app():
+        example()

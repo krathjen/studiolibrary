@@ -16,15 +16,12 @@
 
 import studiolibrary
 
-studiolibrary.Library.DEFAULT_PLUGINS = [
-    "studiolibraryplugins.lockplugin",
-    "studiolibraryplugins.poseplugin",
-    "studiolibraryplugins.animationplugin",
-    "studiolibraryplugins.mirrortableplugin",
-    "studiolibraryplugins.selectionsetplugin",
-]
+# The following items are registered on import.
+from studiolibraryitems import poseitem
+from studiolibraryitems import animitem
+from studiolibraryitems import mirroritem
+from studiolibraryitems import setsitem
 
-studiolibrary.CHECK_FOR_UPDATES_ENABLED = True
 
 studiolibrary.Analytics.ENABLED = True
 studiolibrary.Analytics.DEFAULT_ID = "UA-50172384-1"
@@ -33,5 +30,5 @@ studiolibrary.Analytics.DEFAULT_ID = "UA-50172384-1"
 # studiolibrary.Library.ITEM_DATA_PATH = "{root}/.studiolibrary/item_data.json"
 # studiolibrary.Library.FOLDER_DATA_PATH = "{root}/.studiolibrary/folder_data.json"
 
-# Meta paths are camel case for legacy reasons
-studiolibrary.Record.META_PATH = "{path}/.studioLibrary/record.json"
+# Meta paths are still named record.json and camel case for legacy reasons
+studiolibrary.LibraryItem.META_PATH = "{path}/.studioLibrary/record.json"

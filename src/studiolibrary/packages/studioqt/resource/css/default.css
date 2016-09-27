@@ -29,7 +29,7 @@ QDialog QPushButton:focus {
     background-color: ACCENT_COLOR;
 }
 
-QDialog QPushButton {
+QDialog QPushButton, QDialog QDialogButtonBox QPushButton {
     color: rgb(255, 255, 255, 255);
     background-color: rgb(255, 255, 255, 30);
 }
@@ -50,6 +50,7 @@ QMessageBox QPushButton, QDialog QPushButton  {
 */
 
 QPushButton:hover {
+	color: rgb(255, 255, 255, 200);
 	background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 230);
 }
 
@@ -103,7 +104,6 @@ QSlider::sub-page:horizontal {
  Scroll Bar
  --------------------------------------------------------------------------
 */
-
 QScrollBar:vertical {
 	width: 10*DPIpx;
 }
@@ -113,7 +113,7 @@ QScrollBar:horizontal {
 }
 
 QScrollBar:vertical,
-QScrollBar:horizontal{
+QScrollBar:horizontal {
 	margin: 0px;
 	border: 0px solid grey;
 	background: rgb(255, 255, 255, 0);
@@ -136,7 +136,7 @@ QScrollBar::add-line:horizontal {
 	border: 0px solid grey;
 	subcontrol-origin: margin;
 	subcontrol-position: bottom;
-	background: rgb(80, 80, 80);
+	/*background: rgb(80, 80, 80);*/
 }
 
 QScrollBar::sub-line:vertical,
@@ -145,7 +145,7 @@ QScrollBar::sub-line:horizontal {
 	border: 0px solid grey;
 	subcontrol-position: top;
 	subcontrol-origin: margin;
-	background: rgb(80, 80, 80);
+	/*background: rgb(80, 80, 80);*/
 }
 
 QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
@@ -210,9 +210,9 @@ QTreeView {
 	color: rgb(255, 255, 255, 200);
 }
 
-QTreeWidget {
-	font: 12*DPIpx;
-}
+/*QTreeWidget {*/
+	/*font: 12*DPIpx;*/
+/*}*/
 
 QTreeView, QListView, QPushButton {
     border: 0px;
@@ -371,9 +371,9 @@ QTabBar::tab:first:selected {
 
 
 QMenu, QMenu QWidget {
-	font: 16*DPIpx;
-	color: rgb(255, 255, 255, 180);
-	background-color: BACKGROUND_COLOR;
+	font: 13*DPIpx;
+	/*color: rgb(255, 255, 255, 180);*/
+	/*background-color: BACKGROUND_COLOR;*/
 }
 
 QMenu::item:selected {
@@ -394,6 +394,10 @@ QMenu::indicator:non-exclusive {
 	width: 14px;
 	height: 14px;
 	padding-left: 2px;
+}
+
+QMenu::item:disabled {
+	color: rgb(255, 255, 255, 100);
 }
 
 /*
@@ -454,20 +458,51 @@ QSplitter::handle:hover {
 
 /*
  --------------------------------------------------------------------------
+ Slider Widget Action
+ --------------------------------------------------------------------------
+*/
+
+SliderWidgetAction {
+	padding-left: 18px;
+}
+
+SliderWidgetAction QLabel {
+	min-width: 50px;
+}
+
+
+/*
+ --------------------------------------------------------------------------
+ Separator Widget Action
+ --------------------------------------------------------------------------
+*/
+
+SeparatorWidgetAction {
+	margin: 2px;
+}
+
+SeparatorWidgetAction Line {
+	min-height: 1px;
+	max-height: 1px;
+	background-color: rgb(250, 250, 250, 60);
+}
+
+SeparatorWidgetAction QLabel {
+	min-height:24px;
+	max-height:24px;
+	color: rgb(250, 250, 250, 60);
+}
+
+
+/*
+ --------------------------------------------------------------------------
  Other
  --------------------------------------------------------------------------
 */
 
+
 NavigationFrame {
 	margin: 2px;
-}
-
-QMenu::item:disabled {
-	color: rgb(255, 255, 255, 100);
-}
-
-#sliderActionLabel {
-	padding-left: 18px;
 }
 
 #actionWidget {

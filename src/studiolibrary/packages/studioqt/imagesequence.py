@@ -29,9 +29,9 @@ class ImageSequence(QtCore.QObject):
 
     DEFAULT_FPS = 24
 
-    frameChanged = QtCore.Signal()
+    frameChanged = QtCore.Signal(int)
 
-    def __init__(self,  *args):
+    def __init__(self, path, *args):
         QtCore.QObject.__init__(self, *args)
 
         self._fps = self.DEFAULT_FPS
@@ -40,6 +40,9 @@ class ImageSequence(QtCore.QObject):
         self._frames = []
         self._dirname = None
         self._paused = False
+
+        if path:
+            self.setDirname(path)
 
     def setDirname(self, dirname):
         """
@@ -109,7 +112,6 @@ class ImageSequence(QtCore.QObject):
 
         :rtype: None
         """
-        self._frame = 0
         self._timer.stop()
 
     def start(self):
@@ -141,7 +143,7 @@ class ImageSequence(QtCore.QObject):
 
         frame = self._frame
         frame += 1
-        self.setCurrentFrame(frame)
+        self.jumpToFrame(frame)
 
     def percent(self):
         """
@@ -155,13 +157,29 @@ class ImageSequence(QtCore.QObject):
             _percent = float((len(self._frames) + self._frame)) / len(self._frames) - 1
         return _percent
 
-    def duration(self):
+    def frameCount(self):
         """
         Return the number of frames.
 
         :rtype: int
         """
         return len(self._frames)
+
+    def currentIcon(self):
+        """
+        Returns the current frame as a QIcon.
+
+        :rtype: QtGui.QIcon
+        """
+        return QtGui.QIcon(self.currentFilename())
+
+    def currentPixmap(self):
+        """
+        Return the current frame as a QPixmap.
+
+        :rtype: QtGui.QPixmap
+        """
+        return QtGui.QPixmap(self.currentFilename())
 
     def currentFilename(self):
         """
@@ -170,11 +188,11 @@ class ImageSequence(QtCore.QObject):
         :rtype: str or None
         """
         try:
-            return self._frames[self.currentFrame()]
+            return self._frames[self.currentFrameNumber()]
         except IndexError:
             pass
 
-    def currentFrame(self):
+    def currentFrameNumber(self):
         """
         Return the current frame.
 
@@ -182,16 +200,16 @@ class ImageSequence(QtCore.QObject):
         """
         return self._frame
 
-    def setCurrentFrame(self, frame):
+    def jumpToFrame(self, frame):
         """
         Set the current frame.
 
         :rtype: int or None
         """
-        if frame >= self.duration():
+        if frame >= self.frameCount():
             frame = 0
         self._frame = frame
-        self.frameChanged.emit()
+        self.frameChanged.emit(frame)
 
 
 class ImageSequenceWidget(QtWidgets.QToolButton):
@@ -202,8 +220,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         QtWidgets.QToolButton.__init__(self, *args)
         self.setStyleSheet('border: 0px solid rgb(0, 0, 0, 20);')
 
-        self._filename = None
-        self._imageSequence = ImageSequence(self)
+        self._imageSequence = ImageSequence("")
         self._imageSequence.frameChanged.connect(self._frameChanged)
 
         self.setSize(150, 150)
@@ -228,14 +245,6 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         self.setIconSize(self._size)
         self.setFixedSize(self._size)
 
-    def currentIcon(self):
-        """
-        Return a icon object from the current icon path.
-
-        :rtype: QtGui.QIcon
-        """
-        return QtGui.QIcon(self._imageSequence.currentFilename())
-
     def setDirname(self, dirname):
         """
         Set the location to the image sequence.
@@ -245,7 +254,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         """
         self._imageSequence.setDirname(dirname)
         if self._imageSequence.frames():
-            icon = self.currentIcon()
+            icon = self._imageSequence.currentIcon()
             self.setIcon(icon)
 
     def enterEvent(self, event):
@@ -275,12 +284,12 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         """
         if self.isControlModifier():
             percent = 1.0 - (float(self.width() - event.pos().x()) / float(self.width()))
-            frame = int(self._imageSequence.duration() * percent)
-            self._imageSequence.setCurrentFrame(frame)
-            icon = self.currentIcon()
+            frame = int(self._imageSequence.frameCount() * percent)
+            self._imageSequence.jumpToFrame(frame)
+            icon = self._imageSequence.currentIcon()
             self.setIcon(icon)
 
-    def _frameChanged(self, filename=None):
+    def _frameChanged(self, frame=None):
         """
         Triggered when the image sequence changes frame.
 
@@ -288,8 +297,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         :rtype: None
         """
         if not self.isControlModifier():
-            self._filename = filename
-            icon = self.currentIcon()
+            icon = self._imageSequence.currentIcon()
             self.setIcon(icon)
 
     def currentFilename(self):
@@ -342,5 +350,5 @@ if __name__ == "__main__":
     import studioqt
     with studioqt.app():
         w = ImageSequenceWidget(None)
-        w.setDirname("C:/temp/")
+        w.setDirname("C:/temp/sequence")
         w.show()

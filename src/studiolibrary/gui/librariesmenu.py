@@ -45,7 +45,7 @@ class LibrariesMenu(QtWidgets.QMenu):
             action = LibraryAction(self, library)
             self.addAction(action)
             action.setStatusTip('Load library "%s" "%s"' % (library.name(), library.path()))
-            action.triggered.connect(library.load)
+            action.triggered.connect(library.show)
 
 
 class LibraryAction(QtWidgets.QWidgetAction):

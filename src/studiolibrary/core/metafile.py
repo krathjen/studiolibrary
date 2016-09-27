@@ -20,26 +20,84 @@ import json
 import getpass
 import logging
 
-from . import basepath
+from . import utils
 
 
 __all__ = ["MetaFile"]
 
+
 logger = logging.getLogger(__name__)
 
 
-class MetaFile(basepath.BasePath):
+class MetaFile(object):
 
     def __init__(self, path, read=True):
         """
         :type path: str
         :type read: bool
         """
-        super(MetaFile, self).__init__(path)
         self._data = {}
+        self._path = ""
+
+        if path:
+            self.setPath(path)
 
         if read and self.exists():
             self.read()
+
+    def dirname(self):
+        """
+        :rtype: str
+        """
+        return os.path.dirname(self.path())
+
+    def isFile(self):
+        """
+        :rtype: bool
+        """
+        return os.path.isfile(self.path())
+
+    def isFolder(self):
+        """
+        :rtype: bool
+        """
+        return os.path.isdir(self.path())
+
+    def mkdir(self):
+        """
+        :rtype: None
+        """
+        dirname = self.dirname()
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+    def openLocation(self):
+        """
+        :rtype: None
+        """
+        path = self.path()
+        utils.openLocation(path)
+
+    def path(self):
+        """
+        :rtype: str
+        """
+        return self._path
+
+    def setPath(self, path):
+        """
+        :type path: str
+        """
+        path = path or ""
+        path = path.replace("\\", "/")
+
+        self._path = path
+
+    def name(self):
+        """
+        :rtype: str
+        """
+        return os.path.basename(self.path())
 
     def data(self):
         """
@@ -137,7 +195,7 @@ class MetaFile(basepath.BasePath):
         elif os.path.exists(self.dictPath()):
             return True
         else:
-            return super(MetaFile, self).exists()
+            return os.path.exists(self.path())
 
     def dictPath(self):
         """
@@ -161,19 +219,8 @@ class MetaFile(basepath.BasePath):
 
         :rtype: dict
         """
-        data = {}
         path = self.jsonPath()
-
-        logger.debug("Reading meta file: {0}".format(path))
-
-        if os.path.isfile(path):
-            with open(path, "r") as f:
-                data_ = f.read()
-                try:
-                    data = json.loads(data_)
-                except Exception, msg:
-                    logger.exception(msg)
-
+        data = utils.readJson(path)
         return data
 
     def readDict(self):
@@ -182,19 +229,8 @@ class MetaFile(basepath.BasePath):
 
         :rtype: dict
         """
-        data = {}
         path = self.dictPath()
-
-        logger.debug("Reading meta file: {0}".format(path))
-
-        if os.path.isfile(path):
-            with open(path, "r") as f:
-                data_ = f.read()
-                try:
-                    data = eval(data_.strip(), {})
-                except Exception, msg:
-                    logger.exception(msg)
-
+        data = utils.readDict(path)
         return data
 
     def saveJson(self, data):
@@ -204,11 +240,7 @@ class MetaFile(basepath.BasePath):
         :type data: dict
         :rtype: None
         """
-        self.mkdir()
-
-        with open(self.jsonPath(), "w") as f:
-            data = json.dumps(data, indent=4)
-            f.write(data)
+        utils.saveJson(self.path(), data)
 
     def save(self):
         """
@@ -225,12 +257,12 @@ class MetaFile(basepath.BasePath):
         data["mtime"] = t
         data["owner"] = owner
 
-        logger.debug("Saving Meta File '%s'" % self.path())
+        logger.debug(u'Saving Meta File "{0}"'.format(self.path()))
         self.mkdir()
 
         try:
             data_ = eval(str(data), {})  # Validate data before writing
-            self._write(data=data_)
+            self.saveJson(data_)
         except:
             msg = "An error has occurred when evaluating string: {0}"
             msg = msg.format(str(data))
@@ -244,10 +276,3 @@ class MetaFile(basepath.BasePath):
             return self.readJson()
         else:
             return self.readDict()
-
-    def _write(self, data):
-        """
-        :type data: str
-        :rtype: dict
-        """
-        return self.saveJson(data)

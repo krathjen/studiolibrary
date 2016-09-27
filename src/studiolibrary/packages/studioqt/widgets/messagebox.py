@@ -38,6 +38,8 @@ class MessageBox(QtWidgets.QDialog):
         mb.setTitleText(title)
 
         a = mb.exec_()
+        mb.close()
+
         return mb._standardButtonClicked
 
     @staticmethod
@@ -55,6 +57,8 @@ class MessageBox(QtWidgets.QDialog):
         mb.setTitleText(title)
 
         a = mb.exec_()
+        mb.close()
+
         return mb._standardButtonClicked
 
     def __init__(self, parent=None):

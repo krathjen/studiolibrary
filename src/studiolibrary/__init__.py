@@ -18,10 +18,10 @@ import os
 import sys
 
 
-__version__ = "1.24.3"
+__version__ = "1.25.0"
 __encoding__ = sys.getfilesystemencoding()
 
-_package = None
+_plugins = {}
 _resource = None
 _analytics = None
 _scriptJob = None
@@ -30,9 +30,7 @@ PATH = unicode(os.path.abspath(__file__), __encoding__)
 DIRNAME = os.path.dirname(PATH).replace('\\', '/')
 PACKAGES_PATH = DIRNAME + "/packages"
 RESOURCE_PATH = DIRNAME + "/gui/resource"
-PACKAGE_HELP_URL = "http://www.studiolibrary.com"
-PACKAGE_JSON_URL = "http://dl.dropbox.com/u/28655980/studiolibrary/studiolibrary.json"
-CHECK_FOR_UPDATES_ENABLED = True
+HELP_URL = "http://www.studiolibrary.com"
 
 HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
 LIBRARIES_PATH = HOME_PATH + "/StudioLibrary/Libraries"
@@ -48,7 +46,7 @@ def setup(path):
     :rtype: None
     """
     if os.path.exists(path) and path not in sys.path:
-        print "Adding '{path}' to the sys.path".format(path=path)
+        print 'Adding "{path}" to the sys.path'.format(path=path)
         sys.path.append(path)
 
 
@@ -60,25 +58,19 @@ import studioqt
 from studiolibrary.main import main
 
 from studiolibrary.core.utils import *
-from studiolibrary.core.package import Package
-from studiolibrary.core.basepath import BasePath
 from studiolibrary.core.metafile import MetaFile
 from studiolibrary.core.settings import Settings
 from studiolibrary.core.analytics import Analytics
-from studiolibrary.core.baseplugin import BasePlugin
-from studiolibrary.core.pluginmanager import PluginManager
 
 from studiolibrary.gui.mayadockwidgetmixin import MayaDockWidgetMixin
-from studiolibrary.gui.libraryitem import LibraryItem
 from studiolibrary.gui.librarywidget import LibraryWidget
 from studiolibrary.gui.previewwidget import PreviewWidget
 from studiolibrary.gui.librariesmenu import LibrariesMenu
 from studiolibrary.gui.settingsdialog import SettingsDialog
-from studiolibrary.gui.checkforupdatesthread import CheckForUpdatesThread
 
-from studiolibrary.api.record import Record
-from studiolibrary.api.plugin import Plugin
+from studiolibrary.api.cmds import *
 from studiolibrary.api.library import Library
+from studiolibrary.api.libraryitem import LibraryItem
 
 
 def enableMayaClosedEvent():
@@ -124,30 +116,13 @@ def resource():
     return _resource
 
 
-def package():
-    """
-    Return a Package object for getting info about the Studio Library.
-
-    :rtype: studiolibrary.package.Package
-    """
-    global _package
-
-    if not _package:
-        _package = Package()
-
-    _package.setJsonUrl(PACKAGE_JSON_URL)
-    _package.setHelpUrl(PACKAGE_HELP_URL)
-    _package.setVersion(__version__)
-    return _package
-
-
 def version():
     """
     Return the current version of the Studio Library
 
     :rtype: str
     """
-    return package().version()
+    return __version__
 
 
 def analytics():
@@ -161,7 +136,7 @@ def analytics():
         _analytics = Analytics(
             tid=Analytics.DEFAULT_ID,
             name="StudioLibrary",
-            version=package().version()
+            version=__version__
         )
 
     _analytics.setEnabled(Analytics.ENABLED)
@@ -174,7 +149,7 @@ def windows():
 
     :rtype: list[MainWindow]
     """
-    return Library.windows()
+    return Library.libraryWidgets()
 
 
 def library(name=None):
@@ -205,8 +180,6 @@ def loadFromCommand():
     from optparse import OptionParser
 
     parser = OptionParser()
-    parser.add_option("-p", "--plugins", dest="plugins",
-                      help="", metavar="PLUGINS", default="None")
     parser.add_option("-r", "--root", dest="root",
                       help="", metavar="ROOT")
     parser.add_option("-n", "--name", dest="name",
@@ -216,9 +189,7 @@ def loadFromCommand():
     (options, args) = parser.parse_args()
 
     name = options.name
-    plugins = eval(options.plugins)
-
-    main(name=name, plugins=plugins)
+    main(name=name)
 
 
 def about():
@@ -227,7 +198,7 @@ def about():
 
     :rtype str
     """
-    msg = """
+    msg = u"""
 -------------------------------
 Studio Library is a free python script for managing poses and animation in Maya.
 Comments, suggestions and bug reports are welcome.
@@ -239,7 +210,7 @@ www.studiolibrary.com
 kurt.rathjen@gmail.com
 --------------------------------
 """
-    msg = msg.format(version=package().version(), package=PATH)
+    msg = msg.format(version=__version__, package=PATH)
     return msg
 
 

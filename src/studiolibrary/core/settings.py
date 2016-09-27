@@ -57,5 +57,5 @@ class Settings(metafile.MetaFile):
         :rtype: str
         """
         if not self._path:
-            self._path = os.path.join(Settings.DEFAULT_PATH, self._scope, self._name + ".dict")
+            self._path = os.path.join(Settings.DEFAULT_PATH, self._scope, self._name + ".json")
         return self._path

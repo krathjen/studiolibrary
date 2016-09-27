@@ -63,6 +63,45 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         item = self.itemFromIndex(index)
         item.paintRow(painter, options, index)
 
+    def settings(self):
+        """
+        Return the current state of the widget.
+
+        :rtype: dict
+        """
+        settings = {}
+
+        settings["sortOrder"] = self.sortOrder()
+        settings["sortColumn"] = self.sortColumnLabel()
+        settings["groupOrder"] = self.groupOrder()
+        settings["groupColumn"] = self.groupColumnLabel()
+        # settings["headerState"] = self.header().saveState()
+
+        settings["columnSettings"] = self.columnSettings()
+
+        return settings
+
+    def setSettings(self, settings):
+        """
+        Set the current state of the widget.
+
+        :type settings: dict
+        :rtype: None
+        """
+        # headerState = settings.get("headerState", "")
+        # self.header().restoreState(headerState)
+
+        columnSettings = settings.get("columnSettings", {})
+        self.setColumnSettings(columnSettings)
+
+        sortOrder = settings.get("sortOrder", 0)
+        sortColumn = settings.get("sortColumn", 0)
+        groupOrder = settings.get("groupOrder", 0)
+        groupColumn = settings.get("groupColumn", None)
+        self.sortByColumn(sortColumn, sortOrder, groupColumn, groupOrder)
+
+        return settings
+
     def _itemClicked(self, item):
         """
         Triggered when the user clicks on an item.
@@ -193,20 +232,48 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         items.append(self.takeTopLevelItem(0))
         return items
 
-    def textFromColumn(self, column):
+    def textFromColumn(self, column, split=None, duplicates=False):
         """
-        Return all data for the given column
+        Return all the data for the given column
 
-        :type column: int
-        :rtype: list[object]
+        :type column: int or str
+        :type split: str
+        :type duplicates: bool
+        :rtype: list[str]
         """
-        result = []
-        for item in self.items():
+        items = self.items()
+        results = self.textFromItems(
+            items,
+            column,
+            split=split,
+            duplicates=duplicates,
+        )
+        return results
+
+    def textFromItems(self, items, column, split=None, duplicates=False):
+        """
+        Return all the text data for the given items and given column
+
+        :type items: list[CombinedWidgetItem]
+        :type column: int or str
+        :type split: str
+        :type duplicates: bool
+        :rtype: list[str]
+        """
+        results = []
+
+        for item in items:
             text = item.text(column)
-            if text:
-                result.append(text)
 
-        return result
+            if text and split:
+                results.extend(text.split(split))
+            elif text:
+                results.append(text)
+
+        if not duplicates:
+            results = list(set(results))
+
+        return results
 
     def columnLabels(self):
         """
@@ -243,15 +310,39 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
     def setHeaderLabels(self, *args):
         """
-        Adds a column in the header for each item in the labels list.
+        Set the header for each item in the given label list.
 
         :type args:
         :rtype: None
         """
+        columnSettings = self.columnSettings()
+
         QtWidgets.QTreeWidget.setHeaderLabels(self, *args)
         self.updateHeaderLabels()
+
         self.updateColumnHidden()
         self.updateData()
+
+        self.setColumnSettings(columnSettings)
+
+    def addHeaderLabel(self, label):
+        """
+        Add the given header label to the table.
+
+        :type label: str
+        :rtype: None
+        """
+        labels = self.headerLabels()
+        labels.append(label)
+        self.setHeaderLabels(labels)
+
+    def headerLabels(self):
+        """
+        Return all the header labels.
+
+        :rtype: str
+        """
+        return self._headerLabels
 
     def updateHeaderLabels(self):
         """
@@ -303,8 +394,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         columnLabels = self._hiddenColumns.keys()
 
         for columnLabel in columnLabels:
-            column = self.columnFromLabel(columnLabel)
-            self.setColumnHidden(column, self._hiddenColumns[columnLabel])
+            self.setColumnHidden(columnLabel, self._hiddenColumns[columnLabel])
 
     def setColumnHidden(self, column, value):
         """
@@ -321,6 +411,12 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         self._hiddenColumns[label] = value
 
         QtWidgets.QTreeWidget.setColumnHidden(self, column, value)
+
+        # Make sure the column is not collapsed
+        width = self.columnWidth(column)
+        if width < 5:
+            width = 100
+            self.setColumnWidth(column, width)
 
     def resizeColumnToContents(self, column):
         """
@@ -477,6 +573,46 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
         return menu
 
+    def columnSettings(self):
+        """
+        Return the settings for each column.
+
+        :rtype: dict
+        """
+        columnSettings = {}
+
+        for column in range(self.columnCount()):
+
+            label = self.labelFromColumn(column)
+            hidden = self.isColumnHidden(column)
+            width = self.columnWidth(column)
+
+            columnSettings[label] = {
+                "hidden": hidden,
+                "width": width,
+                "index": column,
+            }
+
+        return columnSettings
+
+    def setColumnSettings(self, settings):
+        """
+        Set the settings for each column.
+
+        :type settings: dict
+        :type: None
+        """
+        for label in settings:
+            column = self.columnFromLabel(label)
+
+            width = settings[label].get("width", 100)
+            if width < 5:
+                width = 100
+            self.setColumnWidth(column, width)
+
+            hidden = settings[label].get("hidden", False)
+            self.setColumnHidden(column, hidden)
+
     def createHideColumnMenu(self):
         """
         Create the hide column menu.
@@ -612,6 +748,12 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
         :rtype: None
         """
+        if isinstance(column, basestring):
+            column = self.columnFromLabel(column)
+
+        if isinstance(groupColumn, basestring):
+            groupColumn = self.columnFromLabel(groupColumn)
+
         self._sortColumn = column
         self.setSortingEnabled(True)
 
@@ -646,6 +788,9 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         sortOrder = self.sortOrder()
         sortColumn = self.sortColumn()
 
+        action = studioqt.SeparatorAction("Sort By", menu)
+        menu.addAction(action)
+
         for column in range(self.columnCount()):
 
             label = self.labelFromColumn(column)
@@ -661,7 +806,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
             callback = partial(self.sortByColumn, column, sortOrder)
             action.triggered.connect(callback)
 
-        menu.addSeparator()
+        action = studioqt.SeparatorAction("Sort Order", menu)
+        menu.addAction(action)
 
         action = menu.addAction("Ascending")
         action.setCheckable(True)
@@ -702,6 +848,18 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         :rtype: None
         """
         return self._groupColumn
+
+    def groupColumnLabel(self):
+        """
+        Return the current group column label.
+
+        :rtype: str or None
+        """
+        label = None
+        column = self.groupColumn()
+        if column is not None:
+            label = self.labelFromColumn(column)
+        return label
 
     def createGroupItem(self, text, children):
         """
@@ -861,6 +1019,9 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         groupOrder = self._groupOrder
         groupColumn = self._groupColumn
 
+        action = studioqt.SeparatorAction("Group By", menu)
+        menu.addAction(action)
+
         action = menu.addAction("None")
         action.setCheckable(True)
 
@@ -889,7 +1050,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
             callback = partial(self.groupByColumn, column, groupOrder)
             action.triggered.connect(callback)
 
-        menu.addSeparator()
+        action = studioqt.SeparatorAction("Group Order", menu)
+        menu.addAction(action)
 
         action = menu.addAction("Ascending")
         action.setCheckable(True)

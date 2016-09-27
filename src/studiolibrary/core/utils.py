@@ -17,6 +17,8 @@
 import re
 import os
 import json
+import shutil
+import logging
 import platform
 import subprocess
 from datetime import datetime
@@ -35,39 +37,35 @@ __all__ = [
     "saveJson",
     "readJson",
     "listPaths",
-    "splitPath",
     "findPaths",
+    "copyPath",
+    "movePath",
+    "splitPath",
+    "renamePath",
+    "formatPath",
+    "moveContents",
     "Direction",
-    "downloadUrl",
     "stringToList",
     "listToString",
     "openLocation",
-    "validatePath",
-    "validateString",
     "generateUniquePath",
     "generateUniqueName",
-    "ValidatePathError",
-    "ValidateStringError",
+    "PathRenameError",
+    "PathNotFoundError",
 ]
 
 
-RE_VALIDATE_PATH = re.compile("^[\\\.:/\sA-Za-z0-9_-]*$")
-RE_VALIDATE_STRING = re.compile("^[\sA-Za-z0-9_-]+$")
+logger = logging.getLogger(__name__)
 
 
-class StudioLibraryError(Exception):
-
-    """Base exception for any studio library errors."""
-
-
-class ValidatePathError(StudioLibraryError):
-
-    """Raised when a path has invalid characters."""
+class PathRenameError(IOError):
+    """
+    """
 
 
-class ValidateStringError(StudioLibraryError):
-
-    """Raised when a string has invalid characters."""
+class PathNotFoundError(IOError):
+    """
+    """
 
 
 class Direction:
@@ -124,32 +122,119 @@ def isLinux():
     return system().startswith("lin")
 
 
-def validatePath(path):
+def formatPath(src, dst, labels=None):
     """
-    :type path: str
-    :raise ValidatePathError
+    Resolve the given destination path.
+
+    Example:
+        print formatPath("C:/hello/world.json", "{dirname}/meta.json")
+        # "C:/hello/meta.json"
+
+    :type src: str
+    :type dst: str
+    :type labels: dict
+    :rtype: str
     """
-    if not RE_VALIDATE_PATH.match(path):
+    dirname, name, extension = splitPath(src)
 
-        msg = (
-            'Invalid characters in path "{0}"! '
-            'Please only use letters, numbers and forward slashes.'
-        )
+    labels_ = {
+        "name": name,
+        "path": src,
+        "dirname": dirname,
+        "extension": extension,
+    }
 
-        msg = msg.format(path)
-        raise ValidatePathError(msg)
+    if labels:
+        labels_.update(labels)
+
+    return unicode(dst).format(**labels_)
 
 
-def validateString(text):
+def copyPath(src, dst):
     """
-    :type text: str
-    :raise ValidateStringError
-    """
-    if not RE_VALIDATE_STRING.match(text):
+    Make a copy of the given src path to the given destination path.
 
-        msg = 'Invalid string "{0}"! Please only use letters and numbers'
-        msg = msg.format(str(text))
-        raise ValidateStringError(msg)
+    :type src: str
+    :type dst: str
+    :rtype: str
+    """
+    if os.path.isfile(src):
+        shutil.copy(src, dst)
+    else:
+        shutil.copytree(src, dst)
+
+    return dst
+
+
+def movePath(src, dst):
+    """
+    Move the given source path to the given destination path.
+
+    :type src: str
+    :type dst: str
+    :rtype: str
+    """
+    src = unicode(src)
+    dirname, name, extension = splitPath(src)
+
+    if not os.path.exists(src):
+        raise IOError(u'No such file or directory: {0}'.format(src))
+
+    if os.path.isdir(src):
+        dst = u'{0}/{1}{2}'.format(dst, name, extension)
+        dst = generateUniquePath(dst)
+
+    shutil.move(src, dst)
+    return dst
+
+
+def renamePath(src, dst, extension=None, force=False):
+    """
+    Rename the given src path to given destination path.
+
+    :type src: str
+    :type dst: str
+    :type extension: str
+    :type force: bool
+    :rtype: str
+    """
+    src = src.replace("\\", "/")
+    dst = dst.replace("\\", "/")
+
+    dirname = os.path.dirname(src)
+
+    if "/" not in dst:
+        dst = dirname + "/" + dst
+
+    if extension and extension not in dst:
+        dst += extension
+
+    logger.debug(u'Renaming: {0} => {1}'.format(src, dst))
+
+    if src == dst and not force:
+        msg = u'The source path and destination path are the same: {0}'
+        raise PathRenameError(msg.format(src))
+
+    if os.path.exists(dst) and not force:
+        msg = u'Cannot save over an existing path: "{0}"'
+        raise PathRenameError(msg.format(dst))
+
+    if not os.path.exists(dirname):
+        msg = u'The system cannot find the specified path: "{0}".'
+        raise PathRenameError(msg.format(dirname))
+
+    if not os.path.exists(os.path.dirname(dst)) and force:
+        os.mkdir(os.path.dirname(dst))
+
+    if not os.path.exists(src):
+        msg = u'The system cannot find the specified path: "{0}"'
+        raise PathRenameError(msg.format(src))
+
+    os.rename(src, dst)
+
+    logger.debug(u'Renamed: {0} => {1}'.format(src, dst))
+
+    return dst
 
 
 def moveContents(contents, path):
@@ -161,7 +246,7 @@ def moveContents(contents, path):
     for src in contents or []:
         basename = os.path.basename(src)
         dst = path + "/" + basename
-        logger.info('Moving Content: {0} => {1}'.format(src, dst))
+        logger.info(u'Moving Content: {0} => {1}'.format(src, dst))
         shutil.move(src, dst)
 
 
@@ -190,19 +275,24 @@ def readJson(path):
     :type path: str
     :rtype: dict
     """
+    logger.debug(u'Reading json file: {0}'.format(path))
+
     data = {}
 
-    if os.path.exists(path):
+    if os.path.isfile(path):
         with open(path, "r") as f:
             data_ = f.read()
             if data_:
-                data = json.loads(data_)
+                try:
+                    data = json.loads(data_)
+                except Exception, e:
+                    logger.exception(e)
     return data
 
 
 def saveDict(path, data):
     """
-    Write a python dict to disc.
+    Write a python dict to the given path on disc.
 
     :type path: str
     :type data: dict
@@ -221,18 +311,22 @@ def saveDict(path, data):
 
 def readDict(path):
     """
-    Read a python dict from disc.
+    Read a python dict from the given path on disc.
 
     :type path: str
     :rtype: dict
     """
     data = {}
+    logger.debug(u'Reading dict file: {0}'.format(path))
 
-    if os.path.exists(path):
+    if os.path.isfile(path):
         with open(path, "r") as f:
             data_ = f.read()
             if data_:
-                data = eval(data_, {})
+                try:
+                    data = eval(data_, {})
+                except Exception, e:
+                    logger.exception(e)
     return data
 
 
@@ -248,7 +342,7 @@ def generateUniqueName(name, names, attempts=1000):
         if result not in names:
             return result
 
-    msg = "Cannot generate unique name for '{name}'"
+    msg = u'Cannot generate unique name for "{name}"'
     msg = msg.format(name=name)
     raise StudioLibraryError(msg)
 
@@ -261,7 +355,7 @@ def generateUniquePath(path, attempts=1000):
     """
     attempt = 1  # We start at one so that the first unique name is actually 2.
     dirname, name, extension = splitPath(path)
-    path_ = "{dirname}/{name} ({number}){extension}"
+    path_ = u'{dirname}/{name} ({number}){extension}'
 
     while os.path.exists(path):
         attempt += 1
@@ -274,7 +368,7 @@ def generateUniquePath(path, attempts=1000):
         )
 
         if attempt >= attempts:
-            msg = "Cannot generate unique name for path {path}"
+            msg = u'Cannot generate unique name for path {path}'
             msg = msg.format(path=path)
             raise ValueError(msg)
 
@@ -283,6 +377,8 @@ def generateUniquePath(path, attempts=1000):
 
 def openLocation(path):
     """
+    Open the file explorer at the given path location.
+
     :type path: str
     :rtype: None
     """
@@ -292,28 +388,6 @@ def openLocation(path):
         os.startfile('%s' % path)
     elif isMac():
         subprocess.call(["open", "-R", path])
-
-
-def copyPath(srcPath, dstPath):
-    """
-    :type srcPath: str
-    :type dstPath: str
-    :rtype: None
-    """
-    import stat
-    import shutil
-
-    if not os.path.exists(srcPath):
-        raise IOError("Path doesn't exists '%s'" % srcPath)
-
-    if os.path.isfile(srcPath):
-        shutil.copyfile(srcPath, dstPath)
-    elif os.path.isdir(srcPath):
-        shutil.copytree(srcPath, dstPath)
-
-    ctime = os.stat(srcPath)[stat.ST_CTIME]
-    mtime = os.stat(srcPath)[stat.ST_MTIME]
-    os.utime(dstPath, (ctime, mtime))
 
 
 def splitPath(path):
@@ -328,7 +402,7 @@ def splitPath(path):
 
 def listToString(data):
     """
-    :type data: list[]
+    :type data: list
     :rtype: str
     """
     # Convert all items to string and remove 'u'
@@ -341,7 +415,7 @@ def listToString(data):
 def stringToList(data):
     """
     :type data: str
-    :rtype: list[]
+    :rtype: list
     """
     data = '["' + str(data) + '"]'
     data = data.replace(' ', '')
@@ -352,13 +426,11 @@ def stringToList(data):
 def listPaths(path):
     """
     :type path: str
-    :rtype: list[str]
+    :rtype: collections.Iterable[str]
     """
-    results = []
     for name in os.listdir(path):
         value = path + "/" + name
-        results.append(value)
-    return results
+        yield value
 
 
 def findPaths(path, match=None, ignore=None, direction=Direction.Down, depth=3):
@@ -378,7 +450,7 @@ def findPaths(path, match=None, ignore=None, direction=Direction.Down, depth=3):
     :type match: func
     :type depth: int
     :type direction: Direction
-    :rtype: list[str]
+    :rtype: collections.Iterable[str]
     """
     if os.path.isfile(path):
         path = os.path.dirname(path)
@@ -403,7 +475,7 @@ def walkup(path, match=None, depth=3):
     :type path: str
     :type match: func
     :type depth: int
-    :rtype: list[str]
+    :rtype: collections.Iterable[str]
     """
     sep = "/"
     path = os.path.realpath(path)
@@ -430,12 +502,12 @@ def walkup(path, match=None, depth=3):
                         yield path
 
 
-def walk(path, match=None, ignore=None, depth=3,):
+def walk(path, match=None, ignore=None, depth=3):
     """
     :type path: str
     :type match: func
     :type depth: int
-    :rtype: list[str]
+    :rtype: collections.Iterable[str]
     """
     path = path.rstrip(os.path.sep)
     path = os.path.realpath(path)
@@ -462,42 +534,6 @@ def walk(path, match=None, ignore=None, depth=3,):
         currentDepth = root.count(os.path.sep)
         if (currentDepth - startDepth) >= maxDepth:
             del dirs[:]
-
-
-# TODO: Add better error handling
-def downloadUrl(url, destination=None):
-    """
-    :type url: str
-    :type destination: str
-    :rtype : str
-    """
-    try:
-        if destination:
-            try:
-                f = open(destination, 'w')
-                f.close()
-            except:
-                print "Studio Library: The current user does not have permission for the directory %s" % destination
-                #  Should raise a permissions error
-                return
-
-        try:
-            import urllib2
-            f = urllib2.urlopen(url, None, 2.0)
-        except Exception:
-            return
-
-        data = f.read()
-
-        if destination:
-            f = open(destination, 'wb')
-            f.write(data)
-            f.close()
-
-        return data
-    except:
-        raise
-        # Sould raise an error
 
 
 def timeAgo(timeStamp):

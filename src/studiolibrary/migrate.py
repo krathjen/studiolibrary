@@ -31,8 +31,8 @@ def migrate():
     """
     try:
         migrateLibraries()
-    except Exception, msg:
-        logger.exception(msg)
+    except Exception, e:
+        logger.exception(e)
 
 
 def migrateLibraries():
@@ -60,20 +60,18 @@ def migrateLibraries():
                 continue
 
             msg = "Migrating old library: {0} -> {1}..."
+            data = None
 
             if os.path.exists(oldJsonPath):
                 msg = msg.format(oldJsonPath, newJsonPath)
-                logger.info(msg)
-
                 data = studiolibrary.readJson(oldJsonPath)
-                studiolibrary.saveJson(newJsonPath, data)
-                studiolibrary.saveJson(migratedPath, data)
 
             elif os.path.exists(oldDictPath):
                 msg = msg.format(oldDictPath, newJsonPath)
-                logger.info(msg)
-
                 data = studiolibrary.readDict(oldJsonPath)
+
+            if data:
+                logger.info(msg)
                 studiolibrary.saveJson(newJsonPath, data)
                 studiolibrary.saveJson(migratedPath, data)
 

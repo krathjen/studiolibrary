@@ -15,13 +15,21 @@
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
+import math
+import logging
 
 from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
 
-
 import studioqt
+
+logger = logging.getLogger(__name__)
+
+
+class GlobalSignals(QtCore.QObject):
+    """"""
+    blendChanged = QtCore.Signal(float)
 
 
 class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
@@ -30,8 +38,13 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
     Combined Widget items are used to hold rows of information for a
     combined widget.
     """
-
     MAX_ICON_SIZE = 256
+
+    DEFAULT_FONT_SIZE = 13
+    DEFAULT_PLAYHEAD_COLOR = QtGui.QColor(255, 255, 255, 220)
+
+    _globalSignals = GlobalSignals()
+    blendChanged = _globalSignals.blendChanged
 
     def __init__(self, *args):
         QtWidgets.QTreeWidgetItem.__init__(self, *args)
@@ -47,10 +60,11 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self._displayText = {}
 
         self._icon = {}
-
         self._fonts = {}
         self._pixmap = {}
+        self._pixmapRect = None
         self._iconPath = ""
+        self._underMouse = False
         self._searchText = None
         self._infoWidget = None
         self._groupColumn = 0
@@ -60,8 +74,35 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         self._dragEnabled = True
 
+        self._imageSequence = None
+        self._imageSequencePath = None
+
+        self._blendValue = 0.0
+        self._blendPreviousValue = 0.0
+        self._blendPosition = None
+        self._blendingEnabled = False
+
     def __eq__(self, other):
         return id(other) == id(self)
+
+    def __ne__(self, other):
+        return id(other) != id(self)
+
+    def __del__(self):
+        """
+        Make sure the sequence is stopped when deleted.
+
+        :rtype: None
+        """
+        self.stop()
+
+    def toJson(self):
+        """
+        Return a dict of the current item text.
+
+        :rtype: dict[]
+        """
+        return self._text
 
     def mimeText(self):
         """
@@ -130,6 +171,11 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type icon: QtGui.QIcon
         :rtype: None
         """
+        # Safe guard for when the class is being used without the gui.
+        isAppRunning = bool(QtWidgets.QApplication.instance())
+        if not isAppRunning:
+            return
+
         if isinstance(icon, basestring):
             if not os.path.exists(icon):
                 color = color or studioqt.Color(255, 255, 255, 20)
@@ -139,7 +185,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         if isinstance(column, basestring):
             self._icon[column] = icon
-        
         else:
             self._pixmap[column] = None
             QtWidgets.QTreeWidgetItem.setIcon(self, column, icon)
@@ -175,9 +220,9 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self.textColumnOrder.append(column)
 
         if isinstance(column, basestring):
-            self._text[column] = value, alignment
+            self._text[column] = value
         else:
-            QtWidgets.QTreeWidgetItem.setText(self, column, value)
+            QtWidgets.QTreeWidgetItem.setText(self, column, unicode(value))
 
     def text(self, column):
         """
@@ -190,9 +235,9 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         #     column = self.treeWidget().labelFromColumn(column)
 
         if isinstance(column, basestring):
-            text = self._sortText.get(column, None)
+            text = self._sortText.get(column)
             if not text:
-                text, alignment = self._text.get(column, ("", None))
+                text = self._text.get(column, "")
         else:
             text = QtWidgets.QTreeWidgetItem.text(self, column)
 
@@ -221,7 +266,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         text = self._sortText.get(column, None)
         if not text:
-            text, alignment = self._text.get(column, ("", None))
+            text = self._text.get(column, "")
 
         return text
 
@@ -232,14 +277,16 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type column: int
         :rtype: str
         """
-        text = None
+        if isinstance(column, basestring):
+            text = self._text.get(column, "")
 
-        if isinstance(column, int):
+        else:
+            # Check the text before the display role data
             label = self.treeWidget().labelFromColumn(column)
-            text, alignment = self._text.get(label, ("", None))
+            text = self._text.get(label, "")
 
-        if not text:
-            text = QtWidgets.QTreeWidgetItem.data(self, column, QtCore.Qt.DisplayRole)
+            if not text:
+                text = QtWidgets.QTreeWidgetItem.data(self, column, QtCore.Qt.DisplayRole)
 
         return text
 
@@ -253,14 +300,12 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         for label in self._text:
             column = treeWidget.columnFromLabel(label)
-            text, alignment = self._text[label]
+
+            if column < 0:
+                treeWidget.addHeaderLabel(label)
+
+            text = self._text[label]
             self.setText(column, text)
-
-            if not alignment and label in self._icon:
-                alignment = QtCore.Qt.AlignHCenter | QtCore.Qt.AlignBottom
-
-            if alignment:
-                self.setTextAlignment(column, alignment)
 
         for label in self._icon:
             column = treeWidget.columnFromLabel(label)
@@ -426,6 +471,17 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         self._pixmap[column] = pixmap
 
+    def thumbnailPath(self):
+        return ""
+
+    def icon(self, column):
+        icon = QtWidgets.QTreeWidgetItem.icon(self, column)
+        if not icon and column == 0:
+            iconPath = self.thumbnailPath()
+            if iconPath:
+                icon = QtGui.QIcon(iconPath)
+        return icon
+
     def pixmap(self, column):
         """
         Return the pixmap for the given column.
@@ -433,12 +489,15 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type column:
         :rtype: QtWidgets.QPixmap
         """
+
         if not self._pixmap.get(column):
+
             icon = self.icon(column)
             if icon:
                 size = QtCore.QSize(self.MAX_ICON_SIZE, self.MAX_ICON_SIZE)
                 iconSize = icon.actualSize(size)
                 self._pixmap[column] = icon.pixmap(iconSize)
+
         return self._pixmap.get(column)
 
     def padding(self):
@@ -472,16 +531,18 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type column: int
         :rtype: QtCore.Qt.AlignmentFlag
         """
-        defaultAlignment = QtCore.Qt.AlignVCenter
-        alignment = QtWidgets.QTreeWidgetItem.textAlignment(self, column)
-        if alignment == 0:
-            return defaultAlignment
+        if self.combinedWidget().isIconView():
+            return QtCore.Qt.AlignCenter
         else:
-            return alignment
+            return QtWidgets.QTreeWidgetItem.textAlignment(self, column)
 
     # -----------------------------------------------------------------------
     # Support for mouse and key events
     # -----------------------------------------------------------------------
+
+    def underMouse(self):
+        """Return True if the item is under the mouse cursor."""
+        return self._underMouse
 
     def contextMenu(self, menu):
         """
@@ -500,7 +561,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        pass
+        self._underMouse = False
+        self.stop()
 
     def mouseEnterEvent(self, event):
         """
@@ -509,7 +571,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        pass
+        self._underMouse = True
+        self.play()
 
     def mouseMoveEvent(self, event):
         """
@@ -518,7 +581,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        pass
+        self.blendingEvent(event)
+        self.imageSequenceEvent(event)
 
     def mousePressEvent(self, event):
         """
@@ -527,7 +591,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        pass
+        if event.button() == QtCore.Qt.MidButton:
+            self._blendPosition = event.pos()
 
     def mouseReleaseEvent(self, event):
         """
@@ -536,7 +601,9 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        pass
+        if self.isBlending():
+            self._blendPosition = None
+            self._blendPreviousValue = self.blendValue()
 
     def keyPressEvent(self, event):
         """
@@ -566,6 +633,10 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: QtWidgets.QtColor
         """
+        # This will be changed to use the palette soon.
+        # Note: There were problems with older versions of Qt's palette (Maya 2014).
+        # Eg:
+        # return self.combinedWidget().palette().color(self.combinedWidget().foregroundRole())
         return self.combinedWidget().textColor()
 
     def textSelectedColor(self):
@@ -661,6 +732,10 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
                 self.paintText(painter, option, index)
 
             self.paintIcon(painter, option, index)
+
+            if index.column() == 0:
+                if self.imageSequence():
+                    self.paintPlayhead(painter, option)
         finally:
             painter.restore()
 
@@ -779,13 +854,33 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         pixmapRect.translate(x, y)
         painter.drawPixmap(pixmapRect, pixmap)
 
+    def drawIconBorder(self, painter, pixmapRect):
+        """
+        Draw a border around the icon.
+
+        :type painter: QtWidgets.QPainter
+        :type option: QtWidgets.QStyleOptionViewItem
+        :rtype: None
+        """
+        pixmapRect = QtCore.QRect(pixmapRect)
+        pixmapRect.setX(pixmapRect.x() - 5)
+        pixmapRect.setY(pixmapRect.y() - 5)
+        pixmapRect.setWidth(pixmapRect.width() + 5)
+        pixmapRect.setHeight(pixmapRect.height() + 5)
+
+        color = QtGui.QColor(255, 255, 255, 10)
+        painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+        painter.setBrush(QtGui.QBrush(color))
+
+        painter.drawRect(pixmapRect)
+
     def fontSize(self):
         """
         Return the font size for the item.
 
         :rtype: int
         """
-        return 11
+        return self.DEFAULT_FONT_SIZE
 
     def font(self, column):
         """
@@ -833,8 +928,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def _paintText(self, painter, option, column):
 
-        # text = self.text(column)
-        # label = self.treeWidget().labelFromColumn(column)
         text = self.displayText(column)
 
         isSelected = option.state & QtWidgets.QStyle.State_Selected
@@ -857,24 +950,274 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         visualRect.setWidth(width - padding)
         visualRect.setHeight(height - padding)
 
-        # textWidth = self.textWidth(column)
-        align = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
-
         font = self.font(column)
+        align = self.textAlignment(column)
         metrics = QtGui.QFontMetricsF(font)
-        textWidth = metrics.width(text)
+
+        if text:
+            textWidth = metrics.width(text)
+        else:
+            textWidth = 1
 
         # # Check if the current text fits within the rect.
         if textWidth > visualRect.width() - padding:
             text = metrics.elidedText(text, QtCore.Qt.ElideRight, visualRect.width())
-            if self.textAlignment(column) == QtCore.Qt.AlignLeft:
-                align = self.textAlignment(column)
-            else:
-                align = QtCore.Qt.AlignLeft | self.textAlignment(column)
+            align = QtCore.Qt.AlignLeft
+
+        if self.combinedWidget().isIconView():
+            align = align | QtCore.Qt.AlignBottom
         else:
-            align = self.textAlignment(column)
+            align = align | QtCore.Qt.AlignVCenter
 
         pen = QtGui.QPen(color)
         painter.setPen(pen)
         painter.setFont(font)
         painter.drawText(visualRect, align, text)
+
+    # ------------------------------------------------------------------------
+    # Support for middle mouse blending (slider)
+    # ------------------------------------------------------------------------
+
+    def setBlendingEnabled(self, enabled):
+        """
+        Set if middle mouse slider is enabled.
+
+        :type enabled: bool
+        :rtype: None
+        """
+        self._blendingEnabled = enabled
+
+    def isBlendingEnabled(self):
+        """
+        Return true if middle mouse slider is enabled.
+
+        :rtype: None
+        """
+        return self._blendingEnabled
+
+    def blendingEvent(self, event):
+        """
+        Called when the mouse moves while the middle mouse button is held down.
+
+        :param event: QtGui.QMouseEvent
+        :rtype: None
+        """
+        if self.isBlending():
+            value = (event.pos().x() - self.blendPosition().x()) / 1.5
+            value = math.ceil(value) + self.blendPreviousValue()
+            try:
+                self.setBlendValue(value)
+            except Exception, msg:
+                self.stopBlending()
+
+    def startBlendingEvent(self, event):
+        """
+        Called when the middle mouse button is pressed.
+
+        :param event: QtGui.QMouseEvent
+        :rtype: None
+        """
+        if self.isBlendingEnabled():
+            if event.button() == QtCore.Qt.MidButton:
+                self._blendPosition = event.pos()
+
+    def stopBlending(self):
+        """
+        Called when the middle mouse button is released.
+
+        :param event: QtGui.QMouseEvent
+        :rtype: None
+        """
+        self._blendPosition = None
+        self._blendPreviousValue = self.blendValue()
+
+    def resetBlending(self):
+        """
+        Reset the blending value to zero.
+
+        :rtype: None
+        """
+        self._blendValue = 0.0
+        self._blendPreviousValue = 0.0
+
+    def isBlending(self):
+        """
+        Return True if blending.
+
+        :rtype: bool
+        """
+        return self.blendPosition() is not None
+
+    def setBlendValue(self, value):
+        """
+        Set the blend value.
+
+        :type value: float
+        :rtype: bool
+        """
+        if self.isBlendingEnabled():
+            self._blendValue = value
+            self.blendChanged.emit(value)
+            logger.debug("BLENDING:" + str(value))
+
+    def blendValue(self):
+        """
+        Return the blend value.
+
+        :rtype: float
+        """
+        return self._blendValue
+
+    def blendPreviousValue(self):
+        """
+        :rtype: float
+        """
+        return self._blendPreviousValue
+
+    def blendPosition(self):
+        """
+        :rtype: QtGui.QPoint
+        """
+        return self._blendPosition
+
+    def selectionChanged(self):
+        """
+        :rtype: QtGui.QPoint
+        """
+        self.resetBlending()
+
+    # ------------------------------------------------------------------------
+    # Support animated image sequence
+    # ------------------------------------------------------------------------
+
+    def imageSequenceEvent(self, event):
+        """
+        :type event: QtCore.QEvent
+        :rtype: None
+        """
+        if self.imageSequence():
+            if studioqt.isControlModifier():
+                if self.rect():
+                    x = event.pos().x() - self.rect().x()
+                    width = self.rect().width()
+                    percent = 1.0 - (float(width - x) / float(width))
+                    frame = int(self.imageSequence().frameCount() * percent)
+                    self.imageSequence().jumpToFrame(frame)
+                    self.updateFrame()
+
+    def resetImageSequence(self):
+        self._imageSequence = None
+
+    def imageSequence(self):
+        """
+        :rtype: studioqt.ImageSequence
+        """
+        return self._imageSequence
+
+    def setImageSequence(self, value):
+        """
+        :type value: studioqt.ImageSequence
+        """
+        self._imageSequence = value
+
+    def setImageSequencePath(self, path):
+        """
+        :type path: str
+        :rtype: None
+        """
+        self._imageSequencePath = path
+
+    def imageSequencePath(self):
+        """
+        :rtype: str
+        """
+        return self._imageSequencePath
+
+    def stop(self):
+        """
+        :rtype: None
+        """
+        if self.imageSequence():
+            self.imageSequence().stop()
+
+    def play(self):
+        """
+        :rtype: None
+        """
+        self.resetImageSequence()
+        path = self.imageSequencePath() or self.thumbnailPath()
+
+        movie = None
+
+        if os.path.isfile(path) and path.lower().endswith(".gif"):
+
+            movie = QtGui.QMovie(path)
+            movie.setCacheMode(QtGui.QMovie.CacheAll)
+            movie.frameChanged.connect(self._frameChanged)
+
+        elif os.path.isdir(path):
+
+            if not self.imageSequence():
+                movie = studioqt.ImageSequence(path)
+                movie.frameChanged.connect(self._frameChanged)
+
+        if movie:
+            self.setImageSequence(movie)
+            self.imageSequence().start()
+
+    def _frameChanged(self, frame):
+        """Triggered when the movie object updates to the given frame."""
+        if not studioqt.isControlModifier():
+            self.updateFrame()
+
+    def updateFrame(self):
+        """Triggered when the movie object updates the current frame."""
+        pixmap = self.imageSequence().currentPixmap()
+        self.setIcon(0, pixmap)
+
+    def playheadColor(self):
+        """
+        Return the playhead color.
+
+        :rtype: QtGui.Color
+        """
+        return self.DEFAULT_PLAYHEAD_COLOR
+
+    def paintPlayhead(self, painter, option):
+        """
+        Paint the playhead if the item has an image sequence.
+
+        :type painter: QtWidgets.QPainter
+        :type option: QtWidgets.QStyleOptionViewItem
+        :rtype: None
+        """
+        movie = self.imageSequence()
+
+        if movie and self.underMouse():
+
+            count = movie.frameCount()
+            current = movie.currentFrameNumber()
+
+            if count > 0:
+                percent = float(((count) + current) + 1)  / count - 1
+            else:
+                percent = 0
+
+            r = self.iconRect(option)
+            c = self.playheadColor()
+            imageSequence = self.imageSequence()
+
+            painter.setPen(QtCore.Qt.NoPen)
+            painter.setBrush(QtGui.QBrush(c))
+
+            if percent <= 0:
+                width = 0
+            elif percent >= 1:
+                width = r.width()
+            else:
+                width = (percent * r.width()) - 1
+
+            height = 3 * self.dpi()
+            y = r.y() + r.height() - (height - 1)
+
+            painter.drawRect(r.x(), y, width, height)

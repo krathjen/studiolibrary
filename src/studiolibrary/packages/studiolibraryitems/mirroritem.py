@@ -1,0 +1,327 @@
+# Copyright 2016 by Kurt Rathjen. All Rights Reserved.
+#
+# Permission to use, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted,
+# provided that the above copyright notice appear in all copies and that
+# both that copyright notice and this permission notice appear in
+# supporting documentation, and that the name of Kurt Rathjen
+# not be used in advertising or publicity pertaining to distribution
+# of the software without specific, written prior permission.
+# KURT RATHJEN DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
+# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+# KURT RATHJEN BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
+# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
+# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+# OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+"""
+#---------------------------------------------------------------------------
+# Saving a mirror table item
+#---------------------------------------------------------------------------
+
+from studiolibraryitems import mirroritem
+
+path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
+objects = maya.cmds.ls(selection=True) or []
+leftSide = "Lf"
+rightSide = "Rf"
+
+item = mirroritem.MirrorItem(path)
+item.save(objects=objects, leftSide=leftSide, rightSide=rightSide)
+
+#---------------------------------------------------------------------------
+# Loading a mirror table item
+#---------------------------------------------------------------------------
+
+from studiolibraryitems import mirroritem
+
+path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
+objects = maya.cmds.ls(selection=True) or []
+namespaces = []
+
+item = mirroritem.MirrorItem(path)
+item.load(objects=objects, namespaces=namespaces, animation=True, time=None)
+"""
+
+import os
+import logging
+
+# studioqt supports both pyside (Qt4) and pyside2 (Qt5)
+from studioqt import QtGui
+from studioqt import QtCore
+from studioqt import QtWidgets
+
+import mutils
+import studiolibrary
+import studiolibraryitems
+
+from studiolibraryitems import transferitem
+
+try:
+    import maya.cmds
+except ImportError, e:
+    print e
+
+
+logger = logging.getLogger(__name__)
+
+
+MirrorOption = mutils.MirrorOption
+
+
+class MirrorItem(transferitem.TransferItem):
+
+    @staticmethod
+    def typeIconPath():
+        """Return the location on disc to the type (extension) icon."""
+        return studiolibraryitems.resource().get("icons", "mirrortable.png")
+
+    @staticmethod
+    def createAction(parent):
+        """
+        Return the action to be displayed when the user clicks the "plus" icon.
+
+        :type parent: QtWidgets.QWidget or None
+        :rtype: QtCore.QAction
+        """
+        icon = QtGui.QIcon(MirrorItem.typeIconPath())
+        action = QtWidgets.QAction(icon, "Mirror Table", parent)
+        return action
+
+    @staticmethod
+    def createWidget(libraryWidget):
+        """
+        Return the widget for creating a new mirror item.
+
+        :type libraryWidget: studiolibrary.LibraryWidget
+        :rtype: MirrorCreateWidget
+        """
+        item = MirrorItem()
+        widget = MirrorCreateWidget(item=item)
+
+        widget.setFolderPath(libraryWidget.selectedFolderPath())
+        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
+
+        return widget
+
+    def __init__(self, *args, **kwargs):
+        """
+        :type args: list
+        :type kwargs: dict
+        """
+        transferitem.TransferItem.__init__(self, *args, **kwargs)
+        self.setTransferBasename("mirrortable.json")
+        self.setTransferClass(mutils.MirrorTable)
+
+    def previewWidget(self, libraryWidget=None):
+        """
+        Return the widget to be shown when the user clicks on the item.
+
+        :type libraryWidget: studiolibrary.LibraryWidget
+        :rtype: MirrorPreviewWidget
+        """
+        return MirrorPreviewWidget(item=self, parent=None)
+
+    def doubleClicked(self):
+        """Overriding this method to load the item on double click."""
+        self.loadFromSettings()
+
+    def loadFromSettings(self):
+        """Load the mirror table using the settings for this item."""
+        mirrorOption = self.settings().get("mirrorOption", MirrorOption.Swap)
+        mirrorAnimation = self.settings().get("mirrorAnimation", True)
+        namespaces = self.namespaces()
+        objects = maya.cmds.ls(selection=True) or []
+
+        try:
+            self.load(
+                objects=objects,
+                option=mirrorOption,
+                animation=mirrorAnimation,
+                namespaces=namespaces,
+            )
+        except Exception, e:
+            studioqt.MessageBox.critical(None, "Item Error", str(e))
+            raise
+
+    @mutils.showWaitCursor
+    def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):
+        """
+        :type objects: list[str]
+        :type namespaces: list[str]
+        :type option: MirrorOption
+        :type animation: bool
+        :type time: list[int]
+        """
+        objects = objects or []
+        self.transferObject().load(
+            objects=objects,
+            namespaces=namespaces,
+            option=option,
+            animation=animation,
+            time=time,
+        )
+
+    def save(self, objects, leftSide, rightSide, path=None, iconPath=None):
+        """
+        :type path: str
+        :type objects: list[str]
+        :type iconPath: str
+        :rtype: None
+        """
+        if path and not path.endswith(".mirror"):
+            path += ".mirror"
+
+        logger.info("Saving: %s" % self.transferPath())
+
+        tempDir = mutils.TempDir("Transfer", makedirs=True)
+        tempPath = os.path.join(tempDir.path(), self.transferBasename())
+
+        t = self.transferClass().fromObjects(
+            objects,
+            leftSide=leftSide,
+            rightSide=rightSide
+        )
+        t.save(tempPath)
+
+        studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath])
+
+
+class MirrorCreateWidget(transferitem.CreateWidget):
+
+    def __init__(self, *args, **kwargs):
+        """
+        :type parent: QtWidgets.QWidget
+        :type item: MirrorItem
+        """
+        transferitem.CreateWidget.__init__(self, *args, **kwargs)
+
+    def leftText(self):
+        """
+        :rtype: str
+        """
+        return str(self.ui.left.text()).strip()
+
+    def rightText(self):
+        """
+        :rtype: str
+        """
+        return str(self.ui.right.text()).strip()
+
+    def selectionChanged(self):
+        """
+        :rtype: None
+        """
+        objects = maya.cmds.ls(selection=True) or []
+
+        if not self.ui.left.text():
+            self.ui.left.setText(mutils.MirrorTable.findLeftSide(objects))
+
+        if not self.ui.right.text():
+            self.ui.right.setText(mutils.MirrorTable.findRightSide(objects))
+
+        leftSide = str(self.ui.left.text())
+        rightSide = str(self.ui.right.text())
+
+        mt = mutils.MirrorTable.fromObjects(
+                [],
+                leftSide=leftSide,
+                rightSide=rightSide
+        )
+
+        self.ui.leftCount.setText(str(mt.leftCount(objects)))
+        self.ui.rightCount.setText(str(mt.rightCount(objects)))
+
+        transferitem.CreateWidget.selectionChanged(self)
+
+    def save(self, objects, path, iconPath, description):
+        """
+        :type objects: list[str]
+        :type path: str
+        :type iconPath: str
+        :type description: str
+        :rtype: None
+        """
+        iconPath = self.iconPath()
+        leftSide = self.leftText()
+        rightSide = self.rightText()
+
+        r = self.item()
+        r.setDescription(description)
+
+        self.item().save(
+            path=path,
+            objects=objects,
+            iconPath=iconPath,
+            leftSide=leftSide,
+            rightSide=rightSide,
+        )
+
+
+class MirrorPreviewWidget(transferitem.PreviewWidget):
+
+    def __init__(self, *args, **kwargs):
+        """
+        :type parent: QtWidgets.QWidget
+        :type item: MirrorItem
+        """
+        transferitem.PreviewWidget.__init__(self, *args, **kwargs)
+
+        self.ui.mirrorAnimationCheckBox.stateChanged.connect(self.updateState)
+        self.ui.mirrorOptionComboBox.currentIndexChanged.connect(self.updateState)
+
+    def setItem(self, item):
+        """
+        :type item: MirrorItem
+        :rtype: None
+        """
+        transferitem.PreviewWidget.setItem(self, item)
+
+        mt = item.transferObject()
+        self.ui.left.setText(mt.leftSide())
+        self.ui.right.setText(mt.rightSide())
+
+    def mirrorOption(self):
+        """
+        :rtype: str
+        """
+        text = self.ui.mirrorOptionComboBox.currentText()
+        return self.ui.mirrorOptionComboBox.findText(text, QtCore.Qt.MatchExactly)
+
+    def mirrorAnimation(self):
+        """
+        :rtype: bool
+        """
+        return self.ui.mirrorAnimationCheckBox.isChecked()
+
+    def state(self):
+        """
+        :rtype: dict
+        """
+        state = super(MirrorPreviewWidget, self).state()
+
+        state["mirrorOption"] = int(self.mirrorOption())
+        state["mirrorAnimation"] = bool(self.mirrorAnimation())
+
+        return state
+
+    def setState(self, state):
+        """
+        :type state: dict
+        """
+        super(MirrorPreviewWidget, self).setState(state)
+
+        mirrorOption = int(state.get("mirrorOption", MirrorOption.Swap))
+        mirrorAnimation = bool(state.get("mirrorAnimation", True))
+
+        self.ui.mirrorOptionComboBox.setCurrentIndex(mirrorOption)
+        self.ui.mirrorAnimationCheckBox.setChecked(mirrorAnimation)
+
+    def accept(self):
+        """
+        :rtype: None
+        """
+        self.item().loadFromSettings()
+
+
+studiolibrary.register(MirrorItem, ".mirror")

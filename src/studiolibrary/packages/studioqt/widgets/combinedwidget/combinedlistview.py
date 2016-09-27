@@ -585,7 +585,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         """
         Show the drag pixmap for the given item.
 
-        :type item: recordwidgetitem.RecordWidgetItem
+        :type item: combinedwidgetitem.CombinedWidgetItem
         :rtype: QtGui.QPixmap
         """
         rect = self.visualRect(self.indexFromItem(item))

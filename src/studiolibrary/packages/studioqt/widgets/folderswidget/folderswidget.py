@@ -403,7 +403,7 @@ class FoldersWidget(QtWidgets.QTreeView):
         name, accepted = QtWidgets.QInputDialog.getText(
             parent,
             "Create Folder",
-            "Name",
+            "Folder name",
             QtWidgets.QLineEdit.Normal
         )
         name = name.strip()
@@ -478,11 +478,11 @@ class FoldersWidget(QtWidgets.QTreeView):
         """
 
         folders = []
+
         for index in self.selectionModel().selectedIndexes():
             path = self.pathFromIndex(index)
             folder = self.folderFromPath(path)
             folders.append(folder)
-
 
         return folders
 
@@ -772,7 +772,7 @@ class FileSystemModel(QtWidgets.QFileSystemModel):
         :type index: QtCore.QModelIndex
         :rtype: bool
         """
-        path = str(self.filePath(index))
+        path = self.filePath(index)
         if os.path.isdir(path):
             for name in os.listdir(path):
                 if self.isPathValid(path + "/" + name):
@@ -787,7 +787,7 @@ class FileSystemModel(QtWidgets.QFileSystemModel):
         """
         if role == QtCore.Qt.DecorationRole:
             if index.column() == 0:
-                dirname = str(self.filePath(index))
+                dirname = self.filePath(index)
                 folder = self.foldersWidget().folderFromPath(dirname)
                 pixmap = QtGui.QIcon(folder.pixmap())
 
@@ -801,7 +801,7 @@ class FileSystemModel(QtWidgets.QFileSystemModel):
 
         if role == QtCore.Qt.FontRole:
             if index.column() == 0:
-                dirname = str(self.filePath(index))
+                dirname = self.filePath(index)
                 folder = self.foldersWidget().folderFromPath(dirname)
                 if folder.exists():
                     if folder.isBold():
@@ -837,8 +837,8 @@ class SortFilterProxyModel(QtCore.QSortFilterProxyModel):
         :type rightIndex: QtWidgets.QModelIndex
         :rtype: bool
         """
-        path1 = str(self.sourceModel().filePath(leftIndex))
-        path2 = str(self.sourceModel().filePath(rightIndex))
+        path1 = self.sourceModel().filePath(leftIndex)
+        path2 = self.sourceModel().filePath(rightIndex)
 
         folder1 = self.folderWidget().folderFromPath(path1)
         folder2 = self.folderWidget().folderFromPath(path2)
@@ -866,7 +866,7 @@ class SortFilterProxyModel(QtCore.QSortFilterProxyModel):
         :rtype: bool
         """
         index = self.sourceModel().index(sourceRow, 0, sourceParent)
-        path = str(self.sourceModel().filePath(index))
+        path = self.sourceModel().filePath(index)
         return self.sourceModel().isPathValid(path)
 
 

@@ -86,37 +86,6 @@ def themePresets():
     return themes
 
 
-class ThemesWidget(QtWidgets.QWidget):
-
-    themeClicked = QtCore.Signal(object)
-
-    def __init__(self, parent=None, themes=None):
-        """
-        :type parent: QtWidgets.QWidget
-        :type themes: list[Theme]
-        """
-        QtWidgets.QWidget.__init__(self, parent)
-
-        if not themes:
-            themes = themePresets()
-
-        layout = QtWidgets.QHBoxLayout(self)
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(layout)
-
-        for theme in themes:
-
-            color = theme.accentColor().toString()
-
-            themeWidget = QtWidgets.QPushButton(self)
-            themeWidget.setStyleSheet("background-color: " + color)
-
-            callback = partial(self.themeClicked.emit, theme)
-            themeWidget.clicked.connect(callback)
-            layout.addWidget(themeWidget)
-
-
 class ThemeAction(QtWidgets.QAction):
 
     def __init__(self, theme, *args):
@@ -179,7 +148,7 @@ def showThemesMenu(parent=None, themes=None):
     :rtype: QtWidgets.QAction
     """
     menu = ThemesMenu(themes=themes, parent=parent)
-    position = QGui.QCursor().pos()
+    position = QtWidgets.QCursor().pos()
     action = menu.exec_(position)
     return action
 
@@ -187,7 +156,7 @@ def showThemesMenu(parent=None, themes=None):
 class Theme(object):
 
     DEFAULT_ACCENT_COLOR = QtGui.QColor(0, 175, 255)
-    DEFAULT_BACKGROUND_COLOR = QtGui.QColor(70, 70, 70)
+    DEFAULT_BACKGROUND_COLOR = QtGui.QColor(70, 70, 80)
 
     def __init__(self):
 
@@ -281,18 +250,24 @@ class Theme(object):
 
     def accentColor(self):
         """
+        Return the accent color for the theme.
+
         :rtype: studioqt.Color
         """
         return self._accentColor
 
     def backgroundColor(self):
         """
+        Return the background color for the theme.
+
         :rtype: studioqt.Color
         """
         return self._backgroundColor
 
     def setAccentColor(self, color):
         """
+        Set the accent color for the theme.
+
         :type color: studioqt.Color | QtGui.QColor
         """
         if isinstance(color, basestring):
@@ -305,6 +280,8 @@ class Theme(object):
 
     def setBackgroundColor(self, color):
         """
+        Set the background color for the theme.
+
         :type color: studioqt.Color | QtGui.QColor
         """
         if isinstance(color, basestring):
@@ -317,6 +294,8 @@ class Theme(object):
 
     def browseAccentColor(self, parent=None):
         """
+        Show the color dialog to browser for a accent color.
+
         :type parent: QtWidgets.QWidget
         :rtype: None
         """
@@ -336,6 +315,8 @@ class Theme(object):
 
     def browseBackgroundColor(self, parent=None):
         """
+        Show the color dialog to browser for a background color.
+
         :type parent: QtWidgets.QWidget
         :rtype: None
         """
@@ -362,7 +343,7 @@ class Theme(object):
         accentColor = self.accentColor()
         backgroundColor = self.backgroundColor()
 
-        textWhite = studioqt.Color(255, 255, 255, 255)
+        textWhite = studioqt.Color(255, 255, 255, 200)
         backgroundWhite = studioqt.Color(255, 255, 255, 20)
 
         options = {
@@ -378,6 +359,7 @@ class Theme(object):
             "BACKGROUND_COLOR_G": str(backgroundColor.green()),
             "BACKGROUND_COLOR_B": str(backgroundColor.blue()),
 
+            # Item theme colors will be depricated soon.
             "ITEM_TEXT_COLOR": textWhite.toString(),
             "ITEM_TEXT_SELECTED_COLOR": textWhite.toString(),
 
@@ -399,22 +381,17 @@ class Theme(object):
         return styleSheet.data()
 
 
-def showExample():
+def example():
     """
-    Run a simple example of the widget.
+    Run a simple example of theme menu.
 
-    :rtype: QtWidgets.QWidget
+    :rtype: None
     """
-    def themeClicked(theme):
-        print theme
-
-    themesWidget = ThemesWidget()
-    themesWidget.themeClicked.connect(themeClicked)
-
-    themesWidget.show()
-    return themesWidget
+    themeAction = showThemesMenu()
+    print "Accent color:", themeAction.theme().accentColor()
+    print "Background color:", themeAction.theme().backgroundColor()
 
 
 if __name__ == "__main__":
     with studioqt.app():
-        w = showExample()
+        example()
