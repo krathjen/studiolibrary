@@ -85,22 +85,16 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         self.setWindowIcon(resource.icon("icon_black"))
 
         self._dpi = 1.0
-        self._compactView = False
-
-        self._pSize = None
-        self._pShow = None
         self._library = None
         self._isDebug = False
         self._isLocked = False
         self._isLoaded = False
-        self._showFolders = False
-        self._updateThread = None
         self._previewWidget = None
         self._loaderEnabled = True
         self._currentItem = None
-        self._recursiveSearchEnabled = self.RECURSIVE_SEARCH_ENABLED
 
         self._trashEnabled = self.TRASH_ENABLED
+        self._recursiveSearchEnabled = self.RECURSIVE_SEARCH_ENABLED
 
         self._itemsHiddenCount = 0
         self._itemsVisibleCount = 0
@@ -126,7 +120,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         self._statusWidget = studioqt.StatusWidget(self)
         self._menuBarWidget = studioqt.MenuBarWidget()
-
         self._foldersWidget = studioqt.FoldersWidget(self)
 
         self.setMinimumWidth(5)
@@ -138,32 +131,32 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         name = "New Item"
         icon = studioqt.icon("add")
-        tip = "Add a new item to the selected folder."
+        tip = "Add a new item to the selected folder"
         self.addMenuBarAction(name, icon, tip, callback=self.showNewMenu, side="Left")
 
         name = "Item View"
         icon = studioqt.icon("view_settings")
-        tip = "Change the style of the item view."
+        tip = "Change the style of the item view"
         self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
 
         name = "Group By"
         icon = studioqt.icon("groupby")
-        tip = "Group the items in the view by a column."
+        tip = "Group the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showGroupByMenu)
 
         name = "Sort By"
         icon = studioqt.icon("sortby")
-        tip = "Sort the items in the view by a column."
+        tip = "Sort the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showSortByMenu)
 
         name = "View"
         icon = studioqt.icon("view")
-        tip = "Choose to show/hide both the preview and navigation pane."
+        tip = "Choose to show/hide both the preview and navigation pane"
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
 
         name = "Settings"
         icon = studioqt.icon("settings")
-        tip = "Choose to show/hide both the preview and navigation pane."
+        tip = "Settings menu"
         self.addMenuBarAction(name, icon, tip, callback=self.showSettingsMenu)
 
         self._menuBarWidget.layout().insertWidget(1, self._searchWidget)
@@ -544,11 +537,8 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         for itemClass in studiolibrary.itemClasses():
 
-            action = itemClass.createAction(menu)
-
+            action = itemClass.createAction(menu, self)
             if action:
-                callback = partial(self.showCreateWidget, itemClass)
-                action.triggered.connect(callback)
                 menu.addAction(action)
 
         return menu
@@ -1063,10 +1053,18 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         return ignoreFilter
 
     def setPath(self, path):
+        """
+        Convenience method to set the root path for the library.
+
+        :type path: str
+        :rtype: None
+        """
         self.setRootPath(path)
 
     def setRootPath(self, path):
         """
+        Set the root path for the library.
+
         :type path: str
         :rtype: None
         """
@@ -1080,8 +1078,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         folderWidget.setFolderOrderIndex(trashPath, 0)
 
     def showSettingsDialog(self):
-        """
-        """
+        """Show the settings dialog for the current library."""
         return self.library().showSettingsDialog()
 
     # -----------------------------------------------------------------------
@@ -1261,16 +1258,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
     # Support for custom preview widgets
     # -----------------------------------------------------------------------
 
-    def showCreateWidget(self, itemClass):
-        """
-        Show the item create widget for a given item class.
-
-        :type itemClass: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        widget = itemClass.createWidget(self)
-        self.setCreateWidget(widget)
-
     def setCreateWidget(self, widget):
         """
         :type widget: QtWidgets.QWidget
@@ -1389,11 +1376,11 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         dpi = settings.get("dpi", 1.0)
         self.setDpi(dpi)
 
-        sizes = settings.get('sizes', [140, 280, 160])
+        sizes = settings.get('sizes', [140, 280, 180])
         if len(sizes) == 3:
             self.setSizes(sizes)
 
-        x, y, width, height = settings.get("geometry", [200, 200, 840, 680])
+        x, y, width, height = settings.get("geometry", [200, 200, 860, 680])
         self.parentX().setGeometry(x, y, width, height)
 
         # Make sure the window is on the screen.

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 MIN_TIME_LIMIT = -10000
 MAX_TIME_LIMIT = 100000
-MAYA_FILE_TYPE = "mayaAscii"
+DEFAULT_FILE_TYPE = "mayaBinary"  # "mayaAscii"
 
 
 class PasteOption:
@@ -519,6 +519,7 @@ class Animation(mutils.Pose):
             self.mayaPath(),
             i=True,
             groupLocator=True,
+            ignoreVersion=True,
             returnNewNodes=True,
             namespace=Animation.IMPORT_NAMESPACE,
         )
@@ -563,7 +564,7 @@ class Animation(mutils.Pose):
     @mutils.unifyUndo
     @mutils.showWaitCursor
     @mutils.restoreSelection
-    def save(self, path, time=None, bakeConnected=True, sampleBy=1):
+    def save(self, path, time=None, bakeConnected=True, sampleBy=1, fileType=None):
         """
         Save all animation data from the objects set on the Anim object.
 
@@ -573,6 +574,8 @@ class Animation(mutils.Pose):
         :type sampleBy: int
         """
         objects = self.objects().keys()
+
+        fileType = fileType or DEFAULT_FILE_TYPE
 
         if not time:
             time = mutils.animationFrameRange(objects)
@@ -653,14 +656,18 @@ class Animation(mutils.Pose):
                                 maya.cmds.cutKey(dstCurve, time=(end + 1, MAX_TIME_LIMIT))
                                 validAnimCurves.append(dstCurve)
 
-            mayaPath = os.path.join(path, "animation.mb")
+            fileName = "animation.ma"
+            if fileType == "mayaBinary":
+                fileName = "animation.mb"
+
+            mayaPath = os.path.join(path, fileName)
             posePath = os.path.join(path, "pose.json")
             mutils.Pose.save(self, posePath)
 
             if validAnimCurves:
                 maya.cmds.select(validAnimCurves)
                 logger.info("Saving animation: %s" % mayaPath)
-                maya.cmds.file(mayaPath, force=True, options='v=0', type="mayaBinary", uiConfiguration=False, exportSelected=True)
+                maya.cmds.file(mayaPath, force=True, options='v=0', type=fileType, uiConfiguration=False, exportSelected=True)
                 self.cleanMayaFile(mayaPath)
 
         finally:

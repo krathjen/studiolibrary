@@ -130,7 +130,7 @@ def currentFrameRange():
     start, end = selectedFrameRange()
 
     if end == start:
-        start, end = animationFrameRange()
+        start, end = selectedObjectsFrameRange()
         if start == end:
             start, end = playbackFrameRange()
 
@@ -158,7 +158,7 @@ def selectedFrameRange():
     return start, end
 
 
-def animationFrameRange(dagPaths=None):
+def selectedObjectsFrameRange(dagPaths=None):
     """
     :rtype : (int, int)
     """

@@ -238,6 +238,10 @@ def mayaWindow():
     return instance
 
 
+def isModifier():
+    return isAltModifier() or isControlModifier()
+
+
 def isAltModifier():
     """
 

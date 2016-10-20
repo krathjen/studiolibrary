@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>172</width>
-    <height>653</height>
+    <width>160</width>
+    <height>558</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>300</width>
+    <width>16777215</width>
     <height>16777215</height>
    </size>
   </property>
@@ -32,10 +32,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QComboBox, QLineEdit {
-	font-size: 16px;
-}
-</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -104,7 +101,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_14">
+    <layout class="QHBoxLayout" name="thumbnailLayout">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -115,26 +112,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="label_9">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>0</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QFrame" name="iconFrame_2">
+      <widget class="QFrame" name="thumbnailFrame">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -173,7 +151,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QToolButton" name="snapshotButton">
+         <widget class="QToolButton" name="thumbnailButton">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -215,8 +193,8 @@ background-color: rgb(254, 255, 230, 0);</string>
           </property>
           <property name="iconSize">
            <size>
-            <width>176</width>
-            <height>180</height>
+            <width>150</width>
+            <height>150</height>
            </size>
           </property>
           <property name="popupMode">
@@ -250,7 +228,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="maximumSize">
         <size>
-         <width>200</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -296,20 +274,20 @@ background-color: rgb(254, 255, 230, 0);</string>
         <bool>false</bool>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -328,7 +306,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-         <horstretch>0</horstretch>
+         <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
@@ -353,20 +331,20 @@ background-color: rgb(254, 255, 230, 0);</string>
         <bool>false</bool>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -385,7 +363,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-         <horstretch>0</horstretch>
+         <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
@@ -410,20 +388,20 @@ background-color: rgb(254, 255, 230, 0);</string>
         <bool>false</bool>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -442,7 +420,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-         <horstretch>0</horstretch>
+         <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
@@ -467,20 +445,20 @@ background-color: rgb(254, 255, 230, 0);</string>
         <bool>false</bool>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>2</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>16777215</width>
          <height>500</height>
         </size>
        </property>
@@ -499,7 +477,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
-         <horstretch>0</horstretch>
+         <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
@@ -545,20 +523,20 @@ background-color: rgb(254, 255, 230, 0);</string>
         <bool>false</bool>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>2</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>16777215</width>
          <height>500</height>
         </size>
        </property>
@@ -577,7 +555,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
+         <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
@@ -626,20 +604,20 @@ background-color: rgb(254, 255, 230, 0);</string>
         <bool>false</bool>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>2</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>16777215</width>
          <height>500</height>
         </size>
        </property>
@@ -658,7 +636,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
+         <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
@@ -705,7 +683,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="maximumSize">
         <size>
-         <width>200</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -750,15 +728,21 @@ background-color: rgb(254, 255, 230, 0);</string>
      </property>
      <item>
       <widget class="QLabel" name="label_20">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>42</width>
+         <width>40</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>42</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -775,6 +759,18 @@ background-color: rgb(254, 255, 230, 0);</string>
      </item>
      <item>
       <widget class="QCheckBox" name="mirrorAnimationCheckBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Animation</string>
        </property>
@@ -795,15 +791,21 @@ background-color: rgb(254, 255, 230, 0);</string>
        <property name="enabled">
         <bool>false</bool>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -816,51 +818,41 @@ background-color: rgb(254, 255, 230, 0);</string>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_17">
-       <property name="spacing">
-        <number>2</number>
+      <widget class="QComboBox" name="mirrorOptionComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="leftMargin">
-        <number>2</number>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
        </property>
        <item>
-        <widget class="QComboBox" name="mirrorOptionComboBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>24</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>1000</width>
-           <height>24</height>
-          </size>
-         </property>
-         <item>
-          <property name="text">
-           <string>swap</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>left to right</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>right to left</string>
-          </property>
-         </item>
-        </widget>
+        <property name="text">
+         <string>swap</string>
+        </property>
        </item>
-      </layout>
+       <item>
+        <property name="text">
+         <string>left to right</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>right to left</string>
+        </property>
+       </item>
+      </widget>
      </item>
     </layout>
    </item>
@@ -879,7 +871,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="maximumSize">
         <size>
-         <width>100</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -924,6 +916,12 @@ background-color: rgb(254, 255, 230, 0);</string>
      </property>
      <item>
       <widget class="QLabel" name="label_16">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>40</width>
@@ -932,7 +930,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -949,6 +947,18 @@ background-color: rgb(254, 255, 230, 0);</string>
      </item>
      <item>
       <widget class="QRadioButton" name="useFileNamespace">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>From file</string>
        </property>
@@ -969,6 +979,12 @@ background-color: rgb(254, 255, 230, 0);</string>
      </property>
      <item>
       <widget class="QLabel" name="label_17">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>40</width>
@@ -977,7 +993,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -994,6 +1010,18 @@ background-color: rgb(254, 255, 230, 0);</string>
      </item>
      <item>
       <widget class="QRadioButton" name="useSelectionNamespace">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>From selection</string>
        </property>
@@ -1014,6 +1042,12 @@ background-color: rgb(254, 255, 230, 0);</string>
      </property>
      <item>
       <widget class="QLabel" name="label_19">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>40</width>
@@ -1022,7 +1056,7 @@ background-color: rgb(254, 255, 230, 0);</string>
        </property>
        <property name="maximumSize">
         <size>
-         <width>40</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1039,6 +1073,18 @@ background-color: rgb(254, 255, 230, 0);</string>
      </item>
      <item>
       <widget class="QRadioButton" name="useCustomNamespace">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Use Custom</string>
        </property>
@@ -1048,6 +1094,12 @@ background-color: rgb(254, 255, 230, 0);</string>
    </item>
    <item>
     <widget class="QComboBox" name="namespaceComboBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="editable">
       <bool>true</bool>
      </property>

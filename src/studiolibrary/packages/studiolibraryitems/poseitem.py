@@ -43,6 +43,7 @@ item.load(objects=objects, namespaces=namespaces, key=True, mirror=False)
 
 import os
 import logging
+from functools import partial
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 import studioqt
@@ -80,41 +81,47 @@ class PoseItemSignals(QtCore.QObject):
 class PoseItem(transferitem.TransferItem):
 
     _poseItemSignals = PoseItemSignals()
-
     mirrorChanged = _poseItemSignals.mirrorChanged
 
-    @staticmethod
-    def typeIconPath():
-        """Return the location on disc to the type (extension) icon."""
+    @classmethod
+    def typeIconPath(cls):
+        """
+        Return the type icon path on disc.
+
+        :rtype: path
+        """
         return studiolibraryitems.resource().get("icons", "pose.png")
 
-    @staticmethod
-    def createAction(parent=None):
+    @classmethod
+    def createAction(cls, menu, libraryWidget):
         """
         Return the action to be displayed when the user clicks the "plus" icon.
 
-        :type parent: QtWidgets.QWidget or None
+        :type menu: QtWidgets.QMenu
+        :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtCore.QAction
         """
-        icon = QtGui.QIcon(PoseItem.typeIconPath())
-        action = QtWidgets.QAction(icon, "Pose", parent)
+        icon = QtGui.QIcon(cls.typeIconPath())
+        callback = partial(cls.showCreateWidget, libraryWidget)
+
+        action = QtWidgets.QAction(icon, "Pose", menu)
+        action.triggered.connect(callback)
+
         return action
 
     @staticmethod
-    def createWidget(libraryWidget):
+    def showCreateWidget(libraryWidget):
         """
-        Return the widget for creating a new pose item.
+        Show the widget for creating a new pose item.
 
         :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: PoseCreateWidget
         """
-        item = PoseItem()
-        widget = PoseCreateWidget(item=item, parent=None)
-
+        widget = PoseCreateWidget()
+        widget.folderFrame().hide()
         widget.setFolderPath(libraryWidget.selectedFolderPath())
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
-        return widget
+        libraryWidget.setCreateWidget(widget)
+        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -382,9 +389,11 @@ class PoseItem(transferitem.TransferItem):
 
 
 class PoseCreateWidget(transferitem.CreateWidget):
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, item=None, parent=None):
         """"""
-        transferitem.CreateWidget.__init__(self, *args, **kwargs)
+        item = item or PoseItem()
+        transferitem.CreateWidget.__init__(self, item, parent=parent)
 
 
 class PosePreviewWidget(transferitem.PreviewWidget):

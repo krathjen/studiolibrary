@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>160</width>
-    <height>494</height>
+    <height>543</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,12 +24,12 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>300</width>
+    <width>16777215</width>
     <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Create Item</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit, QPlainTextEdit {
@@ -106,33 +106,45 @@ background-color: rgb(254, 255, 230, 200);
      <property name="spacing">
       <number>0</number>
      </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
      <property name="bottomMargin">
       <number>0</number>
      </property>
      <item>
-      <widget class="QFrame" name="frame_11">
+      <widget class="QFrame" name="thumbnailFrame">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>16777215</width>
-         <height>16777215</height>
+         <width>150</width>
+         <height>150</height>
         </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
        <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
+        <enum>QFrame::Plain</enum>
        </property>
        <property name="lineWidth">
         <number>0</number>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_15">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -140,11 +152,20 @@ background-color: rgb(254, 255, 230, 200);
          <number>0</number>
         </property>
         <item>
-         <widget class="QToolButton" name="snapshotButton">
+         <widget class="QToolButton" name="thumbnailButton">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>150</width>
-            <height>150</height>
+            <width>0</width>
+            <height>0</height>
            </size>
           </property>
           <property name="maximumSize">
@@ -154,13 +175,10 @@ background-color: rgb(254, 255, 230, 200);
            </size>
           </property>
           <property name="toolTip">
-           <string>Click to take a snapshot of the selected model view.</string>
+           <string>Take snapshot</string>
           </property>
-          <property name="statusTip">
-           <string>Click to take a snapshot of the selected model view.</string>
-          </property>
-          <property name="whatsThis">
-           <string/>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
           </property>
           <property name="styleSheet">
            <string notr="true">color: rgb(40, 40, 40);
@@ -176,8 +194,8 @@ background-color: rgb(254, 255, 230, 200);</string>
           </property>
           <property name="iconSize">
            <size>
-            <width>160</width>
-            <height>160</height>
+            <width>150</width>
+            <height>150</height>
            </size>
           </property>
           <property name="popupMode">
@@ -199,13 +217,19 @@ background-color: rgb(254, 255, 230, 200);</string>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
-      <number>2</number>
+      <number>4</number>
      </property>
      <item>
       <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>55</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
@@ -220,21 +244,21 @@ background-color: rgb(254, 255, 230, 200);</string>
      <item>
       <widget class="QLineEdit" name="name">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>80</width>
-         <height>22</height>
+         <width>0</width>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>22</height>
+         <height>16777215</height>
         </size>
        </property>
        <property name="styleSheet">
@@ -245,9 +269,185 @@ background-color: rgb(254, 255, 230, 200);</string>
     </layout>
    </item>
    <item>
+    <widget class="QFrame" name="folderFrame">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>2</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>70</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Folder</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame_3">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>4</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLineEdit" name="folderEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>5</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="browseFolderButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>File Type</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fileTypeComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>mayaBinary: Faster and can be used with unknow nodes.
+mayaAscii: Slower but can be nice for debugging.</string>
+       </property>
+       <property name="frame">
+        <bool>true</bool>
+       </property>
+       <item>
+        <property name="text">
+         <string>mayaBinary</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>mayaAscii</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_31">
      <property name="spacing">
-      <number>2</number>
+      <number>4</number>
      </property>
      <property name="topMargin">
       <number>0</number>
@@ -257,96 +457,26 @@ background-color: rgb(254, 255, 230, 200);</string>
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>55</width>
+         <width>70</width>
          <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>55</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Start fame</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="startFrameEdit">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>22</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>22</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="setStartFrameButton">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>30</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Sets the start frame to the current time.</string>
-       </property>
-       <property name="text">
-        <string>&lt;&lt;</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_32">
-     <property name="spacing">
-      <number>2</number>
-     </property>
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="scene_dur_start_label_4">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>55</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>55</width>
          <height>16777215</height>
         </size>
        </property>
        <property name="text">
-        <string>End fame</string>
+        <string>Frame Range</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -354,38 +484,108 @@ background-color: rgb(254, 255, 230, 200);</string>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="endFrameEdit">
+      <widget class="QFrame" name="frame_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
-         <height>22</height>
+         <width>10</width>
+         <height>0</height>
         </size>
        </property>
-       <property name="styleSheet">
-        <string notr="true"/>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="setEndFrameButton">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>24</height>
-        </size>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>30</width>
-         <height>24</height>
-        </size>
+       <property name="lineWidth">
+        <number>0</number>
        </property>
-       <property name="toolTip">
-        <string>Sets the end frame to the current time.</string>
-       </property>
-       <property name="text">
-        <string>&lt;&lt;</string>
-       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLineEdit" name="startFrameEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>5</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="endFrameEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>5</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="frameRangeButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>2</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Show the frame range menu.</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -393,7 +593,7 @@ background-color: rgb(254, 255, 230, 200);</string>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_33">
      <property name="spacing">
-      <number>2</number>
+      <number>4</number>
      </property>
      <property name="topMargin">
       <number>0</number>
@@ -403,15 +603,21 @@ background-color: rgb(254, 255, 230, 200);</string>
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>55</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>55</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -425,16 +631,22 @@ background-color: rgb(254, 255, 230, 200);</string>
      </item>
      <item>
       <widget class="QLineEdit" name="byFrameEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>22</height>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>22</height>
+         <height>16777215</height>
         </size>
        </property>
        <property name="toolTip">
@@ -457,7 +669,7 @@ eg: If the &quot;By frame&quot; is set to 2 it will playblast every second frame
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_21">
      <property name="spacing">
-      <number>2</number>
+      <number>4</number>
      </property>
      <property name="leftMargin">
       <number>0</number>
@@ -467,15 +679,21 @@ eg: If the &quot;By frame&quot; is set to 2 it will playblast every second frame
      </property>
      <item>
       <widget class="QLabel" name="label_20">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>45</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>45</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -492,10 +710,16 @@ eg: If the &quot;By frame&quot; is set to 2 it will playblast every second frame
      </item>
      <item>
       <widget class="QCheckBox" name="bakeCheckBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>19</height>
+         <height>24</height>
         </size>
        </property>
        <property name="text">
@@ -524,15 +748,21 @@ eg: If the &quot;By frame&quot; is set to 2 it will playblast every second frame
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
-         <width>55</width>
-         <height>0</height>
+         <width>70</width>
+         <height>20</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>55</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -540,7 +770,7 @@ eg: If the &quot;By frame&quot; is set to 2 it will playblast every second frame
         <string>Contains</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -549,17 +779,23 @@ eg: If the &quot;By frame&quot; is set to 2 it will playblast every second frame
        <property name="enabled">
         <bool>false</bool>
        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>4</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>15</height>
+         <height>20</height>
         </size>
        </property>
        <property name="text">
         <string/>
        </property>
        <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>

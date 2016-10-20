@@ -44,8 +44,10 @@ def selectContentAction(item, parent=None):
     return action
 
 
-def show(path, **kwargs):
+def showSetsMenu(path, **kwargs):
     """
+    Show the frame range menu at the current cursor position.
+
     :type path: str
     :rtype: QtWidgets.QAction
     """

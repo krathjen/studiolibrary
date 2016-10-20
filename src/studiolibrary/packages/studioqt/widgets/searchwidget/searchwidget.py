@@ -37,13 +37,20 @@ class SearchWidget(QtWidgets.QLineEdit):
     def __init__(self, *args):
         QtWidgets.QLineEdit.__init__(self, *args)
 
-        self._iconPadding = 4
+        self._iconPadding = 6
         self._iconButton = QtWidgets.QPushButton(self)
         self._iconButton.clicked.connect(self._iconClicked)
         self._searchFilter = studioqt.SearchFilter("")
 
         icon = studioqt.icon("search")
         self.setIcon(icon)
+
+        self._clearButton = QtWidgets.QPushButton(self)
+        self._clearButton.setCursor(QtCore.Qt.ArrowCursor)
+        icon = studioqt.icon("cross")
+        self._clearButton.setIcon(icon)
+        self._clearButton.setToolTip("Clear all search text")
+        self._clearButton.clicked.connect(self._clearClicked)
 
         self.setPlaceholderText(self.DEFAULT_PLACEHOLDER_TEXT)
 
@@ -54,11 +61,35 @@ class SearchWidget(QtWidgets.QLineEdit):
 
     def update(self):
         self.updateIconColor()
+        self.updateClearButton()
 
     def updateIconColor(self):
+        """
+        Update the color of the icons from the current palette.
+
+        :rtype: None
+        """
         color = self.palette().color(self.foregroundRole())
         color = studioqt.Color.fromColor(color)
         self.setIconColor(color)
+
+    def _clearClicked(self):
+        """
+        Triggered when the user clicks the cross icon.
+
+        :rtype: None
+        """
+        self.setText("")
+        self.setFocus()
+
+    def _iconClicked(self):
+        """
+        Triggered when the user clicks on the icon.
+
+        :rtype: None
+        """
+        if not self.hasFocus():
+            self.setFocus()
 
     def _textChanged(self, text):
         """
@@ -68,6 +99,19 @@ class SearchWidget(QtWidgets.QLineEdit):
         :rtype: None
         """
         self.searchFilter().setPattern(text)
+        self.updateClearButton()
+
+    def updateClearButton(self):
+        """
+        Update the clear button depending on the current text.
+
+        :rtype: None
+        """
+        text = self.text()
+        if text:
+            self._clearButton.show()
+        else:
+            self._clearButton.hide()
 
     def contextMenuEvent(self, event):
         """
@@ -155,15 +199,6 @@ class SearchWidget(QtWidgets.QLineEdit):
         """
         return self._searchFilter
 
-    def _iconClicked(self):
-        """
-        Triggered when the user clicks on the icon.
-
-        :rtype: None
-        """
-        if not self.hasFocus():
-            self.setFocus()
-
     def setIcon(self, icon):
         """
         Set the icon for the search widget.
@@ -184,6 +219,11 @@ class SearchWidget(QtWidgets.QLineEdit):
         icon = studioqt.Icon(icon)
         icon.setColor(color)
         self._iconButton.setIcon(icon)
+
+        icon = self._clearButton.icon()
+        icon = studioqt.Icon(icon)
+        icon.setColor(color)
+        self._clearButton.setIcon(icon)
 
     def settings(self):
         """
@@ -223,6 +263,11 @@ class SearchWidget(QtWidgets.QLineEdit):
 
         self._iconButton.setIconSize(size)
         self._iconButton.setFixedSize(size)
+
+        self._clearButton.setIconSize(size)
+
+        x = self.width() - self.height()
+        self._clearButton.setGeometry(x, 0, self.height(), self.height())
 
 
 def showExample():

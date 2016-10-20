@@ -108,6 +108,7 @@ def main():
 
 
 if __name__ == "__main__":
+
     import studioqt
 
     # The app context is used to check if a QApplication instance is running.

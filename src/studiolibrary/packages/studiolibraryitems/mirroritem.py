@@ -45,6 +45,7 @@ item.load(objects=objects, namespaces=namespaces, animation=True, time=None)
 
 import os
 import logging
+from functools import partial
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 from studioqt import QtGui
@@ -71,38 +72,45 @@ MirrorOption = mutils.MirrorOption
 
 class MirrorItem(transferitem.TransferItem):
 
-    @staticmethod
-    def typeIconPath():
-        """Return the location on disc to the type (extension) icon."""
-        return studiolibraryitems.resource().get("icons", "mirrortable.png")
+    @classmethod
+    def typeIconPath(cls):
+        """
+        Return the type icon path to be displayed on the thumbnail.
 
-    @staticmethod
-    def createAction(parent):
+        :rtype: path
+        """
+        return studiolibraryitems.resource().get("icons", "mirrorTable.png")
+
+    @classmethod
+    def createAction(cls, menu, libraryWidget):
         """
         Return the action to be displayed when the user clicks the "plus" icon.
 
-        :type parent: QtWidgets.QWidget or None
+        :type menu: QtWidgets.QMenu
+        :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtCore.QAction
         """
-        icon = QtGui.QIcon(MirrorItem.typeIconPath())
-        action = QtWidgets.QAction(icon, "Mirror Table", parent)
+        icon = QtGui.QIcon(cls.typeIconPath())
+        callback = partial(cls.showCreateWidget, libraryWidget)
+
+        action = QtWidgets.QAction(icon, "Mirror Table", menu)
+        action.triggered.connect(callback)
+
         return action
 
     @staticmethod
-    def createWidget(libraryWidget):
+    def showCreateWidget(libraryWidget):
         """
-        Return the widget for creating a new mirror item.
+        Show the widget for creating a new anim item.
 
         :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: MirrorCreateWidget
         """
-        item = MirrorItem()
-        widget = MirrorCreateWidget(item=item)
-
+        widget = MirrorCreateWidget()
+        widget.folderFrame().hide()
         widget.setFolderPath(libraryWidget.selectedFolderPath())
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
-        return widget
+        libraryWidget.setCreateWidget(widget)
+        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -189,12 +197,13 @@ class MirrorItem(transferitem.TransferItem):
 
 class MirrorCreateWidget(transferitem.CreateWidget):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, item=None, parent=None):
         """
         :type parent: QtWidgets.QWidget
         :type item: MirrorItem
         """
-        transferitem.CreateWidget.__init__(self, *args, **kwargs)
+        item = item or MirrorItem()
+        transferitem.CreateWidget.__init__(self, item, parent=parent)
 
     def leftText(self):
         """

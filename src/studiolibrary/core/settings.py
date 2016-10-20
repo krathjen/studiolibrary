@@ -29,33 +29,35 @@ class Settings(metafile.MetaFile):
     DEFAULT_PATH = os.getenv('APPDATA') or os.getenv('HOME')
 
     @classmethod
-    def instance(cls, scope, name):
+    def instance(cls, *args):
         """
-        :type scope: str
-        :type name: str
+        Return the settings instance for the given scope.
+
+        :type args: list[str]
         :rtype: Settings
         """
-        key = scope + "/" + name
+        key = "/".join(args)
 
         if key not in cls._instances:
-            cls._instances[key] = cls(scope, name)
+            cls._instances[key] = cls(*args)
 
         return cls._instances[key]
 
-    def __init__(self, scope, name):
+    def __init__(self, *args):
         """
-        :type scope: str
-        :type name: str
+        :type args: list[str]
         """
         self._path = None
-        self._name = name
-        self._scope = scope
+        self._args = args
         metafile.MetaFile.__init__(self, "")
 
     def path(self):
         """
+        Return the path.
+
         :rtype: str
         """
         if not self._path:
-            self._path = os.path.join(Settings.DEFAULT_PATH, self._scope, self._name + ".json")
+            scope = os.path.join(*self._args)
+            self._path = os.path.join(Settings.DEFAULT_PATH, scope + ".json")
         return self._path

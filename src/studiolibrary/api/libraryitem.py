@@ -17,6 +17,7 @@
 import os
 import shutil
 import logging
+from functools import partial
 
 import studiolibrary
 
@@ -53,7 +54,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
     # The meta path is still named record.json and camel case for legacy.
     META_PATH = "{path}/.studioLibrary/record.json"
-    TYPE_ICON_PATH = None
 
     _libraryItemSignals = LibraryItemSignals()
 
@@ -61,23 +61,22 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     saving = _libraryItemSignals.saving
     loaded = _libraryItemSignals.loaded
 
-    @staticmethod
-    def createAction(parent):
+    def typeIconPath(self):
         """
-        Reimplement to display the action in the new items menu (plus icon).
+        Return the type icon path on disc.
 
-        :type parent: QtWidgets.QWidget or None
-        :rtype: QtCore.QAction
+        :rtype: path or None
         """
         pass
 
-    @staticmethod
-    def createWidget(libraryWidget):
+    @classmethod
+    def createAction(cls, menu, libraryWidget):
         """
-        Reimplement to show a create widget for the item.
+        Return the action to be displayed when the user clicks the "plus" icon.
 
+        :type menu: QtWidgets.QMenu
         :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtWidgets.QWidget
+        :rtype: QtCore.QAction or None
         """
         pass
 
@@ -100,7 +99,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self._metaFile = None
         self._iconPath = None
         self._typePixmap = None
-        self._typeIconPath = self.TYPE_ICON_PATH
 
         if library:
             self.setLibrary(library)
@@ -114,7 +112,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         :rtype: studiolibrary.Settings
         """
-        return studiolibrary.Settings.instance("StudioLibrary/Items", self.__class__.__name__)
+        return studiolibrary.Settings.instance("StudioLibrary", "Items", self.__class__.__name__)
 
     def thumbnailPath(self):
         """
@@ -446,22 +444,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     # -----------------------------------------------------------------
     # Support for painting the type icon
     # -----------------------------------------------------------------
-
-    def setTypeIconPath(self, path):
-        """
-        Set the type icon path on disc.
-
-        :rtype: path
-        """
-        self._typeIconPath = path
-
-    def typeIconPath(self):
-        """
-        Return the type icon path on disc.
-
-        :rtype: path
-        """
-        return self._typeIconPath
 
     def typePixmap(self):
         """

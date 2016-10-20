@@ -13,7 +13,6 @@
 # ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
 """
 #---------------------------------------------------------------------------
 # Saving an anim item
@@ -50,6 +49,7 @@ item.load(
 import os
 import shutil
 import logging
+from functools import partial
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 from studioqt import QtGui
@@ -76,8 +76,9 @@ __all__ = [
     "AnimationItemError",
 ]
 
-
 logger = logging.getLogger(__name__)
+
+DEFAULT_FILE_TYPE = "mayaBinary"
 
 
 class AnimItemError(Exception):
@@ -90,43 +91,73 @@ class ValidateAnimError(AnimItemError):
     """Raised when there is an invalid animation option"""
 
 
+def animSettings():
+    """
+    Return the local settings for importing and exporting an animation.
+
+    :rtype: studiolibrary.Settings
+    """
+    folders = "StudioLibrary", "Items", "AnimSettings"
+    settings = studiolibrary.Settings.instance(*folders)
+
+    settings.setdefault('byFrame', 1)
+    settings.setdefault('fileType', DEFAULT_FILE_TYPE)
+    settings.setdefault('currentTime', False)
+    settings.setdefault('byFrameDialog', True)
+    settings.setdefault('connectOption', False)
+    settings.setdefault('showHelpImage', False)
+    settings.setdefault('pasteOption', "replace")
+
+    return settings
+
+
 class AnimItem(transferitem.TransferItem):
 
-    @staticmethod
-    def typeIconPath():
-        """Return the location on disc to the type (extension) icon."""
+    @classmethod
+    def typeIconPath(cls):
+        """
+        Return the icon path to be displayed in thumbnail top left corner.
+
+        :rtype: path
+        """
         return studiolibraryitems.resource().get("icons", "animation.png")
 
-    @staticmethod
-    def createAction(parent):
+    @classmethod
+    def createAction(cls, menu, libraryWidget):
         """
         Return the action to be displayed when the user clicks the "plus" icon.
 
-        :type parent: QtWidgets.QWidget or None
+        :type menu: QtWidgets.QMenu
+        :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtCore.QAction
         """
-        icon = QtGui.QIcon(AnimItem.typeIconPath())
-        action = QtWidgets.QAction(icon, "Animation", parent)
+        icon = QtGui.QIcon(cls.typeIconPath())
+        callback = partial(cls.showCreateWidget, libraryWidget)
+
+        action = QtWidgets.QAction(icon, "Animation", menu)
+        action.triggered.connect(callback)
+
         return action
 
     @staticmethod
-    def createWidget(libraryWidget):
+    def showCreateWidget(libraryWidget):
         """
-        Return the widget for creating a new anim item.
+        Show the widget for creating a new anim item.
 
         :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: AnimCreateWidget
         """
-        item = AnimItem()
-        widget = AnimCreateWidget(item=item, parent=None)
-
+        widget = AnimCreateWidget()
+        widget.folderFrame().hide()
         widget.setFolderPath(libraryWidget.selectedFolderPath())
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
-        return widget
+        libraryWidget.setCreateWidget(widget)
+        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
+        Create a new instance of the anim item from the given path.
+
+        :type path: str
         :type args: list
         :type kwargs: dict
         """
@@ -136,6 +167,17 @@ class AnimItem(transferitem.TransferItem):
 
         self.setTransferClass(mutils.Animation)
         self.setTransferBasename("")
+
+    def previewWidget(self, libraryWidget):
+        """
+        Return the widget to be shown when the user clicks on the item.
+
+        :type libraryWidget: studiolibrary.LibraryWidget
+        :rtype: AnimationPreviewWidget
+        """
+        items = libraryWidget.selectedItems()
+        self.setItems(items)
+        return AnimPreviewWidget(parent=None, item=self)
 
     def imageSequencePath(self):
         """
@@ -151,37 +193,17 @@ class AnimItem(transferitem.TransferItem):
 
         :rtype: studiolibrary.Settings
         """
-        settings = transferitem.TransferItem.settings(self)
-
-        settings.setdefault('byFrame', 1)
-        settings.setdefault('currentTime', False)
-        settings.setdefault('byFrameDialog', True)
-        settings.setdefault('connectOption', False)
-        settings.setdefault('showHelpImage', False)
-        settings.setdefault('pasteOption', "replace")
-
-        return settings
-
-    def previewWidget(self, libraryWidget):
-        """
-        Return the widget to be shown when the user clicks on the item.
-
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: AnimationPreviewWidget
-        """
-        items = libraryWidget.selectedItems()
-        self.setItems(items)
-        return AnimPreviewWidget(parent=None, item=self)
+        return animSettings()
 
     def items(self):
         """
-        :rtype: list[AnimationItem]
+        :rtype: list[AnimItem]
         """
         return self._items
 
     def setItems(self, items):
         """
-        :type items: list[AnimationItem]
+        :type items: list[AnimItem]
         """
         self._items = items
 
@@ -200,7 +222,7 @@ class AnimItem(transferitem.TransferItem):
             return self.transferObject().endFrame()
 
     def doubleClicked(self):
-        """Overriding this method to load the item on double click."""
+        """Overriding this method to load the animation on double click."""
         self.loadFromSettings()
 
     def loadFromSettings(self, sourceStart=None, sourceEnd=None):
@@ -304,6 +326,7 @@ class AnimItem(transferitem.TransferItem):
         path=None,
         contents=None,
         iconPath=None,
+        fileType=None,
         startFrame=None,
         endFrame=None,
         bakeConnected=False
@@ -327,7 +350,7 @@ class AnimItem(transferitem.TransferItem):
         tempPath = tempDir.path() + "/transfer.anim"
 
         t = self.transferClass().fromObjects(objects)
-        t.save(tempPath, time=[startFrame, endFrame], bakeConnected=bakeConnected)
+        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType, bakeConnected=bakeConnected)
 
         if iconPath:
             contents.append(iconPath)
@@ -341,24 +364,32 @@ class AnimItem(transferitem.TransferItem):
 
 class AnimCreateWidget(transferitem.CreateWidget):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, item=None, parent=None):
         """
         :type args: list
         :type kwargs: dict
         """
-        transferitem.CreateWidget.__init__(self, *args, **kwargs)
+        item = item or AnimItem()
+        transferitem.CreateWidget.__init__(self, item, parent=parent)
 
         self._sequencePath = None
-        start, end = mutils.currentFrameRange()
+
+        try:
+            start, end = (1, 100)
+            start, end = mutils.currentFrameRange()
+        except NameError, e:
+            logger.exception(e)
 
         self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
+        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
+        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
 
-        icon = studiolibraryitems.resource().icon("thumbnail")
+        icon = studiolibraryitems.resource().icon("thumbnail2")
         self.ui.sequenceWidget.setIcon(icon)
 
-        self.ui.layout().insertWidget(1, self.ui.sequenceWidget)
-        self.ui.snapshotButton.parent().hide()
-        self.ui.sequenceWidget.setStyleSheet(self.ui.snapshotButton.styleSheet())
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+        self.ui.thumbnailButton.hide()
+        self.ui.thumbnailButton = self.ui.sequenceWidget
 
         validator = QtGui.QIntValidator(-50000000, 50000000, self)
         self.ui.endFrameEdit.setValidator(validator)
@@ -368,20 +399,33 @@ class AnimCreateWidget(transferitem.CreateWidget):
         self.ui.startFrameEdit.setText(str(int(start)))
 
         self.ui.byFrameEdit.setValidator(QtGui.QIntValidator(1, 1000, self))
-        self.ui.byFrameEdit.setText(str(self.settings().get("byFrame")))
 
-        self.ui.sequenceWidget.clicked.connect(self.snapshot)
-        self.ui.setEndFrameButton.clicked.connect(self.setEndFrame)
-        self.ui.setStartFrameButton.clicked.connect(self.setStartFrame)
+        self.ui.sequenceWidget.clicked.connect(self.thumbnailCapture)
+        self.ui.frameRangeButton.clicked.connect(self.showFrameRangeMenu)
+
+        settings = animSettings()
+
+        byFrame = settings.get("byFrame")
+        self.setByFrame(byFrame)
+
+        fileType = settings.get("fileType")
+        self.setFileType(fileType)
+
+        self.ui.byFrameEdit.textChanged.connect(self.stateChanged)
+        self.ui.fileTypeComboBox.currentIndexChanged.connect(self.stateChanged)
 
     def sequencePath(self):
         """
+        Return the playblast path.
+
         :rtype: str
         """
         return self._sequencePath
 
     def startFrame(self):
         """
+        Return the start frame that will be exported.
+
         :rtype: int | None
         """
         try:
@@ -391,6 +435,8 @@ class AnimCreateWidget(transferitem.CreateWidget):
 
     def endFrame(self):
         """
+        Return the end frame that will be exported.
+
         :rtype: int | None
         """
         try:
@@ -400,40 +446,97 @@ class AnimCreateWidget(transferitem.CreateWidget):
 
     def duration(self):
         """
+        Return the duration of the animation that will be exported.
+
         :rtype: int
         """
         return self.endFrame() - self.startFrame()
 
     def byFrame(self):
         """
+        Return the by frame for the playblast.
+
         :rtype: int
         """
         return int(float(self.ui.byFrameEdit.text()))
 
-    def close(self):
+    def setByFrame(self, byFrame):
         """
+        Set the by frame for the playblast.
+
+        :type byFrame: int or str
         :rtype: None
         """
+        self.ui.byFrameEdit.setText(str(byFrame))
+
+    def fileType(self):
+        """
+        Return the file type for the animation.
+
+        :rtype: str
+        """
+        return self.ui.fileTypeComboBox.currentText()
+
+    def setFileType(self, fileType):
+        """
+        Set the file type for the animation.
+
+        :type fileType: str
+        """
+        fileTypeIndex = self.ui.fileTypeComboBox.findText(fileType)
+        if fileTypeIndex:
+            self.ui.fileTypeComboBox.setCurrentIndex(fileTypeIndex)
+
+    def stateChanged(self, value):
+        """Triggered when either the fileType or byFrame has changed."""
         self.settings().set("byFrame", self.byFrame())
+        self.settings().set("fileType", self.fileType())
         self.settings().save()
-        transferitem.CreateWidget.close(self)
 
-    def setEndFrame(self):
+    def showFrameRangeMenu(self):
         """
+        Show the frame range menu at the current cursor location.
+
         :rtype: None
         """
-        start, end = mutils.selectedFrameRange()
-        self.ui.endFrameEdit.setText(str(end))
+        action = mutils.gui.showFrameRangeMenu()
+        if action:
+            self.setFrameRange(action.frameRange())
 
-    def setStartFrame(self):
+    def setFrameRange(self, frameRange):
         """
-        :rtype: None
+        Set the frame range for the animation to be exported.
+
+        :type frameRange: (int, int)
         """
-        start, end = mutils.selectedFrameRange()
-        self.ui.startFrameEdit.setText(str(start))
+        start, end = frameRange
+
+        if start == end:
+            end += 1
+
+        self.setStartFrame(start)
+        self.setEndFrame(end)
+
+    def setEndFrame(self, frame):
+        """
+        Set the end frame range for the animation to be exported.
+
+        :type frame: int or str
+        """
+        self.ui.endFrameEdit.setText(str(int(frame)))
+
+    def setStartFrame(self, frame):
+        """
+        Set the start frame range for the animation to be exported.
+
+        :type frame: int or str
+        """
+        self.ui.startFrameEdit.setText(str(int(frame)))
 
     def showByFrameDialog(self):
         """
+        Show the by frame dialog.
+
         :rtype: None
         """
         msg = """To help speed up the playblast you can set the "by frame" to a number greater than 1. \
@@ -444,14 +547,14 @@ Would you like to show this message again?"""
         if self.settings().get("byFrameDialog") and self.duration() > 100 and self.byFrame() == 1:
 
             buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-            result = studioqt.MessageBox.question(self, "Snapshot tip", msg, buttons)
+            result = studioqt.MessageBox.question(self, "Tip", msg, buttons)
 
             if result == QtWidgets.QMessageBox.Cancel:
                 raise Exception("Cancelled!")
             elif result == QtWidgets.QMessageBox.No:
                 self.settings().set("byFrameDialog", False)
 
-    def _captured(self, playblastPath):
+    def _thumbnailCaptured(self, playblastPath):
         """
         Triggered when the user captures a thumbnail/playblast.
 
@@ -464,9 +567,9 @@ Would you like to show this message again?"""
         self.setIconPath(thumbnailPath)
         self.setSequencePath(playblastPath)
 
-    def snapshot(self):
+    def thumbnailCapture(self):
         """
-        :raise: AnimationItemError
+        :raise: AnimItemError
         """
         startFrame, endFrame = mutils.selectedFrameRange()
         if startFrame == endFrame:
@@ -474,7 +577,9 @@ Would you like to show this message again?"""
             endFrame = self.endFrame()
             startFrame = self.startFrame()
 
-        self.showByFrameDialog()
+        # Ignore the by frame dialog when the control modifier is pressed.
+        if not studioqt.isControlModifier():
+            self.showByFrameDialog()
 
         try:
             step = self.byFrame()
@@ -486,11 +591,11 @@ Would you like to show this message again?"""
                 endFrame=endFrame,
                 step=step,
                 clearCache=True,
-                captured=self._captured,
+                captured=self._thumbnailCaptured,
             )
 
         except Exception, msg:
-            title = "Error while taking snapshot"
+            title = "Error while capturing thumbnail"
             QtWidgets.QMessageBox.critical(None, title, str(msg))
             raise
 
@@ -521,6 +626,7 @@ Would you like to show this message again?"""
         contents = None
         endFrame = self.endFrame()
         startFrame = self.startFrame()
+        fileType = self.ui.fileTypeComboBox.currentText()
         bakeConnected = int(self.ui.bakeCheckBox.isChecked())
 
         item = self.item()
@@ -536,6 +642,7 @@ Would you like to show this message again?"""
             objects=objects,
             contents=contents,
             iconPath=iconPath,
+            fileType=fileType,
             endFrame=endFrame,
             startFrame=startFrame,
             bakeConnected=bakeConnected
@@ -546,7 +653,7 @@ class AnimPreviewWidget(transferitem.PreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
-        :type item: AnimationItem
+        :type item: AnimItem
         :type libraryWidget: studiolibrary.LibraryWidget
         """
         transferitem.PreviewWidget.__init__(self, *args, **kwargs)
@@ -562,7 +669,7 @@ class AnimPreviewWidget(transferitem.PreviewWidget):
 
     def setItem(self, item):
         """
-        :type item: AnimationItem
+        :type item: AnimItem
         :rtype: None
         """
         transferitem.PreviewWidget.setItem(self, item)
@@ -577,7 +684,7 @@ class AnimPreviewWidget(transferitem.PreviewWidget):
 
     def setItems(self, items):
         """
-        :rtype: list[AnimationItem]
+        :rtype: list[AnimItem]
         """
         self._items = items
 

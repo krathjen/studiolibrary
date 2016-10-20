@@ -318,7 +318,8 @@ QComboBox::drop-down {
 QComboBox, QLineEdit, QComboBox QAbstractItemView:item {
 	height: 25px;
 	padding: 0 4px;
-	/*font-size: 11pt;*/
+	/*font-size: 14px;*/
+	font-size: 10pt;
 	border-radius: 0px;
 	background-color: rgb(255, 255, 255, 15);
 	border-bottom: 0px solid rgb(255, 255, 255, 50);
@@ -425,7 +426,7 @@ SearchWidget:focus {
 
 SearchWidget QLabel {
 	border: 0px;
-	color: rgb(255, 255, 255, 240);
+	color: rgb(255, 255, 255, 250);
 }
 
 SearchWidget QPushButton, SearchWidget QPushButton:hover {

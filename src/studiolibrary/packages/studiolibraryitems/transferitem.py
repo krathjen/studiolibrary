@@ -488,6 +488,28 @@ class BaseWidget(QtWidgets.QWidget):
         except NameError, msg:
             logger.exception(msg)
 
+        self.updateThumbnailSize()
+
+    def resizeEvent(self, event):
+        """
+        Overriding to adjust the image size when the widget changes size.
+
+        :type event: QtCore.QSizeEvent
+        """
+        self.updateThumbnailSize()
+
+    def updateThumbnailSize(self):
+
+        if hasattr(self.ui, "thumbnailButton"):
+            width = self.width() - 10
+            if width > 250:
+                width = 250
+
+            size = QtCore.QSize(width, width)
+            self.ui.thumbnailButton.setIconSize(size)
+            self.ui.thumbnailButton.setMaximumSize(size)
+            self.ui.thumbnailFrame.setMaximumSize(size)
+
     def enableScriptJob(self):
         """
         :rtype: None
@@ -516,11 +538,6 @@ class BaseWidget(QtWidgets.QWidget):
 
         if hasattr(self.ui, "contains"):
             self.updateContains()
-
-        if hasattr(self.ui, 'snapshotButton'):
-            path = item.thumbnailPath()
-            if os.path.exists(path):
-                self.setIconPath(path)
 
         ctime = item.ctime()
         if hasattr(self.ui, 'created') and ctime:
@@ -571,14 +588,15 @@ class BaseWidget(QtWidgets.QWidget):
         self._iconPath = path
         icon = QtGui.QIcon(QtGui.QPixmap(path))
         self.setIcon(icon)
+        self.updateThumbnailSize()
 
     def setIcon(self, icon):
         """
         :type icon: QtGui.QIcon
         """
-        self.ui.snapshotButton.setIcon(icon)
-        self.ui.snapshotButton.setIconSize(QtCore.QSize(200, 200))
-        self.ui.snapshotButton.setText("")
+        self.ui.thumbnailButton.setIcon(icon)
+        self.ui.thumbnailButton.setIconSize(QtCore.QSize(200, 200))
+        self.ui.thumbnailButton.setText("")
 
     def showSelectionSetsMenu(self):
         """
@@ -656,41 +674,40 @@ class CreateWidget(BaseWidget):
         """
         BaseWidget.__init__(self, *args, **kwargs)
 
+        self.setWindowTitle("Create Item")
+
         self._iconPath = ""
-        self._folderPath = ""
         self._focusWidget = None
 
-        self.ui.acceptButton.clicked.connect(self.accept)
-        self.ui.snapshotButton.clicked.connect(self.snapshot)
-        self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
+        self.ui.thumbnailButton.setToolTip("Click to capture a thumbnail from the current model panel.\nCTRL + Click to show the capture window for better framing.")
 
-        # import mutils.modelpanelwidget
-        # self._modelPanel = mutils.modelpanelwidget.ModelPanelWidget(self.ui.modelPanelFrame)
-        # self.ui.modelPanelFrame.layout().insertWidget(0, self._modelPanel)
-        # self.ui.snapshotButton.hide()
+        self.ui.acceptButton.clicked.connect(self.accept)
+        self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
+        self.ui.browseFolderButton.clicked.connect(self.browseFolder)
+        self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
     def objectCount(self):
         """
+        Return the number of selected objects in the Maya scene.
+
         :rtype: int
         """
         selection = []
+
         try:
             selection = maya.cmds.ls(selection=True) or []
         except NameError, e:
-            traceback.print_exc()
+            logger.exception(e)
 
         return len(selection)
 
-    def dirname(self):
+    def folderFrame(self):
         """
-        :rtype: str or None
+        Return the frame that contains the folder edit, label and button.
+
+        :rtype: QtWidgets.QFrame
         """
-        dirname = self.item().dirname()
-
-        if not dirname:
-            dirname = self.folderPath()
-
-        return dirname
+        return self.ui.folderFrame
 
     def setFolderPath(self, path):
         """
@@ -699,7 +716,7 @@ class CreateWidget(BaseWidget):
         :type path: str
         :rtype: None
         """
-        self._folderPath = path
+        self.ui.folderEdit.setText(path)
 
     def folderPath(self):
         """
@@ -707,33 +724,42 @@ class CreateWidget(BaseWidget):
 
         :rtype: str
         """
-        return self._folderPath
+        return self.ui.folderEdit.text()
+
+    def browseFolder(self):
+        """
+        Show the file dialog for choosing the folder location to save the item.
+
+        :rtype: None
+        """
+        path = self.folderPath()
+        path = QtWidgets.QFileDialog.getExistingDirectory(None, "Browse Folder", path)
+        if path:
+            self.setFolderPath(path)
 
     def showSelectionSetsMenu(self):
         """
+        Show the selection sets menu for the current folder path.
+
         :rtype: None
         """
         import setsmenu
 
-        dirname = self.dirname()
-        menu = setsmenu.SetsMenu.fromPath(dirname, parent=self)
+        path = self.folderPath()
+        menu = setsmenu.SetsMenu.fromPath(path, parent=self)
         position = QtGui.QCursor().pos()
 
         menu.exec_(position)
 
     def selectionChanged(self):
         """
+        Triggered when the Maya selection changes.
+
         :rtype: None
         """
         self.updateContains()
 
-    def modelPanel(self):
-        """
-        :rtype: mutils.ModelPanelWidget
-        """
-        return self._modelPanel
-
-    def _captured(self, path):
+    def _thumbnailCaptured(self, path):
         """
         Triggered when the user captures a thumbnail/playblast.
 
@@ -742,25 +768,29 @@ class CreateWidget(BaseWidget):
         """
         self.setIconPath(path)
 
-    def snapshot(self):
+    def thumbnailCapture(self):
         """
+        Capture a playblast and save it to the temp thumbnail path.
+
         :rtype: None
         """
         path = mutils.gui.tempThumbnailPath()
-        mutils.gui.thumbnailCapture(path=path, captured=self._captured)
+        mutils.gui.thumbnailCapture(path=path, captured=self._thumbnailCaptured)
 
-    def snapshotQuestion(self):
+    def thumbnailCaptureQuestion(self):
         """
+        Ask the user if they would like to capture a thumbnail.
+
         :rtype: int
         """
-        title = "Create a snapshot icon"
-        message = "Would you like to create a snapshot icon?"
+        title = "Create a thumbnail"
+        message = "Would you like to capture a thumbanil?"
         options = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Cancel
 
         result = studioqt.MessageBox.question(None, title, str(message), options)
 
         if result == QtWidgets.QMessageBox.Yes:
-            self.snapshot()
+            self.thumbnailCapture()
 
         return result
 
@@ -768,10 +798,11 @@ class CreateWidget(BaseWidget):
         """Triggered when the user clicks the save button."""
         try:
             name = self.nameText()
-            objects = maya.cmds.ls(selection=True) or []
-            dirname = self.dirname()
+            path = self.folderPath()
 
-            if not dirname:
+            objects = maya.cmds.ls(selection=True) or []
+
+            if not path:
                 raise ValidateError("No folder selected. Please select a destination folder.")
 
             if not name:
@@ -781,11 +812,11 @@ class CreateWidget(BaseWidget):
                 raise ValidateError("No objects selected. Please select at least one object.")
 
             if not os.path.exists(self.iconPath()):
-                result = self.snapshotQuestion()
+                result = self.thumbnailCaptureQuestion()
                 if result == QtWidgets.QMessageBox.Cancel:
                     return
 
-            path = dirname + "/" + name
+            path += "/" + name
             description = str(self.ui.comment.toPlainText())
 
             self.save(
@@ -811,6 +842,7 @@ class CreateWidget(BaseWidget):
         r = self.item()
         r.setDescription(description)
         r.save(objects=objects, path=path, iconPath=iconPath)
+        self.close()
 
 
 class PreviewWidget(BaseWidget):
@@ -820,6 +852,11 @@ class PreviewWidget(BaseWidget):
         :type parent: QtWidgets.QWidget
         """
         BaseWidget.__init__(self, *args, **kwargs)
+
+        if hasattr(self.ui, 'thumbnailButton'):
+            path = self.item().thumbnailPath()
+            if os.path.exists(path):
+                self.setIconPath(path)
 
         try:
             self.updateNamespaceEdit()

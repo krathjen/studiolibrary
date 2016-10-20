@@ -16,6 +16,7 @@
 
 import os
 import mutils
+from functools import partial
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 from studioqt import QtGui
@@ -30,38 +31,45 @@ from studiolibraryitems import transferitem
 
 class SetsItem(transferitem.TransferItem):
 
-    @staticmethod
-    def typeIconPath():
-        """Return the location on disc to the type (extension) icon."""
+    @classmethod
+    def typeIconPath(cls):
+        """
+        Return the type icon path on disc.
+
+        :rtype: path
+        """
         return studiolibraryitems.resource().get("icons", "selectionSet.png")
 
-    @staticmethod
-    def createAction(parent):
+    @classmethod
+    def createAction(cls, menu, libraryWidget):
         """
         Return the action to be displayed when the user clicks the "plus" icon.
 
-        :type parent: QtWidgets.QWidget or None
+        :type menu: QtWidgets.QMenu
+        :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtCore.QAction
         """
-        icon = QtGui.QIcon(SetsItem.typeIconPath())
-        action = QtWidgets.QAction(icon, "Selection Set", parent)
+        icon = QtGui.QIcon(cls.typeIconPath())
+        callback = partial(cls.showCreateWidget, libraryWidget)
+
+        action = QtWidgets.QAction(icon, "Selection Set", menu)
+        action.triggered.connect(callback)
+
         return action
 
     @staticmethod
-    def createWidget(libraryWidget):
+    def showCreateWidget(libraryWidget):
         """
-        Return the widget for creating a new sets item.
+        Show the widget for creating a new anim item.
 
         :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: SetsCreateWidget
         """
-        item = SetsItem()
-        widget = SetsCreateWidget(parent=None, item=item)
-
+        widget = SetsCreateWidget()
+        widget.folderFrame().hide()
         widget.setFolderPath(libraryWidget.selectedFolderPath())
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
-        return widget
+        libraryWidget.setCreateWidget(widget)
+        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -113,6 +121,17 @@ class SetsItem(transferitem.TransferItem):
         transferitem.TransferItem.save(self, objects, path=path, iconPath=iconPath)
 
 
+class SetsCreateWidget(transferitem.CreateWidget):
+
+    def __init__(self, item=None, parent=None):
+        """
+        :type parent: QtWidgets.QWidget
+        :type item: SelectionSetItem
+        """
+        item = item or SetsItem()
+        transferitem.CreateWidget.__init__(self, item, parent=parent)
+
+
 class SetsPreviewWidget(transferitem.PreviewWidget):
 
     def __init__(self, *args, **kwargs):
@@ -125,16 +144,6 @@ class SetsPreviewWidget(transferitem.PreviewWidget):
     def accept(self):
         """Triggered when the user clicks the apply button."""
         self.item().loadFromSettings()
-
-
-class SetsCreateWidget(transferitem.CreateWidget):
-
-    def __init__(self, *args, **kwargs):
-        """
-        :type parent: QtWidgets.QWidget
-        :type item: SelectionSetItem
-        """
-        transferitem.CreateWidget.__init__(self, *args, **kwargs)
 
 
 studiolibrary.register(SetsItem, ".set")
