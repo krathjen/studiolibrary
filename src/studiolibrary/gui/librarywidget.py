@@ -869,7 +869,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         _data = self.readItemData()
         _data.update(data)
 
-        return studiolibrary.saveJson(path, data)
+        return studiolibrary.saveJson(path, _data)
 
     def readItemData(self):
         """

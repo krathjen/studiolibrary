@@ -18,10 +18,9 @@ import os
 import sys
 
 
-__version__ = "1.26.1"
+__version__ = "1.26.2"
 __encoding__ = sys.getfilesystemencoding()
 
-_plugins = {}
 _resource = None
 _analytics = None
 _scriptJob = None
