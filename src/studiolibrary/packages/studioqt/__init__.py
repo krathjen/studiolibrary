@@ -15,23 +15,7 @@
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-try:
-    from PySide import QtGui
-    from PySide import QtCore
-    from PySide import QtUiTools
-
-    QtWidgets = QtGui
-    QtCore.QItemSelection = QtGui.QItemSelection
-    QtCore.QStringListModel = QtGui.QStringListModel
-    QtCore.QItemSelectionModel = QtGui.QItemSelectionModel
-    QtCore.QSortFilterProxyModel = QtGui.QSortFilterProxyModel
-
-except ImportError:
-    from PySide2 import QtGui
-    from PySide2 import QtCore
-    from PySide2 import QtWidgets
-    from PySide2 import QtUiTools
-
+from studioqt.vendor.Qt import QtGui, QtCore, QtWidgets, QtUiTools
 
 import os
 
