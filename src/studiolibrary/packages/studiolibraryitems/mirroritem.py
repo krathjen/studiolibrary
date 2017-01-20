@@ -48,6 +48,7 @@ import logging
 from functools import partial
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
+import studioqt
 from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
@@ -64,8 +65,13 @@ except ImportError, e:
     print e
 
 
-logger = logging.getLogger(__name__)
+__all__ = [
+    "MirrorItem",
+    "MirrorCreateWidget",
+    "MirrorPreviewWidget",
+]
 
+logger = logging.getLogger(__name__)
 
 MirrorOption = mutils.MirrorOption
 

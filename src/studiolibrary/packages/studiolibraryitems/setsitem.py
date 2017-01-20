@@ -29,6 +29,12 @@ import studiolibraryitems
 from studiolibraryitems import transferitem
 
 
+__all__ = [
+    "SetsItem",
+    "SetsCreateWidget",
+    "SetsPreviewWidget",
+]
+
 class SetsItem(transferitem.TransferItem):
 
     @classmethod
