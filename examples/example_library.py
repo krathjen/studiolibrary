@@ -19,5 +19,4 @@ from studioqt import QtWidgets
 if __name__ == "__main__":
 
     with studioqt.app():
-        path = "C:/Users/Hovel/Dropbox/libraries"
-        library = studiolibrary.main("Hello", path=path, lockFolder="Malcolm")
+        library = studiolibrary.main("Hello", lockFolder="Malcolm")

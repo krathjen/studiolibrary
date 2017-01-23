@@ -72,8 +72,10 @@ except ImportError, e:
 
 
 __all__ = [
-    "AnimationItem",
-    "AnimationItemError",
+    "AnimItem",
+    "AnimItemError",
+    "AnimCreateWidget",
+    "AnimPreviewWidget",
 ]
 
 logger = logging.getLogger(__name__)

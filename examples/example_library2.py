@@ -17,5 +17,4 @@ logger = logging.getLogger("test_library")
 if __name__ == "__main__":
 
     with studioqt.app():
-        path = "C:/Users/Hovel/Dropbox/libraries"
-        studiolibrary.main(u"Exён Шple", path=path)
+        studiolibrary.main(u"Exён Шple")
