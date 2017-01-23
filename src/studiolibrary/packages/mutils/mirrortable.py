@@ -583,7 +583,7 @@ class MirrorTable(mutils.SelectionSet):
         if ":" in name:
             dstName = name.replace(":" + search, ":" + replace)
             if name != dstName:
-                return True
+                return dstName
 
         # Support for the prefix with long names
         # Group|LfootRollExtra|LfootRoll
