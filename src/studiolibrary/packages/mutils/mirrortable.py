@@ -557,6 +557,73 @@ class MirrorTable(mutils.SelectionSet):
         else:
             return True
 
+    def replacePrefix(self, name, search, replace):
+        """
+        Replace the given search prefix with the given replace prefix.
+        It should also support long names.
+
+        # Example:
+        self.replacePrefix("R_footRoll", "R", "L")
+        # Result: "L_footRoll" and not "L_footLoll".
+
+        # Long name example:
+        Group|Character1:R_footRollExtra|Character1:R_footRoll
+
+        :type name: str
+        :type search: str
+        :type replace: str
+        :rtype: str
+        """
+        dstName = name
+        search = search.replace("*", "")
+        replace = replace.replace("*", "")
+
+        # Support for the prefix with namespaces
+        # Group|Character1:LfootRollExtra|Character1:LfootRoll
+        if ":" in name:
+            dstName = name.replace(":" + search, ":" + replace)
+            if name != dstName:
+                return dstName
+
+        # Support for the prefix with long names
+        # Group|LfootRollExtra|LfootRoll
+        if "|" in name:
+            dstName = name.replace("|" + search, "|" + replace)
+
+        return dstName
+
+    def replaceSuffix(self, name, search, replace):
+        """
+        Replace the given search suffix with the given replace suffix.
+        It should also support long names.
+
+        # Example:
+        self.replaceSuffix("footRoll_R", "R", "L")
+        # Eesult: "footRoll_L" and not "footLoll_L".
+
+        # Long name example:
+        Group|Character1:footRollExtra_R|Character1:footRoll_R
+
+        :type name: str
+        :type search: str
+        :type replace: str
+        :rtype: str
+        """
+        dstName = name
+        search = search.replace("*", "")
+        replace = replace.replace("*", "")
+
+        # Support for the suffix with long name
+        # Group|Character1:footRollExtraR|Character1:footRollR
+        if "|" in name:
+            dstName = name.replace(search + "|", replace + "|")
+
+        # Eg: Character1:footRollR
+        if dstName.endswith(search):
+            dstName = dstName[:-len(search)] + replace
+
+        return dstName
+
     def isLeftSide(self, name):
         """
         Return True if the object contains the left side string.
@@ -596,11 +663,21 @@ class MirrorTable(mutils.SelectionSet):
         :rtype: bool
         """
         if side:
-            return side in name
+            # Support for prefix naming convention.
+            if side.endswith("*"):
+                return self.replacePrefix(name, side, "X") != name
+
+            # Support for suffix naming convention.
+            elif side.startswith("*"):
+                return self.replaceSuffix(name, side, "X") != name
+
+            # Support for all other naming conventions.
+            else:
+                return side in name
 
         return False
 
-    def mirrorObject(self, srcObj):
+    def mirrorObject(self, name):
         """
         Return the other/opposite side for the given name.
 
@@ -608,20 +685,46 @@ class MirrorTable(mutils.SelectionSet):
             print self.mirrorObject("FKSholder_L")
             # FKShoulder_R
 
-        :type srcObj: str
+        :type name: str
         :rtype: str or None
         """
         leftSide = self.leftSide()
         rightSide = self.rightSide()
 
-        dstObj = srcObj.replace(leftSide, rightSide)
+        # Support for the prefix naming convention.
+        if leftSide.endswith("*") or rightSide.endswith("*"):
+            dstName = self.replacePrefix(name, leftSide, rightSide)
 
-        if dstObj == srcObj:
-            dstObj = srcObj.replace(rightSide, leftSide)
+            if name == dstName:
+                dstName = self.replacePrefix(name, rightSide, leftSide)
 
-        if dstObj != srcObj:
-            return dstObj
+            if dstName != name:
+                return dstName
 
+        # Support for the suffix naming convention.
+        elif leftSide.startswith("*") or rightSide.startswith("*"):
+
+            dstName = self.replaceSuffix(name, leftSide, rightSide)
+
+            if name == dstName:
+                dstName = self.replaceSuffix(name, rightSide, leftSide)
+
+            if dstName != name:
+                return dstName
+
+        # Support for all other naming conventions.
+        else:
+
+            dstName = name.replace(leftSide, rightSide)
+
+            if dstName == name:
+                dstName = name.replace(rightSide, leftSide)
+
+            if dstName != name:
+                return dstName
+
+        # Return None as the given name is probably a center control
+        # and doesn't have an opposite side.
         return None
 
     def calculateMirrorAxis(self, srcObj):
