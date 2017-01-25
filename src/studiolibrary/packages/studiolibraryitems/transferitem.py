@@ -321,7 +321,8 @@ class TransferItem(studiolibrary.LibraryItem):
         paths = list(studiolibrary.findPaths(
                 self.path(),
                 match=lambda path: path.endswith(".mirror"),
-                direction=studiolibrary.Direction.Up
+                direction=studiolibrary.Direction.Up,
+                depth=10,
             )
         )
         return paths
