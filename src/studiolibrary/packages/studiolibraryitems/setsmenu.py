@@ -121,6 +121,7 @@ class SetsMenu(QtWidgets.QMenu):
             path,
             match=match,
             direction=studiolibrary.Direction.Up,
+            depth=10,
         )
 
         paths = list(paths)
