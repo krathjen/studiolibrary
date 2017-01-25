@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>160</width>
+    <width>177</width>
     <height>466</height>
    </rect>
   </property>
@@ -89,6 +89,12 @@ background-color: rgb(254, 255, 230, 200);
      </item>
      <item>
       <widget class="QLabel" name="label_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="font">
         <font>
          <family>Arial</family>
@@ -465,6 +471,9 @@ background-color: rgb(254, 255, 230, 200);</string>
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Use the &quot;*&quot; character when you need to specify the prefix or suffix naming for the mirror table side.  Example:  &quot;*_L&quot; is the suffix naming convention.  &quot;L_*&quot; is the prefix naming convention.</string>
+          </property>
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -573,6 +582,9 @@ background-color: rgb(254, 255, 230, 200);</string>
             <width>16777215</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Use the &quot;*&quot; character when you need to specify the prefix or suffix naming for the mirror table side.  Example:  &quot;*_L&quot; is the suffix naming convention.  &quot;L_*&quot; is the prefix naming convention.</string>
           </property>
           <property name="styleSheet">
            <string notr="true"/>

@@ -81,7 +81,7 @@ class MirrorItem(transferitem.TransferItem):
     @classmethod
     def typeIconPath(cls):
         """
-        Return the type icon path to be displayed on the thumbnail.
+        Return the mirror icon path to be displayed on the thumbnail.
 
         :rtype: path
         """
@@ -107,7 +107,7 @@ class MirrorItem(transferitem.TransferItem):
     @staticmethod
     def showCreateWidget(libraryWidget):
         """
-        Show the widget for creating a new anim item.
+        Show the widget for creating a new mirror table item.
 
         :type libraryWidget: studiolibrary.LibraryWidget
         """
@@ -161,6 +161,8 @@ class MirrorItem(transferitem.TransferItem):
     @mutils.showWaitCursor
     def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):
         """
+        Load the current mirror table to the given objects and options.
+
         :type objects: list[str]
         :type namespaces: list[str]
         :type option: MirrorOption
@@ -178,6 +180,8 @@ class MirrorItem(transferitem.TransferItem):
 
     def save(self, objects, leftSide, rightSide, path=None, iconPath=None):
         """
+        Save the given objects to the location of the current mirror table.
+
         :type path: str
         :type objects: list[str]
         :type iconPath: str
@@ -213,18 +217,24 @@ class MirrorCreateWidget(transferitem.CreateWidget):
 
     def leftText(self):
         """
+        Return the naming convention for the left side.
+
         :rtype: str
         """
         return str(self.ui.left.text()).strip()
 
     def rightText(self):
         """
+        Return the naming convention for the right side.
+
         :rtype: str
         """
         return str(self.ui.right.text()).strip()
 
     def selectionChanged(self):
         """
+        Triggered when the user changes the Maya object selection.
+
         :rtype: None
         """
         objects = maya.cmds.ls(selection=True) or []
@@ -251,6 +261,8 @@ class MirrorCreateWidget(transferitem.CreateWidget):
 
     def save(self, objects, path, iconPath, description):
         """
+        Called by the base class when the user clicks the save button.
+
         :type objects: list[str]
         :type path: str
         :type iconPath: str
@@ -287,6 +299,8 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
 
     def setItem(self, item):
         """
+        Set the item for the preview widget.
+
         :type item: MirrorItem
         :rtype: None
         """
@@ -298,6 +312,8 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
 
     def mirrorOption(self):
         """
+        Return the current mirror option.
+
         :rtype: str
         """
         text = self.ui.mirrorOptionComboBox.currentText()
@@ -305,12 +321,16 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
 
     def mirrorAnimation(self):
         """
+        Return True if the animation should also be mirrored.
+
         :rtype: bool
         """
         return self.ui.mirrorAnimationCheckBox.isChecked()
 
     def state(self):
         """
+        Return the state of the preview widget.
+
         :rtype: dict
         """
         state = super(MirrorPreviewWidget, self).state()
@@ -322,6 +342,8 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
 
     def setState(self, state):
         """
+        Set the state of the preview widget.
+
         :type state: dict
         """
         super(MirrorPreviewWidget, self).setState(state)
@@ -334,6 +356,8 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
 
     def accept(self):
         """
+        Called by the base class when the user clicks the apply button.
+
         :rtype: None
         """
         self.item().loadFromSettings()
