@@ -147,6 +147,8 @@ class SetsPreviewWidget(transferitem.PreviewWidget):
         """
         transferitem.PreviewWidget.__init__(self, *args, **kwargs)
 
+        self.ui.optionsToggleBox.setVisible(False)
+
     def accept(self):
         """Triggered when the user clicks the apply button."""
         self.item().loadFromSettings()
