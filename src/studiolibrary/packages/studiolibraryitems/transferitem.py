@@ -904,6 +904,16 @@ class PreviewWidget(BaseWidget):
         self.ui.namespaceComboBox.editTextChanged[str].connect(self._namespaceEditChanged)
         self.ui.namespaceComboBox.currentIndexChanged[str].connect(self._namespaceEditChanged)
 
+        self.ui.iconToggleBoxButton.clicked.connect(self.updateState)
+        self.ui.infoToggleBoxButton.clicked.connect(self.updateState)
+        self.ui.optionsToggleBoxButton.clicked.connect(self.updateState)
+        self.ui.namespaceToggleBoxButton.clicked.connect(self.updateState)
+
+        self.ui.iconToggleBoxButton.toggled[bool].connect(self.ui.iconToggleBoxFrame.setVisible)
+        self.ui.infoToggleBoxButton.toggled[bool].connect(self.ui.infoToggleBoxFrame.setVisible)
+        self.ui.optionsToggleBoxButton.toggled[bool].connect(self.ui.optionsToggleBoxFrame.setVisible)
+        self.ui.namespaceToggleBoxButton.toggled[bool].connect(self.ui.namespaceToggleBoxFrame.setVisible)
+
     def _namespaceEditChanged(self, text):
         """
         Triggered when the combox box has changed value.
@@ -987,6 +997,22 @@ class PreviewWidget(BaseWidget):
         namespaces = state.get("namespaces", "")
         self.setNamespaces(namespaces)
 
+        toggleBoxChecked = state.get("iconToggleBoxChecked", True)
+        self.ui.iconToggleBoxFrame.setVisible(toggleBoxChecked)
+        self.ui.iconToggleBoxButton.setChecked(toggleBoxChecked)
+
+        toggleBoxChecked = state.get("infoToggleBoxChecked", True)
+        self.ui.infoToggleBoxFrame.setVisible(toggleBoxChecked)
+        self.ui.infoToggleBoxButton.setChecked(toggleBoxChecked)
+
+        toggleBoxChecked = state.get("optionsToggleBoxChecked", True)
+        self.ui.optionsToggleBoxFrame.setVisible(toggleBoxChecked)
+        self.ui.optionsToggleBoxButton.setChecked(toggleBoxChecked)
+
+        toggleBoxChecked = state.get("namespaceToggleBoxChecked", True)
+        self.ui.namespaceToggleBoxFrame.setVisible(toggleBoxChecked)
+        self.ui.namespaceToggleBoxButton.setChecked(toggleBoxChecked)
+
         super(PreviewWidget, self).setState(state)
 
     def state(self):
@@ -997,6 +1023,11 @@ class PreviewWidget(BaseWidget):
 
         state["namespaces"] = self.namespaces()
         state["namespaceOption"] = self.namespaceOption()
+
+        state["iconToggleBoxChecked"] = self.ui.iconToggleBoxButton.isChecked()
+        state["infoToggleBoxChecked"] = self.ui.infoToggleBoxButton.isChecked()
+        state["optionsToggleBoxChecked"] = self.ui.optionsToggleBoxButton.isChecked()
+        state["namespaceToggleBoxChecked"] = self.ui.namespaceToggleBoxButton.isChecked()
 
         return state
 
