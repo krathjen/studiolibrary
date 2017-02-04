@@ -13,7 +13,13 @@
 # ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+"""
+Example:
 
+import mutils
+attr = mutils.Attribute("sphere1", "translateX")
+attr.set(100)
+"""
 import logging
 
 try:
@@ -26,6 +32,37 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+VALID_CONNECTIONS = [
+    "animCurve",
+    "animBlend",
+    "pairBlend",
+    "character"
+]
+
+VALID_BLEND_ATTRIBUTES = [
+    "int",
+    "long",
+    "float",
+    "short",
+    "double",
+    "doubleAngle",
+    "doubleLinear",
+]
+
+VALID_ATTRIBUTE_TYPES = [
+    "int",
+    "long",
+    "enum",
+    "bool",
+    "string",
+    "float",
+    "short",
+    "double",
+    "doubleAngle",
+    "doubleLinear",
+]
+
+
 class Attribute(object):
 
     def __init__(self, name, attr, value=None, type=None):
@@ -36,7 +73,8 @@ class Attribute(object):
             self._name = name.encode('ascii')
             self._attr = attr.encode('ascii')
         except UnicodeEncodeError:
-            raise UnicodeEncodeError('Not a valid ascii name "%s.%s"' % (name, attr))
+            msg = 'Not a valid ascii name "{0}.{1}"'.format(name, attr)
+            raise UnicodeEncodeError(msg)
 
         self._type = type
         self._value = value
@@ -44,56 +82,79 @@ class Attribute(object):
 
     def name(self):
         """
+        Return the Maya object name for the attribute.
+
         :rtype: str
         """
         return self._name
 
     def attr(self):
         """
+        Return the attribute name.
+
         :rtype: str
         """
         return self._attr
 
     def update(self):
         """
+        Make attribute dirty
         """
         self._type = None
         self._value = None
 
     def fullname(self):
         """
+        Return the name with the attr name.
+
         :rtype: str
         """
         if self._fullname is None:
-            self._fullname = "%s.%s" % (self.name(), self.attr())
+            self._fullname = '{0}.{1}'.format(self.name(), self.attr())
         return self._fullname
 
     def value(self):
         """
-        :rtype: float | str | list[]
+        Return the value of the attribute.
+
+        :rtype: float | str | list
         """
         if self._value is None:
+
             try:
                 self._value = maya.cmds.getAttr(self.fullname())
             except Exception:
-                logger.exception("Cannot GET attribute VALUE for {0}:".format(self.fullname()))
+                msg = 'Cannot GET attribute VALUE for "{0}"'
+                msg = msg.format(self.fullname())
+                logger.exception(msg)
+
         return self._value
 
     def type(self):
         """
+        Return the type of data currently in the attribute.
+
         :rtype: str
         """
         if self._type is None:
+
             try:
                 self._type = maya.cmds.getAttr(self.fullname(), type=True)
                 self._type = self._type.encode('ascii')
             except Exception:
-                logger.exception("Cannot GET attribute TYPE for %s: {0}:".format(self.fullname()))
+                msg = 'Cannot GET attribute TYPE for "{0}"'
+                msg = msg.format(self.fullname())
+                logger.exception(msg)
+
         return self._type
 
-    def set(self, value, blend=100, key=False, **kwargs):
+    def set(self, value, blend=100, key=False, clamp=True):
         """
-        :type value: float | str | list[]
+        Set the value for the attribute.
+
+        :type key: bool
+        :type clamp: bool
+        :type value: float | str | list
         :type blend: float
         """
         try:
@@ -102,8 +163,10 @@ class Attribute(object):
             else:
                 _value = (value - self.value()) * (blend/100.00)
                 value = self.value() + _value
-        except TypeError, msg:
-            logger.debug("Cannot BLEND attribute %s: Error: %s" % (self.fullname(), msg))
+        except TypeError, e:
+            msg = 'Cannot BLEND attribute {0}: Error: {1}'
+            msg = msg.format(self.fullname(), e)
+            logger.debug(msg)
 
         try:
             if self.type() in ["string"]:
@@ -111,18 +174,26 @@ class Attribute(object):
             elif self.type() in ["list", "matrix"]:
                 maya.cmds.setAttr(self.fullname(), *value, type=self.type())
             else:
-                maya.cmds.setAttr(self.fullname(), value)
+                maya.cmds.setAttr(self.fullname(), value, clamp=clamp)
 
             if key:
                 try:
-                    self.key(value=value, **kwargs)
-                except TypeError, msg:
-                    logger.debug("Cannot KEY attribute %s: Error: %s" % (self.fullname(), msg))
-        except (ValueError, RuntimeError), msg:
-            logger.debug("Cannot SET attribute %s: Error: %s" % (self.fullname(), msg))
+                    self.setKeyframe(value=value)
+                except TypeError, e:
+                    msg = 'Cannot KEY attribute {0}: Error: {1}'
+                    msg = msg.format(self.fullname(), e)
+                    logger.debug(msg)
 
-    def key(self, value, **kwargs):
+        except (ValueError, RuntimeError), e:
+            msg = "Cannot SET attribute {0}: Error: {1}"
+            msg = msg.format(self.fullname(), e)
+            logger.debug(msg)
+
+    def setKeyframe(self, value, **kwargs):
         """
+        Set a keyframe with the given value.
+
+        :rtype: None
         """
         if kwargs:
             maya.cmds.setKeyframe(self.fullname(), value=value, **kwargs)
@@ -131,8 +202,11 @@ class Attribute(object):
 
     def insertStaticKeyframe(self, value, time):
         """
+        Insert a static keyframe at the given time with the given value.
+
         :type value: float | str
         :type time: (int, int)
+        :rtype: None
         """
         startTime, endTime = time
         duration = endTime - startTime
@@ -142,10 +216,17 @@ class Attribute(object):
             maya.cmds.setKeyframe(self.fullname(), value=value, time=(endTime, endTime), itt='flat', ott='flat')
             nextFrame = maya.cmds.findKeyframe(self.fullname(), time=(endTime, endTime), which='next')
             maya.cmds.keyTangent(self.fullname(), time=(nextFrame, nextFrame), itt='flat')
-        except TypeError, msg:
-            logger.debug("Cannot insert static key frame for attribute %s: Error: %s" % (self.fullname(), msg))
+        except TypeError, e:
+            msg = "Cannot insert static key frame for attribute {0}: Error: {1}"
+            msg = msg.format(self.fullname(), e)
+            logger.debug(msg)
 
     def animCurve(self):
+        """
+        Return the connected animCurve.
+
+        :rtype: str | None
+        """
         try:
             return maya.cmds.listConnections(self.fullname(), destination=False,
                                              type="animCurve")[0]
@@ -154,6 +235,8 @@ class Attribute(object):
 
     def isConnected(self, ignoreConnections=None):
         """
+        Return true if the attribute is connected.
+
         :type ignoreConnections: list[str]
         :rtype: bool
         """
@@ -177,18 +260,21 @@ class Attribute(object):
 
     def isBlendable(self):
         """
+        Return true if the attribute can be blended.
+
         :rtype: bool
         """
-        return self.type() in ["float", "doubleLinear", "doubleAngle",
-                               "double", "long", "int", "short"]
+        return self.type() in VALID_BLEND_ATTRIBUTES
 
     def isSettable(self, validConnections=None):
         """
+        Return true if the attribute can be set.
+
         :type validConnections: list[str]
         :rtype: bool
         """
         if validConnections is None:
-            validConnections = ["animCurve", "animBlend", "pairBlend", "character"]
+            validConnections = VALID_CONNECTIONS
 
         if not self.exists():
             return False
@@ -208,29 +294,40 @@ class Attribute(object):
 
     def isLocked(self):
         """
+        Return true if the attribute is locked.
+
         :rtype: bool
         """
         return maya.cmds.getAttr(self.fullname(), lock=True)
 
     def isUnlocked(self):
         """
+        Return true if the attribute is unlocked.
+
         :rtype: bool
         """
         return not self.isLocked()
 
     def toDict(self):
         """
-        :rtype: dict[]
+        Return a dictionary of the attribute object.
+
+        :rtype: dict
         """
-        result = {"type": self.type(), "value": self.value(), "fullname": self.fullname()}
+        result = {
+            "type": self.type(),
+            "value": self.value(),
+            "fullname": self.fullname(),
+        }
         return result
 
     def isValid(self):
         """
+        Return true if the attribute type is valid.
+
         :rtype: bool
         """
-        return self.type() in ["string", "enum", "bool", "float", "doubleLinear",
-                               "doubleAngle", "double", "long", "int", "short"]
+        return self.type() in VALID_ATTRIBUTE_TYPES
 
     def __str__(self):
         """
@@ -240,11 +337,16 @@ class Attribute(object):
 
     def exists(self):
         """
+        Return true if the object and attribute exists in the scene.
+
         :rtype: bool
         """
         return maya.cmds.objExists(self.fullname())
 
     def prettyPrint(self):
         """
+        Print the command for setting the attribute value
         """
-        print('maya.cmds.setAttr("%s", %s)' % (self.fullname(), self.value()))
+        msg = 'maya.cmds.setAttr("{0}", {1})'
+        msg = msg.format(self.fullname(), self.value())
+        print(msg)
