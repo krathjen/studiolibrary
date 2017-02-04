@@ -79,7 +79,7 @@ def saveAnim(
         )
 
     if not time:
-        time = mutils.animationFrameRange(objects)
+        time = mutils.selectedObjectsFrameRange(objects)
 
     start, end = time
 
@@ -578,7 +578,7 @@ class Animation(mutils.Pose):
         fileType = fileType or DEFAULT_FILE_TYPE
 
         if not time:
-            time = mutils.animationFrameRange(objects)
+            time = mutils.selectedObjectsFrameRange(objects)
         start, end = time
 
         # Check selected animation layers
