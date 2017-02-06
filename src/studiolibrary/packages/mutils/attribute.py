@@ -17,6 +17,7 @@
 Example:
 
 import mutils
+
 attr = mutils.Attribute("sphere1", "translateX")
 attr.set(100)
 """
@@ -65,6 +66,18 @@ VALID_ATTRIBUTE_TYPES = [
 
 class Attribute(object):
 
+    @classmethod
+    def listAttr(cls, name, **kwargs):
+        """
+        Return a list of Attribute from the given name and matching criteria.
+
+        If no flags are specified all attributes are listed.
+
+        :rtype: list[Attribute]
+        """
+        attrs = maya.cmds.listAttr(name, **kwargs) or []
+        return [cls(name, attr) for attr in attrs]
+
     def __init__(self, name, attr, value=None, type=None):
         """
         :type name: str
@@ -102,6 +115,22 @@ class Attribute(object):
         """
         self._type = None
         self._value = None
+
+    def query(self, **kwargs):
+        """
+        Convenience method for Maya's attribute query command
+
+        :rtype: object
+        """
+        return maya.cmds.attributeQuery(self.attr(), node=self.name(), **kwargs)
+
+    def listConnections(self, **kwargs):
+        """
+        Convenience method for Maya's list connections command
+
+        :rtype: list[str]
+        """
+        return maya.cmds.listConnections(self.fullname(), **kwargs)
 
     def fullname(self):
         """
@@ -175,30 +204,41 @@ class Attribute(object):
                 maya.cmds.setAttr(self.fullname(), *value, type=self.type())
             else:
                 maya.cmds.setAttr(self.fullname(), value, clamp=clamp)
-
-            if key:
-                try:
-                    self.setKeyframe(value=value)
-                except TypeError, e:
-                    msg = 'Cannot KEY attribute {0}: Error: {1}'
-                    msg = msg.format(self.fullname(), e)
-                    logger.debug(msg)
-
         except (ValueError, RuntimeError), e:
             msg = "Cannot SET attribute {0}: Error: {1}"
             msg = msg.format(self.fullname(), e)
             logger.debug(msg)
 
-    def setKeyframe(self, value, **kwargs):
+        try:
+            if key:
+                self.setKeyframe(value=value)
+        except TypeError, e:
+            msg = 'Cannot KEY attribute {0}: Error: {1}'
+            msg = msg.format(self.fullname(), e)
+            logger.debug(msg)
+
+    def setKeyframe(self, value, respectKeyable=True, **kwargs):
         """
         Set a keyframe with the given value.
 
+        :value: object
+        :respectKeyable: bool
         :rtype: None
         """
-        if kwargs:
-            maya.cmds.setKeyframe(self.fullname(), value=value, **kwargs)
-        else:
-            maya.cmds.setKeyframe(self.fullname(), value=value)
+        if self.query(minExists=True):
+            minimum = self.query(minimum=True)[0]
+            if value < minimum:
+                value = minimum
+
+        if self.query(maxExists=True):
+            maximum = self.query(maximum=True)[0]
+            if value > maximum:
+                value = maximum
+
+        kwargs.setdefault("value", value)
+        kwargs.setdefault("respectKeyable", respectKeyable)
+
+        maya.cmds.setKeyframe(self.fullname(), **kwargs)
 
     def insertStaticKeyframe(self, value, time):
         """
@@ -211,9 +251,14 @@ class Attribute(object):
         startTime, endTime = time
         duration = endTime - startTime
         try:
-            maya.cmds.keyframe(self.fullname(), relative=True, time=(startTime, 100000), timeChange=duration)
-            maya.cmds.setKeyframe(self.fullname(), value=value, time=(startTime, startTime), ott='step')
-            maya.cmds.setKeyframe(self.fullname(), value=value, time=(endTime, endTime), itt='flat', ott='flat')
+            # Offset all keyframes from the start position.
+            maya.cmds.keyframe(self.fullname(), relative=True, time=(startTime, 1000000), timeChange=duration)
+
+            # Set a key at the given start and end time
+            self.setKeyframe(value, time=(startTime, startTime), ott='step')
+            self.setKeyframe(value, time=(endTime, endTime), itt='flat', ott='flat')
+
+            # Set the tangent for the next keyframe to flat
             nextFrame = maya.cmds.findKeyframe(self.fullname(), time=(endTime, endTime), which='next')
             maya.cmds.keyTangent(self.fullname(), time=(nextFrame, nextFrame), itt='flat')
         except TypeError, e:
@@ -228,8 +273,7 @@ class Attribute(object):
         :rtype: str | None
         """
         try:
-            return maya.cmds.listConnections(self.fullname(), destination=False,
-                                             type="animCurve")[0]
+            return self.listConnections(destination=False, type="animCurve")[0]
         except IndexError, e:
             return None
 
@@ -243,8 +287,7 @@ class Attribute(object):
         if ignoreConnections is None:
             ignoreConnections = []
         try:
-            connection = maya.cmds.listConnections(self.fullname(),
-                                                   destination=False)
+            connection = self.listConnections(destination=False)
         except ValueError:
             return False
 
@@ -282,7 +325,7 @@ class Attribute(object):
         if not maya.cmds.listAttr(self.fullname(), unlocked=True, keyable=True, multi=True, scalar=True):
             return False
 
-        connection = maya.cmds.listConnections(self.fullname(), destination=False)
+        connection = self.listConnections(destination=False)
         if connection:
             connectionType = maya.cmds.nodeType(connection)
             for validType in validConnections:
