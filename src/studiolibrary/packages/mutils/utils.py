@@ -251,20 +251,13 @@ def getSelectedObjects():
 
 def animCurve(fullname):
     """
+    Return the animation curve for the give attribute.
+
     :type fullname:
     :rtype: None | str
     """
-    result = None
-    if maya.cmds.objExists(fullname):
-        n = maya.cmds.listConnections(fullname, plugs=True, destination=False)
-        if n and "animCurve" in maya.cmds.nodeType(n):
-            result = n
-        elif n and "character" in maya.cmds.nodeType(n):
-            n = maya.cmds.listConnections(n, plugs=True, destination=False)
-            if n and "animCurve" in maya.cmds.nodeType(n):
-                result = n
-        if result:
-            return result[0].split(".")[0]
+    attribute = mutils.Attribute(fullname)
+    return attribute.animCurve()
 
 
 def deleteUnknownNodes():

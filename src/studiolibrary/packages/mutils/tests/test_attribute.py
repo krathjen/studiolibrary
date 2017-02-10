@@ -91,6 +91,60 @@ class TestAttribute(unittest.TestCase):
         value = maya.cmds.keyframe("sphere.testNonKeyable", query=True, eval=True)
         assert value is None, "Non keyable attribute was keyed"
 
+    def test_anim_curve(self):
+        """
+        Test if get anim curve returns the right value.
+        """
+        msg = "Incorrect anim curve was returned when using attr.animCurve "
+
+        attr = mutils.Attribute("sphere", "testFloat")
+        curve = attr.animCurve()
+        assert curve is None, msg + "1"
+
+        attr = mutils.Attribute("sphere", "testConnected")
+        curve = attr.animCurve()
+        assert curve is None, msg + "2"
+
+        attr = mutils.Attribute("sphere", "testAnimated")
+        curve = attr.animCurve()
+        assert curve == "sphere_testAnimated", msg + "3"
+
+    def test_set_anim_curve(self):
+        """
+        Test if set anim curve
+        """
+        msg = "No anim curve was set"
+
+        attr = mutils.Attribute("sphere", "testAnimated")
+        srcCurve = attr.animCurve()
+
+        attr = mutils.Attribute("sphere", "testFloat")
+        attr.setAnimCurve(srcCurve, time=(1, 15), option="replace")
+        curve = attr.animCurve()
+        assert curve is not None, msg
+
+        attr = mutils.Attribute("sphere", "testFloat")
+        attr.setAnimCurve(srcCurve, time=(15, 15), option="replaceCompletely")
+        curve = attr.animCurve()
+        assert curve is not None, msg
+
+    def test_set_static_keyframe(self):
+        """
+        Test set static keyframes
+        """
+        msg = "The inserted static keys have different values"
+
+        attr = mutils.Attribute("sphere", "testAnimated", cache=False)
+        attr.setStaticKeyframe(value=2, time=(4, 6), option="replace")
+
+        maya.cmds.currentTime(4)
+        value1 = attr.value()
+
+        maya.cmds.currentTime(6)
+        value2 = attr.value()
+
+        assert value1 == value2, msg
+
 
 def testSuite():
     """
