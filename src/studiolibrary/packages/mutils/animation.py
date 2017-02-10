@@ -49,6 +49,11 @@ class AnimationTransferError(Exception):
     pass
 
 
+class OutOfBoundsError( AnimationTransferError ):
+    """Exceptions for clips or ranges that are outside the expected range"""
+    pass
+
+
 def saveAnim(
     path,
     objects=None,
@@ -157,6 +162,9 @@ def clipTime(srcTime, dstTime):
     """
     srcStart, srcEnd = srcTime
     dstStart, dstEnd = dstTime
+    
+    if srcStart > dstEnd or srcEnd < dstStart:
+        raise OutOfBoundsError("srcTime and dstTime do not overlap. Unable to clip (src=%s, dest=%s)" , srcTime, dstTime)
 
     if srcStart < dstStart:
         srcStart = dstStart
@@ -209,8 +217,15 @@ def findFirstLastKeyframes(curves, time=None):
     result = (first, last)
 
     if time:
-        result = clipTime(time, result)
-
+        
+        # It's possible (but unlikely) that the curves will not lie within the 
+        # first and last frame
+        try:
+            result = clipTime(time, result)
+        
+        except OutOfBoundsError, errMsg:
+            logger.warning( errMsg )
+            
     return result
 
 
