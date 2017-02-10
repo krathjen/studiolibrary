@@ -220,6 +220,4 @@ migrate.migrate()
 
 if __name__ == "__main__":
     loadFromCommand()
-else:
-    print(about())
 
