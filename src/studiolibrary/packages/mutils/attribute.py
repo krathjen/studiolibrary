@@ -64,6 +64,11 @@ VALID_ATTRIBUTE_TYPES = [
 ]
 
 
+class AttributeError(Exception):
+    """Base class for exceptions in this module."""
+    pass
+
+
 class Attribute(object):
 
     @classmethod
@@ -78,10 +83,25 @@ class Attribute(object):
         attrs = maya.cmds.listAttr(name, **kwargs) or []
         return [cls(name, attr) for attr in attrs]
 
-    def __init__(self, name, attr, value=None, type=None):
+    def __init__(self, name, attr=None, value=None, type=None, cache=True):
         """
         :type name: str
+        :type attr: str | None
+        :type type: str | None
+        :type value: object | None
+        :type cache: bool
         """
+        if "." in name:
+            name, attr = name.split(".")
+
+        if attr is None:
+            msg = "Cannot initialise attribute instance without a given attr."
+            raise AttributeError(msg)
+
+        # For now this is on by default, however in a future update
+        # this will be off by default.
+        self._cache = cache
+
         try:
             self._name = name.encode('ascii')
             self._attr = attr.encode('ascii')
@@ -92,6 +112,12 @@ class Attribute(object):
         self._type = type
         self._value = value
         self._fullname = None
+
+    def __str__(self):
+        """
+        :rtype: str
+        """
+        return str(self.toDict())
 
     def name(self):
         """
@@ -109,12 +135,71 @@ class Attribute(object):
         """
         return self._attr
 
-    def update(self):
+    def isLocked(self):
         """
-        Make attribute dirty
+        Return true if the attribute is locked.
+
+        :rtype: bool
+        """
+        return maya.cmds.getAttr(self.fullname(), lock=True)
+
+    def isUnlocked(self):
+        """
+        Return true if the attribute is unlocked.
+
+        :rtype: bool
+        """
+        return not self.isLocked()
+
+    def toDict(self):
+        """
+        Return a dictionary of the attribute object.
+
+        :rtype: dict
+        """
+        result = {
+            "type": self.type(),
+            "value": self.value(),
+            "fullname": self.fullname(),
+        }
+        return result
+
+    def isValid(self):
+        """
+        Return true if the attribute type is valid.
+
+        :rtype: bool
+        """
+        return self.type() in VALID_ATTRIBUTE_TYPES
+
+    def exists(self):
+        """
+        Return true if the object and attribute exists in the scene.
+
+        :rtype: bool
+        """
+        return maya.cmds.objExists(self.fullname())
+
+    def prettyPrint(self):
+        """
+        Print the command for setting the attribute value
+        """
+        msg = 'maya.cmds.setAttr("{0}", {1})'
+        msg = msg.format(self.fullname(), self.value())
+        print(msg)
+
+    def clearCache(self):
+        """
+        Clear all cached values
         """
         self._type = None
         self._value = None
+
+    def update(self):
+        """
+        This method will be deprecated.
+        """
+        self.clearCache()
 
     def query(self, **kwargs):
         """
@@ -132,6 +217,17 @@ class Attribute(object):
         """
         return maya.cmds.listConnections(self.fullname(), **kwargs)
 
+    def sourceConnection(self, **kwargs):
+        """
+        Return the source connection for this attribute.
+
+        :rtype: str | None
+        """
+        try:
+            return self.listConnections(destination=False, **kwargs)[0]
+        except IndexError, e:
+            return None
+
     def fullname(self):
         """
         Return the name with the attr name.
@@ -148,7 +244,7 @@ class Attribute(object):
 
         :rtype: float | str | list
         """
-        if self._value is None:
+        if self._value is None or not self._cache:
 
             try:
                 self._value = maya.cmds.getAttr(self.fullname())
@@ -240,6 +336,33 @@ class Attribute(object):
 
         maya.cmds.setKeyframe(self.fullname(), **kwargs)
 
+    def setStaticKeyframe(self, value, time, option):
+        """
+        Set a static keyframe at the given time.
+
+        :type value: object
+        :type time: (int, int)
+        :type option: PasteOption
+        """
+        if option == "replaceCompletely":
+            maya.cmds.cutKey(self.fullname())
+            self.set(value, key=False)
+
+        # This should be changed to only look for animation.
+        # Also will need to support animation layers ect...
+        elif self.isConnected():
+
+            # TODO: Should also support static attrs when there is animation.
+            if option == "replace":
+                maya.cmds.cutKey(self.fullname(), time=time)
+                self.insertStaticKeyframe(value, time)
+
+            elif option == "replace":
+                self.insertStaticKeyframe(value, time)
+
+        else:
+            self.set(value, key=False)
+
     def insertStaticKeyframe(self, value, time):
         """
         Insert a static keyframe at the given time with the given value.
@@ -266,16 +389,100 @@ class Attribute(object):
             msg = msg.format(self.fullname(), e)
             logger.debug(msg)
 
+    def setAnimCurve(self, curve, time, option, source=None, connect=False):
+        """
+        Set/Paste the give animation curve to this attribute.
+
+        :type curve: str
+        :type option: PasteOption
+        :type time: (int, int)
+        :type source: (int, int)
+        :type connect: bool
+        :rtype: None
+        """
+        fullname = self.fullname()
+        startTime, endTime = time
+
+        if not self.exists():
+            logger.debug("Attr does not exists")
+            return
+
+        if self.isLocked():
+            logger.debug("Cannot set anim curve when the attr locked")
+            return
+
+        if source is None:
+            first = maya.cmds.findKeyframe(curve, which='first')
+            last = maya.cmds.findKeyframe(curve, which='last')
+            source = (first, last)
+
+        # We run the copy key command twice to check we have a valid curve.
+        # It needs to run before the cutKey command, otherwise if it fails
+        # we have cut keys for no reason!
+        success = maya.cmds.copyKey(curve, time=source)
+        if not success:
+            msg = "Cannot copy keys from the anim curve {0}"
+            msg = msg.format(curve)
+            logger.debug(msg)
+            return
+
+        if option == "replace":
+            maya.cmds.cutKey(fullname, time=time)
+        else:
+            time = (startTime, startTime)
+
+        try:
+            # Update the clip board with the give animation curve
+            maya.cmds.copyKey(curve, time=source)
+
+            # Note: If the attribute is connected to referenced
+            # animation then the following command will not work.
+            maya.cmds.pasteKey(fullname, option=option, time=time, connect=connect)
+
+            if option == "replaceCompletely":
+
+                # The pasteKey cmd doesn't support all anim attributes
+                # so we need to manually set theses.
+                dstCurve = self.animCurve()
+                if dstCurve:
+                    curveColor = maya.cmds.getAttr(curve + ".curveColor")
+                    preInfinity = maya.cmds.getAttr(curve + ".preInfinity")
+                    postInfinity = maya.cmds.getAttr(curve + ".postInfinity")
+                    useCurveColor = maya.cmds.getAttr(curve + ".useCurveColor")
+
+                    maya.cmds.setAttr(dstCurve + ".preInfinity", preInfinity)
+                    maya.cmds.setAttr(dstCurve + ".postInfinity", postInfinity)
+                    maya.cmds.setAttr(dstCurve + ".curveColor", *curveColor[0])
+                    maya.cmds.setAttr(dstCurve + ".useCurveColor", useCurveColor)
+
+        except RuntimeError, e:
+            msg = 'Cannot paste anim curve "{0}" to attribute "{1}"'
+            msg = msg.format(curve, fullname)
+            logger.exception(msg)
+
     def animCurve(self):
         """
-        Return the connected animCurve.
+        Return the connected animation curve.
 
         :rtype: str | None
         """
-        try:
-            return self.listConnections(destination=False, type="animCurve")[0]
-        except IndexError, e:
-            return None
+        result = None
+
+        if self.exists():
+
+            n = self.listConnections(plugs=True, destination=False)
+
+            if n and "animCurve" in maya.cmds.nodeType(n):
+                result = n
+
+            elif n and "character" in maya.cmds.nodeType(n):
+                n = maya.cmds.listConnections(n, plugs=True,
+                                              destination=False)
+                if n and "animCurve" in maya.cmds.nodeType(n):
+                    result = n
+
+            if result:
+                return result[0].split(".")[0]
 
     def isConnected(self, ignoreConnections=None):
         """
@@ -334,62 +541,3 @@ class Attribute(object):
             return False
         else:
             return True
-
-    def isLocked(self):
-        """
-        Return true if the attribute is locked.
-
-        :rtype: bool
-        """
-        return maya.cmds.getAttr(self.fullname(), lock=True)
-
-    def isUnlocked(self):
-        """
-        Return true if the attribute is unlocked.
-
-        :rtype: bool
-        """
-        return not self.isLocked()
-
-    def toDict(self):
-        """
-        Return a dictionary of the attribute object.
-
-        :rtype: dict
-        """
-        result = {
-            "type": self.type(),
-            "value": self.value(),
-            "fullname": self.fullname(),
-        }
-        return result
-
-    def isValid(self):
-        """
-        Return true if the attribute type is valid.
-
-        :rtype: bool
-        """
-        return self.type() in VALID_ATTRIBUTE_TYPES
-
-    def __str__(self):
-        """
-        :rtype: str
-        """
-        return str(self.toDict())
-
-    def exists(self):
-        """
-        Return true if the object and attribute exists in the scene.
-
-        :rtype: bool
-        """
-        return maya.cmds.objExists(self.fullname())
-
-    def prettyPrint(self):
-        """
-        Print the command for setting the attribute value
-        """
-        msg = 'maya.cmds.setAttr("{0}", {1})'
-        msg = msg.format(self.fullname(), self.value())
-        print(msg)

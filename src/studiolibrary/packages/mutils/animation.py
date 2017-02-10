@@ -766,87 +766,18 @@ class Animation(mutils.Pose):
                                      (dstAttr.name(), dstAttr.attr()))
                         continue
 
-                    if srcCurve is None:
-                        type_ = self.attrType(srcNode.name(), attr)
-                        value = self.attrValue(srcNode.name(), attr)
-                        srcAttr = mutils.Attribute(dstNode.name(), attr, type=type_, value=value)
-                        self.setStaticKey(srcAttr, dstAttr, dstTime, option)
-                    else:
-                        self.setAnimationKey(
+                    if srcCurve:
+                        dstAttr.setAnimCurve(
                             srcCurve,
-                            dstAttr,
                             time=dstTime,
                             option=option,
                             source=srcTime,
                             connect=connect
                         )
+                    else:
+                        value = self.attrValue(srcNode.name(), attr)
+                        dstAttr.setStaticKeyframe(value, dstTime, option)
+
         finally:
             self.close()
             maya.cmds.undoInfo(closeChunk=True)
-
-    def setStaticKey(self, srcAttr, dstAttr, time, option):
-        """
-        :type srcAttr: mutils.Attribute
-        :type dstAttr: mutils.Attribute
-        :type time: (int, int)
-        :type option: PasteOption
-        """
-        if option == PasteOption.ReplaceCompletely:
-            maya.cmds.cutKey(dstAttr.fullname())
-            dstAttr.set(srcAttr.value(), key=False)
-
-        # This should be changed to only look for animation.
-        # Also will need to support animation layers ect...
-        elif dstAttr.isConnected():
-
-            # TODO: Should also support static attrs when there is animation.
-            if option == PasteOption.Replace:
-                maya.cmds.cutKey(dstAttr.fullname(), time=time)
-                dstAttr.insertStaticKeyframe(srcAttr.value(), time)
-
-            elif option == PasteOption.Insert:
-                dstAttr.insertStaticKeyframe(srcAttr.value(), time)
-
-        else:
-            dstAttr.set(srcAttr.value(), key=False)
-
-    def setAnimationKey(self, srcCurve, dstAttribute, time, option, source=None, connect=False):
-        """
-        :type srcCurve: str
-        :type dstAttribute: mutils.Attribute
-        :type connect: bool
-        :type option: PasteOption
-        :type time: (int, int)
-        :type source: (int, int)
-        """
-        startTime, endTime = time
-
-        if dstAttribute.exists() and dstAttribute.isUnlocked():
-
-            if option == PasteOption.Replace:
-                maya.cmds.cutKey(dstAttribute.fullname(), time=time)
-
-            if maya.cmds.copyKey(srcCurve, time=source):
-
-                try:
-                    if option != PasteOption.Replace:
-                        time = (startTime, startTime)
-
-                    # Note: If the attribute is connected to referenced
-                    # animation then the following command will not work.
-                    maya.cmds.pasteKey(dstAttribute.fullname(), option=option, time=time, connect=connect)
-                    if option == PasteOption.ReplaceCompletely:
-                        dstCurve = mutils.animCurve(dstAttribute.fullname())
-                        if dstCurve:
-                            curveColor = maya.cmds.getAttr(srcCurve + ".curveColor")
-                            preInfinity = maya.cmds.getAttr(srcCurve + ".preInfinity")
-                            postInfinity = maya.cmds.getAttr(srcCurve + ".postInfinity")
-                            useCurveColor = maya.cmds.getAttr(srcCurve + ".useCurveColor")
-
-                            maya.cmds.setAttr(dstCurve + ".preInfinity", preInfinity)
-                            maya.cmds.setAttr(dstCurve + ".postInfinity", postInfinity)
-                            maya.cmds.setAttr(dstCurve + ".curveColor", *curveColor[0])
-                            maya.cmds.setAttr(dstCurve + ".useCurveColor", useCurveColor)
-
-                except RuntimeError, e:
-                    logger.error("Cannot set animation for destination %s" % (dstAttribute.fullname()))
