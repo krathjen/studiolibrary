@@ -1796,14 +1796,20 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         hiddenCount = self.itemsHiddenCount()
 
         plural = ""
-        if itemCount != 1:
+        if itemCount > 1:
             plural = "s"
 
         hiddenText = ""
         if hiddenCount > 0:
-            hiddenText = ("{0} items hidden.".format(hiddenCount))
 
-        msg = "Loaded {0} item{1} in {2:.3f} seconds. {3}"
+            hiddenPlural = ""
+            if hiddenCount > 1:
+                hiddenPlural = "s"
+
+            hiddenText = "{0} item{1} hidden."
+            hiddenText = hiddenText.format(hiddenCount, hiddenPlural)
+
+        msg = "Displayed {0} item{1} in {2:.3f} seconds. {3}"
         msg = msg.format(itemCount, plural, elapsedTime, hiddenText)
         self.statusWidget().setInfo(msg)
 
