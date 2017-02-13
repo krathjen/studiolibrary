@@ -18,7 +18,6 @@ import os
 import shutil
 import logging
 
-from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
 
@@ -63,13 +62,19 @@ class Library(QtCore.QObject):
 
         :rtype: list[Library]
         """
-        for library in cls.libraries():
+
+        libraries = cls.libraries()
+
+        for library in libraries:
             if library.isDefault():
                 return library
 
-        library = cls.instance(Library.DEFAULT_NAME)
-        library.setDefault(True)
-        return library
+        if libraries:
+            return libraries[0]
+        else:
+            library = cls.instance(Library.DEFAULT_NAME)
+            library.setDefault(True)
+            return library
 
     @classmethod
     def libraries(cls):
@@ -461,23 +466,19 @@ This does not modify or delete the contents of the library.'''.format(
 
     def show(self):
         """Show the library widget/window for this library."""
-        result = None
-        name = self.name()
+
         path = self.path()
 
-        if not path:
-            result = studiolibrary.showWelcomeDialog(name, path, validNames=[name])
+        if not os.path.exists(path):
 
-        elif not os.path.exists(path):
-            result = self.settingsDialog().exec_()
+            result = self.showSettingsDialog()
 
-        if result == QtWidgets.QDialog.Rejected:
-            logger.debug("Dialog was canceled")
-            return
+            if result == QtWidgets.QDialog.Rejected:
+                logger.debug("Dialog was canceled")
+                return
 
         logger.debug("Showing library '%s'" % path)
 
-        # Create a new window
         if not self.libraryWidget():
             libraryWidget = self.createLibraryWidget()
             self.setLibraryWidget(libraryWidget)
@@ -496,19 +497,22 @@ This does not modify or delete the contents of the library.'''.format(
         def validator():
             name = settingsDialog.name()
             path = settingsDialog.path()
+            valid = [self.name()]
 
-            name = self.name()
-
-            studiolibrary.validateName(name, valid=[name])
+            studiolibrary.validateName(name, valid=valid)
             studiolibrary.validatePath(path)
+
+        title = "Settings"
+        header = "Local Library Settings"
+        text = "All changes will be saved to your local settings."
 
         parent = self.libraryWidget()
         settingsDialog = studiolibrary.SettingsDialog(parent)
 
         settingsDialog.close()
-        settingsDialog.setTitle("Settings")
-        settingsDialog.setHeader("Local Library Settings")
-        settingsDialog.setText("All changes will be saved to your local settings.")
+        settingsDialog.setTitle(title)
+        settingsDialog.setHeader(header)
+        settingsDialog.setText(text)
         settingsDialog.setName(self.name())
         settingsDialog.setPath(self.path())
         settingsDialog.setValidator(validator)
@@ -524,7 +528,7 @@ This does not modify or delete the contents of the library.'''.format(
         """
         Show the settings dialog for this library.
 
-        :rtype: None
+        :rtype: int
         """
         path = self.path()
         name = self.name()
@@ -547,3 +551,5 @@ This does not modify or delete the contents of the library.'''.format(
         else:
             self.setAccentColor(accentColor)
             self.setBackgroundColor(backgroundColor)
+
+        return result

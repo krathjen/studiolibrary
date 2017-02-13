@@ -14,9 +14,7 @@ logging.basicConfig(
 logger = logging.getLogger("test_library")
 
 
-from studioqt import QtWidgets
-
 if __name__ == "__main__":
 
     with studioqt.app():
-        library = studiolibrary.main("Hello", lockFolder="Malcolm")
+        library = studiolibrary.main(lockFolder="Malcolm")

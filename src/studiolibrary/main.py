@@ -30,18 +30,21 @@ def main(
     :type name: str
     :type path: str
     :type show: bool
-    :type plugins: list[str]
     :type analytics: bool
-    :type root: str
     :type kwargs: dict
+
     :rtype: studiolibrary.Library
     """
     studiolibrary.analytics().setEnabled(analytics)
 
-    if not name:
-        library = studiolibrary.Library.default()
-    else:
+    isNewUser = not path and not studiolibrary.libraries()
+
+    if show and isNewUser:
+        library = studiolibrary.showWelcomeDialog(showOnAccepted=False)
+    elif name:
         library = studiolibrary.Library.instance(name)
+    else:
+        library = studiolibrary.Library.default()
 
     if path:
         library.setPath(path)
