@@ -14,15 +14,10 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import re
 import os
-import json
 import logging
-import platform
 import collections
 
-from studioqt import QtGui
-from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studiolibrary
@@ -74,6 +69,7 @@ def register(cls, extension, isDir=True, isFile=True, ignore=None):
     _itemClasses[extension]["isFile"] = isFile
     _itemClasses[extension]["ignore"] = ignore
 
+
 def itemClasses():
     """
     Return all registered library item classes.
@@ -87,17 +83,15 @@ def itemExtensions():
     """
     Register the given item class to the given extension.
 
-    :type itemClass: studiolibrary.LibraryItem
-    :rtype: None
+    :rtype: list[str]
     """
     return _itemClasses.keys()
 
 
 def clearItemClasses():
     """
-    Add/Register the given item class.
+    Remove all registered item class.
 
-    :type itemClass: studiolibrary.LibraryItem
     :rtype: None
     """
     global _itemClasses
@@ -141,8 +135,6 @@ def itemsFromPaths(paths):
     :type paths: list[str]:
     :rtype: collections.Iterable[studiolibrary.LibraryItem]
     """
-    items = []
-
     for path in paths:
         item = itemFromPath(path)
         if item:
@@ -232,15 +224,16 @@ def validateName(name, valid=None, caseSensitive=True):
             raise StudioLibraryValidateError(msg)
 
 
-def showWelcomeDialog(name="", path="", validNames=None):
+def showWelcomeDialog(name="", path="", **kwargs):
     """
     Show the welcome dialog.
 
     :type name: str
     :type path: str
-    :type validNames: list[str]
-    :rtype: int
+    :rtype: studiolibrary.Library
     """
+    name = name or studiolibrary.Library.DEFAULT_NAME
+
     return showNewLibraryDialog(
         name=name,
         path=path,
@@ -248,7 +241,7 @@ def showWelcomeDialog(name="", path="", validNames=None):
         header="Welcome to the Studio Library",
         text="""Before you get started please choose a folder location for storing the data.
 A network folder is recommended for sharing within a studio.""",
-        validNames=validNames,
+        **kwargs
     )
 
 
@@ -261,9 +254,11 @@ def showNewLibraryDialog(
 For example; This could be useful when working on different film productions,
 or for having a shared library and a local library.""",
     validNames=None,
+    showOnAccepted=True,
+    errorOnRejected=True
 ):
     """
-    Show the new library dialog.
+    Show the settings dialog for creating a new library.
 
     :type name: str
     :type path: str
@@ -271,8 +266,13 @@ or for having a shared library and a local library.""",
     :type header: str
     :type text: str
     :type validNames: list[str]
-    :rtype: int
+    :type showOnAccepted: bool
+    :type errorOnRejected: bool
+
+    :rtype: studiolibrary.Library
     """
+    library = None
+
     def validator():
         name = settingsDialog.name()
         path = settingsDialog.path()
@@ -298,9 +298,14 @@ or for having a shared library and a local library.""",
         library.setPath(path)
         library.setAccentColor(settingsDialog.accentColor())
         library.setBackgroundColor(settingsDialog.backgroundColor())
-        library.show()
+        library.saveSettings()
+
+        if showOnAccepted:
+            library.show()
 
     else:
         logger.info("New library dialog was canceled!")
+        if errorOnRejected:
+            raise Exception("Dialog was rejected.")
 
-    return result
+    return library
