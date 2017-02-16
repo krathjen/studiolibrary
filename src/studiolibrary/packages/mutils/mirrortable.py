@@ -68,8 +68,8 @@ __all__ = ["MirrorTable", "MirrorPlane", "MirrorOption", "Axis"]
 logger = logging.getLogger(__name__)
 
 
-RE_LEFT_SIDE = "Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|left|Left"
-RE_RIGHT_SIDE = "Rt|rt_|_rt|_r_|_R|R_|right|Right"
+RE_LEFT_SIDE = "Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|left|Left|\|l_|:l_|^l_|_l$"
+RE_RIGHT_SIDE = "Rt|rt_|_rt|_r_|_R|R_|right|Right|\|r_|:r_|^r_|_r$"
 
 
 class MirrorPlane:
@@ -120,17 +120,27 @@ class MirrorTable(mutils.SelectionSet):
         return MirrorTable.findSide(objects, RE_RIGHT_SIDE)
 
     @staticmethod
-    def findSide(objects, reSide):
+    def findSide(names, reSide):
         """
-        :type objects: str
+        :type names: list[str]
         :type reSide: str
         :rtype: str
         """
         reSide = re.compile(reSide)
-        for obj in objects:
-            m = reSide.search(obj)
+        for n in names:
+            m = reSide.search(n)
             if m:
-                return m.group()
+                side = m.group()
+                side = side.replace(":", "")
+                side = side.replace("|", "")
+
+                if n.startswith(side) or ":" + side in n or "|" + side in n:
+                    side += "*"
+
+                if n.endswith(side):
+                    side = "*" + side
+
+                return side
         return ""
 
     @staticmethod

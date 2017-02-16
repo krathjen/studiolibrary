@@ -43,6 +43,7 @@ def testSuite():
     import test_match
     import test_utils
     import test_attribute
+    import test_mirrortable
 
     suite = unittest.TestSuite()
 
@@ -59,6 +60,9 @@ def testSuite():
     suite.addTest(s)
 
     s = unittest.makeSuite(test_attribute.TestAttribute, 'test')
+    suite.addTest(s)
+
+    s = unittest.makeSuite(test_mirrortable.TestMirrorTable, 'test')
     suite.addTest(s)
 
     return suite
