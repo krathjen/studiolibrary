@@ -41,6 +41,7 @@ def testSuite():
     import test_pose
     import test_anim
     import test_match
+    import test_utils
     import test_attribute
 
     suite = unittest.TestSuite()
@@ -49,6 +50,9 @@ def testSuite():
     suite.addTest(s)
 
     s = unittest.makeSuite(test_anim.TestAnim, 'test')
+    suite.addTest(s)
+
+    s = unittest.makeSuite(test_utils.TestUtils, 'test')
     suite.addTest(s)
 
     s = unittest.makeSuite(test_match.TestMatch, 'test')
