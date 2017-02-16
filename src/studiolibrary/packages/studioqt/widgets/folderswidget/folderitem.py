@@ -21,7 +21,6 @@ from studioqt import QtGui
 from studioqt import QtWidgets
 
 import studioqt
-import studiolibrary
 
 
 __all__ = ["Folder"]
@@ -192,7 +191,7 @@ class FolderItem(object):
         :rtype: QtGui.QPixmap
         """
         if not self.isIconVisible():
-            return studiolibrary.resource().pixmap("")
+            return studioqt.resource().pixmap("")
 
         color = self.color()
         iconPath = self.iconPath()
