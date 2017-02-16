@@ -145,15 +145,15 @@ def animCurvesFromMayaAscii(path):
     return animCurves
 
 
-def clipTime(srcTime, dstTime):
+def clampRange(srcTime, dstTime):
     """
     Clips the given source time to within the given destination time.
 
     Example:
-        print clipTime((15, 35), (20, 30))
+        print clampRange((15, 35), (20, 30))
         # 20, 30
 
-        print clipTime((25, 45), (20, 30))
+        print clampRange((25, 45), (20, 30))
         # 25, 30
 
     :type srcTime: (int, int)
@@ -221,7 +221,7 @@ def findFirstLastKeyframes(curves, time=None):
         # It's possible (but unlikely) that the curves will not lie within the 
         # first and last frame
         try:
-            result = clipTime(time, result)
+            result = clampRange(time, result)
         
         except OutOfBoundsError, errMsg:
             logger.warning( errMsg )
