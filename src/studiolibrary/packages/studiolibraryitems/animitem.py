@@ -787,4 +787,4 @@ class AnimPreviewWidget(transferitem.PreviewWidget):
         )
 
 
-studiolibrary.register(AnimItem, ".anim")
+studiolibrary.registerItem(AnimItem, ".anim")

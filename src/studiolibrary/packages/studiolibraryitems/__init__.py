@@ -40,11 +40,25 @@ def resource():
     return _resource
 
 
+def registerItems():
+    """
+    Called by the studiolibrary config file to register the items.
+
+    :rtype: None
+    """
+    # The following items are registered on import.
+    from studiolibraryitems import animitem
+    from studiolibraryitems import poseitem
+    from studiolibraryitems import mirroritem
+    from studiolibraryitems import setsitem
+
+
 def setDebugMode(libraryWidget, value):
     """
     Triggered when the user chooses debug mode.
 
-    :type level: int
+    :type libraryWidget: studiolibrary.LibraryWidget
+    :type value: int
     :rtype: None
     """
     if value:

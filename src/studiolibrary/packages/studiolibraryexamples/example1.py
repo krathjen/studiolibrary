@@ -99,9 +99,9 @@ def main():
 
     # Register the item class to the extension and ignore all jpgs that
     # contain the string "thumbnail."
-    studiolibrary.register(ImageItem, ".jpg", ignore="thumbnail.")
-    studiolibrary.register(ImageItem, ".png")
-    studiolibrary.register(ImageItem, ".gif")
+    studiolibrary.registerItem(ImageItem, ".jpg", ignore="thumbnail.")
+    studiolibrary.registerItem(ImageItem, ".png")
+    studiolibrary.registerItem(ImageItem, ".gif")
 
     # Show the library with the given name and path
     studiolibrary.main(name="Example", path=dirname + "/data")

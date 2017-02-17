@@ -14,11 +14,8 @@
 import studioqt
 import studiolibrary
 
-# The following items are registered on import.
-from studiolibraryitems import poseitem
-from studiolibraryitems import animitem
-from studiolibraryitems import mirroritem
-from studiolibraryitems import setsitem
+import studiolibraryitems
+studiolibraryitems.registerItems()
 
 studiolibrary.Analytics.ENABLED = True
 studiolibrary.Analytics.DEFAULT_ID = "UA-50172384-1"

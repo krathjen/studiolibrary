@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = [
     "register",
+    "registerItem",
     "itemClasses",
     "itemExtensions",
     "itemFromPath",
@@ -49,7 +50,16 @@ class StudioLibraryValidateError(StudioLibraryError):
     pass
 
 
-def register(cls, extension, isDir=True, isFile=True, ignore=None):
+def register(*args, **kwargs):
+    """
+    This method is now deprecated.
+    
+    Please use studiolibrary.registerItem instead.
+    """
+    registerItem(*args, **kwargs)
+
+
+def registerItem(cls, extension, isDir=True, isFile=True, ignore=None):
     """
     Register the given item class to the given extension.
 
