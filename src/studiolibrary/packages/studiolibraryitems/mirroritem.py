@@ -363,4 +363,4 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
         self.item().loadFromSettings()
 
 
-studiolibrary.register(MirrorItem, ".mirror")
+studiolibrary.registerItem(MirrorItem, ".mirror")

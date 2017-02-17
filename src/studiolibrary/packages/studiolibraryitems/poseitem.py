@@ -501,4 +501,4 @@ class PosePreviewWidget(transferitem.PreviewWidget):
         self.item().loadFromSettings(clearSelection=False)
 
 
-studiolibrary.register(PoseItem, ".pose")
+studiolibrary.registerItem(PoseItem, ".pose")

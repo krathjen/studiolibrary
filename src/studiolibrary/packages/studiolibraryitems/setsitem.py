@@ -154,4 +154,4 @@ class SetsPreviewWidget(transferitem.PreviewWidget):
         self.item().loadFromSettings()
 
 
-studiolibrary.register(SetsItem, ".set")
+studiolibrary.registerItem(SetsItem, ".set")
