@@ -6,7 +6,6 @@ Comments, suggestions
 and bug reports are welcome.
 
 * www.studiolibrary.com
-* kurt.rathjen@gmail.com
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=CJvxlGpYc1o
 " target="_blank"><img src="http://img.youtube.com/vi/CJvxlGpYc1o/0.jpg"
