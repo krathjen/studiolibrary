@@ -315,7 +315,11 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         self.endDrag()
         self._dragStartPos = event.pos()
 
-        if not self.selectedItems() or (item and not item.dragEnabled()):
+        isLeftButton = self.mousePressButton() == QtCore.Qt.LeftButton
+        isItemDraggable = item and item.dragEnabled()
+        isSelectionEmpty = not self.selectedItems()
+
+        if isLeftButton and (isSelectionEmpty or not isItemDraggable):
             self.rubberBandStartEvent(event)
 
     def mouseMoveEvent(self, event):
@@ -335,7 +339,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
                 CombinedItemViewMixin.mouseMoveEvent(self, event)
                 QtWidgets.QListView.mouseMoveEvent(self, event)
 
-            if not self.isDraggingItems():
+            if isLeftButton:
                 self.rubberBandMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
