@@ -35,7 +35,6 @@ import studioqt
 import mutils.gui
 import mutils.gui.modelpanelwidget
 
-from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
 
@@ -71,6 +70,7 @@ def tempPlayblastPath(clean=False):
 
 _instance = None
 
+
 def thumbnailCapture(path, startFrame=None, endFrame=None, step=1, clearCache=False, captured=None):
     """
     Capture a playblast and save it to the given path.
@@ -79,7 +79,7 @@ def thumbnailCapture(path, startFrame=None, endFrame=None, step=1, clearCache=Fa
     :type startFrame: int
     :type endFrame:  int
     :type step: int
-    :type clean: bool
+    :type clearCache: bool
     :type captured: func
     :rtype: ThumbnailCaptureDialog
     """
@@ -292,7 +292,7 @@ class ThumbnailCaptureDialog(QtWidgets.QDialog):
         width = self.DEFAULT_WIDTH
         height = self.DEFAULT_HEIGHT
 
-        self._capturedPath = mutils.playblast(
+        self._capturedPath = mutils.playblast.playblast(
             path,
             modelPanel,
             startFrame,

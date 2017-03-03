@@ -15,7 +15,6 @@
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
-import shutil
 import logging
 
 import mutils
@@ -34,6 +33,12 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+# Valid Renderers:
+# [u'vp2Renderer', u'base_OpenGL_Renderer',
+#  u'hwRender_OpenGL_Renderer', u'stub_Renderer']
+DEFAULT_PLAYBLAST_RENDERER = None
+
+
 class PlayblastError(Exception):
     """Base class for exceptions in this module."""
     pass
@@ -41,16 +46,18 @@ class PlayblastError(Exception):
 
 def playblast(filename, modelPanel, startFrame, endFrame, width, height, step=1):
     """
-    :type path: str
+    Wrapper for Maya's Playblast command.
+    
+    :type filename: str
     :type modelPanel: str
-    :type start: int
-    :type end: int
+    :type startFrame: int
+    :type endFrame: int
     :type width: int
     :type height: int
     :type step: list[int]
     :rtype: str
     """
-    logger.info("Playblasting '%s'" % filename)
+    logger.info("Playblasting '{filename}'".format(filename=filename))
 
     if startFrame == endFrame and os.path.exists(filename):
         os.remove(filename)
@@ -60,6 +67,12 @@ def playblast(filename, modelPanel, startFrame, endFrame, width, height, step=1)
     modelPanel = modelPanel or mutils.currentModelPanel()
     if maya.cmds.modelPanel(modelPanel, query=True, exists=True):
         maya.cmds.setFocus(modelPanel)
+        if DEFAULT_PLAYBLAST_RENDERER:
+            maya.cmds.modelEditor(
+                modelPanel,
+                edit=True,
+                rendererName=DEFAULT_PLAYBLAST_RENDERER
+            )
 
     name, compression = os.path.splitext(filename)
     filename = filename.replace(compression, "")
