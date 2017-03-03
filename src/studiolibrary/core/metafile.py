@@ -68,13 +68,6 @@ class MetaFile(object):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-    def openLocation(self):
-        """
-        :rtype: None
-        """
-        path = self.path()
-        utils.openLocation(path)
-
     def path(self):
         """
         :rtype: str

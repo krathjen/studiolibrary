@@ -15,7 +15,6 @@ import re
 import os
 import time
 import logging
-from functools import partial
 
 from studioqt import QtGui
 from studioqt import QtCore
@@ -768,7 +767,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
             menu.addAction(action)
 
         action = QtWidgets.QAction("Show in folder", menu)
-        action.triggered.connect(self.openSelectedItems)
+        action.triggered.connect(self.showItemsInFolder)
         menu.addAction(action)
 
         return menu
@@ -1973,20 +1972,20 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         """
         return self.library().kwargs()
 
-    def openSelectedFolders(self):
-        folders = self.selectedFolders()
-        for folder in folders:
-            folder.openLocation()
-
-    def openSelectedItems(self):
+    def showItemsInFolder(self):
+        """
+        Show the selected items in the system file explorer.
+        
+        :rtype: None 
+        """
         items = self.selectedItems()
 
         for item in items:
-            item.openLocation()
+            item.showInFolder()
 
         if not items:
             for folder in self.selectedFolders():
-                folder.openLocation()
+                folder.showInFolder()
 
     def showCreateFolderDialog(self):
         """

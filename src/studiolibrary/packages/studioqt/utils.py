@@ -17,8 +17,9 @@ import json
 import inspect
 import logging
 import platform
-import subprocess
 import contextlib
+
+import studioqt
 
 from studioqt import QtCore
 from studioqt import QtUiTools
@@ -30,7 +31,7 @@ __all__ = [
     "loadUi",
     "saveJson",
     "readJson",
-    "openLocation",
+    "showInFolder",
     "isAltModifier",
     "isControlModifier",
     "currentScreenGeometry",
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 @contextlib.contextmanager
 def app():
     """
-
+    
     .. code-block:: python
         import studioqt
 
@@ -104,17 +105,31 @@ def isLinux():
     return system().startswith("lin")
 
 
-def openLocation(path):
+def showInFolder(path):
     """
+    Show the given path in the system file explorer.
+    
     :type path: str
     :rtype: None
     """
-    if isLinux():
-        os.system('konqueror "%s"&' % path)
+    if studioqt.SHOW_IN_FOLDER_CMD:
+        cmd = studioqt.SHOW_IN_FOLDER_CMD
+
+    elif isLinux():
+        cmd = 'konqueror "{path}"&'
+
     elif isWindows():
-        os.startfile('%s' % path)
+        cmd = 'start explorer /select, "{path}"'
+
     elif isMac():
-        subprocess.call(["open", "-R", path])
+        cmd = 'open -R "{path}"'
+
+    # Normalize the pathname for windows
+    path = os.path.normpath(path)
+    cmd = cmd.format(path=path)
+
+    logger.info(cmd)
+    os.system(cmd)
 
 
 def saveJson(path, data):

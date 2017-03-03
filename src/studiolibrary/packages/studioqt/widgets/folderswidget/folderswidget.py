@@ -93,7 +93,7 @@ class FoldersWidget(QtWidgets.QTreeView):
             menu.addAction(action)
 
             action = QtWidgets.QAction("Show in folder", menu)
-            action.triggered.connect(self.openSelectedFolders)
+            action.triggered.connect(self.showInFolder)
             menu.addAction(action)
 
         separator = QtWidgets.QAction("Separator2", menu)
@@ -141,10 +141,10 @@ class FoldersWidget(QtWidgets.QTreeView):
         self.setIconSize(QtCore.QSize(size, size))
         self.setStyleSheet("height: {size}".format(size=size))
 
-    def openSelectedFolders(self):
+    def showInFolder(self):
         folders = self.selectedFolders()
         for folder in folders:
-            folder.openLocation()
+            folder.showInFolder()
 
     def reload(self):
         """
