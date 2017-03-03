@@ -16,8 +16,7 @@ from tempdir import TempDir
 from utils import *
 from decorators import *
 
-from playblast import playblast
-
+import playblast
 import namespace
 
 from scriptjob import ScriptJob
