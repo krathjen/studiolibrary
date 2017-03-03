@@ -14,6 +14,7 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import studioqt
 import studiolibrary
 
 # The following items are registered on import.
@@ -22,9 +23,11 @@ from studiolibraryitems import animitem
 from studiolibraryitems import mirroritem
 from studiolibraryitems import setsitem
 
-
 studiolibrary.Analytics.ENABLED = True
 studiolibrary.Analytics.DEFAULT_ID = "UA-50172384-1"
+
+# Used when the user clicks "Show in folder"
+# studioqt.SHOW_IN_FOLDER_CMD = 'konqueror "{path}"&'
 
 # Shared data
 # studiolibrary.Library.ITEM_DATA_PATH = "{root}/.studiolibrary/item_data.json"

@@ -47,7 +47,6 @@ __all__ = [
     "Direction",
     "stringToList",
     "listToString",
-    "openLocation",
     "generateUniquePath",
     "generateUniqueName",
     "PathRenameError",
@@ -373,22 +372,6 @@ def generateUniquePath(path, attempts=1000):
             raise ValueError(msg)
 
     return path
-
-
-def openLocation(path):
-    """
-    Open the file explorer at the given path location.
-
-    :type path: str
-    :rtype: None
-    """
-    if isLinux():
-        os.system('konqueror "%s"&' % path)
-    elif isWindows():
-        os.startfile('%s' % path)
-    elif isMac():
-        subprocess.call(["open", "-R", path])
-
 
 def splitPath(path):
     """

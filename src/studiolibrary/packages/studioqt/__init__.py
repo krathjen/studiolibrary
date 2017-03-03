@@ -57,6 +57,9 @@ DIRNAME = os.path.dirname(PATH).replace('\\', '/')
 PACKAGES_DIRNAME = DIRNAME + "/packages"
 RESOURCE_DIRNAME = DIRNAME + "/resource"
 
+# Studio Qt Config Vars
+SHOW_IN_FOLDER_CMD = None
+
 
 global _resource
 

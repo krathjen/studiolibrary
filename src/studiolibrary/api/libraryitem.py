@@ -15,9 +15,7 @@
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import os
-import shutil
 import logging
-from functools import partial
 
 import studiolibrary
 
@@ -118,7 +116,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         Return the thumbnail location on disc for this item.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtWidgets.QWidget
         """
         return studioqt.resource().get("icons", "thumbnail.png")
@@ -132,11 +129,10 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         pass
 
-    def openLocation(self):
+    def showInFolder(self):
         """Open the file explorer at the given path location."""
         path = self.path()
-        dirname = os.path.dirname(path)
-        studiolibrary.openLocation(dirname)
+        studioqt.showInFolder(path)
 
     def name(self):
         """
@@ -322,9 +318,9 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self.saved.emit(self)
         logger.debug(u'Item Saved: {0}'.format(self.path()))
 
-        # -----------------------------------------------------------------
-        # Support for copy and rename
-        # -----------------------------------------------------------------
+    # -----------------------------------------------------------------
+    # Support for copy and rename
+    # -----------------------------------------------------------------
 
     def move(self, dst):
         """

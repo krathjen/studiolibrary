@@ -54,8 +54,8 @@ class FolderItem(object):
         """
         self._orderIndex = orderIndex
 
-    def openLocation(self):
-        studioqt.openLocation(self.path())
+    def showInFolder(self):
+        studioqt.showInFolder(self.path())
 
     def orderIndex(self):
         """
