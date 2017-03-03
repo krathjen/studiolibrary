@@ -16,5 +16,11 @@ logger = logging.getLogger("test_library")
 
 if __name__ == "__main__":
 
+    def _folderRenamed(oldPath, newPath):
+        print "Renamed:", oldPath, ">>>", newPath
+
     with studioqt.app():
         library = studiolibrary.main(lockFolder="Malcolm")
+
+        widget = library.libraryWidget()
+        widget.folderRenamed.connect(_folderRenamed)

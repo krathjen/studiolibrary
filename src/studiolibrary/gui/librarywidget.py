@@ -66,6 +66,8 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
     loaded = QtCore.Signal()
     lockChanged = QtCore.Signal(object)
     debugModeChanged = QtCore.Signal(object)
+
+    folderRenamed = QtCore.Signal(str, str)
     folderSelectionChanged = QtCore.Signal(object)
 
     def __init__(self, library):
@@ -224,6 +226,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         folderWidget = self.foldersWidget()
         folderWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         folderWidget.itemDropped.connect(self._folderDropped)
+        folderWidget.itemRenamed.connect(self._folderRenamed)
         folderWidget.itemSelectionChanged.connect(self._folderSelectionChanged)
         folderWidget.customContextMenuRequested.connect(self.showFolderContextMenu)
 
@@ -233,6 +236,21 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         self.updateViewButton()
 
         self.itemsWidget().treeWidget().setValidGroupByColumns(self.DEFAULT_GROUP_BY_COLUMNS)
+
+    def _folderRenamed(self, src, dst):
+        """
+        Triggered when a folder has been renamed from the folder widget.
+
+        :str src: str
+        :str dst: str
+        :rtype: None
+        """
+        self.folderRenamed.emit(src, dst)
+
+        db = self.itemDatabase()
+        db.renameFolder(src, dst)
+
+        self.loadCustomOrder()
 
     def addMenuBarAction(self, name, icon, tip, side="Right", callback=None):
         """
@@ -358,8 +376,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         """
         Triggered when an item is selected or deselected.
 
-        :type selectedFolders: list[studiolibrary.Folder]
-        :type deselectedFolders: list[studiolibrary.Folder]
         :rtype: None
         """
         self.reloadItems()
@@ -484,7 +500,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         self.setItems(items, sortEnabled=False)
 
         self.loadCustomOrder()
-        self.itemsWidget().refreshSortBy()
 
         if selectedItems:
             self.selectItems(selectedItems)
@@ -857,28 +872,14 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         path = self.library().itemDataPath()
         return path
 
-    def writeItemData(self, data):
+    def itemDatabase(self):
         """
-        Save the item data to disc.
-
-        :type data: dict
-        :rtype: None
+        Return a new instance of the items database for this library.
+        
+        :rtype: studiolibrary.Database 
         """
-        path = self.itemDataPath()
-
-        _data = self.readItemData()
-        _data.update(data)
-
-        return studiolibrary.saveJson(path, _data)
-
-    def readItemData(self):
-        """
-        Read the item data from disc.
-
-        :rtype: dict
-        """
-        path = self.itemDataPath()
-        return studiolibrary.readJson(path)
+        path = self.library().itemDataPath()
+        return studiolibrary.Database(path)
 
     def loadCustomOrder(self):
         """
@@ -886,12 +887,15 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         :rtype: None
         """
-        data = self.readItemData()
+        db = self.itemDatabase()
+        data = db.read()
 
         try:
             self.itemsWidget().setCustomSortOrder(data)
         except Exception, msg:
             logger.exception(msg)
+
+        self.itemsWidget().refreshSortBy()
 
     def saveCustomOrder(self):
         """
@@ -900,7 +904,9 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         :rtype: None
         """
         data = self.itemsWidget().customSortOrder()
-        self.writeItemData(data)
+
+        db = self.itemDatabase()
+        db.update(data)
 
     # -------------------------------------------------------------------
     # Support for moving items with drag and drop
