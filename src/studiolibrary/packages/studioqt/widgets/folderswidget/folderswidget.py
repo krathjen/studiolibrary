@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 class FoldersWidget(QtWidgets.QTreeView):
 
     itemDropped = QtCore.Signal(object)
-    itemClicked = QtCore.Signal()
+    itemRenamed = QtCore.Signal(str, str)
     itemSelectionChanged = QtCore.Signal()
 
     def __init__(self, parent=None):
@@ -47,7 +47,7 @@ class FoldersWidget(QtWidgets.QTreeView):
         self._filter = []
         self._folders = {}
         self._isLocked = False
-        self._signalsEnabled = True
+        self._blockSignals = False
         self._enableFolderSettings = False
 
         self._sourceModel = FileSystemModel(self)
@@ -218,13 +218,15 @@ class FoldersWidget(QtWidgets.QTreeView):
         index = self.model().mapToSource(index)
         return self.model().sourceModel().filePath(index)
 
-    def _selectionChanged(self, selected, deselected):
+    def _selectionChanged(self, selected=None, deselected=None):
         """
-        :type selected: list[Folder]
-        :type deselected: list[Folder]
+        Triggered when the folder item changes selection.
+
+        :type selected: list[Folder] or None
+        :type deselected: list[Folder] or None
         :rtype: None
         """
-        if self._signalsEnabled:
+        if not self._blockSignals:
             self.itemSelectionChanged.emit()
 
     def saveSettings(self, path):
@@ -329,10 +331,10 @@ class FoldersWidget(QtWidgets.QTreeView):
         if not paths:
             return
 
-        self._signalsEnabled = False
+        self._blockSignals = True
         for path in paths[:-1]:
             self.selectPath(path)
-        self._signalsEnabled = True
+        self._blockSignals = False
         self.selectPath(paths[-1])
 
     def selectFolder(self, folder, mode=QtCore.QItemSelectionModel.Select):
@@ -366,10 +368,10 @@ class FoldersWidget(QtWidgets.QTreeView):
         return folders
 
     def expandPaths(self, paths):
-        self._signalsEnabled = False
+        self._blockSignals = True
         for path in paths:
             self.expandParentsFromPath(path)
-        self._signalsEnabled = True
+        self._blockSignals = False
 
     def expandParentsFromPath(self, path):
         """
@@ -447,9 +449,14 @@ class FoldersWidget(QtWidgets.QTreeView):
 
     def renameFolder(self, folder, name):
         """
+        Rename the folder item to the give name.
+
         :type folder: Folder
         :type name: str
         """
+        self.blockSignals(True)
+        self.clearSelection()
+
         oldPath = folder.path()
         folder.rename(str(name))
         newPath = folder.path()
@@ -458,7 +465,11 @@ class FoldersWidget(QtWidgets.QTreeView):
         self._folders[newPath] = folder
 
         self.reload()
+        self.blockSignals(False)
+
         self.selectPath(newPath)
+
+        self.itemRenamed.emit(oldPath, newPath)
 
     def selectedFolder(self):
         """

@@ -59,6 +59,7 @@ from studiolibrary.main import main
 from studiolibrary.core.utils import *
 from studiolibrary.core.metafile import MetaFile
 from studiolibrary.core.settings import Settings
+from studiolibrary.core.database import Database
 from studiolibrary.core.analytics import Analytics
 
 from studiolibrary.gui.mayadockwidgetmixin import MayaDockWidgetMixin
