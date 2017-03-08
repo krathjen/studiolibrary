@@ -53,18 +53,6 @@ class Database(object):
         """
         utils.saveJson(self.path(), data)
 
-    def data(self, keys=None):
-        """
-        Return the data from the database filtering by the given keys.
-
-        :type keys: list
-        :rtype: dict 
-        """
-        data = self.read()
-        if keys:
-            data = [data[key] for key in data if key in keys]
-        return data
-
     def update(self, data):
         """
         Update the database with the given data.
@@ -102,7 +90,7 @@ class Database(object):
         :type dst: str
         :rtype: None
         """
-        data = self.data()
+        data = self.read()
 
         # Add a slash as a suffix for better directory matching
         if not src.endswith("/"):
