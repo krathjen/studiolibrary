@@ -94,34 +94,27 @@ class Database(object):
 
         self.write(data_)
 
-    def _rreplace(self, name, old, new, maxReplace=1):
+    def renameFolder(self, src, dst):
         """
-        Helper to replace the first instance going from right to left.
-    
-        Example:
-            'XXX'.join('mississippi'.rsplit('iss', 1))
-            missXXXippi
-    
-        :type name: str
-        :type old: str
-        :type new: str
-        :rtype: str
-        """
-        return new.join(name.rsplit(old, maxReplace))
-
-    def rreplaceKeys(self, search, replace):
-        """
-        Replace the keys with the give search option with the given replace.
+        Rename the given source directory to the given destination.
             
-        :str search: str
-        :str replace: str
+        :type src: str
+        :type dst: str
         :rtype: None
         """
         data = self.data()
 
+        # Add a slash as a suffix for better directory matching
+        if not src.endswith("/"):
+            src += "/"
+
+        if not dst.endswith("/"):
+            dst += "/"
+
+        # Replace all keys that start with the src value with the dst value.
         for oldKey in data:
-            if oldKey.startswith(search):
-                newKey = self._rreplace(oldKey, search, replace)
+            if oldKey.startswith(src):
+                newKey = oldKey.replace(src, dst, 1)
                 data[newKey] = data[oldKey]
                 del data[oldKey]
 

@@ -237,22 +237,18 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         self.itemsWidget().treeWidget().setValidGroupByColumns(self.DEFAULT_GROUP_BY_COLUMNS)
 
-    def _folderRenamed(self, oldPath, newPath):
+    def _folderRenamed(self, src, dst):
         """
         Triggered when a folder has been renamed from the folder widget.
 
-        :str oldPath: str
-        :str newPath: str
+        :str src: str
+        :str dst: str
         :rtype: None
         """
-        self.folderRenamed.emit(oldPath, newPath)
-
-        # Add suffix for better matching
-        oldPath += "/"
-        newPath += "/"
+        self.folderRenamed.emit(src, dst)
 
         db = self.itemDatabase()
-        db.rreplaceKeys(oldPath, newPath)
+        db.renameFolder(src, dst)
 
         self.loadCustomOrder()
 
