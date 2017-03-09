@@ -655,62 +655,52 @@ class CombinedWidget(QtWidgets.QWidget):
     # Support for saving the current item order.
     # ------------------------------------------------------------------------
 
-    def customSortOrder(self, indexByColumn="Path"):
+    def itemData(self, columnLabels, indexByColumn="Path"):
         """
-        Return the custom sort order for the items.
+        Return the column data for all the current items. 
+
+        :type columnLabels: list[str]
+        :type indexByColumn: str
 
         :rtype: dict
+                
         """
         column1 = self.treeWidget().columnFromLabel(indexByColumn)
-        column2 = self.treeWidget().columnFromLabel("Custom Order")
 
-        data = {}
+        itemData = {}
+
         for item in self.items():
             key = item.data(column1, QtCore.Qt.EditRole)
-            value = item.data(column2, QtCore.Qt.EditRole)
-            data.setdefault(key, {})
-            data[key].setdefault("Custom Order", value)
 
-        return data
+            for columnLabel in columnLabels:
+                column = self.treeWidget().columnFromLabel(columnLabel)
+                value = item.data(column, QtCore.Qt.EditRole)
 
-    def setCustomSortOrder(self, data, indexByColumn="Path"):
+                itemData.setdefault(key, {})
+                itemData[key].setdefault(columnLabel, value)
+
+        return itemData
+
+    def setItemData(self, itemData, indexByColumn="Path"):
         """
-        Set the custom sort order for the items.
+        Set the item data for all the current items.
 
-        :type data: dict
+        :type itemData: dict
+        :type indexByColumn: str
         """
         column1 = self.treeWidget().columnFromLabel(indexByColumn)
-        column2 = self.treeWidget().columnFromLabel("Custom Order")
 
         for item in self.items():
-            path = item.data(column1, QtCore.Qt.EditRole)
-            if path in data:
-                value = data[path].get("Custom Order")
-                if value:
-                    item.setData(column2, QtCore.Qt.EditRole, value)
+            key = item.data(column1, QtCore.Qt.EditRole)
 
-    def saveCustomSortOrder(self, path):
-        """
-        Save the current item order to the given path location.
+            if key in itemData:
 
-        :type path: str
-        :rtype: None
-        """
-        logger.debug("Saving custom order:" + path)
-        data = self.customSortOrder()
-        studioqt.saveJson(path, data)
+                for columnLabel in itemData[key]:
+                    column = self.treeWidget().columnFromLabel(columnLabel)
+                    value = itemData[key].get(columnLabel)
 
-    def loadCustomSortOrder(self, path):
-        """
-        Read and then load the sort oder from the given path location.
-
-        :type path: str
-        :rtype: None
-        """
-        if os.path.exists(path):
-            logger.debug("Loading custom order:" + path)
-            data = studioqt.readJson(path)
-            self.setCustomSortOrder(data)
+                    if value is not None:
+                        item.setText(column, value)
 
     def updateColumns(self):
         """

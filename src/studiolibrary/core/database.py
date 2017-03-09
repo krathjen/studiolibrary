@@ -61,7 +61,7 @@ class Database(object):
         data_.update(data)
         self.write(data_)
 
-    def updateKeys(self, keys, data):
+    def updateMultiple(self, keys, data):
         """
         Update the given keys with the given data.
 
@@ -79,9 +79,34 @@ class Database(object):
 
         self.write(data_)
 
+    def renameItem(self, src, dst):
+        """
+        Rename the given item path in the db to the given dst path.
+
+        :type src: str
+        :type dst: str
+        :rtype: None
+        """
+        data = self.read()
+
+        # Replace the old key with the new dst value
+        if src in data:
+
+            itemData = data.get(src, {})
+
+            # If the dst item already exists then we just update the data
+            if dst in data:
+                data[dst].update(itemData)
+            else:
+                data[dst] = itemData
+
+            # Remove the old item from the database
+            del data[src]
+            self.write(data)
+
     def renameFolder(self, src, dst):
         """
-        Rename the given source directory to the given destination.
+        Rename the given source directory in the db to the given destination.
             
         :type src: str
         :type dst: str
@@ -96,7 +121,7 @@ class Database(object):
         if not dst.endswith("/"):
             dst += "/"
 
-        # Replace all keys that start with the src value with the dst value.
+        # Replace all keys that start with the src value with the dst value
         for oldKey in data:
             if oldKey.startswith(src):
                 newKey = oldKey.replace(src, dst, 1)
