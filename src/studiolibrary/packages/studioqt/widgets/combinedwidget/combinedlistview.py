@@ -492,8 +492,12 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         item = self.itemAt(event.pos())
         selectedItems = self.selectedItems()
 
-        if selectedItems and item and self.treeWidget().isSortByCustomOrder():
-            self.moveItems(selectedItems, item)
+        if selectedItems and item:
+            if self.treeWidget().isSortByCustomOrder():
+                self.moveItems(selectedItems, item)
+            else:
+                msg = "You can only re-order items when sorting by custom order."
+                logger.info(msg)
 
         self.itemDropped.emit(event)
 

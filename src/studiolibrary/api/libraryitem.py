@@ -43,6 +43,7 @@ class LibraryItemSignals(QtCore.QObject):
     saved = QtCore.Signal(object)
     saving = QtCore.Signal(object)
     loaded = QtCore.Signal(object)
+    renamed = QtCore.Signal(str, str)
 
 
 class LibraryItem(studioqt.CombinedWidgetItem):
@@ -55,6 +56,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     saved = _libraryItemSignals.saved
     saving = _libraryItemSignals.saving
     loaded = _libraryItemSignals.loaded
+    renamed = _libraryItemSignals.renamed
 
     def typeIconPath(self):
         """
@@ -113,7 +115,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         Return the thumbnail location on disc for this item.
 
-        :rtype: QtWidgets.QWidget
+        :rtype: str
         """
         return studioqt.resource().get("icons", "thumbnail.png")
 
@@ -345,7 +347,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         Rename the current path to given destination path.
 
-        :type name: str
+        :type dst: str
         :type force: bool
         :type extension: bool or None
         :rtype: None
@@ -358,8 +360,10 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if dst and extension not in dst:
             dst += extension
 
-        path = studiolibrary.renamePath(src, dst)
-        self.setPath(path)
+        dst = studiolibrary.renamePath(src, dst)
+        self.setPath(dst)
+
+        self.renamed.emit(src, dst)
 
     def showRenameDialog(self, parent=None):
         """
