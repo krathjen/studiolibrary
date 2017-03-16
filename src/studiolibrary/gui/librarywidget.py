@@ -152,7 +152,8 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         name = "View"
         icon = studioqt.icon("view")
-        tip = "Choose to show/hide both the preview and navigation pane"
+        tip = "Choose to show/hide both the preview and navigation pane. " \
+              "Click + CTRL will hide the menu bar as well."
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
 
         name = "Settings"
@@ -282,7 +283,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
             tip=tip,
             side=side,
             callback=callback,
-       )
+        )
 
     def showGroupByMenu(self):
         """
@@ -294,7 +295,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         widget = self.menuBarWidget().findToolButton("Group By")
 
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
-        action = menu.exec_(point)
+        menu.exec_(point)
 
     def showSortByMenu(self):
         """
@@ -306,7 +307,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         widget = self.menuBarWidget().findToolButton("Sort By")
 
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
-        action = menu.exec_(point)
+        menu.exec_(point)
 
     def showItemViewMenu(self):
         """
@@ -318,7 +319,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         widget = self.menuBarWidget().findToolButton("Item View")
 
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
-        action = menu.exec_(point)
+        menu.exec_(point)
 
     def foldersWidget(self):
         """
@@ -708,7 +709,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         """
         Show the folder context menu at the current cursor position.
 
-        :type menu: QtWidgets.QMenu
+        :type pos: None or QtCore.QPoint
         :rtype: QtWidgets.QAction
         """
         menu = self.createFolderContextMenu()
@@ -942,6 +943,9 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
     def _itemMoved(self, item):
         """
+        Triggered when an item has been moved.
+        
+        :type item: studiolibrary.LibraryItem
         :rtype: None
         """
         self.saveCustomOrder()
@@ -1891,7 +1895,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         """
         Update the lock state for the library.
 
-        :param libraryWidget: studiolibrary.LibraryWidget
         :rtype: None
         """
         kwargs = self.library().kwargs()
@@ -1948,9 +1951,15 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
     def toggleView(self):
         """
         Toggle the preview widget and folder widget visible.
+        
         :rtype: None
         """
         compact = self.isCompactView()
+
+        if studioqt.isControlModifier():
+            compact = False
+            self.setMenuBarWidgetVisible(compact)
+
         self.setPreviewWidgetVisible(compact)
         self.setFoldersWidgetVisible(compact)
 
@@ -2098,12 +2107,12 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         """
         self._isDebug = value
 
-        logger = logging.getLogger("studiolibrary")
+        logger_ = logging.getLogger("studiolibrary")
 
         if value:
-            logger.setLevel(logging.DEBUG)
+            logger_.setLevel(logging.DEBUG)
         else:
-            logger.setLevel(logging.INFO)
+            logger_.setLevel(logging.INFO)
 
         self.debugModeChanged.emit(value)
         self.globalSignal.debugModeChanged.emit(self, value)
@@ -2113,5 +2122,3 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         :rtype: bool
         """
         return self._isDebug
-
-
