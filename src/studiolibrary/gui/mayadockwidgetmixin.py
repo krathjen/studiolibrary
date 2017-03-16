@@ -23,15 +23,14 @@ try:
 except ImportError:
     isMaya = False
 
-try:
-    from shiboken import wrapInstance
-except Exception, msg:
-    print msg
 
 try:
     from shiboken2 import wrapInstance
-except Exception, msg:
-    print msg
+except ImportError:
+    try:
+        from shiboken import wrapInstance
+    except ImportError, e:
+        print e
 
 
 __all__ = [

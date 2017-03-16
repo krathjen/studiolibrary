@@ -16,14 +16,17 @@
 
 import maya.OpenMayaUI as omui
 
-from studioqt import QtGui
-from studioqt import QtCore
 from studioqt import QtWidgets
 
+
 try:
-    from shiboken import wrapInstance
-except Exception:
     from shiboken2 import wrapInstance
+except ImportError:
+    try:
+        from shiboken import wrapInstance
+    except ImportError, e:
+        print e
+
 
 from .framerangemenu import FrameRangeMenu
 from .framerangemenu import showFrameRangeMenu
