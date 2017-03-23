@@ -594,7 +594,7 @@ class Animation(mutils.Pose):
         start, end = time
 
         # Check selected animation layers
-        gSelectedAnimLayers = maya.mel.eval('$a = $gSelectedAnimLayers;')
+        gSelectedAnimLayers = maya.mel.eval('$gSelectedAnimLayers=$gSelectedAnimLayers')
         if len(gSelectedAnimLayers) > 1:
             msg = "More than one animation layer is selected! Please select only one animation layer for export!"
             raise AnimationTransferError(msg)
