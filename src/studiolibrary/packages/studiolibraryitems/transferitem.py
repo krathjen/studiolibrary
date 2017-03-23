@@ -863,29 +863,6 @@ class PreviewWidget(BaseWidget):
 
         self.setupConnections()
 
-    def updateNamespaceFromScene(self):
-        """
-        Update the namespaces in the combobox with the ones in the scene.
-
-        :rtype: None
-        """
-        IGNORE_NAMESPACES = ['UI', 'shared']
-
-        namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True)
-        namespaces = list(set(namespaces) - set(IGNORE_NAMESPACES))
-        namespaces = sorted(namespaces)
-
-        text = self.ui.namespaceComboBox.currentText()
-
-        if namespaces:
-            self.ui.namespaceComboBox.setToolTip("")
-        else:
-            self.ui.namespaceComboBox.setToolTip("No namespaces found in scene.")
-
-        self.ui.namespaceComboBox.clear()
-        self.ui.namespaceComboBox.addItems(namespaces)
-        self.ui.namespaceComboBox.setEditText(text)
-
     def setupConnections(self):
         """
         :rtype: None
@@ -894,7 +871,7 @@ class PreviewWidget(BaseWidget):
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
         self.ui.useFileNamespace.clicked.connect(self.updateState)
-        self.ui.useCustomNamespace.clicked.connect(self.updateState)
+        self.ui.useCustomNamespace.clicked.connect(self._useCustomNamespaceClicked)
         self.ui.useSelectionNamespace.clicked.connect(self.updateState)
 
         self.ui.namespaceComboBox.activated[str].connect(self._namespaceEditChanged)
@@ -921,6 +898,15 @@ class PreviewWidget(BaseWidget):
         self.ui.useCustomNamespace.setChecked(True)
         self.ui.namespaceComboBox.setEditText(text)
         self.saveSettings()
+
+    def _useCustomNamespaceClicked(self):
+        """
+        Triggered when the custom namespace radio button is clicked.
+        
+        :rtype: None 
+        """
+        self.ui.namespaceComboBox.setFocus()
+        self.updateState()
 
     def objectCount(self):
         """
@@ -1049,6 +1035,29 @@ class PreviewWidget(BaseWidget):
         """
         self.updateNamespaceEdit()
 
+    def updateNamespaceFromScene(self):
+        """
+        Update the namespaces in the combobox with the ones in the scene.
+
+        :rtype: None
+        """
+        IGNORE_NAMESPACES = ['UI', 'shared']
+
+        namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True)
+        namespaces = list(set(namespaces) - set(IGNORE_NAMESPACES))
+        namespaces = sorted(namespaces)
+
+        text = self.ui.namespaceComboBox.currentText()
+
+        if namespaces:
+            self.ui.namespaceComboBox.setToolTip("")
+        else:
+            self.ui.namespaceComboBox.setToolTip("No namespaces found in scene.")
+
+        self.ui.namespaceComboBox.clear()
+        self.ui.namespaceComboBox.addItems(namespaces)
+        self.ui.namespaceComboBox.setEditText(text)
+
     def updateNamespaceEdit(self):
         """
         :rtype: None
@@ -1066,9 +1075,8 @@ class PreviewWidget(BaseWidget):
         elif self.ui.useFileNamespace.isChecked():
             namespaces = self.item().transferObject().namespaces()
 
-        if self.ui.useCustomNamespace.isChecked():
-            self.ui.namespaceComboBox.setFocus()
-        else:
+        if not self.ui.useCustomNamespace.isChecked():
+
             self.setNamespaces(namespaces)
 
             # Removes focus from the combobox
