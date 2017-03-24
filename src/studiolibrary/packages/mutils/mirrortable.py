@@ -68,6 +68,8 @@ logger = logging.getLogger(__name__)
 RE_LEFT_SIDE = "Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|left|Left|\|l_|:l_|^l_|_l$"
 RE_RIGHT_SIDE = "Rt|rt_|_rt|_r_|_R|R_|right|Right|\|r_|:r_|^r_|_r$"
 
+VALID_NODE_TYPES = ["joint", "transform"]
+
 
 class MirrorPlane:
     YZ = [-1, 1, 1]
@@ -85,9 +87,22 @@ class MirrorTable(mutils.SelectionSet):
 
     @classmethod
     @mutils.restoreSelection
-    def fromObjects(cls, objects, leftSide=None, rightSide=None, mirrorPlane=MirrorPlane.YZ):
+    def fromObjects(
+        cls,
+        objects,
+        leftSide=None,
+        rightSide=None,
+        mirrorPlane=MirrorPlane.YZ
+    ):
         """
+        Create a new Mirror Table instance from the given Maya object/controls.
+        
         :type objects: list[str]
+        :type leftSide: str
+        :type rightSide: str
+        :type mirrorPlane: mirrortable.MirrorPlane
+        
+        :rtype: MirrorTable
         """
         mirrorTable = cls()
         mirrorTable.setMetadata("left", leftSide)
@@ -95,8 +110,13 @@ class MirrorTable(mutils.SelectionSet):
         mirrorTable.setMetadata("mirrorPlane", mirrorPlane)
 
         for obj in objects:
-            if maya.cmds.nodeType(obj) == "transform":
+            nodeType = maya.cmds.nodeType(obj)
+            if nodeType in VALID_NODE_TYPES:
                 mirrorTable.add(obj)
+            else:
+                msg = "Node of type {0} is not supported. Node name: {1}"
+                msg = msg.format(nodeType, obj)
+                logger.info(msg)
 
         return mirrorTable
 
@@ -452,7 +472,7 @@ class MirrorTable(mutils.SelectionSet):
         :type srcObj: str
         :type dstObj: str
         :type mirrorAxis: int
-        :type attrs: None | str
+        :type attrs: None | list[str]
         :type option: MirrorOption
         """
         srcValue = None
@@ -564,9 +584,9 @@ class MirrorTable(mutils.SelectionSet):
         else:
             return True
 
-    def replacePrefix(self, name, search, replace):
+    def replacePrefix(self, name, old, new):
         """
-        Replace the given search prefix with the given replace prefix.
+        Replace the given old prefix with the given new prefix.
         It should also support long names.
 
         # Example:
@@ -577,57 +597,59 @@ class MirrorTable(mutils.SelectionSet):
         Group|Character1:R_footRollExtra|Character1:R_footRoll
 
         :type name: str
-        :type search: str
-        :type replace: str
+        :type old: str
+        :type new: str
         :rtype: str
         """
         dstName = name
-        search = search.replace("*", "")
-        replace = replace.replace("*", "")
+        old = old.replace("*", "")
+        new = new.replace("*", "")
 
         # Support for the prefix with namespaces
         # Group|Character1:LfootRollExtra|Character1:LfootRoll
         if ":" in name:
-            dstName = name.replace(":" + search, ":" + replace)
+            dstName = name.replace(":" + old, ":" + new)
             if name != dstName:
                 return dstName
 
         # Support for the prefix with long names
         # Group|LfootRollExtra|LfootRoll
         if "|" in name:
-            dstName = name.replace("|" + search, "|" + replace)
+            dstName = name.replace("|" + old, "|" + new)
+        elif dstName.startswith(old):
+            dstName = name.replace(old, new, 1)
 
         return dstName
 
-    def replaceSuffix(self, name, search, replace):
+    def replaceSuffix(self, name, old, new):
         """
-        Replace the given search suffix with the given replace suffix.
+        Replace the given old suffix with the given new suffix.
         It should also support long names.
 
         # Example:
         self.replaceSuffix("footRoll_R", "R", "L")
-        # Eesult: "footRoll_L" and not "footLoll_L".
+        # Result: "footRoll_L" and not "footLoll_L".
 
         # Long name example:
         Group|Character1:footRollExtra_R|Character1:footRoll_R
 
         :type name: str
-        :type search: str
-        :type replace: str
+        :type old: str
+        :type new: str
         :rtype: str
         """
         dstName = name
-        search = search.replace("*", "")
-        replace = replace.replace("*", "")
+        old = old.replace("*", "")
+        new = new.replace("*", "")
 
         # Support for the suffix with long name
         # Group|Character1:footRollExtraR|Character1:footRollR
         if "|" in name:
-            dstName = name.replace(search + "|", replace + "|")
+            dstName = name.replace(old + "|", new + "|")
 
         # Eg: Character1:footRollR
-        if dstName.endswith(search):
-            dstName = dstName[:-len(search)] + replace
+        if dstName.endswith(old):
+            dstName = dstName[:-len(old)] + new
 
         return dstName
 
@@ -640,7 +662,7 @@ class MirrorTable(mutils.SelectionSet):
         # footRoll_L
         # footRoll_LShape
 
-        :type obj: str
+        :type name: str
         :rtype: bool
         """
         side = self.leftSide()
