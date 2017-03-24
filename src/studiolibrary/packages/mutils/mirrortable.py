@@ -53,11 +53,11 @@ mt.rightToLeft()
 import re
 import mutils
 import logging
+import traceback
 
 try:
     import maya.cmds
 except ImportError:
-    import traceback
     traceback.print_exc()
 
 
@@ -65,8 +65,8 @@ __all__ = ["MirrorTable", "MirrorPlane", "MirrorOption", "Axis"]
 logger = logging.getLogger(__name__)
 
 
-RE_LEFT_SIDE = "Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|left|Left|\|l_|:l_|^l_|_l$"
-RE_RIGHT_SIDE = "Rt|rt_|_rt|_r_|_R|R_|right|Right|\|r_|:r_|^r_|_r$"
+RE_LEFT_SIDE = "Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|left|Left|\|l_|:l_|^l_|_l$|:L|^L"
+RE_RIGHT_SIDE = "Rt|rt_|_rt|_r_|_R|R_|right|Right|\|r_|:r_|^r_|_r$|:R|^R"
 
 VALID_NODE_TYPES = ["joint", "transform"]
 
@@ -123,7 +123,9 @@ class MirrorTable(mutils.SelectionSet):
     @staticmethod
     def findLeftSide(objects):
         """
-        :type objects: str
+        Return the left side naming convention for the given objects
+        
+        :type objects: list[str]
         :rtype: str
         """
         return MirrorTable.findSide(objects, RE_LEFT_SIDE)
@@ -131,34 +133,210 @@ class MirrorTable(mutils.SelectionSet):
     @staticmethod
     def findRightSide(objects):
         """
-        :type objects: str
+        Return the right side naming convention for the given objects
+        
+        :type objects: list[str]
         :rtype: str
         """
         return MirrorTable.findSide(objects, RE_RIGHT_SIDE)
 
     @staticmethod
-    def findSide(names, reSide):
+    def findSide(objects, reSide):
         """
-        :type names: list[str]
+        Return the naming convention for the given names.
+        
+        :type objects: list[str]
         :type reSide: str
         :rtype: str
         """
         reSide = re.compile(reSide)
-        for n in names:
-            m = reSide.search(n)
+        for obj in objects:
+            obj = obj.split("|")[-1]
+            obj = obj.split(":")[-1]
+
+            m = reSide.search(obj)
             if m:
                 side = m.group()
-                side = side.replace(":", "")
-                side = side.replace("|", "")
 
-                if n.startswith(side) or ":" + side in n or "|" + side in n:
+                if obj.startswith(side):
                     side += "*"
 
-                if n.endswith(side):
+                if obj.endswith(side):
                     side = "*" + side
 
                 return side
         return ""
+
+    @staticmethod
+    def matchSide(name, side):
+        """
+        Return True if the name contains the given side.
+
+        :type name: str
+        :type side: str
+        :rtype: bool
+        """
+        if side:
+            # Support for prefix naming convention.
+            if side.endswith("*"):
+                return MirrorTable.replacePrefix(name, side, "X") != name
+
+            # Support for suffix naming convention.
+            elif side.startswith("*"):
+                return MirrorTable.replaceSuffix(name, side, "X") != name
+
+            # Support for all other naming conventions.
+            else:
+                return side in name
+
+        return False
+
+    @staticmethod
+    def rreplace(name, old, new, count=1):
+        """
+        convenience method.
+
+        Example:
+            print MirrorTable.rreplace("CHR1:RIG:RhandCON", ":R", ":L")
+            "CHR1:RIG:LhandCON"
+
+        :type name: str
+        :type old: str
+        :type new: str
+        :type count: int
+        :rtype: str 
+        """
+        return new.join(name.rsplit(old, count))
+
+    @staticmethod
+    def replacePrefix(name, old, new):
+        """
+        Replace the given old prefix with the given new prefix.
+        It should also support long names.
+
+        # Example:
+        self.replacePrefix("R_footRoll", "R", "L")
+        # Result: "L_footRoll" and not "L_footLoll".
+
+        self.replacePrefix("Grp|Ch1:R_footExtra|Ch1:R_footRoll", "R_", "L_")
+        # Result: "Grp|Ch1:L_footExtra|Ch1:L_footRoll"
+
+        :type name: str
+        :type old: str
+        :type new: str
+        :rtype: str
+        """
+        dstName = name
+        old = old.replace("*", "")
+        new = new.replace("*", "")
+
+        # Support for the prefix with namespaces
+        # Group|Character1:LfootRollExtra|Character1:LfootRoll
+        if ":" in name:
+            dstName = MirrorTable.rreplace(name, ":" + old, ":" + new, 1)
+            if name != dstName:
+                return dstName
+
+        # Support for the prefix with long names
+        # Group|LfootRollExtra|LfootRoll
+        if "|" in name:
+            dstName = name.replace("|" + old, "|" + new)
+        elif dstName.startswith(old):
+            dstName = name.replace(old, new, 1)
+
+        return dstName
+
+    @staticmethod
+    def replaceSuffix(name, old, new):
+        """
+        Replace the given old suffix with the given new suffix.
+        It should also support long names.
+
+        # Example:
+        self.replaceSuffix("footRoll_R", "R", "L")
+        # Result: "footRoll_L" and not "footLoll_L".
+
+        self.replaceSuffix("Grp|Ch1:footExtra_R|Ch1:footRoll_R", "_R", "_L")
+        # Result: "Grp|Ch1:footExtra_L|Ch1:footRoll_L"
+
+        :type name: str
+        :type old: str
+        :type new: str
+        :rtype: str
+        """
+        dstName = name
+        old = old.replace("*", "")
+        new = new.replace("*", "")
+
+        # Support for the suffix with long name
+        # Group|Character1:footRollExtraR|Character1:footRollR
+        if "|" in name:
+            dstName = name.replace(old + "|", new + "|")
+
+        # Eg: Character1:footRollR
+        if dstName.endswith(old):
+            dstName = dstName[:-len(old)] + new
+
+        return dstName
+
+    def mirrorObject(self, obj):
+        """
+        Return the other/opposite side for the given name.
+
+        Example:
+            print self.mirrorObject("FKSholder_L")
+            # FKShoulder_R
+
+        :type obj: str
+        :rtype: str or None
+        """
+        leftSide = self.leftSide()
+        rightSide = self.rightSide()
+        return self._mirrorObject(obj, leftSide, rightSide)
+
+    @staticmethod
+    def _mirrorObject(obj, leftSide, rightSide):
+        """
+        A static method that is called by self.mirrorObject.
+
+        :type obj: str
+        :rtype: str or None
+        """
+        # Support for the prefix naming convention.
+        if leftSide.endswith("*") or rightSide.endswith("*"):
+            dstName = MirrorTable.replacePrefix(obj, leftSide, rightSide)
+
+            if obj == dstName:
+                dstName = MirrorTable.replacePrefix(obj, rightSide, leftSide)
+
+            if dstName != obj:
+                return dstName
+
+        # Support for the suffix naming convention.
+        elif leftSide.startswith("*") or rightSide.startswith("*"):
+
+            dstName = MirrorTable.replaceSuffix(obj, leftSide, rightSide)
+
+            if obj == dstName:
+                dstName = MirrorTable.replaceSuffix(obj, rightSide, leftSide)
+
+            if dstName != obj:
+                return dstName
+
+        # Support for all other naming conventions.
+        else:
+
+            dstName = obj.replace(leftSide, rightSide)
+
+            if dstName == obj:
+                dstName = obj.replace(rightSide, leftSide)
+
+            if dstName != obj:
+                return dstName
+
+        # Return None as the given name is probably a center control
+        # and doesn't have an opposite side.
+        return None
 
     @staticmethod
     def animCurve(obj, attr):
@@ -167,7 +345,8 @@ class MirrorTable(mutils.SelectionSet):
         :type attr: str
         :rtype: str
         """
-        connections = maya.cmds.listConnections(obj + "." + attr, d=False, s=True)
+        fullname = obj + "." + attr
+        connections = maya.cmds.listConnections(fullname, d=False, s=True)
         if connections:
             return connections[0]
         return None
@@ -215,7 +394,7 @@ class MirrorTable(mutils.SelectionSet):
     def axisWorldPosition(obj, axis):
         """
         :type obj: str
-        :type axis: (int, int, int)
+        :type axis: list[int]
         :rtype: list[float]
         """
         transform1 = maya.cmds.createNode("transform", name="transform1")
@@ -257,7 +436,7 @@ class MirrorTable(mutils.SelectionSet):
         """
         :type srcObj: str
         :type dstObj: str
-        :type axis: (int, int, int)
+        :type axis: list[int]
         :type mirrorPlane: list[int]
         :rtype: int
         """
@@ -343,7 +522,7 @@ class MirrorTable(mutils.SelectionSet):
 
     def mirrorPlane(self):
         """
-        :rtype: str | None
+        :rtype: lsit[int] | None
         """
         return self.metadata().get("mirrorPlane")
 
@@ -379,7 +558,13 @@ class MirrorTable(mutils.SelectionSet):
         result = {"mirrorAxis": self.calculateMirrorAxis(name)}
         return result
 
-    def matchObjects(self,  objects=None, namespaces=None, selection=False, callback=None):
+    def matchObjects(
+        self,
+        objects=None,
+        namespaces=None,
+        selection=False,
+        callback=None
+    ):
         """
         :type objects: list[str]
         :type namespaces: list[str]
@@ -417,11 +602,20 @@ class MirrorTable(mutils.SelectionSet):
     @mutils.unifyUndo
     @mutils.showWaitCursor
     @mutils.restoreSelection
-    def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):
+    def load(
+        self,
+        objects=None,
+        namespaces=None,
+        option=None,
+        animation=True,
+        time=None
+    ):
         """
         :type objects: list[str]
         :type namespaces: list[str]
         :type option: mirrorOptions
+        :type animation: bool
+        :type time: None or list[int]
         """
         results = {}
         foundObject = False
@@ -471,7 +665,7 @@ class MirrorTable(mutils.SelectionSet):
         """
         :type srcObj: str
         :type dstObj: str
-        :type mirrorAxis: int
+        :type mirrorAxis: list[int]
         :type attrs: None | list[str]
         :type option: MirrorOption
         """
@@ -506,7 +700,7 @@ class MirrorTable(mutils.SelectionSet):
         :type name: str
         :type: attr: str
         :type: value: int | float
-        :type mirrorAxis: Axis
+        :type mirrorAxis: Axis or None
         """
         if mirrorAxis is not None:
             value = self.formatValue(attr, value, mirrorAxis)
@@ -521,7 +715,7 @@ class MirrorTable(mutils.SelectionSet):
         """
         :type srcObj: str
         :type dstObj: str
-        :type mirrorAxis: Axis
+        :type mirrorAxis: Axis or None
         """
         srcValid = self.isValidMirror(srcObj, option)
         dstValid = self.isValidMirror(dstObj, option)
@@ -542,7 +736,8 @@ class MirrorTable(mutils.SelectionSet):
         :type srcObj: str
         :type dstObj: str
         :type attrs: list[str]
-        :type mirrorAxis: (int, int, int)
+        :type time: list[int]
+        :type mirrorAxis: list[int]
         """
         maya.cmds.cutKey(dstObj, time=time or ())  # remove keys
         if maya.cmds.copyKey(srcObj, time=time or ()):
@@ -584,75 +779,6 @@ class MirrorTable(mutils.SelectionSet):
         else:
             return True
 
-    def replacePrefix(self, name, old, new):
-        """
-        Replace the given old prefix with the given new prefix.
-        It should also support long names.
-
-        # Example:
-        self.replacePrefix("R_footRoll", "R", "L")
-        # Result: "L_footRoll" and not "L_footLoll".
-
-        # Long name example:
-        Group|Character1:R_footRollExtra|Character1:R_footRoll
-
-        :type name: str
-        :type old: str
-        :type new: str
-        :rtype: str
-        """
-        dstName = name
-        old = old.replace("*", "")
-        new = new.replace("*", "")
-
-        # Support for the prefix with namespaces
-        # Group|Character1:LfootRollExtra|Character1:LfootRoll
-        if ":" in name:
-            dstName = name.replace(":" + old, ":" + new)
-            if name != dstName:
-                return dstName
-
-        # Support for the prefix with long names
-        # Group|LfootRollExtra|LfootRoll
-        if "|" in name:
-            dstName = name.replace("|" + old, "|" + new)
-        elif dstName.startswith(old):
-            dstName = name.replace(old, new, 1)
-
-        return dstName
-
-    def replaceSuffix(self, name, old, new):
-        """
-        Replace the given old suffix with the given new suffix.
-        It should also support long names.
-
-        # Example:
-        self.replaceSuffix("footRoll_R", "R", "L")
-        # Result: "footRoll_L" and not "footLoll_L".
-
-        # Long name example:
-        Group|Character1:footRollExtra_R|Character1:footRoll_R
-
-        :type name: str
-        :type old: str
-        :type new: str
-        :rtype: str
-        """
-        dstName = name
-        old = old.replace("*", "")
-        new = new.replace("*", "")
-
-        # Support for the suffix with long name
-        # Group|Character1:footRollExtraR|Character1:footRollR
-        if "|" in name:
-            dstName = name.replace(old + "|", new + "|")
-
-        # Eg: Character1:footRollR
-        if dstName.endswith(old):
-            dstName = dstName[:-len(old)] + new
-
-        return dstName
-
     def isLeftSide(self, name):
         """
         Return True if the object contains the left side string.
@@ -683,83 +809,10 @@ class MirrorTable(mutils.SelectionSet):
         side = self.rightSide()
         return self.matchSide(name, side)
 
-    def matchSide(self, name, side):
-        """
-        Return True if the name contains the given side.
-
-        :type name: str
-        :type side: str
-        :rtype: bool
-        """
-        if side:
-            # Support for prefix naming convention.
-            if side.endswith("*"):
-                return self.replacePrefix(name, side, "X") != name
-
-            # Support for suffix naming convention.
-            elif side.startswith("*"):
-                return self.replaceSuffix(name, side, "X") != name
-
-            # Support for all other naming conventions.
-            else:
-                return side in name
-
-        return False
-
-    def mirrorObject(self, name):
-        """
-        Return the other/opposite side for the given name.
-
-        Example:
-            print self.mirrorObject("FKSholder_L")
-            # FKShoulder_R
-
-        :type name: str
-        :rtype: str or None
-        """
-        leftSide = self.leftSide()
-        rightSide = self.rightSide()
-
-        # Support for the prefix naming convention.
-        if leftSide.endswith("*") or rightSide.endswith("*"):
-            dstName = self.replacePrefix(name, leftSide, rightSide)
-
-            if name == dstName:
-                dstName = self.replacePrefix(name, rightSide, leftSide)
-
-            if dstName != name:
-                return dstName
-
-        # Support for the suffix naming convention.
-        elif leftSide.startswith("*") or rightSide.startswith("*"):
-
-            dstName = self.replaceSuffix(name, leftSide, rightSide)
-
-            if name == dstName:
-                dstName = self.replaceSuffix(name, rightSide, leftSide)
-
-            if dstName != name:
-                return dstName
-
-        # Support for all other naming conventions.
-        else:
-
-            dstName = name.replace(leftSide, rightSide)
-
-            if dstName == name:
-                dstName = name.replace(rightSide, leftSide)
-
-            if dstName != name:
-                return dstName
-
-        # Return None as the given name is probably a center control
-        # and doesn't have an opposite side.
-        return None
-
     def calculateMirrorAxis(self, srcObj):
         """
         :type srcObj: str
-        :rtype: (int, int int)
+        :rtype: list[int]
         """
         result = [1, 1, 1]
         dstObj = self.mirrorObject(srcObj) or srcObj
