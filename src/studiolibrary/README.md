@@ -1,18 +1,20 @@
-## STUDIO LIBRARY
+## Studio Library
 
-Studio Library is a free python script for managing
-poses and animation in Maya.
-Comments, suggestions
-and bug reports are welcome.
+Studio Library is a free python script for managing poses and animation in Maya.
 
 * www.studiolibrary.com
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=CJvxlGpYc1o
-" target="_blank"><img src="http://img.youtube.com/vi/CJvxlGpYc1o/0.jpg"
-alt="Studio Library" width="240" height="180" border="10" /></a>
+
+## Contributing
+
+Whether it's reporting bugs, discussing ideas or committing code: Contributions to Studio Library are welcome!
+
+* Please follow the same workflow as the "[GitHub flow](https://guides.github.com/introduction/flow/index.html)".
+
+* Please follow the same coding style as the "[Python Qt Style Guidelines](http://bitesofcode.blogspot.co.uk/2011/10/pyqt-coding-style-guidelines.html)".
 
 
-## HOW TO INSTALL?
+## How to Install?
 
 1. Download and unzip the *studiolibrary.zip* file
 
@@ -32,7 +34,7 @@ alt="Studio Library" width="240" height="180" border="10" /></a>
 *C:/Users/USERNAME/Documents/maya/scripts*
 
 
-## HOW TO RUN?
+## How to run?
 
 3. Start Maya and run the following code in the **Python** script editor.
 
@@ -42,8 +44,8 @@ studiolibrary.main()
 ```
 
 
-## HAVING ISSUES?
+## Having Issues?
 
 Please send an email with the error message and a detailed step by step process of how you got the error.
 
-Comments, suggestions and bug reports are welcome. Contact
+Comments, suggestions and bug reports are welcome. [Contact](www.studiolibrary.com/contact)
