@@ -29,7 +29,9 @@ __all__ = [
     "itemExtensions",
     "itemFromPath",
     "itemsFromPaths",
+    "itemsFromUrls",
     "findItems",
+    "findItemsInFolders",
     "validatePath",
     "validateName",
     "showWelcomeDialog",
@@ -128,7 +130,10 @@ def itemFromPath(path):
             if ignore and ignore in path:
                 continue
 
-            if isDir and os.path.isdir(path) or isFile and os.path.isfile(path):
+            isDir = isDir and os.path.isdir(path)
+            isFile = isFile and os.path.isfile(path)
+
+            if isDir or isFile:
                 item = cls(path)
                 break
 
@@ -137,7 +142,7 @@ def itemFromPath(path):
 
 def itemsFromPaths(paths):
     """
-    Return the items for the given paths.
+    Return new item instances for the given paths.
 
     :type paths: list[str]:
     :rtype: collections.Iterable[studiolibrary.LibraryItem]
@@ -148,16 +153,38 @@ def itemsFromPaths(paths):
             yield item
 
 
+def itemsFromUrls(urls):
+    """
+    Return new item instances for the given QUrl objects.
+    
+    :type urls: list[QtGui.QUrl]
+    :rtype: list[studiolibrary.LibraryItem]
+    """
+    items = []
+    for url in urls:
+        path = url.toLocalFile()
+
+        # Fixes a bug when dragging from windows explorer on windows 10
+        if studiolibrary.isWindows():
+            if path.startswith("/"):
+                path = path[1:]
+
+        item = itemFromPath(path)
+        items.append(item)
+
+    return items
+
+
 def findItems(path, direction=studiolibrary.Direction.Down, depth=3):
     """
-    Find the items by walking the given path.
+    Find and create new item instances by walking the given path.
 
     :type path: str
     :type direction: studiolibrary.Direction or str
+    :type depth: int
+    
     :rtype: collections.Iterable[studiolibrary.LibraryItem]
     """
-    match = lambda path: itemFromPath(path)
-
     ignore = [
         ".studiolibrary",
         ".studioLibrary",
@@ -165,13 +192,27 @@ def findItems(path, direction=studiolibrary.Direction.Down, depth=3):
 
     paths = studiolibrary.findPaths(
         path,
-        match=match,
+        match=itemFromPath,
         ignore=ignore,
         direction=direction,
         depth=depth
     )
 
     return itemsFromPaths(paths)
+
+
+def findItemsInFolders(folders, depth=3):
+    """
+    Find and create new item instances by walking the given paths.
+
+    :type folders: list[str]
+    :type depth: int
+
+    :rtype: collections.Iterable[studiolibrary.LibraryItem]
+    """
+    for folder in folders:
+        for item in findItems(folder, depth=depth):
+            yield item
 
 
 def validatePath(path):
@@ -204,7 +245,6 @@ def validateName(name, valid=None, caseSensitive=True):
     :type caseSensitive: bool
 
     :raises: StudioLibraryValidateError
-
     :rtype: None
     """
     libraries = {}
@@ -217,13 +257,15 @@ def validateName(name, valid=None, caseSensitive=True):
     if name in valid:
         return
 
-    if name in studiolibrary.Library._instances:
+    names = studiolibrary.Library._instances
+
+    if name in names:
         msg = u'The Library "{0}" already exists!'.format(name)
         raise StudioLibraryValidateError(msg)
 
     if caseSensitive:
-        for n in studiolibrary.Library._instances:
-            libraries[n.lower()] = studiolibrary.Library._instances[n]
+        for n in names:
+            libraries[n.lower()] = names[n]
 
         if name.lower() in libraries:
             msg = u'The Library "{0}" already exists. It is case sensitive!'

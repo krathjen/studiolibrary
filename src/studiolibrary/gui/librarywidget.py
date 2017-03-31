@@ -394,29 +394,10 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         :rtype: None
         """
-        self.reloadItems()
+        self.loadItems()
         path = self.selectedFolderPath()
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
-
-    def itemsFromUrls(self, urls):
-        """
-        :type urls: list[QtGui.QUrl]
-        :rtype: list[studiolibrary.LibraryItem]
-        """
-        items = []
-        for url in urls:
-            path = url.toLocalFile()
-
-            # Fixes a bug when dragging from windows explorer on windows 10
-            if studiolibrary.isWindows():
-                if path.startswith("/"):
-                    path = path[1:]
-
-            item = studiolibrary.itemFromPath(path)
-            items.append(item)
-
-        return items
 
     # -----------------------------------------------------------------
     # Support for loading and setting items
@@ -431,7 +412,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         for library in self.library().libraries():
             widget = library.libraryWidget()
             if widget:
-                widget.reloadItems()
+                widget.loadItems()
 
     def clearItems(self):
         """
@@ -455,7 +436,16 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
+        selectedItems = self.selectedItems()
+
         self.itemsWidget().setItems(items, sortEnabled=sortEnabled)
+
+        self.loadItemData()
+
+        if selectedItems:
+            self.selectItems(selectedItems)
+
+        self.refreshSearch()
 
     def setLoaderEnabled(self, value):
         """
@@ -470,24 +460,20 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         """
         return self._loaderEnabled
 
-    def loader(self):
+    def createItems(self):
         """
         :rtype: list[studiolibrary.LibraryItem]
         """
         items = []
-        folders = self.foldersWidget().selectedFolders()
+        paths = self.foldersWidget().selectedPaths()
+        depth = 1
 
-        for folder in folders:
+        if self.isRecursiveSearchEnabled():
+            depth = 3
 
-            path = folder.path()
-            depth = 1
-
-            if self.isRecursiveSearchEnabled():
-                depth = 3
-
-            for item in studiolibrary.findItems(path, depth=depth):
-                item.setLibrary(self.library())
-                items.append(item)
+        for item in studiolibrary.findItemsInFolders(paths, depth):
+            item.setLibrary(self.library())
+            items.append(item)
 
         return items
 
@@ -499,7 +485,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         self.setRootPath(self.library().path())
 
     @studioqt.showWaitCursor
-    def reloadItems(self):
+    def loadItems(self):
         """Reload the items widget."""
         if not self.loaderEnabled():
             logger.debug("Loader disabled!")
@@ -509,18 +495,8 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         elapsedTime = time.time()
 
-        selectedItems = self.selectedItems()
-
-        items = self.loader()
-
+        items = self.createItems()
         self.setItems(items, sortEnabled=False)
-
-        self.loadItemData()
-
-        if selectedItems:
-            self.selectItems(selectedItems)
-
-        self.refreshSearch()
 
         elapsedTime = time.time() - elapsedTime
         self.setLoadedMessage(elapsedTime)
@@ -959,7 +935,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         if mimeData.hasUrls():
             folder = self.selectedFolder()
-            items = self.itemsFromUrls(mimeData.urls())
+            items = studiolibrary.itemsFromUrls(mimeData.urls())
 
             for item in items:
                 # Check if the item is moving to another folder.
@@ -1036,7 +1012,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         if folder and folder.path() == item.dirname():
             path = item.path()
             self.itemsWidget().clearSelection()
-            self.reloadItems()
+            self.loadItems()
             self.selectPaths([path])
 
     def _itemSaving(self, item):
@@ -1471,7 +1447,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         finally:
             self.reloadStyleSheet()
             self.setLoaderEnabled(True)
-            self.reloadItems()
+            self.loadItems()
 
         self.loadFolderData()
 
@@ -1779,7 +1755,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
             raise
 
         finally:
-            self.reloadItems()
+            self.loadItems()
 
     # -----------------------------------------------------------------------
     # Support for message boxes
@@ -2004,7 +1980,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         result = item.showRenameDialog(parent=self)
         if result:
-            self.reloadItems()
+            self.loadItems()
             self.selectItems([item])
 
     def kwargs(self):
@@ -2091,7 +2067,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         :rtype: None
         """
         self._recursiveSearchEnabled = value
-        self.reloadItems()
+        self.loadItems()
 
     @staticmethod
     def help():
