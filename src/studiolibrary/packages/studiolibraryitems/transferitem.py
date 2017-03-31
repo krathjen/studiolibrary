@@ -815,7 +815,7 @@ class CreateWidget(BaseWidget):
                     return
 
             path += "/" + name
-            description = str(self.ui.comment.toPlainText())
+            description = self.description()
 
             self.save(
                 path=path,
