@@ -70,8 +70,6 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-MirrorOption = mutils.MirrorOption
-
 
 class MirrorItem(transferitem.TransferItem):
 
@@ -139,8 +137,8 @@ class MirrorItem(transferitem.TransferItem):
 
     def loadFromSettings(self):
         """Load the mirror table using the settings for this item."""
-        mirrorOption = self.settings().get("mirrorOption", MirrorOption.Swap)
-        mirrorAnimation = self.settings().get("mirrorAnimation", True)
+        mirrorOption = self.settings().get("mirrorOption")
+        mirrorAnimation = self.settings().get("mirrorAnimation")
         namespaces = self.namespaces()
         objects = maya.cmds.ls(selection=True) or []
 
@@ -345,8 +343,8 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
         """
         super(MirrorPreviewWidget, self).setState(state)
 
-        mirrorOption = int(state.get("mirrorOption", MirrorOption.Swap))
-        mirrorAnimation = bool(state.get("mirrorAnimation", True))
+        mirrorOption = int(state.get("mirrorOption"))
+        mirrorAnimation = bool(state.get("mirrorAnimation"))
 
         self.ui.mirrorOptionComboBox.setCurrentIndex(mirrorOption)
         self.ui.mirrorAnimationCheckBox.setChecked(mirrorAnimation)
