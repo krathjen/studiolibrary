@@ -16,7 +16,10 @@ import sys
 import logging
 
 import studiolibrary
+
+import mutils
 import studioqt
+
 
 __encoding__ = sys.getfilesystemencoding()
 
@@ -24,8 +27,37 @@ PATH = unicode(os.path.abspath(__file__), __encoding__)
 DIRNAME = os.path.dirname(PATH).replace('\\', '/')
 RESOURCE_DIRNAME = DIRNAME + "/resource"
 
+DEFAULT_FILE_TYPE = "mayaBinary"
 
 _resource = None
+
+
+def settings():
+    """
+    Return the local settings for importing and exporting an animation.
+
+    :rtype: studiolibrary.Settings
+    """
+    settings = studiolibrary.Settings.instance("StudioLibrary", "ItemSettings")
+
+    # Anim options
+    settings.setdefault('byFrame', 1)
+    settings.setdefault('fileType', DEFAULT_FILE_TYPE)
+    settings.setdefault('currentTime', False)
+    settings.setdefault('byFrameDialog', True)
+    settings.setdefault('connectOption', False)
+    settings.setdefault('showHelpImage', False)
+    settings.setdefault('pasteOption', "replace")
+
+    # Pose options
+    settings.setdefault("keyEnabled", False)
+    settings.setdefault("mirrorEnabled", False)
+
+    # Mirror options
+    settings.setdefault("mirrorOption", mutils.MirrorOption.Swap)
+    settings.setdefault("mirrorAnimation", True)
+
+    return settings
 
 
 def resource():

@@ -77,8 +77,6 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_FILE_TYPE = "mayaBinary"
-
 
 class AnimItemError(Exception):
 
@@ -88,26 +86,6 @@ class AnimItemError(Exception):
 class ValidateAnimError(AnimItemError):
 
     """Raised when there is an invalid animation option"""
-
-
-def animSettings():
-    """
-    Return the local settings for importing and exporting an animation.
-
-    :rtype: studiolibrary.Settings
-    """
-    folders = "StudioLibrary", "Items", "AnimSettings"
-    settings = studiolibrary.Settings.instance(*folders)
-
-    settings.setdefault('byFrame', 1)
-    settings.setdefault('fileType', DEFAULT_FILE_TYPE)
-    settings.setdefault('currentTime', False)
-    settings.setdefault('byFrameDialog', True)
-    settings.setdefault('connectOption', False)
-    settings.setdefault('showHelpImage', False)
-    settings.setdefault('pasteOption', "replace")
-
-    return settings
 
 
 class AnimItem(transferitem.TransferItem):
@@ -185,14 +163,6 @@ class AnimItem(transferitem.TransferItem):
         :rtype: str
         """
         return self.path() + "/sequence"
-
-    def settings(self):
-        """
-        Reimplemented so that we can set the default options.
-
-        :rtype: studiolibrary.Settings
-        """
-        return animSettings()
 
     def items(self):
         """
@@ -365,8 +335,8 @@ class AnimCreateWidget(transferitem.CreateWidget):
 
     def __init__(self, item=None, parent=None):
         """
-        :type args: list
-        :type kwargs: dict
+        :type item: studiolibrary.LibraryItem
+        :type parent: QtWidgets.QWidget
         """
         item = item or AnimItem()
         transferitem.CreateWidget.__init__(self, item, parent=parent)
@@ -402,7 +372,7 @@ class AnimCreateWidget(transferitem.CreateWidget):
         self.ui.sequenceWidget.clicked.connect(self.thumbnailCapture)
         self.ui.frameRangeButton.clicked.connect(self.showFrameRangeMenu)
 
-        settings = animSettings()
+        settings = studiolibraryitems.settings()
 
         byFrame = settings.get("byFrame")
         self.setByFrame(byFrame)

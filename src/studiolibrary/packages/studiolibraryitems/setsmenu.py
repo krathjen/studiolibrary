@@ -48,7 +48,7 @@ def showSetsMenu(path, **kwargs):
     :type path: str
     :rtype: QtWidgets.QAction
     """
-    menu = SelectionSetMenu.fromPath(path, **kwargs)
+    menu = SetsMenu.fromPath(path, **kwargs)
     position = QtGui.QCursor().pos()
     action = menu.exec_(position)
     return action
@@ -74,7 +74,7 @@ class SetsMenu(QtWidgets.QMenu):
             enableSelectContent=True,
     ):
         """
-        :type item: mayabaseitem.MayaBaseItem
+        :type item: studiolibraryitems.TransferItem
         :type parent: QtWidgets.QMenu
         :type namespaces: list[str]
         :type enableSelectContent: bool

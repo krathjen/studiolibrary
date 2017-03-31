@@ -12,9 +12,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import shutil
 import logging
-import traceback
 
 from studioqt import QtGui
 from studioqt import QtCore
@@ -138,8 +136,7 @@ class TransferItem(studiolibrary.LibraryItem):
         """
         Return the thumbnail location on disc to be displayed for the item.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtWidgets.QWidget
+        :rtype: str
         """
         iconPath = self.path() + "/thumbnail.jpg"
 
@@ -154,7 +151,7 @@ class TransferItem(studiolibrary.LibraryItem):
 
         :rtype: studiolibrary.Settings
         """
-        return self.localSettings()
+        return studiolibraryitems.settings()
 
     def owner(self):
         """
@@ -1043,7 +1040,11 @@ class PreviewWidget(BaseWidget):
         """
         IGNORE_NAMESPACES = ['UI', 'shared']
 
-        namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True)
+        if studiolibrary.isMaya():
+            namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True)
+        else:
+            namespaces = []
+
         namespaces = list(set(namespaces) - set(IGNORE_NAMESPACES))
         namespaces = sorted(namespaces)
 

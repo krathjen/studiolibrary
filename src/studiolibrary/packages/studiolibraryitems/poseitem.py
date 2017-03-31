@@ -168,7 +168,7 @@ class PoseItem(transferitem.TransferItem):
         """
         :rtype: bool
         """
-        return self.settings().get("mirrorEnabled", False)
+        return self.settings().get("mirrorEnabled")
 
     def setMirrorEnabled(self, value):
         """
@@ -181,7 +181,7 @@ class PoseItem(transferitem.TransferItem):
         """
         :rtype: bool
         """
-        return self.settings().get("keyEnabled", False)
+        return self.settings().get("keyEnabled")
 
     def setKeyEnabled(self, value):
         """
@@ -440,8 +440,8 @@ class PosePreviewWidget(transferitem.PreviewWidget):
 
     def setState(self, state):
         """Set the current state of the widget with a dictionary."""
-        key = state.get("keyEnabled", False)
-        mirror = state.get("mirrorEnabled", False)
+        key = state.get("keyEnabled")
+        mirror = state.get("mirrorEnabled")
 
         self.ui.keyCheckBox.setChecked(key)
         self.ui.mirrorCheckBox.setChecked(mirror)
