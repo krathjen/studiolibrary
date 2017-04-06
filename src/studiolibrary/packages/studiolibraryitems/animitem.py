@@ -582,7 +582,7 @@ Would you like to show this message again?"""
         """
         if self.startFrame() is None or self.endFrame() is None:
             msg = "Please choose a start frame and an end frame."
-            raise ValidateAnimationError(msg)
+            raise ValidateAnimError(msg)
 
     def save(self, objects, path, iconPath, description):
         """
@@ -633,8 +633,6 @@ class AnimPreviewWidget(transferitem.PreviewWidget):
         self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
         self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
         self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
-
-        self.loadSettings()
 
     def setItem(self, item):
         """
