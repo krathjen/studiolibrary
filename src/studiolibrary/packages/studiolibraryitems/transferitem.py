@@ -51,7 +51,7 @@ class ValidateError(TransferItemError):
 
 
 class NamespaceOption:
-    FromFile = "pose"
+    FromFile = "file"
     FromCustom = "custom"
     FromSelection = "selection"
 
@@ -375,7 +375,7 @@ class TransferItem(studiolibrary.LibraryItem):
 
         :rtype: list[str]
         """
-        return self.settings().get("namespaces", "")
+        return self.settings().get("namespaces", [])
 
     def setCustomNamespaces(self, namespaces):
         """
@@ -971,11 +971,11 @@ class PreviewWidget(BaseWidget):
         """
         :type state: dict
         """
-        namespaceOption = state.get("namespaceOption", "")
-        self.setNamespaceOption(namespaceOption)
-
-        namespaces = state.get("namespaces", "")
+        namespaces = state.get("namespaces", [])
         self.setNamespaces(namespaces)
+
+        namespaceOption = state.get("namespaceOption", NamespaceOption.FromFile)
+        self.setNamespaceOption(namespaceOption)
 
         toggleBoxChecked = state.get("iconToggleBoxChecked", True)
         self.ui.iconToggleBoxFrame.setVisible(toggleBoxChecked)

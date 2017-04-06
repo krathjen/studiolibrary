@@ -40,6 +40,15 @@ def settings():
     """
     settings = studiolibrary.Settings.instance("StudioLibrary", "ItemSettings")
 
+    # Shared options
+    settings.setdefault("namespaces", [])
+    settings.setdefault("namespaceOption", "file")
+
+    settings.setdefault("iconToggleBoxChecked", True)
+    settings.setdefault("infoToggleBoxChecked", True)
+    settings.setdefault("optionsToggleBoxChecked", True)
+    settings.setdefault("namespaceToggleBoxChecked", True)
+
     # Anim options
     settings.setdefault('byFrame', 1)
     settings.setdefault('fileType', DEFAULT_FILE_TYPE)
