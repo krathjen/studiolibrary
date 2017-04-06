@@ -16,7 +16,7 @@
 # Saving a pose item
 #---------------------------------------------------------------------------
 
-from studiolibraryitems import poseitem
+from studiolibrarymaya import poseitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.pose"
 objects = maya.cmds.ls(selection=True) or []
@@ -28,7 +28,7 @@ item.save(objects=objects)
 # Loading a pose item
 #---------------------------------------------------------------------------
 
-from studiolibraryitems import poseitem
+from studiolibrarymaya import poseitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.pose"
 objects = maya.cmds.ls(selection=True) or []
@@ -49,9 +49,9 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studiolibrary
-import studiolibraryitems
+import studiolibrarymaya
 
-from studiolibraryitems import transferitem
+from studiolibrarymaya import baseitem
 
 try:
     import mutils
@@ -75,7 +75,7 @@ class PoseItemSignals(QtCore.QObject):
     mirrorChanged = QtCore.Signal(bool)
 
 
-class PoseItem(transferitem.TransferItem):
+class PoseItem(baseitem.BaseItem):
 
     _poseItemSignals = PoseItemSignals()
     mirrorChanged = _poseItemSignals.mirrorChanged
@@ -87,7 +87,7 @@ class PoseItem(transferitem.TransferItem):
 
         :rtype: path
         """
-        return studiolibraryitems.resource().get("icons", "pose.png")
+        return studiolibrarymaya.resource().get("icons", "pose.png")
 
     @classmethod
     def createAction(cls, menu, libraryWidget):
@@ -128,7 +128,7 @@ class PoseItem(transferitem.TransferItem):
         :type args: list
         :type kwargs: dict
         """
-        transferitem.TransferItem.__init__(self, *args, **kwargs)
+        baseitem.BaseItem.__init__(self, *args, **kwargs)
 
         self._options = None
         self._isLoading = False
@@ -193,7 +193,7 @@ class PoseItem(transferitem.TransferItem):
         """
         :type event: QtGui.QEvent
         """
-        transferitem.TransferItem.keyPressEvent(self, event)
+        baseitem.BaseItem.keyPressEvent(self, event)
 
         if not event.isAutoRepeat():
             if event.key() == QtCore.Qt.Key_M:
@@ -242,7 +242,7 @@ class PoseItem(transferitem.TransferItem):
         :rtype: None
         """
         self._transferObject = None
-        transferitem.TransferItem.selectionChanged(self)
+        baseitem.BaseItem.selectionChanged(self)
 
     def stopBlending(self):
         """
@@ -251,7 +251,7 @@ class PoseItem(transferitem.TransferItem):
         :rtype: None
         """
         self._options = None
-        transferitem.TransferItem.stopBlending(self)
+        baseitem.BaseItem.stopBlending(self)
 
     def setBlendValue(self, value, load=True):
         """
@@ -260,7 +260,7 @@ class PoseItem(transferitem.TransferItem):
         :type value: float
         :rtype: None
         """
-        transferitem.TransferItem.setBlendValue(self, value)
+        baseitem.BaseItem.setBlendValue(self, value)
 
         if load:
             self.loadFromSettings(
@@ -348,7 +348,7 @@ class PoseItem(transferitem.TransferItem):
             self.libraryWidget().setToast("Blend: {0}%".format(blend))
 
         try:
-            transferitem.TransferItem.load(
+            baseitem.BaseItem.load(
                 self,
                 objects=objects,
                 namespaces=namespaces,
@@ -382,24 +382,24 @@ class PoseItem(transferitem.TransferItem):
         if path and not path.endswith(".pose"):
             path += ".pose"
 
-        transferitem.TransferItem.save(self, objects, path=path, iconPath=iconPath)
+        baseitem.BaseItem.save(self, objects, path=path, iconPath=iconPath)
 
 
-class PoseCreateWidget(transferitem.CreateWidget):
+class PoseCreateWidget(baseitem.CreateWidget):
 
     def __init__(self, item=None, parent=None):
         """"""
         item = item or PoseItem()
-        transferitem.CreateWidget.__init__(self, item, parent=parent)
+        baseitem.CreateWidget.__init__(self, item, parent=parent)
 
 
-class PosePreviewWidget(transferitem.PreviewWidget):
+class PosePreviewWidget(baseitem.PreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :rtype: None
         """
-        transferitem.PreviewWidget.__init__(self, *args, **kwargs)
+        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
 
         self.connect(self.ui.keyCheckBox, QtCore.SIGNAL("clicked()"), self.updateState)
         self.connect(self.ui.mirrorCheckBox, QtCore.SIGNAL("clicked()"), self.updateState)
@@ -416,7 +416,7 @@ class PosePreviewWidget(transferitem.PreviewWidget):
         :type item: PoseItem
         :rtype: None
         """
-        transferitem.PreviewWidget.setItem(self, item)
+        baseitem.PreviewWidget.setItem(self, item)
 
         # Mirror check box
         mirrorTip = "Cannot find a mirror table!"

@@ -16,7 +16,7 @@
 Saving and loading a pose items
 
 ```python
-from studiolibraryitems import poseitem
+from studiolibrarymaya import poseitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.pose"
 objects = maya.cmds.ls(selection=True) or []
@@ -36,7 +36,7 @@ item.load(objects=objects, namespaces=namespaces, key=True, mirror=False)
 Saving and loading animation items
 
 ```python
-from studiolibraryitems import animitem
+from studiolibrarymaya import animitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.anim"
 objects = maya.cmds.ls(selection=True) or []
@@ -58,7 +58,7 @@ item.load(objects=objects, namespaces=namespaces,
 Saving and loading mirror tables
 
 ```python
-from studiolibraryitems import mirroritem
+from studiolibrarymaya import mirroritem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
 objects = maya.cmds.ls(selection=True) or []
@@ -80,7 +80,7 @@ item.load(objects=objects, namespaces=namespaces,
 Saving and loading selection sets
 
 ```python
-from studiolibraryitems import setsitem
+from studiolibrarymaya import setsitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.set"
 objects = maya.cmds.ls(selection=True) or []

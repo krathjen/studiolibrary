@@ -17,13 +17,12 @@ from functools import partial
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 from studioqt import QtGui
-from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studiolibrary
-import studiolibraryitems
+import studiolibrarymaya
 
-from studiolibraryitems import transferitem
+from studiolibrarymaya import baseitem
 
 
 __all__ = [
@@ -32,7 +31,8 @@ __all__ = [
     "SetsPreviewWidget",
 ]
 
-class SetsItem(transferitem.TransferItem):
+
+class SetsItem(baseitem.BaseItem):
 
     @classmethod
     def typeIconPath(cls):
@@ -41,7 +41,7 @@ class SetsItem(transferitem.TransferItem):
 
         :rtype: path
         """
-        return studiolibraryitems.resource().get("icons", "selectionSet.png")
+        return studiolibrarymaya.resource().get("icons", "selectionSet.png")
 
     @classmethod
     def createAction(cls, menu, libraryWidget):
@@ -78,7 +78,7 @@ class SetsItem(transferitem.TransferItem):
         """
         :rtype: None
         """
-        transferitem.TransferItem.__init__(self, *args, **kwargs)
+        baseitem.BaseItem.__init__(self, *args, **kwargs)
         self.setTransferBasename("set.json")
         self.setTransferClass(mutils.SelectionSet)
 
@@ -121,10 +121,10 @@ class SetsItem(transferitem.TransferItem):
         if path and not path.endswith(".set"):
             path += ".set"
 
-        transferitem.TransferItem.save(self, objects, path=path, iconPath=iconPath)
+        baseitem.BaseItem.save(self, objects, path=path, iconPath=iconPath)
 
 
-class SetsCreateWidget(transferitem.CreateWidget):
+class SetsCreateWidget(baseitem.CreateWidget):
 
     def __init__(self, item=None, parent=None):
         """
@@ -132,17 +132,17 @@ class SetsCreateWidget(transferitem.CreateWidget):
         :type item: SelectionSetItem
         """
         item = item or SetsItem()
-        transferitem.CreateWidget.__init__(self, item, parent=parent)
+        baseitem.CreateWidget.__init__(self, item, parent=parent)
 
 
-class SetsPreviewWidget(transferitem.PreviewWidget):
+class SetsPreviewWidget(baseitem.PreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :type parent: QtWidgets.QWidget
         :type item: SelectionSetItem
         """
-        transferitem.PreviewWidget.__init__(self, *args, **kwargs)
+        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
 
         self.ui.optionsToggleBox.setVisible(False)
 

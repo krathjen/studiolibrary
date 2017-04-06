@@ -88,10 +88,10 @@ def registerItems():
     :rtype: None
     """
     # The following items are registered on import.
-    from studiolibraryitems import animitem
-    from studiolibraryitems import poseitem
-    from studiolibraryitems import mirroritem
-    from studiolibraryitems import setsitem
+    from studiolibrarymaya import animitem
+    from studiolibrarymaya import poseitem
+    from studiolibrarymaya import mirroritem
+    from studiolibrarymaya import setsitem
 
 
 def setDebugMode(libraryWidget, value):
@@ -110,7 +110,7 @@ def setDebugMode(libraryWidget, value):
     logger_ = logging.getLogger("mutils")
     logger_.setLevel(level)
 
-    logger_ = logging.getLogger("studiolibraryitems")
+    logger_ = logging.getLogger("studiolibrarymaya")
     logger_.setLevel(level)
 
 

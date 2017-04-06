@@ -20,9 +20,9 @@ from studioqt import QtWidgets
 
 
 import studiolibrary
-import studiolibraryitems
+import studiolibrarymaya
 
-from studiolibraryitems import setsitem
+from studiolibrarymaya import setsitem
 
 
 __all__ = ["SetsMenu"]
@@ -35,7 +35,7 @@ def selectContentAction(item, parent=None):
     :param item: mayabaseitem.MayaBaseItem
     :param parent: QtWidgets.QMenu
     """
-    icon = studiolibraryitems.resource().icon("arrow")
+    icon = studiolibrarymaya.resource().icon("arrow")
     action = QtWidgets.QAction(icon, "Select content", parent)
     action.triggered.connect(item.selectContent)
     return action
@@ -74,14 +74,14 @@ class SetsMenu(QtWidgets.QMenu):
             enableSelectContent=True,
     ):
         """
-        :type item: studiolibraryitems.TransferItem
+        :type item: studiolibrarymaya.BaseItem
         :type parent: QtWidgets.QMenu
         :type namespaces: list[str]
         :type enableSelectContent: bool
         """
         QtWidgets.QMenu.__init__(self, "Selection Sets", parent)
 
-        icon = studiolibraryitems.resource().icon("selectionSet")
+        icon = studiolibrarymaya.resource().icon("selectionSet")
         self.setIcon(icon)
 
         self._item = item
