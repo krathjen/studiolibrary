@@ -20,7 +20,7 @@ from studioqt import QtWidgets
 
 import studioqt
 import studiolibrary
-import studiolibraryitems
+import studiolibrarymaya
 
 try:
     import mutils
@@ -31,7 +31,7 @@ except ImportError, e:
 
 
 __all__ = [
-    "TransferItem",
+    "BaseItem",
     "CreateWidget",
     "PreviewWidget",
 
@@ -40,12 +40,12 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class TransferItemError(Exception):
+class BaseItemError(Exception):
     """Base class for exceptions in this module."""
     pass
 
 
-class ValidateError(TransferItemError):
+class ValidateError(BaseItemError):
     """"""
     pass
 
@@ -56,7 +56,7 @@ class NamespaceOption:
     FromSelection = "selection"
 
 
-class TransferItem(studiolibrary.LibraryItem):
+class BaseItem(studiolibrary.LibraryItem):
 
     """Base class for anim, pose, mirror and sets transfer items."""
 
@@ -141,7 +141,7 @@ class TransferItem(studiolibrary.LibraryItem):
         iconPath = self.path() + "/thumbnail.jpg"
 
         if not os.path.exists(iconPath):
-            iconPath = studiolibraryitems.resource().get("icons", "thumbnail.png")
+            iconPath = studiolibrarymaya.resource().get("icons", "thumbnail.png")
 
         return iconPath
 
@@ -151,7 +151,7 @@ class TransferItem(studiolibrary.LibraryItem):
 
         :rtype: studiolibrary.Settings
         """
-        return studiolibraryitems.settings()
+        return studiolibrarymaya.settings()
 
     def owner(self):
         """
@@ -214,7 +214,7 @@ class TransferItem(studiolibrary.LibraryItem):
         This method is called when the user right clicks on this item.
 
         :type menu: QtWidgets.QMenu
-        :type items: list[TransferItem]
+        :type items: list[BaseItem]
         :rtype: None
         """
         import setsmenu

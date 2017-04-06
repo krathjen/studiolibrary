@@ -16,7 +16,7 @@
 # Saving a mirror table item
 #---------------------------------------------------------------------------
 
-from studiolibraryitems import mirroritem
+from studiolibrarymaya import mirroritem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
 objects = maya.cmds.ls(selection=True) or []
@@ -30,7 +30,7 @@ item.save(objects=objects, leftSide=leftSide, rightSide=rightSide)
 # Loading a mirror table item
 #---------------------------------------------------------------------------
 
-from studiolibraryitems import mirroritem
+from studiolibrarymaya import mirroritem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
 objects = maya.cmds.ls(selection=True) or []
@@ -52,9 +52,9 @@ from studioqt import QtWidgets
 
 import mutils
 import studiolibrary
-import studiolibraryitems
+import studiolibrarymaya
 
-from studiolibraryitems import transferitem
+from studiolibrarymaya import baseitem
 
 try:
     import maya.cmds
@@ -71,7 +71,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class MirrorItem(transferitem.TransferItem):
+class MirrorItem(baseitem.BaseItem):
 
     @classmethod
     def typeIconPath(cls):
@@ -80,7 +80,7 @@ class MirrorItem(transferitem.TransferItem):
 
         :rtype: path
         """
-        return studiolibraryitems.resource().get("icons", "mirrorTable.png")
+        return studiolibrarymaya.resource().get("icons", "mirrorTable.png")
 
     @classmethod
     def createAction(cls, menu, libraryWidget):
@@ -118,7 +118,7 @@ class MirrorItem(transferitem.TransferItem):
         :type args: list
         :type kwargs: dict
         """
-        transferitem.TransferItem.__init__(self, *args, **kwargs)
+        baseitem.BaseItem.__init__(self, *args, **kwargs)
         self.setTransferBasename("mirrortable.json")
         self.setTransferClass(mutils.MirrorTable)
 
@@ -200,7 +200,7 @@ class MirrorItem(transferitem.TransferItem):
         studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath])
 
 
-class MirrorCreateWidget(transferitem.CreateWidget):
+class MirrorCreateWidget(baseitem.CreateWidget):
 
     def __init__(self, item=None, parent=None):
         """
@@ -208,7 +208,7 @@ class MirrorCreateWidget(transferitem.CreateWidget):
         :type item: MirrorItem
         """
         item = item or MirrorItem()
-        transferitem.CreateWidget.__init__(self, item, parent=parent)
+        baseitem.CreateWidget.__init__(self, item, parent=parent)
 
     def leftText(self):
         """
@@ -252,7 +252,7 @@ class MirrorCreateWidget(transferitem.CreateWidget):
         self.ui.leftCount.setText(str(mt.leftCount(objects)))
         self.ui.rightCount.setText(str(mt.rightCount(objects)))
 
-        transferitem.CreateWidget.selectionChanged(self)
+        baseitem.CreateWidget.selectionChanged(self)
 
     def save(self, objects, path, iconPath, description):
         """
@@ -280,14 +280,14 @@ class MirrorCreateWidget(transferitem.CreateWidget):
         )
 
 
-class MirrorPreviewWidget(transferitem.PreviewWidget):
+class MirrorPreviewWidget(baseitem.PreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :type parent: QtWidgets.QWidget
         :type item: MirrorItem
         """
-        transferitem.PreviewWidget.__init__(self, *args, **kwargs)
+        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
 
         self.ui.mirrorAnimationCheckBox.stateChanged.connect(self.updateState)
         self.ui.mirrorOptionComboBox.currentIndexChanged.connect(self.updateState)
@@ -299,7 +299,7 @@ class MirrorPreviewWidget(transferitem.PreviewWidget):
         :type item: MirrorItem
         :rtype: None
         """
-        transferitem.PreviewWidget.setItem(self, item)
+        baseitem.PreviewWidget.setItem(self, item)
 
         mt = item.transferObject()
         self.ui.left.setText(mt.leftSide())

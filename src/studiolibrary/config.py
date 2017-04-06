@@ -14,8 +14,8 @@
 import studioqt
 import studiolibrary
 
-import studiolibraryitems
-studiolibraryitems.registerItems()
+import studiolibrarymaya
+studiolibrarymaya.registerItems()
 
 studiolibrary.Analytics.ENABLED = True
 studiolibrary.Analytics.DEFAULT_ID = "UA-50172384-1"

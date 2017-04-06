@@ -15,7 +15,7 @@
 # Saving an anim item
 #---------------------------------------------------------------------------
 
-from studiolibraryitems import animitem
+from studiolibrarymaya import animitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.anim"
 objects = maya.cmds.ls(selection=True) or []
@@ -27,7 +27,7 @@ item.save(objects=objects, startFrame=0, endFrame=200)
 # Loading an anim item
 #---------------------------------------------------------------------------
 
-from studiolibraryitems import animitem
+from studiolibrarymaya import animitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.anim"
 objects = maya.cmds.ls(selection=True) or []
@@ -55,9 +55,9 @@ from studioqt import QtWidgets
 
 import studioqt
 import studiolibrary
-import studiolibraryitems
+import studiolibrarymaya
 
-from studiolibraryitems import transferitem
+from studiolibrarymaya import baseitem
 
 try:
     import mutils
@@ -88,7 +88,7 @@ class ValidateAnimError(AnimItemError):
     """Raised when there is an invalid animation option"""
 
 
-class AnimItem(transferitem.TransferItem):
+class AnimItem(baseitem.BaseItem):
 
     @classmethod
     def typeIconPath(cls):
@@ -97,7 +97,7 @@ class AnimItem(transferitem.TransferItem):
 
         :rtype: path
         """
-        return studiolibraryitems.resource().get("icons", "animation.png")
+        return studiolibrarymaya.resource().get("icons", "animation.png")
 
     @classmethod
     def createAction(cls, menu, libraryWidget):
@@ -138,7 +138,7 @@ class AnimItem(transferitem.TransferItem):
         :type args: list
         :type kwargs: dict
         """
-        transferitem.TransferItem.__init__(self, *args, **kwargs)
+        baseitem.BaseItem.__init__(self, *args, **kwargs)
 
         self._items = []
 
@@ -331,7 +331,7 @@ class AnimItem(transferitem.TransferItem):
         studiolibrary.LibraryItem.save(self, path=path, contents=contents)
 
 
-class AnimCreateWidget(transferitem.CreateWidget):
+class AnimCreateWidget(baseitem.CreateWidget):
 
     def __init__(self, item=None, parent=None):
         """
@@ -339,7 +339,7 @@ class AnimCreateWidget(transferitem.CreateWidget):
         :type parent: QtWidgets.QWidget
         """
         item = item or AnimItem()
-        transferitem.CreateWidget.__init__(self, item, parent=parent)
+        baseitem.CreateWidget.__init__(self, item, parent=parent)
 
         self._sequencePath = None
 
@@ -353,7 +353,7 @@ class AnimCreateWidget(transferitem.CreateWidget):
         self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
         self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
 
-        icon = studiolibraryitems.resource().icon("thumbnail2")
+        icon = studiolibrarymaya.resource().icon("thumbnail2")
         self.ui.sequenceWidget.setIcon(icon)
 
         self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
@@ -372,7 +372,7 @@ class AnimCreateWidget(transferitem.CreateWidget):
         self.ui.sequenceWidget.clicked.connect(self.thumbnailCapture)
         self.ui.frameRangeButton.clicked.connect(self.showFrameRangeMenu)
 
-        settings = studiolibraryitems.settings()
+        settings = studiolibrarymaya.settings()
 
         byFrame = settings.get("byFrame")
         self.setByFrame(byFrame)
@@ -618,14 +618,14 @@ Would you like to show this message again?"""
         )
 
 
-class AnimPreviewWidget(transferitem.PreviewWidget):
+class AnimPreviewWidget(baseitem.PreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :type item: AnimItem
         :type libraryWidget: studiolibrary.LibraryWidget
         """
-        transferitem.PreviewWidget.__init__(self, *args, **kwargs)
+        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
 
         self._items = []
 
@@ -639,7 +639,7 @@ class AnimPreviewWidget(transferitem.PreviewWidget):
         :type item: AnimItem
         :rtype: None
         """
-        transferitem.PreviewWidget.setItem(self, item)
+        baseitem.PreviewWidget.setItem(self, item)
 
         startFrame = str(item.startFrame())
         endFrame = str(item.endFrame())
@@ -733,7 +733,7 @@ class AnimPreviewWidget(transferitem.PreviewWidget):
             connect = "Connect"
 
         basename = "{0}{1}".format(imageText, connect)
-        imageIcon = studiolibraryitems.resource().icon(basename)
+        imageIcon = studiolibrarymaya.resource().icon(basename)
 
         self.ui.helpImage.setIcon(imageIcon)
         index = self.ui.option.findText(text)
