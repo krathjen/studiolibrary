@@ -634,8 +634,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
             menu.addSeparator()
             dockMenu = self.dockMenu()
             menu.addMenu(dockMenu)
-
-        menu.addSeparator()
+            menu.addSeparator()
 
         action = QtWidgets.QAction("Debug mode", menu)
         action.setCheckable(True)
@@ -1353,7 +1352,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
     def settings(self):
         """
-        :rtype: studiolibrary.MetaFile
+        :rtype: dict
         """
         geometry = (
             self.parentX().geometry().x(),
@@ -1382,7 +1381,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
     def setSettings(self, settings):
         """
-        :type settings: studiolibrary.MetaFile
+        :type settings: dict
         """
 
         self.itemsWidget().setToastEnabled(False)
@@ -1399,7 +1398,10 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         # Make sure the window is on the screen.
         screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
-        if x < 0 or y < 0 or x > screenGeometry.x() or y > screenGeometry.y():
+        screenWidth = screenGeometry.width()
+        screenHeight = screenGeometry.height()
+
+        if x < 0 or y < 0 or x > screenWidth or y > screenHeight:
             self.centerWindow()
 
         # Reload the stylesheet before loading the dock widget settings.
@@ -1785,17 +1787,12 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
     def updateWindowTitle(self):
         """
-        Update the window title with the version the lock status.
+        Update the window title with the version and lock status.
 
         :rtype: None
         """
-
         title = "Studio Library - "
-
-        if self.isDocked():
-            title += self.library().name()
-        else:
-            title += studiolibrary.__version__ + " - " + self.library().name()
+        title += studiolibrary.version() + " - " + self.library().name()
 
         if self.isLocked():
             title += " (Locked)"

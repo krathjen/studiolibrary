@@ -17,6 +17,8 @@ import studiolibrary
 import studiolibrarymaya
 studiolibrarymaya.registerItems()
 
+studiolibrary.Library.DEFAULT_LIBRARY_WIDGET = studiolibrarymaya.MayaLibraryWidget
+
 studiolibrary.Analytics.ENABLED = True
 studiolibrary.Analytics.DEFAULT_ID = "UA-50172384-1"
 

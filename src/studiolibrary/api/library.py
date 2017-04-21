@@ -34,6 +34,7 @@ class Library(QtCore.QObject):
     DEFAULT_NAME = "Default"
     ITEM_DATA_PATH = "{localPath}/item_data.json"
     FOLDER_DATA_PATH = "{localPath}/folder_data.json"
+    DEFAULT_LIBRARY_WIDGET = None
 
     @classmethod
     def instance(cls, name=None):
@@ -399,6 +400,14 @@ class Library(QtCore.QObject):
     # Misc
     # ------------------------------------------------------------------
 
+    def libraryWidgetClass(self):
+        """
+        Return the Library Widget Class to be created for this library.
+        
+        :rtype:  class`studiolibrary.LibraryWidget`
+        """
+        return self.DEFAULT_LIBRARY_WIDGET or studiolibrary.LibraryWidget
+
     def libraryWidget(self):
         """
         :rtype: studiolibrary.LibraryWidget
@@ -415,7 +424,8 @@ class Library(QtCore.QObject):
         """
         :rtype: studiolibrary.LibraryWidget
         """
-        return studiolibrary.LibraryWidget(library=self)
+        cls = self.libraryWidgetClass()
+        return cls(library=self)
 
     def reset(self):
         """
