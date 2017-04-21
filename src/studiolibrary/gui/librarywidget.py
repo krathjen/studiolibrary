@@ -45,7 +45,7 @@ class GlobalSignal(QtCore.QObject):
     folderSelectionChanged = QtCore.Signal(object, object)
 
 
-class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
+class LibraryWidget(QtWidgets.QWidget):
 
     DPI_ENABLED = False  # Still in development
     TRASH_ENABLED = True
@@ -74,12 +74,12 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         :type library: studiolibrary.Library
         """
         QtWidgets.QWidget.__init__(self, None)
-        studiolibrary.MayaDockWidgetMixin.__init__(self, None)
 
         msg = u'Loading library window "{0}"'.format(library.name())
         logger.info(msg)
 
         self.setObjectName("studiolibrary")
+
         studiolibrary.analytics().logScreen("MainWindow")
 
         resource = studiolibrary.resource()
@@ -208,8 +208,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         # -------------------------------------------------------------------
         # Setup Connections
         # -------------------------------------------------------------------
-
-        self.dockingChanged.connect(self.updateWindowTitle)
 
         searchWidget = self.searchWidget()
         searchWidget.searchChanged.connect(self._searchChanged)
@@ -554,9 +552,9 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         """
         Return the settings menu for changing the library widget.
 
-        :rtype: QtWidgets.QMenu
+        :rtype: studioqt.Menu
         """
-        menu = QtWidgets.QMenu("", self)
+        menu = studioqt.Menu("", self)
         menu.setTitle("Settings")
 
         librariesMenu = studiolibrary.LibrariesMenu(menu)
@@ -629,12 +627,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         menu.addMenu(viewMenu)
 
         menu.addSeparator()
-
-        if studiolibrary.isMaya():
-            menu.addSeparator()
-            dockMenu = self.dockMenu()
-            menu.addMenu(dockMenu)
-            menu.addSeparator()
 
         action = QtWidgets.QAction("Debug mode", menu)
         action.setCheckable(True)
@@ -1355,10 +1347,10 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         :rtype: dict
         """
         geometry = (
-            self.parentX().geometry().x(),
-            self.parentX().geometry().y(),
-            self.parentX().geometry().width(),
-            self.parentX().geometry().height()
+            self.geometry().x(),
+            self.geometry().y(),
+            self.geometry().width(),
+            self.geometry().height()
         )
         settings = {}
 
@@ -1372,7 +1364,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         settings["statusBarWidgetVisible"] = self.isStatusBarWidgetVisible()
         settings["recursiveSearchEnabled"] = self.isRecursiveSearchEnabled()
 
-        settings["dockWidget"] = self.dockSettings()
         settings['searchWidget'] = self.searchWidget().settings()
         settings['foldersWidget'] = self.foldersWidget().settings()
         settings['itemsWidget'] = self.itemsWidget().settings()
@@ -1386,6 +1377,10 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         self.itemsWidget().setToastEnabled(False)
 
+        # Reload the stylesheet before loading the settings.
+        # This is to avoid any display issues while updating the settings.
+        self.reloadStyleSheet()
+
         dpi = settings.get("dpi", 1.0)
         self.setDpi(dpi)
 
@@ -1394,7 +1389,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
             self.setSizes(sizes)
 
         x, y, width, height = settings.get("geometry", [200, 200, 860, 680])
-        self.parentX().setGeometry(x, y, width, height)
+        self.setGeometry(x, y, width, height)
 
         # Make sure the window is on the screen.
         screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
@@ -1403,13 +1398,6 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
 
         if x < 0 or y < 0 or x > screenWidth or y > screenHeight:
             self.centerWindow()
-
-        # Reload the stylesheet before loading the dock widget settings.
-        # Otherwise the widget will show docked without a stylesheet.
-        self.reloadStyleSheet()
-
-        dockSettings = settings.get("dockWidget", {})
-        self.setDockSettings(dockSettings)
 
         value = settings.get("foldersWidgetVisible", True)
         self.setFoldersWidgetVisible(value)
@@ -1500,7 +1488,7 @@ class LibraryWidget(studiolibrary.MayaDockWidgetMixin, QtWidgets.QWidget):
         screen = QtWidgets.QApplication.desktop().screenNumber(pos)
         centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         geometry.moveCenter(centerPoint)
-        self.parentX().move(geometry.topLeft())
+        self.move(geometry.topLeft())
 
     # -----------------------------------------------------------------------
     # Overloading events

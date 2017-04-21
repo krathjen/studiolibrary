@@ -59,7 +59,6 @@ from studiolibrary.core.settings import Settings
 from studiolibrary.core.database import Database
 from studiolibrary.core.analytics import Analytics
 
-from studiolibrary.gui.mayadockwidgetmixin import MayaDockWidgetMixin
 from studiolibrary.gui.librarywidget import LibraryWidget
 from studiolibrary.gui.previewwidget import PreviewWidget
 from studiolibrary.gui.librariesmenu import LibrariesMenu

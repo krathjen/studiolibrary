@@ -11,6 +11,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import uuid
 import logging
 
 from studioqt import QtCore
@@ -40,31 +41,19 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+class MayaDockWidgetMixinSignals(QtCore.QObject):
+    """"""
+    dockingChanged = QtCore.Signal()
+
+
 class MayaDockWidgetMixin(object):
 
     DEFAULT_DOCK_AREA = "none"
     DEFAULT_DOCK_ALLOWED_AREAS = ["top", "bottom", "left", "right"]
 
-    dockingChanged = QtCore.Signal()
+    _signals = MayaDockWidgetMixinSignals()
 
-    @staticmethod
-    def generateUniqueObjectName(name, attempts=100):
-        """
-        Generate a unique name for the dock widget.
-
-        :type name: str
-        :type attempts: int
-        :rtype: str
-        """
-        for i in range(1, attempts):
-            uniqueName = name + str(i)
-            controlExists = maya.cmds.control(uniqueName, exists=True)
-            if not controlExists:
-                return uniqueName
-
-        msg = 'Cannot find unique window name for "{0}"'
-        msg = msg.format(name)
-        raise ValueError(msg)
+    dockingChanged = _signals.dockingChanged
 
     @staticmethod
     def dockAreaStrMap():
@@ -95,19 +84,16 @@ class MayaDockWidgetMixin(object):
         }
 
     def __init__(self, *args):
-        self._dockWidgetName = None
         self._dockLayoutName = None
 
-    def setObjectName(self, name):
-        """
-        :type name: str
-        """
-        try:
-            name = self.generateUniqueObjectName(name)
-        except NameError, msg:
-            logger.exception(msg)
+        # Set a unique object name string so Maya can easily look it up
+        if self.objectName() == '':
+            name = self.__class__.__name__
+        else:
+            name = self.objectName()
 
-        QtWidgets.QWidget.setObjectName(self, name)
+        objectName = '{0}_{1}'.format(name, uuid.uuid4())
+        self.setObjectName(objectName)
 
     def setupDockSignals(self):
         dockWidget = self.dockWidget()
@@ -140,6 +126,22 @@ class MayaDockWidgetMixin(object):
 
         self.dockingChanged.emit()
 
+    def raise_(self):
+        """
+        Raise the window to the top of the screen.
+        """
+        dockControlName = self.dockControlName()
+
+        if dockControlName:
+            maya.cmds.dockControl(
+                dockControlName,
+                r=True,
+                edit=True,
+                visible=True,
+            )
+        else:
+            QtWidgets.QWidget.raise_(self)
+
     def showEvent(self, event):
         """
         :type event: QtWidgets.QShowEvent
@@ -147,17 +149,25 @@ class MayaDockWidgetMixin(object):
         QtWidgets.QWidget.showEvent(self, event)
         self.fixMinimumDockSize()
 
-    def parentX(self):
+    def setWindowTitle(self, text):
         """
-        :rtype: QtWidgets.QWidget
+        :type text: str
         """
-        return self.parent() or self
+        if self.dockWidget():
+            self.dockWidget().setWindowTitle(text)
+
+        QtWidgets.QWidget.setWindowTitle(self, text)
 
     def dockWidget(self):
         """
-        :rtype: QtWidgets.QDockWidget
+        :rtype: QtWidgets.QDockWidget or None
         """
-        return self.parent()
+        parent = self.parent()
+
+        if isinstance(parent, QtWidgets.QDockWidget):
+            return parent
+
+        return None
 
     def mayaWindow(self):
         """
@@ -190,6 +200,7 @@ class MayaDockWidgetMixin(object):
             dockArea = QtCore.Qt.NoDockWidgetArea
         else:
             dockArea = self.mayaWindow().dockWidgetArea(self.dockWidget())
+        
         return dockArea
 
     def dockAreaStr(self):
@@ -197,14 +208,6 @@ class MayaDockWidgetMixin(object):
         :rtype: str
         """
         return self.mapDockAreaToStr(self.dockArea())
-
-    def setWindowTitle(self, text):
-        """
-        :type text: str
-        """
-        if self.dockWidget():
-            self.dockWidget().setWindowTitle(text)
-        QtWidgets.QWidget.setWindowTitle(self, text)
 
     def isDocked(self):
         """
@@ -216,12 +219,8 @@ class MayaDockWidgetMixin(object):
         """
         :rtype: bool
         """
-        isFloating = True
-
-        if self.dockWidget():
-            isFloating = self.dockWidget().isFloating()
-
-        return isFloating
+        floating = bool(self.dockWidget() and self.dockWidget().isFloating())
+        return floating or self.isMayaStandaloneWindow()
 
     def setFloating(self):
         self.setDockArea(dockArea=QtCore.Qt.NoDockWidgetArea)
@@ -259,9 +258,10 @@ class MayaDockWidgetMixin(object):
         menu = QtWidgets.QMenu(self)
         menu.setTitle("Dock")
 
-        action = QtWidgets.QAction("Set Floating", menu)
-        action.setEnabled(self.isDocked())
-        action.triggered.connect(self.setFloating)
+        action = QtWidgets.QAction("Window", menu)
+        action.setCheckable(True)
+        action.setChecked(self.isMayaStandaloneWindow())
+        action.triggered.connect(self.makeMayaStandaloneWindow)
         menu.addAction(action)
 
         menu.addSeparator()
@@ -330,35 +330,24 @@ class MayaDockWidgetMixin(object):
 
         :rtype: None
         """
-        dockWidgetPtr = omui.MQtUtil.findControl(self._dockWidgetName)
-        dockWidget = wrapInstance(long(dockWidgetPtr), QtWidgets.QWidget)
-        dockWidget.setMinimumSize(QtCore.QSize(20, 20))
+        try:
+            dockWidget = self.dockWidget()
+            if dockWidget:
+                dockWidget.setMinimumSize(QtCore.QSize(20, 20))
+        except NameError, e:
+            logger.exception(e)
 
     def dockWidth(self):
         """
         :rtype: int
         """
-        return maya.cmds.dockControl(self._dockWidgetName, q=True, w=True)
+        return maya.cmds.dockControl(self.dockControlName(), q=True, w=True)
 
     def dockHeight(self):
         """
         :rtype: int
         """
-        return maya.cmds.dockControl(self._dockWidgetName, q=True, h=True)
-
-    def raise_(self):
-        """
-        Raise the window to the top of the screen.
-        """
-        if self._dockWidgetName:
-            maya.cmds.dockControl(
-                self._dockWidgetName,
-                r=True,
-                edit=True,
-                visible=True,
-            )
-        else:
-            QtWidgets.QWidget.raise_(self)
+        return maya.cmds.dockControl(self.dockControlName(), q=True, h=True)
 
     def _createDockLayout(self):
         """
@@ -385,7 +374,7 @@ class MayaDockWidgetMixin(object):
             isFloating = True
             dockAreaStr = "left"
 
-        self._dockWidgetName = maya.cmds.dockControl(
+        maya.cmds.dockControl(
             r=True,
             area=dockAreaStr,
             content=objectName,
@@ -395,6 +384,58 @@ class MayaDockWidgetMixin(object):
 
         self.setupDockSignals()
         self.setWindowTitle(self.windowTitle())
+
+    def dockControlName(self):
+        """
+        Return the name of the parent dock control.
+        
+        :rtype: str or None 
+        """
+        parent = self.parent()
+
+        if parent:
+            dockControlName = parent.objectName()
+            if dockControlName and len(dockControlName):
+                if maya.cmds.dockControl(dockControlName, q=True, exists=True):
+                    return dockControlName
+
+        return None
+
+    def isMayaStandaloneWindow(self):
+        """
+        Return True if the widget has been parented to the Maya main window.
+        
+        :rtype: bool 
+        """
+        parent = self.parent()
+        return isinstance(parent, QtWidgets.QMainWindow)
+
+    def makeMayaStandaloneWindow(self):
+        """
+        Make a standalone window, though parented under Maya's mainWindow.
+        
+        The parenting under Maya's mainWindow is done so that the QWidget will 
+        not auto-destroy itself when the instance variable goes out of scope.
+        """
+        dockControlName = self.dockControlName()
+
+        if not self.isMayaStandaloneWindow():
+
+            # Parent under the main Maya window
+            mainWindowPtr = long(omui.MQtUtil.mainWindow())
+            mainWindow = wrapInstance(mainWindowPtr, QtWidgets.QMainWindow)
+            self.setParent(mainWindow)
+
+            # Make this widget appear as a standalone window
+            self.setWindowFlags(QtCore.Qt.Window)
+            self.raise_()
+            self.show()
+
+        # Delete the parent dock control if applicable
+        if dockControlName:
+            maya.cmds.deleteUI(dockControlName, control=True)
+
+        self._dockingChanged()
 
     def setDockArea(
         self,
@@ -421,30 +462,25 @@ class MayaDockWidgetMixin(object):
             else:
                 dockAreaStr = self.mapDockAreaToStr(dockArea)
 
-            if not self._dockWidgetName:
-                self._createDockWidget(
-                    dockAreaStr=dockAreaStr,
-                    allowedAreas=allowedAreas
-                )
-
             if dockArea == "none":
-                maya.cmds.dockControl(
-                    self._dockWidgetName,
-                    r=True,
-                    edit=True,
-                    width=width,
-                    height=height,
-                    visible=True,
-                    floating=True
-                )
+                self.makeMayaStandaloneWindow()
+
             else:
+                if not self.dockWidget():
+                    self._createDockWidget(
+                        dockAreaStr=dockAreaStr,
+                        allowedAreas=allowedAreas
+                    )
+
+                dockControlName = self.dockControlName()
                 maya.cmds.dockControl(
-                    self._dockWidgetName,
+                    dockControlName,
                     r=True,
                     edit=True,
                     width=width,
                     height=height,
                     visible=True,
                     area=dockAreaStr,
-                    floating=False
+                    floating=False,
+                    allowedArea=allowedAreas,
                 )

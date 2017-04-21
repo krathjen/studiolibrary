@@ -17,6 +17,7 @@ import os
 
 from studioqt.utils import *
 from studioqt.icon import Icon
+from studioqt.menu import Menu
 from studioqt.theme import Theme, ThemesMenu
 from studioqt.color import Color
 from studioqt.pixmap import Pixmap
