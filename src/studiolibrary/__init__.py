@@ -20,7 +20,7 @@ __encoding__ = sys.getfilesystemencoding()
 
 _resource = None
 _analytics = None
-_scriptJob = None
+
 
 PATH = unicode(os.path.abspath(__file__), __encoding__)
 DIRNAME = os.path.dirname(PATH).replace('\\', '/')
@@ -68,35 +68,6 @@ from studiolibrary.gui.settingsdialog import SettingsDialog
 from studiolibrary.api.cmds import *
 from studiolibrary.api.library import Library
 from studiolibrary.api.libraryitem import LibraryItem
-
-
-def enableMayaClosedEvent():
-    """
-    Create a Maya script job to trigger on the event "quitApplication".
-
-    :rtype: None
-    """
-    global _scriptJob
-
-    if isMaya():
-        import maya.cmds
-        if not _scriptJob:
-            _scriptJob = maya.cmds.scriptJob(
-                event=[
-                    "quitApplication",
-                    "import studiolibrary;studiolibrary.mayaClosedEvent()"
-                ]
-            )
-
-
-def mayaClosedEvent():
-    """
-    This functions is triggered when the user closes Maya.
-
-    :rtype: None
-    """
-    for window in windows():
-        window.saveSettings()
 
 
 def resource():

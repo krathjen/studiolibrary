@@ -20,6 +20,8 @@ import studiolibrary
 import mutils
 import studioqt
 
+from mayalibrarywidget import MayaLibraryWidget
+
 
 __encoding__ = sys.getfilesystemencoding()
 

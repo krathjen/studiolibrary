@@ -48,8 +48,6 @@ def main(
 
     library.setKwargs(kwargs)
 
-    studiolibrary.enableMayaClosedEvent()
-
     if show:
         library.show()
 
