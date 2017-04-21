@@ -17,13 +17,26 @@ from studioqt import QtCore
 
 import mutils
 
+import mayadockwidgetmixin
+
 __all__ = ["MayaLibraryWidget"]
 
 
-class MayaLibraryWidget(studiolibrary.LibraryWidget):
+class MayaLibraryWidget(
+    studiolibrary.LibraryWidget,
+    mayadockwidgetmixin.MayaDockWidgetMixin
+):
 
     def __init__(self, *args, **kwargs):
+        """
+        The Maya Library Widget can be used outside of Maya, however it
+        is recommended that you use the base library widget for this.
+        
+        :type args: list
+        :type kwargs: dict
+        """
         studiolibrary.LibraryWidget.__init__(self, *args,  **kwargs)
+        mayadockwidgetmixin.MayaDockWidgetMixin.__init__(self, None)
 
         self._mayaCloseScriptJob = None
 
@@ -32,23 +45,69 @@ class MayaLibraryWidget(studiolibrary.LibraryWidget):
         except NameError, e:
             print e
 
-        self.setWindowFlags(QtCore.Qt.Window)
-        self.setAttribute(QtCore.Qt.WA_DontCreateNativeAncestors)
+        self.dockingChanged.connect(self.updateWindowTitle)
+        self.updateWindowTitle()
+
+    def settings(self):
+        """
+        Return a dict containing the settings for the widget.
+        
+        Overriding this method to add support for dock settings.
+        
+        :rtype: dict 
+        """
+        settings = studiolibrary.LibraryWidget.settings(self)
+
+        settings["dockWidget"] = self.dockSettings()
+
+        return settings
+
+    def setSettings(self, settings):
+        """
+        Set the state of the widget with the given settings dict.
+
+        Overriding this method to add support for dock settings.
+
+        :type settings: dict 
+        """
+        studiolibrary.LibraryWidget.setSettings(self, settings)
+
+        dockSettings = settings.get("dockWidget", {})
+
+        self.setDockSettings(dockSettings)
+
+    def createSettingsMenu(self):
+        """
+        Create a new instance of the settings menu.
+        
+        Overriding this method to add support for docking.
+
+        :rtype: studioqt.Menu
+        """
+        menu = studiolibrary.LibraryWidget.createSettingsMenu(self)
+
+        dockMenu = self.dockMenu()
+
+        menu.insertMenuBefore("debug mode", dockMenu)
+        menu.insertSeparatorBefore("debug mode")
+
+        return menu
 
     def updateWindowTitle(self):
         """
         Update the window title with the version and lock status.
-        
-        Overriding this method so that we can remove the version from the 
+
+        Overriding this method so that we can remove the version from the
         title when the widget has been docked.
 
         :rtype: None
         """
-        title = "Studio Library Maya - "
+        title = "Studio Library - "
 
         if self.isDocked():
             title += self.library().name()
         else:
+            title = "Studio Library Maya - "
             title += studiolibrary.version() + " - " + self.library().name()
 
         if self.isLocked():
@@ -73,3 +132,30 @@ class MayaLibraryWidget(studiolibrary.LibraryWidget):
         :rtype: None
         """
         self.saveSettings()
+
+    # The following methods need to be reimplemented because of how the
+    # mixin has been implemented.
+
+    def raise_(self):
+        """
+        Need to reimplemented because of the mixin.
+
+        :rtype: None
+        """
+        mayadockwidgetmixin.MayaDockWidgetMixin.raise_(self)
+
+    def showEvent(self, event):
+        """
+        Need to reimplemented because of the mixin.
+
+        :rtype: None
+        """
+        studiolibrary.LibraryWidget.showEvent(self, event)
+
+    def setWindowTitle(self, text):
+        """
+        Need to reimplemented because of the mixin.
+
+        :rtype: None
+        """
+        mayadockwidgetmixin.MayaDockWidgetMixin.setWindowTitle(self, text)
