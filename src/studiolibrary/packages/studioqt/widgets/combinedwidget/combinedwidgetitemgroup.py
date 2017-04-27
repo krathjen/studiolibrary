@@ -178,6 +178,12 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         finally:
             painter.restore()
 
+    def icon(self, *args):
+        """
+        Overriding the icon method, so that an icon is not displayed.
+        """
+        return None
+
     def paintBackground(self, painter, option, index):
         """
         Draw the background for the item.
@@ -201,7 +207,11 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         visualRect.setHeight(2 * self.dpi())
         visualRect.setWidth(visualRect.width() - padding)
 
-        color = QtGui.QColor(250,250,250, 20)
+        color = QtGui.QColor(
+            self.textColor().red(),
+            self.textColor().green(),
+            self.textColor().blue(), 10
+        )
         painter.setBrush(QtGui.QBrush(color))
 
         painter.drawRect(visualRect)

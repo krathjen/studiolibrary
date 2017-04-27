@@ -541,8 +541,13 @@ class LibraryWidget(QtWidgets.QWidget):
         menu.addAction(separator)
 
         for itemClass in studiolibrary.itemClasses():
-
             action = itemClass.createAction(menu, self)
+
+            icon = studioqt.Icon(action.icon())
+            icon.setColor(self.iconColor())
+
+            action.setIcon(icon)
+
             if action:
                 menu.addAction(action)
 
@@ -1538,6 +1543,9 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for themes and custom style sheets
     # -----------------------------------------------------------------------
 
+    def theme(self):
+        return self.library().theme()
+
     def dpi(self):
         """
         Return the current dpi for the library widget.
@@ -1605,6 +1613,9 @@ class LibraryWidget(QtWidgets.QWidget):
 
         color = studioqt.Color.fromString(options["ITEM_BACKGROUND_COLOR"])
         self.itemsWidget().setBackgroundColor(color)
+
+        color = studioqt.Color.fromString(options["ITEM_BACKGROUND_HOVER_COLOR"])
+        self.itemsWidget().setBackgroundHoverColor(color)
 
         color = studioqt.Color.fromString(options["ITEM_BACKGROUND_SELECTED_COLOR"])
         self.itemsWidget().setBackgroundSelectedColor(color)

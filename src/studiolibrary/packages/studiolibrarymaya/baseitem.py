@@ -138,12 +138,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: str
         """
-        iconPath = self.path() + "/thumbnail.jpg"
-
-        if not os.path.exists(iconPath):
-            iconPath = studiolibrarymaya.resource().get("icons", "thumbnail.png")
-
-        return iconPath
+        return self.path() + "/thumbnail.jpg"
 
     def settings(self):
         """

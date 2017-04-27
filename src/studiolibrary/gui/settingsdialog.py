@@ -40,6 +40,7 @@ class SettingsDialog(QtWidgets.QDialog):
     ]
 
     DEFAULT_BACKGROUND_COLORS = [
+        # QtGui.QColor(245, 245, 248),
         QtGui.QColor(70, 70, 80),
         QtGui.QColor(65, 65, 75),
         QtGui.QColor(55, 55, 65),
@@ -53,7 +54,6 @@ class SettingsDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
         """
         :type parent: QtWidgets.QWidget
-        :type library: studiolibrary.Library
         """
         QtWidgets.QDialog.__init__(self, parent)
         studioqt.loadUi(self)
@@ -69,8 +69,8 @@ class SettingsDialog(QtWidgets.QDialog):
         windowTitle = windowTitle.format(version=studiolibrary.version())
         self.setWindowTitle(windowTitle)
 
-        self.createAccentColorBar()
-        self.createBackgroundColorBar()
+        self._accentColorBar = self.createAccentColorBar()
+        self._backgroundColorBar = self.createBackgroundColorBar()
 
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.rejectButton.clicked.connect(self.close)
@@ -109,11 +109,27 @@ class SettingsDialog(QtWidgets.QDialog):
         """
         self.setBackgroundColor(color)
 
+    def accentColorBar(self):
+        """
+        Return the accent color bar widget.
+
+        :rtype: studioqt.HColorBar
+        """
+        return self._accentColorBar
+
+    def backgroundColorBar(self):
+        """
+        Return the background color bar widget.
+        
+        :rtype: studioqt.HColorBar
+        """
+        return self._backgroundColorBar
+
     def createAccentColorBar(self):
         """
         Create and setup the accent color bar.
 
-        :rtype: None
+        :rtype: studioqt.HColorBar
         """
         browserColors_ = [
             # Top row, Bottom row
@@ -144,17 +160,19 @@ class SettingsDialog(QtWidgets.QDialog):
 
         hColorBar = studioqt.HColorBar()
         hColorBar.setColors(self.DEFAULT_ACCENT_COLORS)
-        hColorBar.setCurrentColor(self.DEFAULT_ACCENT_COLOR)
+        hColorBar.setCurrentColor(self.accentColor())
         hColorBar.setBrowserColors(browserColors)
         hColorBar.colorChanged.connect(self._accentColorChanged)
 
         self.ui.accentColorBarFrame.layout().addWidget(hColorBar)
 
+        return hColorBar
+
     def createBackgroundColorBar(self):
         """
         Create and setup the background color bar.
 
-        :rtype: None
+        :rtype: studioqt.HColorBar
         """
         browserColors_ = [
             (0, 0, 0),
@@ -180,11 +198,13 @@ class SettingsDialog(QtWidgets.QDialog):
 
         hColorBar = studioqt.HColorBar()
         hColorBar.setColors(self.DEFAULT_BACKGROUND_COLORS)
-        hColorBar.setCurrentColor(self.DEFAULT_BACKGROUND_COLOR)
+        hColorBar.setCurrentColor(self.backgroundColor())
         hColorBar.setBrowserColors(browserColors)
         hColorBar.colorChanged.connect(self._backgroundColorClicked)
 
         self.ui.backgroundColorBarFrame.layout().addWidget(hColorBar)
+
+        return hColorBar
 
     def accept(self):
         """
@@ -295,6 +315,8 @@ class SettingsDialog(QtWidgets.QDialog):
         :rtype: None
         """
         self._accentColor = color
+        self.accentColorBar().setCurrentColor(color)
+
         self.updateStyleSheet()
         self.accentColorChanged.emit(color)
 
@@ -306,6 +328,8 @@ class SettingsDialog(QtWidgets.QDialog):
         :rtype: None
         """
         self._backgroundColor = color
+        self.backgroundColorBar().setCurrentColor(color)
+
         self.updateStyleSheet()
         self.backgroundColorChanged.emit(color)
 

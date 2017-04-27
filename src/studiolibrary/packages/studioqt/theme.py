@@ -152,6 +152,9 @@ def showThemesMenu(parent=None, themes=None):
 
 class Theme(object):
 
+    LIGHT_THEME_ENABLED = True
+    LIGHT_THEME_THRESHOLD = 210
+
     DEFAULT_ACCENT_COLOR = QtGui.QColor(0, 175, 255)
     DEFAULT_BACKGROUND_COLOR = QtGui.QColor(70, 70, 80)
 
@@ -236,14 +239,67 @@ class Theme(object):
         """
         self._name = name
 
+    def isDark(self):
+        """
+        Return True if the current theme is dark.
+        
+        rtype: bool
+        """
+        if self.LIGHT_THEME_ENABLED:
+
+            threshold = self.LIGHT_THEME_THRESHOLD
+
+            return self.backgroundColor().red() < threshold and \
+                   self.backgroundColor().green() < threshold and \
+                   self.backgroundColor().blue() < threshold
+
+        return True
+
     def iconColor(self):
-        return studioqt.Color(250, 250, 250)
+        """
+        Return the icon color for the theme.
+        
+        :rtype: studioqt.Color 
+        """
+        return self.forgroundColor()
 
     def accentForgroundColor(self):
-        return studioqt.Color(255, 255, 255, 225)
+        """
+        Return the foreground color for the accent color.
+
+        :rtype: studioqt.Color 
+        """
+        return studioqt.Color(255, 255, 255, 255)
 
     def forgroundColor(self):
-        return studioqt.Color(250, 250, 250, 225)
+        """
+        Return the foreground color for the theme.
+
+        :rtype: studioqt.Color 
+        """
+        if self.isDark():
+            return studioqt.Color(250, 250, 250, 225)
+        else:
+            return studioqt.Color(0, 40, 80, 180)
+
+    def itemBackgroundColor(self):
+        """
+        Return the item background color.
+
+        :rtype: studioqt.Color 
+        """
+        if self.isDark():
+            return studioqt.Color(255, 255, 255, 20)
+        else:
+            return studioqt.Color(255, 255, 255, 120)
+
+    def itemBackgroundHoverColor(self):
+        """
+        Return the item background color when the mouse hovers over the item.
+
+        :rtype: studioqt.Color 
+        """
+        return studioqt.Color(255, 255, 255, 60)
 
     def accentColor(self):
         """
@@ -338,12 +394,21 @@ class Theme(object):
         :rtype: dict
         """
         accentColor = self.accentColor()
+        accentForegroundColor = self.accentForgroundColor()
+
+        foregroundColor = self.forgroundColor()
         backgroundColor = self.backgroundColor()
 
-        textWhite = studioqt.Color(255, 255, 255, 200)
-        backgroundWhite = studioqt.Color(255, 255, 255, 20)
+        itemBackgroundColor = self.itemBackgroundColor()
+        itemBackgroundHoverColor = self.itemBackgroundHoverColor()
+
+        if self.isDark():
+            darkness = "white"
+        else:
+            darkness = "black"
 
         options = {
+            "DARKNESS": darkness,
             "RESOURCE_DIRNAME": studioqt.RESOURCE_DIRNAME,
 
             "ACCENT_COLOR": accentColor.toString(),
@@ -351,16 +416,23 @@ class Theme(object):
             "ACCENT_COLOR_G": str(accentColor.green()),
             "ACCENT_COLOR_B": str(accentColor.blue()),
 
+            "ACCENT_FOREGROUND_COLOR": accentForegroundColor.toString(),
+
+            "FOREGROUND_COLOR": foregroundColor.toString(),
+            "FOREGROUND_COLOR_R": str(foregroundColor.red()),
+            "FOREGROUND_COLOR_G": str(foregroundColor.green()),
+            "FOREGROUND_COLOR_B": str(foregroundColor.blue()),
+
             "BACKGROUND_COLOR": backgroundColor.toString(),
             "BACKGROUND_COLOR_R": str(backgroundColor.red()),
             "BACKGROUND_COLOR_G": str(backgroundColor.green()),
             "BACKGROUND_COLOR_B": str(backgroundColor.blue()),
 
-            # Item theme colors will be depricated soon.
-            "ITEM_TEXT_COLOR": textWhite.toString(),
-            "ITEM_TEXT_SELECTED_COLOR": textWhite.toString(),
+            "ITEM_TEXT_COLOR": foregroundColor.toString(),
+            "ITEM_TEXT_SELECTED_COLOR": accentForegroundColor.toString(),
 
-            "ITEM_BACKGROUND_COLOR": backgroundWhite.toString(),
+            "ITEM_BACKGROUND_COLOR": itemBackgroundColor.toString(),
+            "ITEM_BACKGROUND_HOVER_COLOR": itemBackgroundHoverColor.toString(),
             "ITEM_BACKGROUND_SELECTED_COLOR":  accentColor.toString(),
         }
 
