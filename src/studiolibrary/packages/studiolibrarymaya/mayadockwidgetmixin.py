@@ -171,18 +171,21 @@ class MayaDockWidgetMixin(object):
 
     def mayaWindow(self):
         """
-        :rtype: QMainWindow
+        :rtype: QMainWindow or None
         """
-        mainWindowPtr = omui.MQtUtil.mainWindow()
-        return wrapInstance(long(mainWindowPtr), QtWidgets.QMainWindow)
+        try:
+            mainWindowPtr = omui.MQtUtil.mainWindow()
+            return wrapInstance(long(mainWindowPtr), QtWidgets.QMainWindow)
+        except NameError, e:
+            logger.exception(e)
 
     def mapDockAreaToStr(self, dockArea):
         """
         :type dockArea: QtCore.Qt.QDockArea
         :rtype: str
         """
-        map = self.dockAreaMap()
-        return map[dockArea]
+        areaMap = self.dockAreaMap()
+        return areaMap[dockArea]
 
     def mapDockAreaFromStr(self, dockAreaStr):
         """
@@ -196,9 +199,9 @@ class MayaDockWidgetMixin(object):
         """
         :rtype: QtCore.Qt.DockWidgetAreas
         """
-        if self.isFloating():
-            dockArea = QtCore.Qt.NoDockWidgetArea
-        else:
+        dockArea = QtCore.Qt.NoDockWidgetArea
+
+        if self.mayaWindow() and not self.isFloating():
             dockArea = self.mayaWindow().dockWidgetArea(self.dockWidget())
         
         return dockArea
