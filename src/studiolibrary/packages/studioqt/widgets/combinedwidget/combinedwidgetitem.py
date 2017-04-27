@@ -475,8 +475,13 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         icon = QtWidgets.QTreeWidgetItem.icon(self, column)
         if not icon and column == 0:
             iconPath = self.thumbnailPath()
-            if iconPath:
+
+            if not os.path.exists(iconPath):
+                color = self.textColor()
+                icon = studioqt.resource().icon("thumbnail", color=color)
+            else:
                 icon = QtGui.QIcon(iconPath)
+
         return icon
 
     def pixmap(self, column):

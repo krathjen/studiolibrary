@@ -58,11 +58,11 @@ class LibraryAction(QtWidgets.QWidgetAction):
 
 #actionLabel, #actionLabel, #actionOption {
     background-color: BACKGROUND_COLOR;
-    color: rgb(255, 255, 255);
+    color: FOREGROUND_COLOR;
 }
 #actionLabel:hover, #actionLabel:hover, #actionOption:hover {
     background-color: ACCENT_COLOR;
-    color: rgb(255, 255, 255);
+    color: ACCENT_FOREGROUND_COLOR;
 }
 """
 

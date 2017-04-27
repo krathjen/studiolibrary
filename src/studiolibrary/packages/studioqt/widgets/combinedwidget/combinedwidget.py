@@ -1097,6 +1097,14 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         self._backgroundColor = color
 
+    def setBackgroundHoverColor(self, color):
+        """
+        Set the background color when the mouse hovers over the item.
+
+        :type color: QtWidgets.QtColor
+        """
+        self._backgroundHoverColor = color
+
     def setBackgroundSelectedColor(self, color):
         """
         Set the background color when an item is selected.
