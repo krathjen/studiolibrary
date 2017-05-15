@@ -170,7 +170,13 @@ def itemsFromUrls(urls):
                 path = path[1:]
 
         item = itemFromPath(path)
-        items.append(item)
+
+        if item:
+            items.append(item)
+        else:
+            msg = 'Cannot find the item for path "{0}"'
+            msg = msg.format(path)
+            logger.warning(msg)
 
     return items
 

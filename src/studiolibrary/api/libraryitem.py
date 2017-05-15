@@ -220,12 +220,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         return self.path()
 
-    def url(self):
-        """
-        :rtype: str
-        """
-        return QtCore.QUrl.fromLocalFile(self.path())
-
     def errorString(self):
         """
         Return the text string that explains why the item didn't save.
