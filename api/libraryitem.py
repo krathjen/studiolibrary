@@ -368,7 +368,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if not path:
             raise ItemError('Cannot set an empty item path.')
 
-        path = path.replace("\\", "/")
+        path = unicode(path).replace("\\", "/")
 
         dirname, basename, extension = studiolibrary.splitPath(path)
 

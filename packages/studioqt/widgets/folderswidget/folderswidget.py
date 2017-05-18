@@ -441,7 +441,7 @@ class FoldersWidget(QtWidgets.QTreeView):
             )
 
             if accept:
-                self.renameFolder(folder, str(name))
+                self.renameFolder(folder, unicode(name))
 
     def renameFolder(self, folder, name):
         """
@@ -454,7 +454,7 @@ class FoldersWidget(QtWidgets.QTreeView):
         self.clearSelection()
 
         oldPath = folder.path()
-        folder.rename(str(name))
+        folder.rename(unicode(name))
         newPath = folder.path()
 
         del self._folders[oldPath]
@@ -699,7 +699,7 @@ class FoldersWidget(QtWidgets.QTreeView):
             "*.png"
         )
 
-        path = str(path).replace("\\", "/")
+        path = unicode(path).replace("\\", "/")
         if path:
             for folder in self.selectedFolders():
                 folder.setIconPath(path)
