@@ -11,8 +11,8 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import utils
-
 
 __all__ = [
     "Database",
@@ -20,31 +20,45 @@ __all__ = [
 
 
 class Database(object):
-
     def __init__(self, path):
 
         self._path = path
+        self._mtime = None
 
     def path(self):
         """
         Return the disc location of the db.
-        
+
         :rtype: str 
         """
         return self._path
 
+    def isDirty(self):
+        """
+        Return True if the database has changed on disc.
+
+        :rtype: bool 
+        """
+        path = self.path()
+        return self._mtime != os.path.getmtime(path)
+
     def read(self):
         """
         Read the database and return the data.
-        
+
         :rtype: dict 
         """
-        return utils.readJson(self.path())
+        path = self.path()
+
+        data = utils.readJson(path)
+        self._mtime = os.path.getmtime(path)
+
+        return data
 
     def write(self, data):
         """
         Write the given data to the database.
-        
+
         :type data: dict
         :rtype: None 
         """
@@ -53,7 +67,7 @@ class Database(object):
     def update(self, data):
         """
         Update the database with the given data.
-        
+
         :type data: dict
         :rtype: None 
         """
@@ -107,7 +121,7 @@ class Database(object):
     def renameFolder(self, src, dst):
         """
         Rename the given source directory in the db to the given destination.
-            
+
         :type src: str
         :type dst: str
         :rtype: None
