@@ -696,11 +696,12 @@ class CombinedWidget(QtWidgets.QWidget):
             if key in itemData:
 
                 for columnLabel in itemData[key]:
-                    column = self.treeWidget().columnFromLabel(columnLabel)
                     value = itemData[key].get(columnLabel)
 
                     if value is not None:
-                        item.setText(column, value)
+                        item.setText(columnLabel, value)
+
+                item.updateData()
 
     def updateColumns(self):
         """

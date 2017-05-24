@@ -206,6 +206,24 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         return text
 
+    def setName(self, text):
+        """
+        Set the name that is shown under the icon and in the Name column.
+        
+        :type text: str
+        :rtype: None 
+        """
+        self.setText("Icon", text)
+        self.setText("Name", text)
+
+    def name(self):
+        """
+        Return text for the Name column.
+
+        :rtype: str
+        """
+        return self.text("Name")
+
     def setText(self, column, value, alignment=None):
         """
         Set the text to be displayed for the given column.
@@ -931,6 +949,11 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
     def _paintText(self, painter, option, column):
 
         text = self.displayText(column)
+
+        if self.combinedWidget().isIconView():
+            text = self.name()
+        else:
+            text = self.displayText(column)
 
         isSelected = option.state & QtWidgets.QStyle.State_Selected
 

@@ -867,9 +867,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         :rtype: studioqt.CombinedWidgetItemGroup
         """
         groupItem = studioqt.CombinedWidgetItemGroup()
-        groupItem.setText(0, text)
-        groupItem.setText(1, text)
-
+        groupItem.setName(text)
         groupItem.setStretchToWidget(self.parent())
         groupItem.setChildren(children)
         return groupItem

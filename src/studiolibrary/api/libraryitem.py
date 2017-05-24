@@ -262,8 +262,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         name = os.path.basename(path)
         category = os.path.basename(dirname)
 
-        self.setText("Icon", name)
-        self.setText("Name", name)
+        self.setName(name)
         self.setText("Path", path)
         self.setText("Category", category)
 
