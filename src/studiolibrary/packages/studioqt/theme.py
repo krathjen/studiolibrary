@@ -11,58 +11,54 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from functools import partial
-
 from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studioqt
 
-
 __all__ = ["Theme", "ThemeAction", "ThemesMenu"]
-
 
 THEME_PRESETS = [
     {
         "name": "Blue",
         "accentColor": "rgb(50, 180, 240, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
     {
         "name": "Green",
         "accentColor": "rgb(80, 200, 140, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
     {
         "name": "Yellow",
         "accentColor": "rgb(250, 200, 0, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
     {
         "name": "Orange",
         "accentColor": "rgb(255, 170, 0, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
     {
         "name": "Peach",
         "accentColor": "rgb(255, 125, 100, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
     {
         "name": "Red",
         "accentColor": "rgb(230, 60, 60, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
     {
         "name": "Pink",
         "accentColor": "rgb(255, 87, 123, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
     {
         "name": "Purple",
         "accentColor": "rgb(110, 110, 240, 255)",
-        "backgroundColor": "rgb(30, 30, 40, 255)",
+        "backgroundColor": "rgb(70, 70, 80, 255)",
     },
 ]
 
@@ -95,7 +91,7 @@ class ThemeAction(QtWidgets.QAction):
         self._theme = theme
 
         color = theme.accentColor()
-        icon = studioqt.icon("radio_button_checked", color=color)
+        icon = studioqt.icon("radio_button_checked_white", color=color)
         self.setIcon(icon)
 
     def theme(self):
@@ -107,6 +103,11 @@ class ThemeAction(QtWidgets.QAction):
 
 class ThemesMenu(QtWidgets.QMenu):
 
+    DEFAULT_DARK_COLOR = "rgb(80, 80, 90)"
+    DEFAULT_LIGHT_COLOR = "rgb(230, 230, 235)"
+
+    DEFAULT_MENU_ICON = "radio_button_checked_white"
+
     themeTriggered = QtCore.Signal(object)
 
     def __init__(self, parent=None, themes=None):
@@ -116,6 +117,8 @@ class ThemesMenu(QtWidgets.QMenu):
         """
         QtWidgets.QMenu.__init__(self, "Themes", parent)
 
+        self._currentTheme = None
+
         if not themes:
             themes = themePresets()
 
@@ -123,7 +126,32 @@ class ThemesMenu(QtWidgets.QMenu):
             action = ThemeAction(theme, self)
             self.addAction(action)
 
+        self.addSeparator()
+
+        action = QtWidgets.QAction("Dark", self)
+        icon = studioqt.icon(self.DEFAULT_MENU_ICON, color="rgb(60,60,80)")
+        action.setIcon(icon)
+
+        self.addAction(action)
+
+        action = QtWidgets.QAction("Light", self)
+        icon = studioqt.icon(self.DEFAULT_MENU_ICON, color="rgb(245,245,255)")
+        action.setIcon(icon)
+
+        self.addAction(action)
+
         self.triggered.connect(self._themeTriggered)
+
+    def setCurrentTheme(self, theme):
+        self._currentTheme = theme
+
+    def currentTheme(self):
+        """
+        Triggered when a theme has been clicked.
+
+        :rtype: Theme
+        """
+        return self._currentTheme
 
     def _themeTriggered(self, action):
         """
@@ -132,8 +160,20 @@ class ThemesMenu(QtWidgets.QMenu):
         :type action: Action
         :rtype: None
         """
+        theme = self.currentTheme()
+        if not theme:
+            raise Exception("Please set the current theme for the menu.")
+
         if isinstance(action, ThemeAction):
-            self.themeTriggered.emit(action.theme())
+            theme.setAccentColor(action.theme().accentColor())
+
+        elif action.text() == "Dark":
+            theme.setBackgroundColor(ThemesMenu.DEFAULT_DARK_COLOR)
+
+        elif action.text() == "Light":
+            theme.setBackgroundColor(ThemesMenu.DEFAULT_LIGHT_COLOR)
+
+        self.themeTriggered.emit(theme)
 
 
 def showThemesMenu(parent=None, themes=None):
@@ -242,7 +282,7 @@ class Theme(object):
     def isDark(self):
         """
         Return True if the current theme is dark.
-        
+
         rtype: bool
         """
         if self.LIGHT_THEME_ENABLED:
@@ -258,7 +298,7 @@ class Theme(object):
     def iconColor(self):
         """
         Return the icon color for the theme.
-        
+
         :rtype: studioqt.Color 
         """
         return self.forgroundColor()
@@ -433,7 +473,7 @@ class Theme(object):
 
             "ITEM_BACKGROUND_COLOR": itemBackgroundColor.toString(),
             "ITEM_BACKGROUND_HOVER_COLOR": itemBackgroundHoverColor.toString(),
-            "ITEM_BACKGROUND_SELECTED_COLOR":  accentColor.toString(),
+            "ITEM_BACKGROUND_SELECTED_COLOR": accentColor.toString(),
         }
 
         return options

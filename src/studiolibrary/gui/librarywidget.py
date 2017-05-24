@@ -579,7 +579,9 @@ class LibraryWidget(QtWidgets.QWidget):
         menu.addAction(action)
 
         if self.THEMES_MENU_ENABLED:
+            menu.addSeparator()
             themesMenu = studioqt.ThemesMenu(menu)
+            themesMenu.setCurrentTheme(self.theme())
             themesMenu.themeTriggered.connect(self.library().setTheme)
             menu.addMenu(themesMenu)
 
