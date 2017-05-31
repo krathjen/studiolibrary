@@ -87,6 +87,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._dpi = 1.0
         self._library = None
+        self._database = None
         self._isDebug = False
         self._isLocked = False
         self._isLoaded = False
@@ -244,7 +245,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :str dst: str
         :rtype: None
         """
-        db = self.itemDatabase()
+        db = self.database()
         db.renameItem(src, dst)
 
         self.loadItemData()
@@ -258,11 +259,90 @@ class LibraryWidget(QtWidgets.QWidget):
         :str dst: str
         :rtype: None
         """
-        db = self.itemDatabase()
+        db = self.database()
         db.renameFolder(src, dst)
 
         self.loadItemData()
         self.folderRenamed.emit(src, dst)
+
+    def _itemSelectionChanged(self):
+        """
+        Triggered when an item is selected or deselected.
+
+        :rtype: None
+        """
+        item = self.itemsWidget().selectedItem()
+
+        if self._currentItem != item:
+            self._currentItem = item
+            self.setPreviewWidgetFromItem(item)
+
+        self.itemSelectionChanged.emit(item)
+
+    def _folderSelectionChanged(self):
+        """
+        Triggered when an item is selected or deselected.
+
+        :rtype: None
+        """
+        self.loadItems()
+        path = self.selectedFolderPath()
+        self.folderSelectionChanged.emit(path)
+        self.globalSignal.folderSelectionChanged.emit(self, path)
+
+    def _itemMoved(self, item):
+        """
+        Triggered when an item has been moved.
+
+        :type item: studiolibrary.LibraryItem
+        :rtype: None
+        """
+        self.saveCustomOrder()
+
+    def _folderDropped(self, event):
+        """
+        Triggered when an item has been dropped on the folder widget.
+        
+        :type event: list[studiolibrary.LibraryItem]
+        :rtype: None
+        """
+        mimeData = event.mimeData()
+
+        if mimeData.hasUrls():
+            folder = self.selectedFolder()
+            items = studiolibrary.itemsFromUrls(mimeData.urls())
+
+            for item in items:
+                # Check if the item is moving to another folder.
+                if folder.path() != item.dirname():
+                    self.moveItemsToFolder(items, folder=folder)
+                    break
+
+    def _itemSaving(self, item):
+        """
+        Triggered when an item is saving.
+        
+        :type item: studiolibrary.LibraryItem
+        :rtype: None
+        """
+        if self.library().path() in item.path():
+            if item.exists():
+                self.showItemExistsDialog(item)
+
+    def _itemSaved(self, item):
+        """
+        Triggered when an item has finished saving.
+        
+        :type item: studiolibrary.LibraryItem
+        :rtype: None
+        """
+        folder = self.selectedFolder()
+
+        if folder and folder.path() == item.dirname():
+            path = item.path()
+            self.itemsWidget().clearSelection()
+            self.loadItems()
+            self.selectPaths([path])
 
     def addMenuBarAction(self, name, icon, tip, side="Right", callback=None):
         """
@@ -371,31 +451,6 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self._library = library
         self.reload()
-
-    def _itemSelectionChanged(self):
-        """
-        Triggered when an item is selected or deselected.
-
-        :rtype: None
-        """
-        item = self.itemsWidget().selectedItem()
-
-        if self._currentItem != item:
-            self._currentItem = item
-            self.setPreviewWidgetFromItem(item)
-
-        self.itemSelectionChanged.emit(item)
-
-    def _folderSelectionChanged(self):
-        """
-        Triggered when an item is selected or deselected.
-
-        :rtype: None
-        """
-        self.loadItems()
-        path = self.selectedFolderPath()
-        self.folderSelectionChanged.emit(path)
-        self.globalSignal.folderSelectionChanged.emit(self, path)
 
     # -----------------------------------------------------------------
     # Support for loading and setting items
@@ -853,21 +908,16 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for reading and writing to the item database
     # -------------------------------------------------------------------
 
-    def itemDatabasePath(self):
-        """
-        Return the disc location of the item database.
-
-        :rtype: str
-        """
-        return self.library().itemDatabasePath()
-
-    def itemDatabase(self):
+    def database(self):
         """
         Return a new instance of the items database for this library.
         
         :rtype: studiolibrary.Database 
         """
-        return self.library().itemDatabase()
+        if not self._database:
+            self._database = self.library().database()
+
+        return self._database
 
     def loadItemData(self):
         """
@@ -877,7 +927,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         logger.debug("Loading item data")
 
-        db = self.itemDatabase()
+        db = self.database()
         data = db.read()
 
         try:
@@ -898,8 +948,10 @@ class LibraryWidget(QtWidgets.QWidget):
 
         data = self.itemsWidget().itemData(columns)
 
-        db = self.itemDatabase()
+        db = self.database()
         db.update(data)
+
+        print data
 
         self.loadItemData()
 
@@ -914,33 +966,6 @@ class LibraryWidget(QtWidgets.QWidget):
     # -------------------------------------------------------------------
     # Support for moving items with drag and drop
     # -------------------------------------------------------------------
-
-    def _itemMoved(self, item):
-        """
-        Triggered when an item has been moved.
-        
-        :type item: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        self.saveCustomOrder()
-
-    def _folderDropped(self, event):
-        """
-        :type event: list[studiolibrary.LibraryItem]
-        :rtype: None
-        """
-        mimeData = event.mimeData()
-
-        if mimeData.hasUrls():
-            folder = self.selectedFolder()
-            items = studiolibrary.itemsFromUrls(mimeData.urls())
-
-            for item in items:
-                # Check if the item is moving to another folder.
-                if folder.path() != item.dirname():
-                    self.moveItemsToFolder(items, folder=folder)
-                    self.refreshLibraryWidgets()
-                    break
 
     def moveItemsDialog(self, parent=None):
         """
@@ -999,28 +1024,7 @@ class LibraryWidget(QtWidgets.QWidget):
         finally:
             self.itemsWidget().addItems(movedItems)
             self.selectItems(movedItems)
-
-    def _itemSaved(self, item):
-        """
-        :type item: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        folder = self.selectedFolder()
-
-        if folder and folder.path() == item.dirname():
-            path = item.path()
-            self.itemsWidget().clearSelection()
-            self.loadItems()
-            self.selectPaths([path])
-
-    def _itemSaving(self, item):
-        """
-        :type item: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        if self.library().path() in item.path():
-            if item.exists():
-                self.showItemExistsDialog(item)
+            self.refreshLibraryWidgets()
 
     def showItemExistsDialog(self, item):
         """

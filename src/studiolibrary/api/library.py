@@ -150,7 +150,7 @@ class Library(QtCore.QObject):
         """
         return self.formatPath(self.FOLDER_DATA_PATH)
 
-    def itemDatabasePath(self):
+    def databasePath(self):
         """
         Return the resolved path for the item data.
 
@@ -158,14 +158,15 @@ class Library(QtCore.QObject):
         """
         return self.formatPath(self.ITEM_DATA_PATH)
 
-    def itemDatabase(self):
+    def database(self):
         """
         Return a new instance of the items database for this library.
 
         :rtype: studiolibrary.Database 
         """
-        path = self.itemDatabasePath()
-        return studiolibrary.Database(path)
+        path = self.databasePath()
+        database = studiolibrary.Database(path)
+        return database
 
     def name(self):
         """
