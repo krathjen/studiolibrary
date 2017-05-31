@@ -54,7 +54,7 @@ class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
         """
         # This will be called for each row.
         item = self.combinedWidget().itemFromIndex(index)
-        return item.sizeHint()
+        return item.sizeHint(0)
 
     def paint(self, painter, option, index):
         """

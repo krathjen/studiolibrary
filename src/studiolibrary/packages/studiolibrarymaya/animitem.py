@@ -1,5 +1,3 @@
-# Copyright 2017 by Kurt Rathjen. All Rights Reserved.
-#
 # This library is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation, either
@@ -46,9 +44,7 @@ item.load(
 import os
 import shutil
 import logging
-from functools import partial
 
-# studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
@@ -91,46 +87,6 @@ class ValidateAnimError(AnimItemError):
 
 
 class AnimItem(baseitem.BaseItem):
-
-    @classmethod
-    def typeIconPath(cls):
-        """
-        Return the icon path to be displayed in thumbnail top left corner.
-
-        :rtype: path
-        """
-        return studiolibrarymaya.resource().get("icons", "animation.png")
-
-    @classmethod
-    def createAction(cls, menu, libraryWidget):
-        """
-        Return the action to be displayed when the user clicks the "plus" icon.
-
-        :type menu: QtWidgets.QMenu
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtCore.QAction
-        """
-        icon = QtGui.QIcon(cls.typeIconPath())
-        callback = partial(cls.showCreateWidget, libraryWidget)
-
-        action = QtWidgets.QAction(icon, "Animation", menu)
-        action.triggered.connect(callback)
-
-        return action
-
-    @staticmethod
-    def showCreateWidget(libraryWidget):
-        """
-        Show the widget for creating a new anim item.
-
-        :type libraryWidget: studiolibrary.LibraryWidget
-        """
-        widget = AnimCreateWidget()
-        widget.folderFrame().hide()
-        widget.setFolderPath(libraryWidget.selectedFolderPath())
-
-        libraryWidget.setCreateWidget(widget)
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -783,5 +739,11 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
             sourceEnd=sourceEnd
         )
 
+
+# Register the anim item to the Studio Library
+AnimItem.CreateWidgetClass = AnimCreateWidget
+AnimItem.MenuName = "Animation"
+AnimItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "animation.png")
+AnimItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "animation.png")
 
 studiolibrary.registerItem(AnimItem, ".anim")

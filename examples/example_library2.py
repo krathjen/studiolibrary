@@ -11,8 +11,6 @@ logging.basicConfig(
     filemode='w'
 )
 
-logger = logging.getLogger("test_library")
-
 
 if __name__ == "__main__":
 

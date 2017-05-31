@@ -26,7 +26,7 @@ studiolibrary.Analytics.DEFAULT_ID = "UA-50172384-1"
 # studioqt.SHOW_IN_FOLDER_CMD = 'konqueror "{path}"&'
 
 # Shared data
-# studiolibrary.Library.ITEM_DATA_PATH = "{root}/.studiolibrary/item_data.json"
+studiolibrary.Library.ITEM_DATA_PATH = "{root}/.studiolibrary/item_data.json"
 # studiolibrary.Library.FOLDER_DATA_PATH = "{root}/.studiolibrary/folder_data.json"
 
 # Meta paths are still named record.json and camel case for legacy reasons

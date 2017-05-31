@@ -107,7 +107,7 @@ def clearItemClasses():
     _itemClasses = collections.OrderedDict()
 
 
-def itemFromPath(path):
+def itemFromPath(path, **kwargs):
     """
     Return a new item instance for the given path.
 
@@ -134,13 +134,13 @@ def itemFromPath(path):
             isFile = isFile and os.path.isfile(path)
 
             if isDir or isFile:
-                item = cls(path)
+                item = cls(path, **kwargs)
                 break
 
     return item
 
 
-def itemsFromPaths(paths):
+def itemsFromPaths(paths, **kwargs):
     """
     Return new item instances for the given paths.
 
@@ -148,12 +148,12 @@ def itemsFromPaths(paths):
     :rtype: collections.Iterable[studiolibrary.LibraryItem]
     """
     for path in paths:
-        item = itemFromPath(path)
+        item = itemFromPath(path, **kwargs)
         if item:
             yield item
 
 
-def itemsFromUrls(urls):
+def itemsFromUrls(urls, **kwargs):
     """
     Return new item instances for the given QUrl objects.
     
@@ -169,7 +169,7 @@ def itemsFromUrls(urls):
             if path.startswith("/"):
                 path = path[1:]
 
-        item = itemFromPath(path)
+        item = itemFromPath(path, **kwargs)
 
         if item:
             items.append(item)
@@ -181,7 +181,7 @@ def itemsFromUrls(urls):
     return items
 
 
-def findItems(path, direction=studiolibrary.Direction.Down, depth=3):
+def findItems(path, direction=studiolibrary.Direction.Down, depth=3, **kwargs):
     """
     Find and create new item instances by walking the given path.
 
@@ -204,10 +204,10 @@ def findItems(path, direction=studiolibrary.Direction.Down, depth=3):
         depth=depth
     )
 
-    return itemsFromPaths(paths)
+    return itemsFromPaths(paths, **kwargs)
 
 
-def findItemsInFolders(folders, depth=3):
+def findItemsInFolders(folders, depth=3, **kwargs):
     """
     Find and create new item instances by walking the given paths.
 
@@ -217,7 +217,7 @@ def findItemsInFolders(folders, depth=3):
     :rtype: collections.Iterable[studiolibrary.LibraryItem]
     """
     for folder in folders:
-        for item in findItems(folder, depth=depth):
+        for item in findItems(folder, depth=depth, **kwargs):
             yield item
 
 

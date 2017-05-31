@@ -1,5 +1,3 @@
-# Copyright 2017 by Kurt Rathjen. All Rights Reserved.
-#
 # This library is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation, either
@@ -42,13 +40,10 @@ item.load(objects=objects, namespaces=namespaces, animation=True, time=None)
 
 import os
 import logging
-from functools import partial
 
-# studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 import studioqt
-from studioqt import QtGui
+
 from studioqt import QtCore
-from studioqt import QtWidgets
 
 import mutils
 import studiolibrary
@@ -75,46 +70,6 @@ logger = logging.getLogger(__name__)
 
 
 class MirrorItem(baseitem.BaseItem):
-
-    @classmethod
-    def typeIconPath(cls):
-        """
-        Return the mirror icon path to be displayed on the thumbnail.
-
-        :rtype: path
-        """
-        return studiolibrarymaya.resource().get("icons", "mirrorTable.png")
-
-    @classmethod
-    def createAction(cls, menu, libraryWidget):
-        """
-        Return the action to be displayed when the user clicks the "plus" icon.
-
-        :type menu: QtWidgets.QMenu
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtCore.QAction
-        """
-        icon = QtGui.QIcon(cls.typeIconPath())
-        callback = partial(cls.showCreateWidget, libraryWidget)
-
-        action = QtWidgets.QAction(icon, "Mirror Table", menu)
-        action.triggered.connect(callback)
-
-        return action
-
-    @staticmethod
-    def showCreateWidget(libraryWidget):
-        """
-        Show the widget for creating a new mirror table item.
-
-        :type libraryWidget: studiolibrary.LibraryWidget
-        """
-        widget = MirrorCreateWidget()
-        widget.folderFrame().hide()
-        widget.setFolderPath(libraryWidget.selectedFolderPath())
-
-        libraryWidget.setCreateWidget(widget)
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -362,5 +317,11 @@ class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
         """
         self.item().loadFromSettings()
 
+
+# Register the mirror table item to the Studio Library
+MirrorItem.CreateWidgetClass = MirrorCreateWidget
+MirrorItem.MenuName = "Mirror Table"
+MirrorItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
+MirrorItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
 
 studiolibrary.registerItem(MirrorItem, ".mirror")

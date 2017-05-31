@@ -205,6 +205,8 @@ class BaseItem(studiolibrary.LibraryItem):
         menu.addMenu(subMenu)
         menu.addSeparator()
 
+        studiolibrary.LibraryItem.contextMenu(self, menu, items=items)
+
     def showSelectionSetsMenu(self, **kwargs):
         """
         Show the selection sets menu for this item at the cursor position.

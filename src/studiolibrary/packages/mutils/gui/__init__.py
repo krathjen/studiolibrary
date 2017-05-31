@@ -14,8 +14,12 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import maya.OpenMayaUI as omui
+try:
+    import maya.OpenMayaUI as omui
+except ImportError, e:
+    print e
 
+from studioqt import QtCore
 from studioqt import QtWidgets
 
 
@@ -36,7 +40,25 @@ from .thumbnailcapturedialog import *
 
 def mayaWindow():
     """
+    Return the Maya main window as a QMainWindow object.
+    
     :rtype: QMainWindow
     """
     mainWindowPtr = omui.MQtUtil.mainWindow()
     return wrapInstance(long(mainWindowPtr), QtWidgets.QMainWindow)
+
+
+def makeMayaStandaloneWindow(w):
+    """
+    Make a standalone window, though parented under Maya's mainWindow.
+
+    The parenting under Maya's mainWindow is done so that the QWidget will 
+    not auto-destroy itself when the instance variable goes out of scope.
+    """
+    # Parent under the main Maya window
+    w.setParent(mayaWindow())
+
+    # Make this widget appear as a standalone window
+    w.setWindowFlags(QtCore.Qt.Window)
+    w.raise_()
+    w.show()

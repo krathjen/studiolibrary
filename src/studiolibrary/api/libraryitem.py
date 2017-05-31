@@ -13,6 +13,7 @@
 
 import os
 import logging
+from functools import partial
 
 import studiolibrary
 
@@ -51,20 +52,18 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     # The meta path is still named record.json and camel case for legacy.
     META_PATH = "{path}/.studioLibrary/record.json"
 
+    MenuName = "Library Item"
+    MenuIconPath = ""
+
+    TypeIconPath = ""
+    CreateWidgetClass = None
+
     _libraryItemSignals = LibraryItemSignals()
 
     saved = _libraryItemSignals.saved
     saving = _libraryItemSignals.saving
     loaded = _libraryItemSignals.loaded
     renamed = _libraryItemSignals.renamed
-
-    def typeIconPath(self):
-        """
-        Return the type icon path on disc.
-
-        :rtype: path or None
-        """
-        pass
 
     @classmethod
     def createAction(cls, menu, libraryWidget):
@@ -73,14 +72,42 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         :type menu: QtWidgets.QMenu
         :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtCore.QAction or None
+        :rtype: QtCore.QAction
         """
-        pass
+        icon = QtGui.QIcon(cls.MenuIconPath)
+        callback = partial(cls.showCreateWidget, libraryWidget)
+
+        action = QtWidgets.QAction(icon, cls.MenuName, menu)
+        action.triggered.connect(callback)
+
+        return action
+
+    @classmethod
+    def showCreateWidget(cls, libraryWidget):
+        """
+        Show the widget for creating a new item.
+
+        :type libraryWidget: studiolibrary.LibraryWidget
+        """
+        widget = cls.CreateWidgetClass()
+
+        dst = libraryWidget.selectedFolderPath()
+
+        if dst:
+            widget.folderFrame().hide()
+
+        widget.setFolderPath(dst)
+        widget.setDatabase(libraryWidget.database())
+
+        libraryWidget.setCreateWidget(widget)
+        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(
         self,
         path=None,
         library=None,
+        database=None,
+        libraryWidget=None,
     ):
         """
         The LibraryItem class provides an item for use with the LibraryWidget.
@@ -97,12 +124,27 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self._iconPath = None
         self._database = None
         self._typePixmap = None
+        self._libraryWidget = None
 
         if library:
             self.setLibrary(library)
 
+        if libraryWidget:
+            self.setLibraryWidget(libraryWidget)
+
+        if database:
+            self.setDatabase(database)
+
         if path:
             self.setPath(path)
+
+    def typeIconPath(self):
+        """
+        Return the type icon path on disc.
+
+        :rtype: path or None
+        """
+        return self.TypeIconPath
 
     def localSettings(self):
         """
@@ -126,6 +168,34 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtWidgets.QWidget
+        """
+        pass
+
+    def contextEditMenu(self, menu, items=None):
+        """
+        Called when the user would like to edit the item from the menu.
+        
+        The given menu is shown as a submenu of the main context menu.
+        
+        :type menu: QtWidgets.QMenu
+        :type items: list[LibraryItem]
+        :rtype: None
+        """
+        action = QtWidgets.QAction("Rename", menu)
+        action.triggered.connect(self.showRenameDialog)
+        menu.addAction(action)
+
+        action = QtWidgets.QAction("Show in folder", menu)
+        action.triggered.connect(self.showInFolder)
+        menu.addAction(action)
+
+    def contextMenu(self, menu, items=None):
+        """
+        Called when the user right clicks on the item.
+
+        :type menu: QtWidgets.QMenu
+        :type items: list[LibraryItem]
+        :rtype: None
         """
         pass
 
@@ -190,6 +260,21 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         self._library = library
 
+    def libraryWidget(self):
+        """
+        :rtype: studiolibrary.LibraryWidget or None
+        """
+        if not self._libraryWidget and self.library():
+            self._libraryWidget = self.library().libraryWidget()
+
+        return self._libraryWidget
+
+    def setLibraryWidget(self, libraryWidget):
+        """
+        :rtype: studiolibrary.LibraryWidget or None
+        """
+        self._libraryWidget = libraryWidget
+
     def setDatabase(self, database):
         """
         Set the database for the item.
@@ -208,13 +293,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             self._database = self.library().database()
 
         return self._database
-
-    def libraryWidget(self):
-        """
-        :rtype: studiolibrary.LibraryWidget or None
-        """
-        if self.library():
-            return self.library().libraryWidget()
 
     def setIconPath(self, path):
         """
@@ -396,7 +474,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         :type parent: QtWidgets.QWidget
         """
-        parent = parent or self.library()
+        parent = parent or self.libraryWidget()
+
         name, accepted = QtWidgets.QInputDialog.getText(
             parent,
             "Rename",

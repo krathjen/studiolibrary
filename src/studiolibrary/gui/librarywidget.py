@@ -245,7 +245,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :str dst: str
         :rtype: None
         """
-        self.loadItemData()
+        self.loadItems()
         self.itemRenamed.emit(src, dst)
 
     def _folderRenamed(self, src, dst):
@@ -516,16 +516,19 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         :rtype: list[studiolibrary.LibraryItem]
         """
-        items = []
         paths = self.foldersWidget().selectedPaths()
         depth = 1
+        library = self.library()
 
         if self.isRecursiveSearchEnabled():
             depth = 3
 
-        for item in studiolibrary.findItemsInFolders(paths, depth):
-            item.setLibrary(self.library())
-            items.append(item)
+        items = list(studiolibrary.findItemsInFolders(
+            paths,
+            depth,
+            library=library
+            )
+        )
 
         return items
 
@@ -795,31 +798,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return action
 
-    def createItemEditMenu(self):
-        """
-        Return the edit menu for deleting, renaming items.
-
-        :rtype: QtWidgets.QMenu
-        """
-        menu = QtWidgets.QMenu(self)
-        menu.setTitle("Edit")
-
-        action = QtWidgets.QAction("Rename", menu)
-        action.triggered.connect(self.renameSelectedItem)
-        menu.addAction(action)
-
-        if self.trashEnabled():
-            action = QtWidgets.QAction("Move to trash", menu)
-            action.setEnabled(self.isTrashEnabled())
-            action.triggered.connect(self.trashSelectedItemsDialog)
-            menu.addAction(action)
-
-        action = QtWidgets.QAction("Show in folder", menu)
-        action.triggered.connect(self.showItemsInFolder)
-        menu.addAction(action)
-
-        return menu
-
     def createItemContextMenu(self, items):
         """
         Return the item context menu for the given items.
@@ -830,17 +808,24 @@ class LibraryWidget(QtWidgets.QWidget):
         menu = studioqt.ContextMenu(self)
 
         if items:
-            items = items[-1]
-            try:
-                items.contextMenu(menu)
-            except Exception, msg:
-                logger.exception(msg)
+            item = items[-1]
+            item.contextMenu(menu)
 
         if not self.isLocked():
             menu.addMenu(self.createNewMenu())
 
-            if items:
-                menu.addMenu(self.createItemEditMenu())
+            if item:
+                editMenu = studioqt.ContextMenu(menu)
+                editMenu.setTitle("Edit")
+                menu.addMenu(editMenu)
+
+                item.contextEditMenu(editMenu)
+
+                if self.trashEnabled():
+                    action = QtWidgets.QAction("Move to trash", editMenu)
+                    action.setEnabled(self.isTrashEnabled())
+                    action.triggered.connect(self.trashSelectedItemsDialog)
+                    editMenu.addAction(action)
 
         menu.addSeparator()
         menu.addMenu(self.createSettingsMenu())
@@ -1956,52 +1941,11 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.menuBarWidget().update()
 
-    def renameSelectedItem(self):
-        """
-        Rename the selected item.
-
-        :rtype: None
-        """
-        try:
-            self._renameSelectedItem()
-        except Exception, e:
-            self.criticalDialog(e.message)
-            raise
-
-    def _renameSelectedItem(self):
-        """
-        :rtype: None
-        """
-        item = self.itemsWidget().selectedItem()
-
-        if not item:
-            raise Exception("Please select an item")
-
-        result = item.showRenameDialog(parent=self)
-        if result:
-            self.loadItems()
-            self.selectItems([item])
-
     def kwargs(self):
         """
         :rtype: dict
         """
         return self.library().kwargs()
-
-    def showItemsInFolder(self):
-        """
-        Show the selected items in the system file explorer.
-        
-        :rtype: None 
-        """
-        items = self.selectedItems()
-
-        for item in items:
-            item.showInFolder()
-
-        if not items:
-            for folder in self.selectedFolders():
-                folder.showInFolder()
 
     def showCreateFolderDialog(self):
         """
