@@ -88,6 +88,24 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         self._item = item
 
+    def setDatabase(self, database):
+        """
+        Convenience method for setting the database for the item.
+
+        :type database: studiolibrary.Database
+        :rtype: None 
+        """
+        self.item().setDatabase(database)
+
+    def setLibrary(self, library):
+        """
+        Convenience method for setting the library for the item.
+        
+        :type library: studiolibrary.Library
+        :rtype: None 
+        """
+        self.item().setLibrary(library)
+
     def iconPath(self):
         """
         Return the icon path to be used for the thumbnail.

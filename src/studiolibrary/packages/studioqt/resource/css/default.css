@@ -304,7 +304,6 @@ QComboBox {
 QComboBox::drop-down {
 	border: 0px;
 	padding-top: 2px;
-	align: center;
 	background-color: rgb(255, 255, 255, 0);
 	image: url(RESOURCE_DIRNAME/icons/drop_arrow_DARKNESS.png);
 }

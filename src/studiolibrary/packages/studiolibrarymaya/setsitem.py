@@ -13,11 +13,6 @@
 
 import os
 import mutils
-from functools import partial
-
-# studioqt supports both pyside (Qt4) and pyside2 (Qt5)
-from studioqt import QtGui
-from studioqt import QtWidgets
 
 import studiolibrary
 import studiolibrarymaya
@@ -34,46 +29,6 @@ __all__ = [
 
 
 class SetsItem(baseitem.BaseItem):
-
-    @classmethod
-    def typeIconPath(cls):
-        """
-        Return the type icon path on disc.
-
-        :rtype: path
-        """
-        return studiolibrarymaya.resource().get("icons", "selectionSet.png")
-
-    @classmethod
-    def createAction(cls, menu, libraryWidget):
-        """
-        Return the action to be displayed when the user clicks the "plus" icon.
-
-        :type menu: QtWidgets.QMenu
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtCore.QAction
-        """
-        icon = QtGui.QIcon(cls.typeIconPath())
-        callback = partial(cls.showCreateWidget, libraryWidget)
-
-        action = QtWidgets.QAction(icon, "Selection Set", menu)
-        action.triggered.connect(callback)
-
-        return action
-
-    @staticmethod
-    def showCreateWidget(libraryWidget):
-        """
-        Show the widget for creating a new anim item.
-
-        :type libraryWidget: studiolibrary.LibraryWidget
-        """
-        widget = SetsCreateWidget()
-        widget.folderFrame().hide()
-        widget.setFolderPath(libraryWidget.selectedFolderPath())
-
-        libraryWidget.setCreateWidget(widget)
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -152,5 +107,11 @@ class SetsPreviewWidget(basepreviewwidget.BasePreviewWidget):
         """Triggered when the user clicks the apply button."""
         self.item().loadFromSettings()
 
+
+# Register the selection set item to the Studio Library
+SetsItem.CreateWidgetClass = SetsCreateWidget
+SetsItem.MenuName = "Selection Set"
+SetsItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
+SetsItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
 
 studiolibrary.registerItem(SetsItem, ".set")

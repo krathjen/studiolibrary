@@ -18,12 +18,12 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 try:
+    import mutils
     import maya.cmds
     import maya.OpenMayaUI as omui
     isMaya = True
 except ImportError:
     isMaya = False
-
 
 try:
     from shiboken2 import wrapInstance
@@ -423,16 +423,7 @@ class MayaDockWidgetMixin(object):
         dockControlName = self.dockControlName()
 
         if not self.isMayaStandaloneWindow():
-
-            # Parent under the main Maya window
-            mainWindowPtr = long(omui.MQtUtil.mainWindow())
-            mainWindow = wrapInstance(mainWindowPtr, QtWidgets.QMainWindow)
-            self.setParent(mainWindow)
-
-            # Make this widget appear as a standalone window
-            self.setWindowFlags(QtCore.Qt.Window)
-            self.raise_()
-            self.show()
+            mutils.gui.makeMayaStandaloneWindow(self)
 
         # Delete the parent dock control if applicable
         if dockControlName:

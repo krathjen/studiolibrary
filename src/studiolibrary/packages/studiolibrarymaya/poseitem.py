@@ -1,5 +1,3 @@
-# Copyright 2017 by Kurt Rathjen. All Rights Reserved.
-#
 # This library is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation, either
@@ -40,13 +38,10 @@ item.load(objects=objects, namespaces=namespaces, key=True, mirror=False)
 
 import os
 import logging
-from functools import partial
 
-# studioqt supports both pyside (Qt4) and pyside2 (Qt5)
 import studioqt
-from studioqt import QtGui
+
 from studioqt import QtCore
-from studioqt import QtWidgets
 
 import studiolibrary
 import studiolibrarymaya
@@ -81,46 +76,6 @@ class PoseItem(baseitem.BaseItem):
 
     _poseItemSignals = PoseItemSignals()
     mirrorChanged = _poseItemSignals.mirrorChanged
-
-    @classmethod
-    def typeIconPath(cls):
-        """
-        Return the type icon path on disc.
-
-        :rtype: path
-        """
-        return studiolibrarymaya.resource().get("icons", "pose.png")
-
-    @classmethod
-    def createAction(cls, menu, libraryWidget):
-        """
-        Return the action to be displayed when the user clicks the "plus" icon.
-
-        :type menu: QtWidgets.QMenu
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtCore.QAction
-        """
-        icon = QtGui.QIcon(cls.typeIconPath())
-        callback = partial(cls.showCreateWidget, libraryWidget)
-
-        action = QtWidgets.QAction(icon, "Pose", menu)
-        action.triggered.connect(callback)
-
-        return action
-
-    @staticmethod
-    def showCreateWidget(libraryWidget):
-        """
-        Show the widget for creating a new pose item.
-
-        :type libraryWidget: studiolibrary.LibraryWidget
-        """
-        widget = PoseCreateWidget()
-        widget.folderFrame().hide()
-        widget.setFolderPath(libraryWidget.selectedFolderPath())
-
-        libraryWidget.setCreateWidget(widget)
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -499,5 +454,11 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
         """Triggered when the user clicks the apply button."""
         self.item().loadFromSettings(clearSelection=False)
 
+
+# Register the pose item to the Studio Library
+PoseItem.CreateWidgetClass = PoseCreateWidget
+PoseItem.MenuName = "Pose"
+PoseItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "pose.png")
+PoseItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "pose.png")
 
 studiolibrary.registerItem(PoseItem, ".pose")
