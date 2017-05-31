@@ -20,7 +20,7 @@ if __name__ == "__main__":
         print "Renamed:", oldPath, ">>>", newPath
 
     with studioqt.app():
-        library = studiolibrary.main(lockFolder="Malcolm")
+        library = studiolibrary.main("Default", lockFolder="Malcolm")
 
         widget = library.libraryWidget()
         widget.folderRenamed.connect(_folderRenamed)

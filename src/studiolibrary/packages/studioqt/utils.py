@@ -35,9 +35,33 @@ __all__ = [
     "isAltModifier",
     "isControlModifier",
     "currentScreenGeometry",
+    "InvokeRepeatingThread",
 ]
 
 logger = logging.getLogger(__name__)
+
+
+class InvokeRepeatingThread(QtCore.QThread):
+    """
+    A convenience class for invoking a method to the given repeat rate.
+    """
+
+    triggered = QtCore.Signal()
+
+    def __init__(self, repeatRate, *args):
+        QtCore.QThread.__init__(self, *args)
+
+        self._repeatRate = repeatRate
+
+    def run(self):
+        """
+        The starting point for the thread.
+        
+        :rtype: None 
+        """
+        while True:
+            QtCore.QThread.sleep(self._repeatRate)
+            self.triggered.emit()
 
 
 @contextlib.contextmanager

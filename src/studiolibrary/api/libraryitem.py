@@ -189,9 +189,16 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         self._library = library
 
+    def database(self):
+        """
+        :rtype: studiolibrary.Database
+        """
+        if self.library():
+            return self.library().database()
+
     def libraryWidget(self):
         """
-        :rtype: studiolibrary.LibraryWidget
+        :rtype: studiolibrary.LibraryWidget or None
         """
         if self.library():
             return self.library().libraryWidget()
@@ -306,6 +313,10 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         path = self.path()
         self.metaFile().save()
         studiolibrary.moveContents(contents, path)
+
+        db = self.database()
+        if db:
+            db.insert(path, {})
 
         self.saved.emit(self)
         logger.debug(u'Item Saved: {0}'.format(self.path()))

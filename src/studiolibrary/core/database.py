@@ -13,25 +13,70 @@
 
 import os
 import utils
+import logging
+
+import studioqt
+from studioqt import QtCore
+
 
 __all__ = [
     "Database",
 ]
 
 
-class Database(object):
+logger = logging.getLogger(__name__)
+
+
+class Database(QtCore.QObject):
+
+    ENABLE_WATCHER = False
+
+    databaseChanged = QtCore.Signal()
+
     def __init__(self, path):
+        QtCore.QObject.__init__(self)
 
         self._path = path
         self._mtime = None
+        self._watcher = None
 
-    def path(self):
-        """
-        Return the disc location of the db.
+        if self.ENABLE_WATCHER:
+            self.setWatcherEnabled(True)
 
-        :rtype: str 
+    def setWatcherEnabled(self, enable, repeatRate=1):
         """
-        return self._path
+        Enable a watcher that will trigger the database changed signal.
+        
+        :type enable: bool
+        :type repeatRate: int
+        :rtype: None 
+        """
+        if enable:
+            if not self._watcher:
+                self._watcher = studioqt.InvokeRepeatingThread(repeatRate)
+                self._watcher.triggered.connect(self._watcherTrggered)
+                self._watcher.start()
+        elif self._watcher:
+                self._watcher.terminate()
+                self._watcher = None
+
+    def _watcherTrggered(self):
+        """
+        Triggered when the watcher has reached it's repeat rate.
+        
+        :rtype: None 
+        """
+        if self.isDirty():
+            self.makeDirty()
+            self.databaseChanged.emit()
+
+    def makeDirty(self):
+        """
+        Update the database object with the current timestamp of the db path.
+        
+        :rtype: None 
+        """
+        self._mtime = os.path.getmtime(self.path())
 
     def isDirty(self):
         """
@@ -42,17 +87,22 @@ class Database(object):
         path = self.path()
         return self._mtime != os.path.getmtime(path)
 
+    def path(self):
+        """
+        Return the disc location of the db.
+
+        :rtype: str 
+        """
+        return self._path
+
     def read(self):
         """
         Read the database and return the data.
 
-        :rtype: dict 
+        :rtype: dict
         """
         path = self.path()
-
         data = utils.readJson(path)
-        self._mtime = os.path.getmtime(path)
-
         return data
 
     def write(self, data):
@@ -75,6 +125,16 @@ class Database(object):
         data_.update(data)
         self.write(data_)
 
+    def insert(self, key, data):
+        """
+        Insert the given data at the given key.
+        
+        :type key: str 
+        :type data: dict
+        :rtype: None 
+        """
+        self.updateMultiple([key], data)
+
     def updateMultiple(self, keys, data):
         """
         Update the given keys with the given data.
@@ -95,7 +155,7 @@ class Database(object):
 
     def renameItem(self, src, dst):
         """
-        Rename the given item path in the db to the given dst path.
+        Rename the given path in the db to the given dst path.
 
         :type src: str
         :type dst: str
@@ -106,16 +166,18 @@ class Database(object):
         # Replace the old key with the new dst value
         if src in data:
 
-            itemData = data.get(src, {})
+            data_ = data.get(src, {})
 
-            # If the dst item already exists then we just update the data
+            # If the dst path already exists then we just update the data
             if dst in data:
-                data[dst].update(itemData)
+                data[dst].update(data_)
             else:
-                data[dst] = itemData
+                data[dst] = data_
 
-            # Remove the old item from the database
-            del data[src]
+            # Remove the old path from the database
+            if src in data:
+                del data[src]
+
             self.write(data)
 
     def renameFolder(self, src, dst):
