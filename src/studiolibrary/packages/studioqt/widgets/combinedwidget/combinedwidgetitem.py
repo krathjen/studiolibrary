@@ -486,13 +486,34 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         self._pixmap[column] = pixmap
 
-    def thumbnailPath(self):
-        return ""
+    def setIconPath(self, path):
+        """
+        Set the icon path for the current item.
+
+        :type path: str
+        :rtype: None
+        """
+        self._iconPath = path
+        self.clearIconCache()
+
+    def iconPath(self):
+        """
+        Return the icon path for the current item.
+
+        :rtype: str
+        """
+        return self._iconPath
 
     def icon(self, column):
+        """
+        Return the icon for the given column.
+        
+        :type column: int
+        :rtype: QtGui.QIcon
+        """
         icon = QtWidgets.QTreeWidgetItem.icon(self, column)
         if not icon and column == 0:
-            iconPath = self.thumbnailPath()
+            iconPath = self.iconPath()
 
             if not os.path.exists(iconPath):
                 color = self.textColor()
@@ -501,6 +522,14 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
                 icon = QtGui.QIcon(iconPath)
 
         return icon
+
+    def clearIconCache(self):
+        """
+        Clear the pixmap cache for the item.
+        
+        :rtype: None 
+        """
+        self._pixmap = {}
 
     def pixmap(self, column):
         """
@@ -717,9 +746,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         rect = QtCore.QRect(option.rect)
         return rect
-
-    def repaint(self):
-        self.update(self.rect())
 
     def paintRow(self, painter, option, index):
         """
@@ -1170,7 +1196,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :rtype: None
         """
         self.resetImageSequence()
-        path = self.imageSequencePath() or self.thumbnailPath()
+        path = self.imageSequencePath() or self.iconPath()
 
         movie = None
 
