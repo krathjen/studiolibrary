@@ -111,14 +111,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         return studiolibrary.Settings.instance("StudioLibrary", "Items", self.__class__.__name__)
 
-    def thumbnailPath(self):
-        """
-        Return the thumbnail location on disc for this item.
-
-        :rtype: str
-        """
-        return studioqt.resource().get("icons", "thumbnail.png")
-
     def previewWidget(self, libraryWidget):
         """
         Return the widget to be shown when the user clicks on the item.
@@ -196,23 +188,13 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if self.library():
             return self.library().libraryWidget()
 
-    def setIconPath(self, path):
-        """
-        Set the icon path for the current item.
-
-        :type path: str
-        :rtype: None
-        """
-        self._iconPath = path
-
     def iconPath(self):
         """
         Return the icon path for the current item.
 
-        :type path: str
-        :rtype: None
+        :rtype: str or None
         """
-        return self._iconPath
+        return studioqt.resource().get("icons", "thumbnail.png")
 
     def mimeText(self):
         """

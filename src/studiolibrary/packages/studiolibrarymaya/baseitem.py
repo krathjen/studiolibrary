@@ -132,7 +132,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 self._transferObject = self.transferClass().fromPath(path)
         return self._transferObject
 
-    def thumbnailPath(self):
+    def iconPath(self):
         """
         Return the thumbnail location on disc to be displayed for the item.
 
@@ -844,7 +844,7 @@ class PreviewWidget(BaseWidget):
         BaseWidget.__init__(self, *args, **kwargs)
 
         if hasattr(self.ui, 'thumbnailButton'):
-            path = self.item().thumbnailPath()
+            path = self.item().iconPath()
             if os.path.exists(path):
                 self.setIconPath(path)
 
