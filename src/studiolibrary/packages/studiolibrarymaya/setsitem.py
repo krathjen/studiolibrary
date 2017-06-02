@@ -23,7 +23,8 @@ import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
-
+from studiolibrarymaya import basecreatewidget
+from studiolibrarymaya import basepreviewwidget
 
 __all__ = [
     "SetsItem",
@@ -78,7 +79,8 @@ class SetsItem(baseitem.BaseItem):
         """
         :rtype: None
         """
-        baseitem.BaseItem.__init__(self, *args, **kwargs)
+        super(SetsItem, self).__init__(*args, **kwargs)
+
         self.setTransferBasename("set.json")
         self.setTransferClass(mutils.SelectionSet)
 
@@ -121,10 +123,10 @@ class SetsItem(baseitem.BaseItem):
         if path and not path.endswith(".set"):
             path += ".set"
 
-        baseitem.BaseItem.save(self, objects, path=path, iconPath=iconPath)
+        super(SetsItem, self).save(objects, path=path, iconPath=iconPath)
 
 
-class SetsCreateWidget(baseitem.CreateWidget):
+class SetsCreateWidget(basecreatewidget.BaseCreateWidget):
 
     def __init__(self, item=None, parent=None):
         """
@@ -132,17 +134,17 @@ class SetsCreateWidget(baseitem.CreateWidget):
         :type item: SelectionSetItem
         """
         item = item or SetsItem()
-        baseitem.CreateWidget.__init__(self, item, parent=parent)
+        super(SetsCreateWidget, self).__init__(item, parent=parent)
 
 
-class SetsPreviewWidget(baseitem.PreviewWidget):
+class SetsPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :type parent: QtWidgets.QWidget
         :type item: SelectionSetItem
         """
-        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
+        super(SetsPreviewWidget, self).__init__(*args, **kwargs)
 
         self.ui.optionsToggleBox.setVisible(False)
 

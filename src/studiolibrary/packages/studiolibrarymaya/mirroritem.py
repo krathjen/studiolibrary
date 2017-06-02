@@ -55,6 +55,9 @@ import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
+from studiolibrarymaya import basecreatewidget
+from studiolibrarymaya import basepreviewwidget
+
 
 try:
     import maya.cmds
@@ -118,7 +121,8 @@ class MirrorItem(baseitem.BaseItem):
         :type args: list
         :type kwargs: dict
         """
-        baseitem.BaseItem.__init__(self, *args, **kwargs)
+        super(MirrorItem, self).__init__(*args, **kwargs)
+
         self.setTransferBasename("mirrortable.json")
         self.setTransferClass(mutils.MirrorTable)
 
@@ -165,6 +169,7 @@ class MirrorItem(baseitem.BaseItem):
         :type time: list[int]
         """
         objects = objects or []
+
         self.transferObject().load(
             objects=objects,
             namespaces=namespaces,
@@ -200,7 +205,7 @@ class MirrorItem(baseitem.BaseItem):
         studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath])
 
 
-class MirrorCreateWidget(baseitem.CreateWidget):
+class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
 
     def __init__(self, item=None, parent=None):
         """
@@ -208,7 +213,7 @@ class MirrorCreateWidget(baseitem.CreateWidget):
         :type item: MirrorItem
         """
         item = item or MirrorItem()
-        baseitem.CreateWidget.__init__(self, item, parent=parent)
+        super(MirrorCreateWidget, self).__init__(item, parent=parent)
 
     def leftText(self):
         """
@@ -252,7 +257,7 @@ class MirrorCreateWidget(baseitem.CreateWidget):
         self.ui.leftCount.setText(str(mt.leftCount(objects)))
         self.ui.rightCount.setText(str(mt.rightCount(objects)))
 
-        baseitem.CreateWidget.selectionChanged(self)
+        super(MirrorCreateWidget, self).selectionChanged()
 
     def save(self, objects, path, iconPath, description):
         """
@@ -280,14 +285,14 @@ class MirrorCreateWidget(baseitem.CreateWidget):
         )
 
 
-class MirrorPreviewWidget(baseitem.PreviewWidget):
+class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :type parent: QtWidgets.QWidget
         :type item: MirrorItem
         """
-        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
+        super(MirrorPreviewWidget, self).__init__(*args, **kwargs)
 
         self.ui.mirrorAnimationCheckBox.stateChanged.connect(self.updateState)
         self.ui.mirrorOptionComboBox.currentIndexChanged.connect(self.updateState)
@@ -299,7 +304,7 @@ class MirrorPreviewWidget(baseitem.PreviewWidget):
         :type item: MirrorItem
         :rtype: None
         """
-        baseitem.PreviewWidget.setItem(self, item)
+        super(MirrorPreviewWidget, self).setItem(item)
 
         mt = item.transferObject()
         self.ui.left.setText(mt.leftSide())
