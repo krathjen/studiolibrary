@@ -52,6 +52,8 @@ import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
+from studiolibrarymaya import basecreatewidget
+from studiolibrarymaya import basepreviewwidget
 
 try:
     import mutils
@@ -128,7 +130,7 @@ class PoseItem(baseitem.BaseItem):
         :type args: list
         :type kwargs: dict
         """
-        baseitem.BaseItem.__init__(self, *args, **kwargs)
+        super(PoseItem, self).__init__(*args, **kwargs)
 
         self._options = None
         self._isLoading = False
@@ -193,7 +195,7 @@ class PoseItem(baseitem.BaseItem):
         """
         :type event: QtGui.QEvent
         """
-        baseitem.BaseItem.keyPressEvent(self, event)
+        super(PoseItem, self).keyPressEvent(event)
 
         if not event.isAutoRepeat():
             if event.key() == QtCore.Qt.Key_M:
@@ -260,7 +262,7 @@ class PoseItem(baseitem.BaseItem):
         :type value: float
         :rtype: None
         """
-        baseitem.BaseItem.setBlendValue(self, value)
+        super(PoseItem, self).setBlendValue(value)
 
         if load:
             self.loadFromSettings(
@@ -382,24 +384,24 @@ class PoseItem(baseitem.BaseItem):
         if path and not path.endswith(".pose"):
             path += ".pose"
 
-        baseitem.BaseItem.save(self, objects, path=path, iconPath=iconPath)
+        super(PoseItem, self).save(objects, path=path, iconPath=iconPath)
 
 
-class PoseCreateWidget(baseitem.CreateWidget):
+class PoseCreateWidget(basecreatewidget.BaseCreateWidget):
 
     def __init__(self, item=None, parent=None):
         """"""
         item = item or PoseItem()
-        baseitem.CreateWidget.__init__(self, item, parent=parent)
+        super(PoseCreateWidget, self).__init__(item, parent=parent)
 
 
-class PosePreviewWidget(baseitem.PreviewWidget):
+class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :rtype: None
         """
-        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
+        super(PosePreviewWidget, self).__init__(*args, **kwargs)
 
         self.connect(self.ui.keyCheckBox, QtCore.SIGNAL("clicked()"), self.updateState)
         self.connect(self.ui.mirrorCheckBox, QtCore.SIGNAL("clicked()"), self.updateState)
@@ -416,7 +418,7 @@ class PosePreviewWidget(baseitem.PreviewWidget):
         :type item: PoseItem
         :rtype: None
         """
-        baseitem.PreviewWidget.setItem(self, item)
+        super(PosePreviewWidget, self).setItem(item)
 
         # Mirror check box
         mirrorTip = "Cannot find a mirror table!"

@@ -58,6 +58,8 @@ import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
+from studiolibrarymaya import basecreatewidget
+from studiolibrarymaya import basepreviewwidget
 
 try:
     import mutils
@@ -331,7 +333,7 @@ class AnimItem(baseitem.BaseItem):
         studiolibrary.LibraryItem.save(self, path=path, contents=contents)
 
 
-class AnimCreateWidget(baseitem.CreateWidget):
+class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
     def __init__(self, item=None, parent=None):
         """
@@ -339,7 +341,7 @@ class AnimCreateWidget(baseitem.CreateWidget):
         :type parent: QtWidgets.QWidget
         """
         item = item or AnimItem()
-        baseitem.CreateWidget.__init__(self, item, parent=parent)
+        super(AnimCreateWidget, self).__init__(item, parent=parent)
 
         self._sequencePath = None
 
@@ -618,14 +620,14 @@ Would you like to show this message again?"""
         )
 
 
-class AnimPreviewWidget(baseitem.PreviewWidget):
+class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :type item: AnimItem
         :type libraryWidget: studiolibrary.LibraryWidget
         """
-        baseitem.PreviewWidget.__init__(self, *args, **kwargs)
+        super(AnimPreviewWidget, self).__init__(*args, **kwargs)
 
         self._items = []
 
@@ -639,7 +641,7 @@ class AnimPreviewWidget(baseitem.PreviewWidget):
         :type item: AnimItem
         :rtype: None
         """
-        baseitem.PreviewWidget.setItem(self, item)
+        super(AnimPreviewWidget, self).setItem(item)
 
         startFrame = str(item.startFrame())
         endFrame = str(item.endFrame())
