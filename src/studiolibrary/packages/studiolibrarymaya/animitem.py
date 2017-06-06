@@ -351,16 +351,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         except NameError, e:
             logger.exception(e)
 
-        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
-        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
-        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
-
-        icon = studiolibrarymaya.resource().icon("thumbnail2")
-        self.ui.sequenceWidget.setIcon(icon)
-
-        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
-        self.ui.thumbnailButton.hide()
-        self.ui.thumbnailButton = self.ui.sequenceWidget
+        self.createSequenceWidget()
 
         validator = QtGui.QIntValidator(-50000000, 50000000, self)
         self.ui.endFrameEdit.setValidator(validator)
@@ -370,8 +361,6 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         self.ui.startFrameEdit.setText(str(int(start)))
 
         self.ui.byFrameEdit.setValidator(QtGui.QIntValidator(1, 1000, self))
-
-        self.ui.sequenceWidget.clicked.connect(self.thumbnailCapture)
         self.ui.frameRangeButton.clicked.connect(self.showFrameRangeMenu)
 
         settings = studiolibrarymaya.settings()
@@ -385,6 +374,25 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         self.ui.byFrameEdit.textChanged.connect(self.stateChanged)
         self.ui.fileTypeComboBox.currentIndexChanged.connect(self.stateChanged)
 
+    def createSequenceWidget(self):
+        """
+        Create a sequence widget to replace the static thumbnail widget.
+
+        :rtype: None 
+        """
+        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
+        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
+        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+
+        icon = studiolibrarymaya.resource().icon("thumbnail2")
+        self.ui.sequenceWidget.setIcon(icon)
+
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+        self.ui.thumbnailButton.hide()
+        self.ui.thumbnailButton = self.ui.sequenceWidget
+
+        self.ui.sequenceWidget.clicked.connect(self.thumbnailCapture)
+
     def sequencePath(self):
         """
         Return the playblast path.
@@ -392,6 +400,16 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         :rtype: str
         """
         return self._sequencePath
+
+    def setSequencePath(self, path):
+        """
+        Set the disk location for the image sequence to be saved.
+        
+        :type path: str
+        :rtype: None
+        """
+        self._sequencePath = path
+        self.ui.sequenceWidget.setDirname(os.path.dirname(path))
 
     def startFrame(self):
         """
@@ -570,14 +588,6 @@ Would you like to show this message again?"""
             QtWidgets.QMessageBox.critical(None, title, str(msg))
             raise
 
-    def setSequencePath(self, path):
-        """
-        :type path: str
-        :rtype: None
-        """
-        self._sequencePath = path
-        self.ui.sequenceWidget.setDirname(os.path.dirname(path))
-
     def validateFrameRange(self):
         """
         :raise: ValidateAnimationError
@@ -631,10 +641,27 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
         self._items = []
 
+        self.createSequenceWidget()
+
         self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.updateState)
         self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
         self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
         self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
+
+    def createSequenceWidget(self):
+        """
+        Create a sequence widget to replace the static thumbnail widget.
+        
+        :rtype: None 
+        """
+        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
+        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
+        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+        self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
+
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+        self.ui.thumbnailButton.hide()
+        self.ui.thumbnailButton = self.ui.sequenceWidget
 
     def setItem(self, item):
         """
