@@ -245,9 +245,6 @@ class LibraryWidget(QtWidgets.QWidget):
         :str dst: str
         :rtype: None
         """
-        db = self.database()
-        db.renameItem(src, dst)
-
         self.loadItemData()
         self.itemRenamed.emit(src, dst)
 
@@ -313,6 +310,8 @@ class LibraryWidget(QtWidgets.QWidget):
             items = studiolibrary.itemsFromUrls(mimeData.urls())
 
             for item in items:
+                item.setLibrary(self.library())
+
                 # Check if the item is moving to another folder.
                 if folder.path() != item.dirname():
                     self.moveItemsToFolder(items, folder=folder)
@@ -950,8 +949,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         db = self.database()
         db.update(data)
-
-        print data
 
         self.loadItemData()
 
