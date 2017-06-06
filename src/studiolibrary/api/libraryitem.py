@@ -95,6 +95,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self._library = None
         self._metaFile = None
         self._iconPath = None
+        self._database = None
         self._typePixmap = None
 
         if library:
@@ -189,12 +190,24 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         self._library = library
 
+    def setDatabase(self, database):
+        """
+        Set the database for the item.
+        
+        :type database: studiolibrary.Database
+        """
+        self._database = database
+
     def database(self):
         """
+        Return the database for the item.
+        
         :rtype: studiolibrary.Database
         """
-        if self.library():
-            return self.library().database()
+        if not self._database and self.library():
+            self._database = self.library().database()
+
+        return self._database
 
     def libraryWidget(self):
         """
@@ -325,6 +338,17 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     # Support for copy and rename
     # -----------------------------------------------------------------
 
+    def copy(self, dst):
+        """
+        Make a copy/duplicate the current item to the given destination.
+
+        :type dst: str
+        :rtype: None
+        """
+        src = self.path()
+        path = studiolibrary.copyPath(src, dst)
+        self.setPath(path)
+
     def move(self, dst):
         """
         Move the current item to the given destination.
@@ -336,16 +360,10 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         path = studiolibrary.movePath(src, dst)
         self.setPath(path)
 
-    def copy(self, dst):
-        """
-        Make a copy/duplicate the current item to the given destination.
+        if self.database():
+            self.database().renameItem(src, dst)
 
-        :type dst: str
-        :rtype: None
-        """
-        src = self.path()
-        path = studiolibrary.copyPath(src, dst)
-        self.setPath(path)
+        self.renamed.emit(src, dst)
 
     def rename(self, dst, extension=None, force=True):
         """
@@ -366,6 +384,9 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         dst = studiolibrary.renamePath(src, dst)
         self.setPath(dst)
+
+        if self.database():
+            self.database().renameItem(src, dst)
 
         self.renamed.emit(src, dst)
 
