@@ -29,8 +29,30 @@ class GlobalSignals(QtCore.QObject):
     blendChanged = QtCore.Signal(float)
 
 
-class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
+class IconThread(QtCore.QThread):
+    """
+    A convenience class for loading an icon in a thread.
+    """
 
+    triggered = QtCore.Signal(object)
+
+    def __init__(self, path, *args):
+        QtCore.QThread.__init__(self, *args)
+
+        self._path = path
+
+    def run(self):
+        """
+        The starting point for the thread.
+
+        :rtype: None 
+        """
+        if self._path:
+            image = QtGui.QImage(str(self._path))
+            self.triggered.emit(image)
+
+
+class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
     """
     Combined Widget items are used to hold rows of information for a
     combined widget.
@@ -39,6 +61,9 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
     DEFAULT_FONT_SIZE = 13
     DEFAULT_PLAYHEAD_COLOR = QtGui.QColor(255, 255, 255, 220)
+
+    THUMBNAIL_COLUMN = 0
+    ENABLE_THUMBNAIL_THREAD = False  # Still in development/testing
 
     _globalSignals = GlobalSignals()
     blendChanged = _globalSignals.blendChanged
@@ -59,8 +84,12 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self._icon = {}
         self._fonts = {}
         self._pixmap = {}
+        self._thread = None
         self._pixmapRect = None
+
         self._iconPath = ""
+        self._thumbnailIcon = None
+
         self._underMouse = False
         self._searchText = None
         self._infoWidget = None
@@ -487,18 +516,61 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self._pixmap[column] = pixmap
 
     def thumbnailPath(self):
+        """
+        Return the thumbnail path on disk.
+
+        :rtype: None or str
+        """
         return ""
 
-    def icon(self, column):
-        icon = QtWidgets.QTreeWidgetItem.icon(self, column)
-        if not icon and column == 0:
-            iconPath = self.thumbnailPath()
+    def _thumbnailFromImage(self, image):
+        """
+        Called after the given image object has finished loading.
 
-            if not os.path.exists(iconPath):
-                color = self.textColor()
-                icon = studioqt.resource().icon("thumbnail", color=color)
+        :type image: QtGui.QImage
+        :rtype: None  
+        """
+        pixmap = QtGui.QPixmap()
+        pixmap.convertFromImage(image)
+        icon = QtGui.QIcon(pixmap)
+
+        self._thumbnailIcon = icon
+        self.combinedWidget().update()
+
+    def thumbnailIcon(self):
+        """
+        Return the thumbnail icon.
+
+        :rtype: QtGui.QIcon
+        """
+        thumbnailPath = self.thumbnailPath()
+
+        if not os.path.exists(thumbnailPath):
+            color = self.textColor()
+            thumbnailPath = studioqt.resource().icon("thumbnail", color=color)
+
+        if not self._thumbnailIcon:
+
+            if self.ENABLE_THUMBNAIL_THREAD and not self._thread:
+                self._thread = IconThread(thumbnailPath)
+                self._thread.triggered.connect(self._thumbnailFromImage)
+                self._thread.start()
             else:
-                icon = QtGui.QIcon(iconPath)
+                self._thumbnailIcon = QtGui.QIcon(thumbnailPath)
+
+        return self._thumbnailIcon
+
+    def icon(self, column):
+        """
+        Overriding the icon method to add support for the thumbnail icon.
+
+        :type column: int
+        :rtype: QtGui.QIcon
+        """
+        icon = QtWidgets.QTreeWidgetItem.icon(self, column)
+
+        if not icon and column == self.THUMBNAIL_COLUMN:
+            icon = self.thumbnailIcon()
 
         return icon
 
@@ -506,7 +578,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         Return the pixmap for the given column.
 
-        :type column:
+        :type column: int
         :rtype: QtWidgets.QPixmap
         """
 
@@ -718,9 +790,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         rect = QtCore.QRect(option.rect)
         return rect
 
-    def repaint(self):
-        self.update(self.rect())
-
     def paintRow(self, painter, option, index):
         """
         Paint performs low-level painting for the item.
@@ -879,7 +948,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         Draw a border around the icon.
 
         :type painter: QtWidgets.QPainter
-        :type option: QtWidgets.QStyleOptionViewItem
+        :type pixmapRect: QtWidgets.QRect
         :rtype: None
         """
         pixmapRect = QtCore.QRect(pixmapRect)
@@ -1224,7 +1293,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             current = movie.currentFrameNumber()
 
             if count > 0:
-                percent = float(((count) + current) + 1)  / count - 1
+                percent = float(((count) + current) + 1) / count - 1
             else:
                 percent = 0
 

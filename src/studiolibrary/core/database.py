@@ -40,6 +40,7 @@ class Database(QtCore.QObject):
         self._mtime = None
         self._watcher = None
 
+        self.setDirty(False)
         if self.ENABLE_WATCHER:
             self.setWatcherEnabled(True)
 
@@ -66,17 +67,21 @@ class Database(QtCore.QObject):
         
         :rtype: None 
         """
+        print self._mtime
         if self.isDirty():
-            self.makeDirty()
+            self.setDirty(False)
             self.databaseChanged.emit()
 
-    def makeDirty(self):
+    def setDirty(self, value):
         """
         Update the database object with the current timestamp of the db path.
         
         :rtype: None 
         """
-        self._mtime = os.path.getmtime(self.path())
+        if value:
+            self._mtime = None
+        else:
+            self._mtime = os.path.getmtime(self.path())
 
     def isDirty(self):
         """
@@ -84,8 +89,7 @@ class Database(QtCore.QObject):
 
         :rtype: bool 
         """
-        path = self.path()
-        return self._mtime != os.path.getmtime(path)
+        return self._mtime != os.path.getmtime(self.path())
 
     def path(self):
         """
