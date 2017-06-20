@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 class Database(QtCore.QObject):
 
     ENABLE_WATCHER = False
+    DEFAULT_WATCHER_REPEAT_RATE = 1  # in seconds
 
     databaseChanged = QtCore.Signal()
 
@@ -44,7 +45,7 @@ class Database(QtCore.QObject):
         if self.ENABLE_WATCHER:
             self.setWatcherEnabled(True)
 
-    def setWatcherEnabled(self, enable, repeatRate=1):
+    def setWatcherEnabled(self, enable, repeatRate=None):
         """
         Enable a watcher that will trigger the database changed signal.
         
@@ -52,6 +53,8 @@ class Database(QtCore.QObject):
         :type repeatRate: int
         :rtype: None 
         """
+        repeatRate = repeatRate or self.DEFAULT_WATCHER_REPEAT_RATE
+
         if enable:
             if not self._watcher:
                 self._watcher = studioqt.InvokeRepeatingThread(repeatRate)
@@ -67,10 +70,23 @@ class Database(QtCore.QObject):
         
         :rtype: None 
         """
-        print self._mtime
         if self.isDirty():
             self.setDirty(False)
             self.databaseChanged.emit()
+
+    def mtime(self):
+        """
+        Return the time of last modification of db.
+        
+        :rtype: float or None
+        """
+        path = self.path()
+        mtime = None
+
+        if os.path.exists(path):
+            mtime = os.path.getmtime(path)
+
+        return mtime
 
     def setDirty(self, value):
         """
@@ -81,7 +97,7 @@ class Database(QtCore.QObject):
         if value:
             self._mtime = None
         else:
-            self._mtime = os.path.getmtime(self.path())
+            self._mtime = self.mtime()
 
     def isDirty(self):
         """
@@ -89,7 +105,7 @@ class Database(QtCore.QObject):
 
         :rtype: bool 
         """
-        return self._mtime != os.path.getmtime(self.path())
+        return self._mtime != self.mtime()
 
     def path(self):
         """
