@@ -99,6 +99,9 @@ class SelectionSet(mutils.TransferBase):
 
         if validNodes:
             maya.cmds.select(validNodes, **kwargs)
+
+            # Return the focus to the Maya window
+            maya.cmds.setFocus("MayaWindow")
         else:
             raise mutils.NoMatchFoundError("No objects match when loading data")
 

@@ -258,6 +258,9 @@ class Pose(mutils.SelectionSet):
             if not batchMode:
                 self.afterLoad()
 
+                # Return the focus to the Maya window
+                maya.cmds.setFocus("MayaWindow")
+
         if refresh:
             maya.cmds.refresh(cv=True)
 

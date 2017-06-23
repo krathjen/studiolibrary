@@ -658,6 +658,9 @@ class MirrorTable(mutils.SelectionSet):
                         msg = msg.format(dstObj2)
                         logger.debug(msg)
 
+        # Return the focus to the Maya window
+        maya.cmds.setFocus("MayaWindow")
+
         if not foundObject:
             raise mutils.NoMatchFoundError("No objects match when loading data")
 
