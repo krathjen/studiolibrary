@@ -90,17 +90,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type libraryWidget: studiolibrary.LibraryWidget
         """
         widget = cls.CreateWidgetClass()
-
-        dst = libraryWidget.selectedFolderPath()
-
-        if dst:
-            widget.folderFrame().hide()
-
-        widget.setFolderPath(dst)
-        widget.setDatabase(libraryWidget.database())
-
         libraryWidget.setCreateWidget(widget)
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(
         self,

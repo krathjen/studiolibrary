@@ -499,7 +499,13 @@ class CatalogWidget(QtWidgets.QWidget):
 
         :rtype: str
         """
-        return self.library().path()
+        path = self.database().path()
+
+        # Quick fix for paths that are in the .studiolibrary sub-directory.
+        if "/.studiolibrary" in path.lower():
+            path = os.path.dirname(path)
+
+        return os.path.dirname(path)
 
     def setPath(self, path):
         """
