@@ -1,5 +1,3 @@
-# Copyright 2017 by Kurt Rathjen. All Rights Reserved.
-#
 # This library is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation, either
@@ -11,13 +9,12 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import os
 import json
 import shutil
 import logging
 import platform
-import subprocess
+
 from datetime import datetime
 
 
@@ -45,7 +42,6 @@ __all__ = [
     "stringToList",
     "listToString",
     "generateUniquePath",
-    "generateUniqueName",
     "PathRenameError",
     "PathNotFoundError",
 ]
@@ -171,13 +167,13 @@ def movePath(src, dst):
     :rtype: str
     """
     src = unicode(src)
-    dirname, name, extension = splitPath(src)
 
     if not os.path.exists(src):
         raise IOError(u'No such file or directory: {0}'.format(src))
 
     if os.path.isdir(src):
-        dst = u'{0}/{1}{2}'.format(dst, name, extension)
+        basename = os.path.basename(src)
+        dst = os.path.join(dst, basename)
         dst = generateUniquePath(dst)
 
     shutil.move(src, dst)
@@ -194,13 +190,10 @@ def renamePath(src, dst, extension=None, force=False):
     :type force: bool
     :rtype: str
     """
-    src = src.replace("\\", "/")
-    dst = dst.replace("\\", "/")
-
     dirname = os.path.dirname(src)
 
-    if "/" not in dst:
-        dst = dirname + "/" + dst
+    if "/" not in dst and "\\" not in dst:
+        dst = os.path.join(dirname, dst)
 
     if extension and extension not in dst:
         dst += extension
@@ -216,7 +209,7 @@ def renamePath(src, dst, extension=None, force=False):
         raise PathRenameError(msg.format(dst))
 
     if not os.path.exists(dirname):
-        msg = u'The system cannot find the specified path: "{0}".'
+        msg = u'The system cannot find the specified path: "{0}"'
         raise PathRenameError(msg.format(dirname))
 
     if not os.path.exists(os.path.dirname(dst)) and force:
@@ -241,7 +234,7 @@ def moveContents(contents, path):
     """
     for src in contents or []:
         basename = os.path.basename(src)
-        dst = path + "/" + basename
+        dst = os.path.join(path, basename)
         logger.info(u'Moving Content: {0} => {1}'.format(src, dst))
         shutil.move(src, dst)
 
@@ -301,7 +294,7 @@ def saveDict(path, data):
 
     with open(path, "w") as f:
         d = str(data)
-        test = eval(d, {})  # Test that the data can be converted.
+        _ = eval(d, {})  # Test that the data can be converted.
         f.write(d)
 
 
@@ -326,42 +319,32 @@ def readDict(path):
     return data
 
 
-def generateUniqueName(name, names, attempts=1000):
-    """
-    :type name: str
-    :type names: list[str]
-    :type attempts: int
-    :rtype: str
-    """
-    for i in range(1, attempts):
-        result = name + str(i)
-        if result not in names:
-            return result
-
-    msg = u'Cannot generate unique name for "{name}"'
-    msg = msg.format(name=name)
-    raise StudioLibraryError(msg)
-
-
 def generateUniquePath(path, attempts=1000):
     """
+    Return a unique name for the given path.
+    
+    Example:
+        print generateUniquePath(r'C:\Python27\Lib\packages\readme.txt')
+        # Result: r'C:\Python27\Lib\packages\readme (2).txt'
+    
     :type path:  str
     :type attempts: int
     :rtype: str
     """
     attempt = 1  # We start at one so that the first unique name is actually 2.
     dirname, name, extension = splitPath(path)
-    path_ = u'{dirname}/{name} ({number}){extension}'
+    filename_ = u'{name} ({number}){extension}'
 
     while os.path.exists(path):
         attempt += 1
 
-        path = path_.format(
+        filename = filename_.format(
             name=name,
             number=attempt,
-            dirname=dirname,
             extension=extension
         )
+
+        path = os.path.join(dirname, filename)
 
         if attempt >= attempts:
             msg = u'Cannot generate unique name for path {path}'
@@ -370,12 +353,19 @@ def generateUniquePath(path, attempts=1000):
 
     return path
 
+
 def splitPath(path):
     """
+    Split the given path into dirname, filename, extension.
+    
+    Example:
+        results = splitPath(r'C:\Python27\Lib\packages\readme.txt')
+        # Result: r'C:\Python27\Lib\packages', 'readme', '.txt'
+    
     :type path: str
     :rtype: list[str]
     """
-    path = path.replace("\\", "/")
+    path = os.path.normpath(path)
     filename, extension = os.path.splitext(path)
     return os.path.dirname(filename), os.path.basename(filename), extension
 
@@ -409,7 +399,7 @@ def listPaths(path):
     :rtype: collections.Iterable[str]
     """
     for name in os.listdir(path):
-        value = path + "/" + name
+        value = os.path.join(path, name)
         yield value
 
 
@@ -457,14 +447,9 @@ def walkup(path, match=None, depth=3):
     :type depth: int
     :rtype: collections.Iterable[str]
     """
-    sep = "/"
     path = os.path.realpath(path)
-    path = path.replace("\\", "/")
+    folders = path.split(os.sep)
 
-    if not path.endswith(sep):
-        path += sep
-
-    folders = path.split(sep)
     depthCount = 0
 
     for i, folder in enumerate(folders):

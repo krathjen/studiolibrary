@@ -22,9 +22,21 @@ import studioqt
 import studiolibrary
 
 
-__all__ = ["Library"]
+__all__ = [
+    "Library",
+    "libraries",
+]
 
 logger = logging.getLogger(__name__)
+
+
+def libraries():
+    """
+    Convenience method for returning all the current libraries.
+
+    :rtype: list[studiolibrary.Library]
+    """
+    return Library.libraries()
 
 
 class Library(QtCore.QObject):
