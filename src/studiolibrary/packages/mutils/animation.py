@@ -795,4 +795,4 @@ class Animation(mutils.Pose):
             maya.cmds.undoInfo(closeChunk=True)
 
             # Return the focus to the Maya window
-            maya.cmds.setFocus("mayaWindow")
+            maya.cmds.setFocus("MayaWindow")
