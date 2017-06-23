@@ -1,5 +1,3 @@
-# Copyright 2017 by Kurt Rathjen. All Rights Reserved.
-#
 # This library is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation, either
@@ -23,13 +21,13 @@ _analytics = None
 
 
 PATH = unicode(os.path.abspath(__file__), __encoding__)
-DIRNAME = os.path.dirname(PATH).replace('\\', '/')
-PACKAGES_PATH = DIRNAME + "/packages"
-RESOURCE_PATH = DIRNAME + "/gui/resource"
-HELP_URL = "http://www.studiolibrary.com"
-
+DIRNAME = os.path.dirname(PATH)
+PACKAGES_PATH = os.path.join(DIRNAME, "packages")
+RESOURCE_PATH = os.path.join(DIRNAME, "gui", "resource")
 HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
-LIBRARIES_PATH = HOME_PATH + "/StudioLibrary/Libraries"
+LIBRARIES_PATH = os.path.join(HOME_PATH, "StudioLibrary", "Libraries")
+
+HELP_URL = "http://www.studiolibrary.com"
 
 
 def setup(path):
@@ -68,6 +66,7 @@ from studiolibrary.gui.settingsdialog import SettingsDialog
 
 from studiolibrary.api.cmds import *
 from studiolibrary.api.library import Library
+from studiolibrary.api.library import libraries
 from studiolibrary.api.libraryitem import LibraryItem
 
 
@@ -112,34 +111,6 @@ def analytics():
     return _analytics
 
 
-def windows():
-    """
-    Return a list of all the loaded library windows.
-
-    :rtype: list[MainWindow]
-    """
-    return Library.libraryWidgets()
-
-
-def library(name=None):
-    """
-    Return a library by name.
-
-    :type name: str
-    :rtype: studiolibrary.Library
-    """
-    return Library.instance(name)
-
-
-def libraries():
-    """
-    Return a list of the loaded libraries.
-
-    :rtype: list[studiolibrary.Library]
-    """
-    return Library.libraries()
-
-
 def loadFromCommand():
     """
     Triggered when the Studio Library is loaded from the command line.
@@ -149,6 +120,8 @@ def loadFromCommand():
     from optparse import OptionParser
 
     parser = OptionParser()
+    parser.add_option("-p", "--path", dest="path",
+                      help="", metavar="PATH")
     parser.add_option("-r", "--root", dest="root",
                       help="", metavar="ROOT")
     parser.add_option("-n", "--name", dest="name",
