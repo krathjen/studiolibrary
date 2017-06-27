@@ -1022,12 +1022,16 @@ class CatalogWidget(QtWidgets.QWidget):
 
     def settingsPath(self):
         """
+        Return the settings path for the CatalogWidget
+        
         :rtype: str
         """
-        return os.path.join(studiolibrary.HOME_PATH, "Catalog", "library.json")
+        return os.path.join(studiolibrary.HOME_PATH, "StudioLibrary", "CatalogWidget.json")
 
     def settings(self):
         """
+        Return a dictionary with the widget settings.
+        
         :rtype: dict
         """
         geometry = (
@@ -1036,6 +1040,7 @@ class CatalogWidget(QtWidgets.QWidget):
             self.geometry().width(),
             self.geometry().height()
         )
+
         settings = {}
 
         settings['dpi'] = self.dpi()
@@ -1058,6 +1063,8 @@ class CatalogWidget(QtWidgets.QWidget):
 
     def setSettings(self, settings):
         """
+        Set the widget settings from the given dictionary.
+        
         :type settings: dict
         """
         themeSettings = settings.get("theme", None)
@@ -1080,7 +1087,10 @@ class CatalogWidget(QtWidgets.QWidget):
 
         # Make sure the window is on the screen.
         screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
-        if x < 0 or y < 0 or x > screenGeometry.x() or y > screenGeometry.y():
+        screenWidth = screenGeometry.width()
+        screenHeight = screenGeometry.height()
+
+        if x < 0 or y < 0 or x > screenWidth or y > screenHeight:
             self.centerWindow()
 
         # Reload the stylesheet before loading the dock widget settings.
@@ -1116,8 +1126,13 @@ class CatalogWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        data = self.settings()
+        settings = self.settings()
+
         path = self.settingsPath()
+        key = self.database().path()
+
+        data = studiolibrary.readJson(path)
+        data[key] = settings
 
         studiolibrary.saveJson(path, data)
 
@@ -1128,11 +1143,14 @@ class CatalogWidget(QtWidgets.QWidget):
         :rtype: None
         """
         path = self.settingsPath()
+        key = self.database().path()
 
         self.reloadStyleSheet()
 
         data = studiolibrary.readJson(path)
-        self.setSettings(data)
+        settings = data.get(key, {})
+
+        self.setSettings(settings)
 
     def setSizes(self, sizes):
         """
@@ -1454,7 +1472,10 @@ class CatalogWidget(QtWidgets.QWidget):
 
 if __name__ == "__main__":
 
-    path = u'C:/Users/Hovel/Dropbox/libraries/animation/.studioLibrary/item_data.json'
-
     with studioqt.app():
+
+        path = u'C:/Users/Hovel/Dropbox/libraries/animation/.studioLibrary/itemdata.json'
+        c = catalog(path)
+
+        path = u'C:/Users/Hovel/Dropbox/libraries/animation/.studioLibrary/item_data.json'
         c = catalog(path)
