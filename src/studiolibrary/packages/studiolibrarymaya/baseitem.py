@@ -406,7 +406,15 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: list[str]
         """
-        return mutils.namespace.getFromSelection() or [""]
+        namespaces = [""]
+
+        try:
+            namespaces = mutils.namespace.getFromSelection() or namespaces
+        except NameError, e:
+            # Catch any errors when running this command outside of Maya
+            logger.exception(e)
+
+        return namespaces
 
     def doubleClicked(self):
         """
