@@ -1279,8 +1279,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         if item:
             try:
-                previewWidget = item.previewWidget(self)
-                self.setPreviewWidget(previewWidget)
+                item.showPreviewWidget(self)
             except Exception, msg:
                 self.setError(msg)
                 raise

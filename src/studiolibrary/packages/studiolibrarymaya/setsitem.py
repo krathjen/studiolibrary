@@ -43,15 +43,6 @@ class SetsItem(baseitem.BaseItem):
         if not os.path.exists(self.transferPath()):
             self.setTransferBasename("set.json")
 
-    def previewWidget(self, parent=None):
-        """
-        Return the widget to be shown when the user clicks on the item.
-
-        :type parent: QtWidgets.QWidget
-        :rtype: SetsPreviewWidget
-        """
-        return SetsPreviewWidget(parent=parent, item=self)
-
     def doubleClicked(self):
         """Overriding this method to load the item on double click."""
         self.loadFromSettings()
@@ -109,9 +100,12 @@ class SetsPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
 
 # Register the selection set item to the Studio Library
-SetsItem.CreateWidgetClass = SetsCreateWidget
+iconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
+
 SetsItem.MenuName = "Selection Set"
-SetsItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
-SetsItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
+SetsItem.MenuIconPath = iconPath
+SetsItem.TypeIconPath = iconPath
+SetsItem.CreateWidgetClass = SetsCreateWidget
+SetsItem.PreviewWidgetClass = SetsPreviewWidget
 
 studiolibrary.registerItem(SetsItem, ".set")
