@@ -1,5 +1,3 @@
-# Copyright 2017 by Kurt Rathjen. All Rights Reserved.
-#
 # This library is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation, either
@@ -18,17 +16,14 @@ import logging
 import studioqt
 from studioqt import QtCore
 
-
 __all__ = [
     "Database",
 ]
-
 
 logger = logging.getLogger(__name__)
 
 
 class Database(QtCore.QObject):
-
     ENABLE_WATCHER = False
     DEFAULT_WATCHER_REPEAT_RATE = 1  # in seconds
 
@@ -48,7 +43,7 @@ class Database(QtCore.QObject):
     def setWatcherEnabled(self, enable, repeatRate=None):
         """
         Enable a watcher that will trigger the database changed signal.
-        
+
         :type enable: bool
         :type repeatRate: int
         :rtype: None 
@@ -61,13 +56,13 @@ class Database(QtCore.QObject):
                 self._watcher.triggered.connect(self._watcherTrggered)
                 self._watcher.start()
         elif self._watcher:
-                self._watcher.terminate()
-                self._watcher = None
+            self._watcher.terminate()
+            self._watcher = None
 
     def _watcherTrggered(self):
         """
         Triggered when the watcher has reached it's repeat rate.
-        
+
         :rtype: None 
         """
         if self.isDirty():
@@ -77,7 +72,7 @@ class Database(QtCore.QObject):
     def mtime(self):
         """
         Return the time of last modification of db.
-        
+
         :rtype: float or None
         """
         path = self.path()
@@ -91,7 +86,7 @@ class Database(QtCore.QObject):
     def setDirty(self, value):
         """
         Update the database object with the current timestamp of the db path.
-        
+
         :rtype: None 
         """
         if value:
@@ -148,7 +143,7 @@ class Database(QtCore.QObject):
     def insert(self, key, data):
         """
         Insert the given data at the given key.
-        
+
         :type key: str 
         :type data: dict
         :rtype: None 
@@ -165,6 +160,8 @@ class Database(QtCore.QObject):
         """
         data_ = self.read()
 
+        keys = self.normPaths(keys)
+
         for key in keys:
             if key in data_:
                 data_[key].update(data)
@@ -172,6 +169,53 @@ class Database(QtCore.QObject):
                 data_[key] = data
 
         self.write(data_)
+
+    def delete(self, key):
+        """
+        Delete the given key in the JSON path.
+
+        :type key: str
+        :rtype: None 
+        """
+        self.deleteMultiple([key])
+
+    def deleteMultiple(self, keys):
+        """
+        Delete the given keys in the JSON path.
+
+        :type keys: list[str]
+        :rtype: None 
+        """
+        data = self.read()
+
+        keys = self.normPaths(keys)
+
+        for key in keys:
+            if key in data:
+                del data[key]
+
+        self.write(data)
+
+    def normPaths(self, paths):
+        """
+        Normalize all the given paths to a consistent format.
+        
+        :type paths: list[str]
+        :rtype: list[str] 
+        """
+        return [self.normPath(path) for path in paths]
+
+    def normPath(self, path):
+        """
+        Normalize the path and make all back slashes to forward slashes.
+        
+        :type path: str
+        :rtype: str 
+        """
+        path = os.path.normpath(path)
+        path = path.replace("\\", "/")
+        path = path.replace("\\\\", "/")
+        return path
 
     def renameItem(self, src, dst):
         """
@@ -183,22 +227,26 @@ class Database(QtCore.QObject):
         """
         data = self.read()
 
+        dst = self.normPath(dst)
+        src = self.normPath(src)
+
+        data_ = {}
+
         # Replace the old key with the new dst value
         if src in data:
+            data_ = data.get(src, data_)
 
-            data_ = data.get(src, {})
+        # If the dst path already exists then we just update the data
+        if dst in data:
+            data[dst].update(data_)
+        else:
+            data[dst] = data_
 
-            # If the dst path already exists then we just update the data
-            if dst in data:
-                data[dst].update(data_)
-            else:
-                data[dst] = data_
+        # Remove the old path from the database
+        if src in data:
+            del data[src]
 
-            # Remove the old path from the database
-            if src in data:
-                del data[src]
-
-            self.write(data)
+        self.write(data)
 
     def renameFolder(self, src, dst):
         """
@@ -209,6 +257,9 @@ class Database(QtCore.QObject):
         :rtype: None
         """
         data = self.read()
+
+        dst = self.normPath(dst)
+        src = self.normPath(src)
 
         # Add a slash as a suffix for better directory matching
         if not src.endswith("/"):
