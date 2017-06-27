@@ -38,6 +38,7 @@ __all__ = [
     "copyPath",
     "movePath",
     "splitPath",
+    "removePath",
     "renamePath",
     "formatPath",
     "moveContents",
@@ -182,6 +183,19 @@ def movePath(src, dst):
 
     shutil.move(src, dst)
     return dst
+
+
+def removePath(path):
+    """
+    Delete the given path from disc. 
+
+    :type path: str
+    :rtype: None
+    """
+    if os.path.isfile(path):
+        os.remove(path)
+    elif os.path.isdir(path):
+        shutil.rmtree(path)
 
 
 def renamePath(src, dst, extension=None, force=False):
@@ -369,6 +383,7 @@ def generateUniquePath(path, attempts=1000):
             raise ValueError(msg)
 
     return path
+
 
 def splitPath(path):
     """

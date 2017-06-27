@@ -215,7 +215,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         studiolibrary.LibraryItem.saved.connect(self._itemSaved)
         studiolibrary.LibraryItem.saving.connect(self._itemSaving)
-        studiolibrary.LibraryItem.renamed.connect(self._itemRenamed)
 
         itemsWidget = self.itemsWidget()
         itemsWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -236,17 +235,6 @@ class LibraryWidget(QtWidgets.QWidget):
         self.updateViewButton()
 
         self.itemsWidget().treeWidget().setValidGroupByColumns(self.DEFAULT_GROUP_BY_COLUMNS)
-
-    def _itemRenamed(self, src, dst):
-        """
-        Triggered when an item has been renamed.
-
-        :str src: str
-        :str dst: str
-        :rtype: None
-        """
-        self.loadItems()
-        self.itemRenamed.emit(src, dst)
 
     def _folderRenamed(self, src, dst):
         """
@@ -270,9 +258,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         item = self.itemsWidget().selectedItem()
 
-        if self._currentItem != item:
-            self._currentItem = item
-            self.setPreviewWidgetFromItem(item)
+        self.setPreviewWidgetFromItem(item)
 
         self.itemSelectionChanged.emit(item)
 
@@ -307,7 +293,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         if mimeData.hasUrls():
             folder = self.selectedFolder()
-            items = studiolibrary.itemsFromUrls(mimeData.urls())
+            items = self.createItemsFromUrls(mimeData.urls())
 
             for item in items:
                 item.setLibrary(self.library())
@@ -339,9 +325,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
         if folder and folder.path() == item.dirname():
             path = item.path()
-            self.itemsWidget().clearSelection()
             self.loadItems()
-            self.selectPaths([path])
+            self.selectPath(path)
 
     def addMenuBarAction(self, name, icon, tip, side="Right", callback=None):
         """
@@ -514,11 +499,12 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def createItems(self):
         """
+        Return a new instance of the items to be shown.
+        
         :rtype: list[studiolibrary.LibraryItem]
         """
         paths = self.foldersWidget().selectedPaths()
         depth = 1
-        library = self.library()
 
         if self.isRecursiveSearchEnabled():
             depth = 3
@@ -526,8 +512,22 @@ class LibraryWidget(QtWidgets.QWidget):
         items = list(studiolibrary.findItemsInFolders(
             paths,
             depth,
-            library=library
+            database=self.database(),
+            libraryWidget=self,
             )
+        )
+
+        return items
+
+    def createItemsFromUrls(self, urls):
+        """
+        Return a new instance of the items to be shown from the given urls.
+
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        items = studiolibrary.itemsFromUrls(urls,
+                database=self.database(),
+                libraryWidget=self,
         )
 
         return items
@@ -822,6 +822,8 @@ class LibraryWidget(QtWidgets.QWidget):
                 item.contextEditMenu(editMenu)
 
                 if self.trashEnabled():
+                    editMenu.addSeparator()
+
                     action = QtWidgets.QAction("Move to trash", editMenu)
                     action.setEnabled(self.isTrashEnabled())
                     action.triggered.connect(self.trashSelectedItemsDialog)
@@ -1277,6 +1279,12 @@ class LibraryWidget(QtWidgets.QWidget):
         :type item: studiolibrary.LibraryItem
         :rtype: None
         """
+        if self._currentItem == item:
+            logger.debug("The current item preview widget is already set.")
+            return
+
+        self._currentItem = item
+
         if item:
             try:
                 item.showPreviewWidget(self)
@@ -1957,14 +1965,24 @@ class LibraryWidget(QtWidgets.QWidget):
             raise
 
     def selectPath(self, path):
+        """
+        Select the item with the given path.
+
+        :type path: str
+        :rtype: None
+        """
         self.selectPaths([path])
 
     def selectPaths(self, paths):
         """
+        Select items with the given paths.
+        
         :type paths: list[str]
         :rtype: None
         """
         selection = self.selectedItems()
+
+        self.itemsWidget().clearSelection()
         self.itemsWidget().selectPaths(paths)
 
         if self.selectedItems() != selection:

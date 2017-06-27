@@ -44,6 +44,8 @@ def catalog(path, show=True):
     :type show: bool
     :rtype: CatalogWidget
     """
+    studiolibrary.LibraryItem.ENABLE_DELETE = True
+
     def onItemsLoaded(w):
         items = w.items()
         paths = [os.path.dirname(item.path()) for item in items]
