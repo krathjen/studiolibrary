@@ -51,6 +51,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
     # The meta path is still named record.json and camel case for legacy.
     META_PATH = "{path}/.studioLibrary/record.json"
+    ENABLE_DELETE = False
 
     MenuName = "Library Item"
     MenuIconPath = ""
@@ -186,8 +187,18 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type items: list[LibraryItem]
         :rtype: None
         """
+        if self.ENABLE_DELETE:
+            action = QtWidgets.QAction("Delete", menu)
+            action.triggered.connect(self.showDeleteDialog)
+            menu.addAction(action)
+            menu.addSeparator()
+
         action = QtWidgets.QAction("Rename", menu)
         action.triggered.connect(self.showRenameDialog)
+        menu.addAction(action)
+
+        action = QtWidgets.QAction("Move to", menu)
+        action.triggered.connect(self.showMoveDialog)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Show in folder", menu)
@@ -312,7 +323,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         Return the icon path for the current item.
 
-        :type path: str
         :rtype: None
         """
         return self._iconPath
@@ -410,9 +420,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self.metaFile().save()
         studiolibrary.moveContents(contents, path)
 
-        db = self.database()
-        if db:
-            db.insert(path, {})
+        if self.database():
+            self.database().insert(path, {})
 
         self.saved.emit(self)
         logger.debug(u'Item Saved: {0}'.format(self.path()))
@@ -420,6 +429,21 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     # -----------------------------------------------------------------
     # Support for copy and rename
     # -----------------------------------------------------------------
+
+    def delete(self):
+        """
+        Delete the item from disc and the database.
+        
+        :rtype: None 
+        """
+        path = self.path()
+        studiolibrary.removePath(path)
+
+        if self.database():
+            self.database().delete(path)
+
+        if self.libraryWidget():
+            self.libraryWidget().loadItems()
 
     def copy(self, dst):
         """
@@ -440,8 +464,9 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :rtype: None
         """
         src = self.path()
-        path = studiolibrary.movePath(src, dst)
-        self.setPath(path)
+
+        dst = studiolibrary.movePath(src, dst)
+        self.setPath(dst)
 
         if self.database():
             self.database().renameItem(src, dst)
@@ -490,9 +515,53 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         )
 
         if accepted:
-            self.rename(name)
+            try:
+                self.rename(name)
+            except Exception, e:
+                logger.exception(e)
+                studioqt.MessageBox.critical(parent, "Rename Error", str(e))
 
         return accepted
+
+    def showMoveDialog(self, parent=None):
+        """
+        Show the move to browser dialog.
+
+        :type parent: QtWidgets.QWidget
+        """
+        title = "Move To..."
+        path = os.path.dirname(self.dirname())
+
+        dst = QtWidgets.QFileDialog.getExistingDirectory(parent, title, path)
+
+        if dst:
+            try:
+                self.move(dst)
+            except Exception, e:
+                logger.exception(e)
+                studioqt.MessageBox.critical(parent, "Move Error", str(e))
+
+    def showDeleteDialog(self, parent=None):
+        """
+        Show the delete item dialog.
+
+        :type parent: QtWidgets.QWidget
+        """
+
+        msgBox = QtWidgets.QMessageBox(parent)
+        msgBox.setWindowTitle("Delete")
+        msgBox.setText('Are you sure you want to delete this item?')
+        msgBox.addButton('Yes', QtWidgets.QMessageBox.AcceptRole)
+        msgBox.addButton('Cancel', QtWidgets.QMessageBox.RejectRole)
+
+        result = msgBox.exec_()
+
+        if result == 0:
+            try:
+                self.delete()
+            except Exception, e:
+                logger.exception(e)
+                studioqt.MessageBox.critical(parent, "Delete Error", str(e))
 
     # -----------------------------------------------------------------
     # Support for meta data
