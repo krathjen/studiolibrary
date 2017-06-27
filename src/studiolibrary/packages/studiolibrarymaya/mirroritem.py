@@ -81,15 +81,6 @@ class MirrorItem(baseitem.BaseItem):
         self.setTransferBasename("mirrortable.json")
         self.setTransferClass(mutils.MirrorTable)
 
-    def previewWidget(self, libraryWidget=None):
-        """
-        Return the widget to be shown when the user clicks on the item.
-
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: MirrorPreviewWidget
-        """
-        return MirrorPreviewWidget(item=self, parent=None)
-
     def doubleClicked(self):
         """Overriding this method to load the item on double click."""
         self.loadFromSettings()
@@ -319,9 +310,12 @@ class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
 
 # Register the mirror table item to the Studio Library
-MirrorItem.CreateWidgetClass = MirrorCreateWidget
+iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
+
 MirrorItem.MenuName = "Mirror Table"
-MirrorItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
-MirrorItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
+MirrorItem.MenuIconPath = iconPath
+MirrorItem.TypeIconPath = iconPath
+MirrorItem.CreateWidgetClass = MirrorCreateWidget
+MirrorItem.PreviewWidgetClass = MirrorPreviewWidget
 
 studiolibrary.registerItem(MirrorItem, ".mirror")

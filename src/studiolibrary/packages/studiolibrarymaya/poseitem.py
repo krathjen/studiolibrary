@@ -98,15 +98,6 @@ class PoseItem(baseitem.BaseItem):
         if not os.path.exists(self.transferPath()):
             self.setTransferBasename("pose.json")
 
-    def previewWidget(self, libraryWidget):
-        """
-        Return the widget to be shown when the user clicks on the item.
-
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: PosePreviewWidget
-        """
-        return PosePreviewWidget(item=self)
-
     def isLoading(self):
         """
         :rtype: bool
@@ -456,9 +447,12 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
 
 
 # Register the pose item to the Studio Library
-PoseItem.CreateWidgetClass = PoseCreateWidget
+iconPath = studiolibrarymaya.resource().get("icons", "pose.png")
+
 PoseItem.MenuName = "Pose"
-PoseItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "pose.png")
-PoseItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "pose.png")
+PoseItem.MenuIconPath = iconPath
+PoseItem.TypeIconPath = iconPath
+PoseItem.CreateWidgetClass = PoseCreateWidget
+PoseItem.PreviewWidgetClass = PosePreviewWidget
 
 studiolibrary.registerItem(PoseItem, ".pose")

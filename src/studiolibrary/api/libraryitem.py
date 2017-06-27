@@ -57,6 +57,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
     TypeIconPath = ""
     CreateWidgetClass = None
+    PreviewWidgetClass = None
 
     _libraryItemSignals = LibraryItemSignals()
 
@@ -85,7 +86,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     @classmethod
     def showCreateWidget(cls, libraryWidget):
         """
-        Show the widget for creating a new item.
+        Show the create widget for creating a new item.
 
         :type libraryWidget: studiolibrary.LibraryWidget
         """
@@ -152,14 +153,28 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         return studioqt.resource().get("icons", "thumbnail.png")
 
+    def showPreviewWidget(self, libraryWidget):
+        """
+        Show the preview Widget for the item instance.
+
+        :type libraryWidget: studiolibrary.LibraryWidget
+        """
+        widget = self.previewWidget(libraryWidget)
+        libraryWidget.setPreviewWidget(widget)
+
     def previewWidget(self, libraryWidget):
         """
         Return the widget to be shown when the user clicks on the item.
 
         :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: QtWidgets.QWidget
+        :rtype: QtWidgets.QWidget or None
         """
-        pass
+        widget = None
+
+        if self.PreviewWidgetClass:
+            widget = self.PreviewWidgetClass(item=self)
+
+        return widget
 
     def contextEditMenu(self, menu, items=None):
         """

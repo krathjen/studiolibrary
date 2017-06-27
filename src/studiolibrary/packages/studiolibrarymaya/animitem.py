@@ -106,6 +106,8 @@ class AnimItem(baseitem.BaseItem):
     def previewWidget(self, libraryWidget):
         """
         Return the widget to be shown when the user clicks on the item.
+        
+        Overriding this method to add support for loading many animations.
 
         :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: AnimationPreviewWidget
@@ -741,9 +743,11 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
 
 # Register the anim item to the Studio Library
-AnimItem.CreateWidgetClass = AnimCreateWidget
+iconPath = studiolibrarymaya.resource().get("icons", "animation.png")
+
 AnimItem.MenuName = "Animation"
-AnimItem.MenuIconPath = studiolibrarymaya.resource().get("icons", "animation.png")
-AnimItem.TypeIconPath = studiolibrarymaya.resource().get("icons", "animation.png")
+AnimItem.MenuIconPath = iconPath
+AnimItem.TypeIconPath = iconPath
+AnimItem.CreateWidgetClass = AnimCreateWidget
 
 studiolibrary.registerItem(AnimItem, ".anim")
