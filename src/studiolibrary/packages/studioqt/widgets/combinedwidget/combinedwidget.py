@@ -458,7 +458,10 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         settings = {}
 
-        settings["columnLabels"] = self.columnLabels()
+        # This has been removed because it is buggy.
+        # Note: Should probably use QTreeWidget.state() instead.
+        # settings["columnLabels"] = self.columnLabels()
+
         settings["padding"] = self.padding()
         settings["spacing"] = self.spacing()
         settings["zoomAmount"] = self.zoomAmount()
@@ -477,9 +480,10 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         self.setToastEnabled(False)
 
-        # Must set the column labels first for sorting and grouping.
-        columnLabels = settings.get("columnLabels", [])
-        self.setColumnLabels(columnLabels)
+        # This has been removed because it is buggy.
+        # Note: Should probably use QTreeWidget.setState() instead.
+        # columnLabels = settings.get("columnLabels", [])
+        # self.setColumnLabels(columnLabels)
 
         padding = settings.get("padding", 5)
         self.setPadding(padding)
