@@ -807,6 +807,8 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         menu = studioqt.ContextMenu(self)
 
+        item = None
+
         if items:
             item = items[-1]
             item.contextMenu(menu)
