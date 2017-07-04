@@ -498,16 +498,6 @@ class MirrorTable(mutils.SelectionSet):
 
         return result
 
-    def setPath(self, path):
-        """
-        :type path: str
-        :rtype: None
-        """
-        if path.endswith(".mirror"):
-            path += "/mirrortable.json"
-
-        mutils.TransferBase.setPath(self, path)
-
     def leftSide(self):
         """
         :rtype: str | None
@@ -562,7 +552,6 @@ class MirrorTable(mutils.SelectionSet):
         self,
         objects=None,
         namespaces=None,
-        selection=False,
         callback=None
     ):
         """

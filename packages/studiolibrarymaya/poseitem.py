@@ -93,10 +93,7 @@ class PoseItem(baseitem.BaseItem):
 
         self.setBlendingEnabled(True)
         self.setTransferClass(mutils.Pose)
-        self.setTransferBasename("pose.dict")
-
-        if not os.path.exists(self.transferPath()):
-            self.setTransferBasename("pose.json")
+        self.setTransferBasename("pose.json")
 
     def isLoading(self):
         """
@@ -122,7 +119,7 @@ class PoseItem(baseitem.BaseItem):
         """
         :type value: bool
         """
-        self.settings().set("mirrorEnabled", value)
+        self.settings()["mirrorEnabled"] = value
         self.mirrorChanged.emit(bool(value))
 
     def isKeyEnabled(self):
@@ -135,7 +132,7 @@ class PoseItem(baseitem.BaseItem):
         """
         :type value: bool
         """
-        self.settings().set("keyEnabled", value)
+        self.settings()["keyEnabled"] = value
 
     def keyPressEvent(self, event):
         """
@@ -319,7 +316,7 @@ class PoseItem(baseitem.BaseItem):
 
         logger.info(u'Loaded: {0}'.format(self.path()))
 
-    def save(self, objects, path=None, iconPath=None):
+    def save(self, objects, path=None, iconPath=None, **kwargs):
         """
         Save all the given object data to the given path on disc.
 
@@ -330,7 +327,7 @@ class PoseItem(baseitem.BaseItem):
         if path and not path.endswith(".pose"):
             path += ".pose"
 
-        super(PoseItem, self).save(objects, path=path, iconPath=iconPath)
+        super(PoseItem, self).save(objects, path=path, iconPath=iconPath, **kwargs)
 
 
 class PoseCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -349,8 +346,8 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
         """
         super(PosePreviewWidget, self).__init__(*args, **kwargs)
 
-        self.connect(self.ui.keyCheckBox, QtCore.SIGNAL("clicked()"), self.updateState)
-        self.connect(self.ui.mirrorCheckBox, QtCore.SIGNAL("clicked()"), self.updateState)
+        self.connect(self.ui.keyCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
+        self.connect(self.ui.mirrorCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
         self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderMoved(int)"), self.sliderMoved)
         self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderReleased()"), self.sliderReleased)
 
@@ -386,31 +383,31 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
         else:
             self.ui.mirrorCheckBox.setCheckState(QtCore.Qt.Unchecked)
 
-    def setState(self, state):
+    def setSettings(self, settings):
         """Set the current state of the widget with a dictionary."""
-        key = state.get("keyEnabled")
-        mirror = state.get("mirrorEnabled")
+        key = settings.get("keyEnabled")
+        mirror = settings.get("mirrorEnabled")
 
         self.ui.keyCheckBox.setChecked(key)
         self.ui.mirrorCheckBox.setChecked(mirror)
 
-        super(PosePreviewWidget, self).setState(state)
+        super(PosePreviewWidget, self).setSettings(settings)
 
-    def state(self):
+    def settings(self):
         """
         Return the current state of the widget as a dictionary.
 
         :rtype: dict
         """
-        state = super(PosePreviewWidget, self).state()
+        settings = super(PosePreviewWidget, self).settings()
 
         key = bool(self.ui.keyCheckBox.isChecked())
         mirror = bool(self.ui.mirrorCheckBox.isChecked())
 
-        state["keyEnabled"] = key
-        state["mirrorEnabled"] = mirror
+        settings["keyEnabled"] = key
+        settings["mirrorEnabled"] = mirror
 
-        return state
+        return settings
 
     def updateSlider(self, value):
         """

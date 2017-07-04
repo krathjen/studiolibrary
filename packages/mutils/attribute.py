@@ -452,7 +452,7 @@ class Attribute(object):
                     maya.cmds.setAttr(dstCurve + ".curveColor", *curveColor[0])
                     maya.cmds.setAttr(dstCurve + ".useCurveColor", useCurveColor)
 
-        except RuntimeError, e:
+        except RuntimeError:
             msg = 'Cannot paste anim curve "{0}" to attribute "{1}"'
             msg = msg.format(curve, fullname)
             logger.exception(msg)

@@ -138,17 +138,11 @@ class AnimItem(baseitem.BaseItem):
 
     def startFrame(self):
         """Return the start frame for the animation."""
-        if self.transferObject().isLegacy():
-            return int(self.metaFile().get("start", 0))
-        else:
-            return self.transferObject().startFrame()
+        return self.transferObject().startFrame()
 
     def endFrame(self):
         """Return the end frame for the animation."""
-        if self.transferObject().isLegacy():
-            return int(self.metaFile().get("end", 0))
-        else:
-            return self.transferObject().endFrame()
+        return self.transferObject().endFrame()
 
     def doubleClicked(self):
         """Overriding this method to load the animation on double click."""
@@ -201,7 +195,7 @@ class AnimItem(baseitem.BaseItem):
         :type startFrame: bool
         :type sourceStart: int
         :type sourceEnd: int
-        :type option: PasteOption
+        :type option: PasteOption or str
         :type connect: bool
         :type currentTime: bool
         :rtype: None
@@ -258,16 +252,20 @@ class AnimItem(baseitem.BaseItem):
         fileType=None,
         startFrame=None,
         endFrame=None,
-        bakeConnected=False
+        bakeConnected=False,
+        description=None,
     ):
         """
         :type path: path
-        :type objects: list
-        :type contents: list[str]
-        :type iconPath: str
-        :type startFrame: int
-        :type endFrame: int
+        :type objects: list or None
+        :type contents: list[str] or None
+        :type iconPath: str or None
+        :type startFrame: int or None
+        :type endFrame: int or None
+        :type fileType: str or None
         :type bakeConnected: bool
+        :type description: str or None
+        
         :rtype: None
         """
         if path and not path.endswith(".anim"):
@@ -279,15 +277,13 @@ class AnimItem(baseitem.BaseItem):
         tempPath = tempDir.path() + "/transfer.anim"
 
         t = self.transferClass().fromObjects(objects)
-        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType, bakeConnected=bakeConnected)
+        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType, bakeConnected=bakeConnected, description=description)
 
         if iconPath:
             contents.append(iconPath)
 
         contents.extend(t.paths())
 
-        self.metaFile().set("start", startFrame)
-        self.metaFile().set("end", endFrame)
         studiolibrary.LibraryItem.save(self, path=path, contents=contents)
 
 
@@ -303,8 +299,9 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
         self._sequencePath = None
 
+        start, end = (1, 100)
+
         try:
-            start, end = (1, 100)
             start, end = mutils.currentFrameRange()
         except NameError, e:
             logger.exception(e)
@@ -329,8 +326,8 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         fileType = settings.get("fileType")
         self.setFileType(fileType)
 
-        self.ui.byFrameEdit.textChanged.connect(self.stateChanged)
-        self.ui.fileTypeComboBox.currentIndexChanged.connect(self.stateChanged)
+        self.ui.byFrameEdit.textChanged.connect(self.saveSettings)
+        self.ui.fileTypeComboBox.currentIndexChanged.connect(self.saveSettings)
 
     def createSequenceWidget(self):
         """
@@ -434,11 +431,14 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         if fileTypeIndex:
             self.ui.fileTypeComboBox.setCurrentIndex(fileTypeIndex)
 
-    def stateChanged(self, value):
-        """Triggered when either the fileType or byFrame has changed."""
-        self.settings().set("byFrame", self.byFrame())
-        self.settings().set("fileType", self.fileType())
-        self.settings().save()
+    def settings(self):
+
+        settings = super(AnimPreviewWidget, self).settings()
+
+        settings["byFrame"] = self.byFrame()
+        settings["fileType"] = self.fileType()
+
+        return settings
 
     def showFrameRangeMenu(self):
         """
@@ -572,7 +572,6 @@ For example if the "by frame" is set to 2 it will playblast every second frame."
         bakeConnected = int(self.ui.bakeCheckBox.isChecked())
 
         item = self.item()
-        item.setDescription(description)
         iconPath = self.iconPath()
 
         sequencePath = self.sequencePath()
@@ -587,6 +586,7 @@ For example if the "by frame" is set to 2 it will playblast every second frame."
             fileType=fileType,
             endFrame=endFrame,
             startFrame=startFrame,
+            description=description,
             bakeConnected=bakeConnected
         )
 
@@ -604,7 +604,7 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
         self.createSequenceWidget()
 
-        self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.updateState)
+        self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.saveSettings)
         self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
         self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
         self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
@@ -669,36 +669,36 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
         if save:
             self.saveSettings()
 
-    def state(self):
+    def settings(self):
         """
         :rtype: dict
         """
-        state = super(AnimPreviewWidget, self).state()
+        settings = super(AnimPreviewWidget, self).settings()
 
-        state["pasteOption"] = str(self.ui.option.currentText())
-        state["currentTime"] = bool(self.ui.currentTime.isChecked())
-        state["showHelpImage"] = bool(self.ui.helpCheckBox.isChecked())
-        state["connectOption"] = float(self.ui.connectCheckBox.isChecked())
+        settings["pasteOption"] = str(self.ui.option.currentText())
+        settings["currentTime"] = bool(self.ui.currentTime.isChecked())
+        settings["showHelpImage"] = bool(self.ui.helpCheckBox.isChecked())
+        settings["connectOption"] = float(self.ui.connectCheckBox.isChecked())
 
-        return state
+        return settings
 
-    def setState(self, state):
+    def setSettings(self, settings):
         """
-        :type state: dict
+        :type settings: dict
         """
-        connect = state.get("connectOption")
-        pasteOption = state.get("pasteOption")
-        currentTime = state.get("currentTime")
-        showHelpImage = state.get("showHelpImage")
+        connect = settings.get("connectOption")
+        pasteOption = settings.get("pasteOption")
+        currentTime = settings.get("currentTime")
+        showHelpImage = settings.get("showHelpImage")
 
         self.ui.currentTime.setChecked(currentTime)
-        self.ui.connectCheckBox.setChecked(connect)
+        self.ui.connectCheckBox.setChecked(bool(connect))
         self.ui.helpCheckBox.setChecked(showHelpImage)
 
         self.optionChanged(pasteOption, save=False)
         self.showHelpImage(showHelpImage, save=False)
 
-        super(AnimPreviewWidget, self).setState(state)
+        super(AnimPreviewWidget, self).setSettings(settings)
 
     def connectChanged(self, value):
         """
@@ -709,6 +709,7 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
     def optionChanged(self, text, save=True):
         """
         :type text: str
+        :type save: bool
         """
         imageText = text
 

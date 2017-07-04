@@ -83,7 +83,7 @@ class SeparatorAction(QtWidgets.QWidgetAction):
         """
         This method is called by the QWidgetAction base class.
 
-        :type parent: QtWidgets.QMenu
+        :type menu: QtWidgets.QMenu
         """
         actionWidget = self.widget()
 

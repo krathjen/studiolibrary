@@ -297,5 +297,6 @@ def showExample():
         return searchWidget
 
 
+
 if __name__ == "__main__":
     showExample()

@@ -1,20 +1,31 @@
-## Studio Library
+## Studio Library 2 - Beta
 
 Studio Library is a free python script for managing poses and animation in Maya.
 
 * www.studiolibrary.com
 
+## What's changed in version 2?
+Most of the changes in version 2 are to help with maintaining the project.
+There have been many API changes, so the major version was changed.
+
+* Docking in Maya is not supported yet
+* Items created before version 1.5.x (mid-2014) are no longer supported
+* Creating and switching between libraries from the UI is no longer supported
 
 ## Contributing
 
 Whether it's reporting bugs, discussing ideas or committing code: Contributions to Studio Library are welcome!
+
+* [Branch naming style](https://stackoverflow.com/questions/273695/git-branch-naming-best-practices)
+
+* [Commit messages style](https://github.com/erlang/otp/wiki/Writing-good-commit-messages)
 
 * Please follow the same workflow as the "[GitHub flow](https://guides.github.com/introduction/flow/index.html)".
 
 * Please follow the same coding style as the "[Python Qt Style Guidelines](http://bitesofcode.blogspot.co.uk/2011/10/pyqt-coding-style-guidelines.html)".
 
 
-## How to Install?
+## How to install?
 
 1. Download and unzip the *studiolibrary.zip* file
 

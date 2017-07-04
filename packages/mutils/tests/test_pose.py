@@ -54,7 +54,6 @@ class TestPose(test_base.TestBase):
         Test parsing an older pose format
         """
         srcPath = self.dataPath("test_older_version.dict")
-        dstPath = self.dataPath("test_older_version.json")
 
         pose = mutils.Pose.fromPath(srcPath)
         print pose.objects()

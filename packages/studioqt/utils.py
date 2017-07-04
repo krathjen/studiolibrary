@@ -138,6 +138,7 @@ def showInFolder(path):
     :rtype: None
     """
     cmd = os.system
+    args = []
 
     if studioqt.SHOW_IN_FOLDER_CMD:
         args = [unicode(studioqt.SHOW_IN_FOLDER_CMD)]

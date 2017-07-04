@@ -20,8 +20,6 @@ import studiolibrary
 import mutils
 import studioqt
 
-from mayalibrarywidget import MayaLibraryWidget
-
 
 __encoding__ = sys.getfilesystemencoding()
 
@@ -30,8 +28,35 @@ DIRNAME = os.path.dirname(PATH).replace('\\', '/')
 RESOURCE_DIRNAME = DIRNAME + "/resource"
 
 DEFAULT_FILE_TYPE = "mayaBinary"
+SETTINGS_PATH = studiolibrary.localPath("ItemSettings.json")
 
 _resource = None
+_settings = None
+_mayaCloseScriptJob = None
+
+
+def readSettings():
+    """
+    Return the local settings from the location of the SETTING_PATH.
+
+    :rtype: dict 
+    """
+    return studiolibrary.readJson(SETTINGS_PATH)
+
+
+def saveSettings(data):
+    """
+    Save the given dict to the local location of the SETTING_PATH.
+    
+    :type data: dict
+    :rtype: dict 
+    """
+    global _settings
+    _settings = None
+
+    data_ = readSettings()
+    data_.update(data)
+    return studiolibrary.saveJson(SETTINGS_PATH, data_)
 
 
 def settings():
@@ -40,34 +65,37 @@ def settings():
 
     :rtype: studiolibrary.Settings
     """
-    settings = studiolibrary.Settings.instance("StudioLibrary", "ItemSettings")
+    global _settings
+
+    if not _settings:
+        _settings = readSettings()
 
     # Shared options
-    settings.setdefault("namespaces", [])
-    settings.setdefault("namespaceOption", "file")
+    _settings.setdefault("namespaces", [])
+    _settings.setdefault("namespaceOption", "file")
 
-    settings.setdefault("iconToggleBoxChecked", True)
-    settings.setdefault("infoToggleBoxChecked", True)
-    settings.setdefault("optionsToggleBoxChecked", True)
-    settings.setdefault("namespaceToggleBoxChecked", True)
+    _settings.setdefault("iconToggleBoxChecked", True)
+    _settings.setdefault("infoToggleBoxChecked", True)
+    _settings.setdefault("optionsToggleBoxChecked", True)
+    _settings.setdefault("namespaceToggleBoxChecked", True)
 
     # Anim options
-    settings.setdefault('byFrame', 1)
-    settings.setdefault('fileType', DEFAULT_FILE_TYPE)
-    settings.setdefault('currentTime', False)
-    settings.setdefault('connectOption', False)
-    settings.setdefault('showHelpImage', False)
-    settings.setdefault('pasteOption', "replace")
+    _settings.setdefault('byFrame', 1)
+    _settings.setdefault('fileType', DEFAULT_FILE_TYPE)
+    _settings.setdefault('currentTime', False)
+    _settings.setdefault('connectOption', False)
+    _settings.setdefault('showHelpImage', False)
+    _settings.setdefault('pasteOption', "replace")
 
     # Pose options
-    settings.setdefault("keyEnabled", False)
-    settings.setdefault("mirrorEnabled", False)
+    _settings.setdefault("keyEnabled", False)
+    _settings.setdefault("mirrorEnabled", False)
 
     # Mirror options
-    settings.setdefault("mirrorOption", mutils.MirrorOption.Swap)
-    settings.setdefault("mirrorAnimation", True)
+    _settings.setdefault("mirrorOption", mutils.MirrorOption.Swap)
+    _settings.setdefault("mirrorAnimation", True)
 
-    return settings
+    return _settings
 
 
 def resource():
@@ -93,6 +121,35 @@ def registerItems():
     from studiolibrarymaya import poseitem
     from studiolibrarymaya import mirroritem
     from studiolibrarymaya import setsitem
+
+    # Enable the Maya closed event
+    enableMayaClosedEvent()
+
+
+def enableMayaClosedEvent():
+    """
+    Create a Maya script job to trigger on the event "quitApplication".
+
+    :rtype: None
+    """
+    global _mayaCloseScriptJob
+
+    if not _mayaCloseScriptJob:
+        event = ['quitApplication', mayaClosedEvent]
+        try:
+            _mayaCloseScriptJob = mutils.ScriptJob(event=event)
+        except NameError, e:
+            logging.exception(e)
+
+
+def mayaClosedEvent():
+    """
+    Create a Maya script job to trigger on the event "quitApplication".
+
+    :rtype: None
+    """
+    for libraryWidget in studiolibrary.LibraryWidget.instances():
+        libraryWidget.saveSettings()
 
 
 def setDebugMode(libraryWidget, value):

@@ -10,7 +10,7 @@
 # Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-import os
+
 import logging
 
 import mutils
@@ -25,42 +25,12 @@ except Exception:
 logger = logging.getLogger(__name__)
 
 
-class SelectionSet(mutils.TransferBase):
-
-    def __init__(self):
-        mutils.TransferBase.__init__(self)
-        self._namespaces = None
-
-    def namespaces(self):
-        """
-        :rtype: list[str]
-        """
-        if self._namespaces is None:
-            group = mutils.groupObjects(self.objects())
-            self._namespaces = group.keys()
-
-        return self._namespaces
-
-    def iconPath(self):
-        """
-        Return the icon path for this transfer object.
-
-        :rtype: str
-        """
-        return os.path.dirname(self.path()) + "/thumbnail.jpg"
-
-    def setPath(self, path):
-        """
-        :type path: str
-        :rtype: None
-        """
-        if path.endswith(".set"):
-            path += "/set.json"
-
-        mutils.TransferBase.setPath(self, path)
+class SelectionSet(mutils.TransferObject):
 
     def load(self, objects=None, namespaces=None, **kwargs):
         """
+        Load/Select the transfer objects to the given objects or namespaces.
+        
         :type objects:
         :type namespaces: list[str]
         :type kwargs:
@@ -107,18 +77,10 @@ class SelectionSet(mutils.TransferBase):
 
     def select(self, objects=None, namespaces=None, **kwargs):
         """
-        :type objects:
+        Convenience method for any classes inheriting SelectionSet.
+        
+        :type objects: str
         :type namespaces: list[str]
-        :type kwargs:
+        :rtype: None
         """
         SelectionSet.load(self, objects=objects, namespaces=namespaces, **kwargs)
-
-    @mutils.showWaitCursor
-    def save(self,  *args, **kwargs):
-        """
-        :type args: list
-        :type kwargs: dict
-        """
-        self.setMetadata("mayaVersion", maya.cmds.about(v=True))
-        self.setMetadata("mayaSceneFile", maya.cmds.file(q=True, sn=True))
-        mutils.TransferBase.save(self, *args, **kwargs)

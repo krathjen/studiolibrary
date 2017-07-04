@@ -29,7 +29,6 @@ class Icon(QtGui.QIcon):
         size = size or icon.actualSize(QtCore.QSize(256, 256))
 
         pixmap = icon.pixmap(size)
-        rect = QtCore.QRect(0,0, size.width(), size.height())
 
         if not self.isNull():
             painter = QtGui.QPainter(pixmap)

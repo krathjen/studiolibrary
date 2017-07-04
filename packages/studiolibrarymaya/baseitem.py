@@ -108,7 +108,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :rtype: str
         """
         if self.transferBasename():
-            return "/".join([self.path(), self.transferBasename()])
+            return os.path.join(self.path(), self.transferBasename())
         else:
             return self.path()
 
@@ -160,32 +160,14 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         Return the user who created this item.
 
-        :rtype: str
+        :rtype: str or None
         """
-        owner = studiolibrary.LibraryItem.owner(self)
-        transferObject = self.transferObject()
+        user = ""
 
-        if not owner and transferObject:
-            owner = self.transferObject().metadata().get("user")
+        if self.transferObject():
+            user = self.transferObject().metadata().get("user")
 
-        return owner
-
-    def ctime(self):
-        """
-        Return when the item was created.
-
-        :rtype: str
-        """
-        path = self.path()
-        ctime = ""
-
-        if os.path.exists(path):
-            ctime = studiolibrary.LibraryItem.ctime(self)
-
-            if not ctime:
-                ctime = int(os.path.getctime(path))
-
-        return ctime
+        return user
 
     def description(self):
         """
@@ -193,10 +175,9 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: str
         """
-        description = studiolibrary.LibraryItem.description(self)
-        transferObject = self.transferObject()
+        description = ""
 
-        if not description and transferObject:
+        if self.transferObject():
             description = self.transferObject().metadata().get("description")
 
         return description
@@ -290,10 +271,15 @@ class BaseItem(studiolibrary.LibraryItem):
         :rtype: mutils.MirrorTable or None
         """
         mirrorTable = None
-        path = self.mirrorTablePath()
 
-        if path:
-            mirrorTable = mutils.MirrorTable.fromPath(path)
+        mirrorTablePath = self.mirrorTablePath()
+
+        if mirrorTablePath:
+
+            path = os.path.join(mirrorTablePath, "mirrortable.json")
+
+            if path:
+                mirrorTable = mutils.MirrorTable.fromPath(path)
 
         return mirrorTable
 
@@ -338,18 +324,18 @@ class BaseItem(studiolibrary.LibraryItem):
         # When creating a new item we can only get the namespaces from
         # selection because the file (transferObject) doesn't exist yet.
         if not self.transferObject():
-            namespaces = self.namespaceFromSelection()
+            namespaces = self.namespacesFromSelection()
 
         # If the file (transferObject) exists then we can use the namespace
         # option to determined which namespaces to return.
         elif namespaceOption == NamespaceOption.FromFile:
-            namespaces = self.namespaceFromFile()
+            namespaces = self.namespacesFromFile()
 
         elif namespaceOption == NamespaceOption.FromCustom:
-            namespaces = self.namespaceFromCustom()
+            namespaces = self.namespacesFromCustom()
 
         elif namespaceOption == NamespaceOption.FromSelection:
-            namespaces = self.namespaceFromSelection()
+            namespaces = self.namespacesFromSelection()
 
         return namespaces
 
@@ -360,7 +346,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type namespaceOption: NamespaceOption
         :rtype: None
         """
-        self.settings().set("namespaceOption", namespaceOption)
+        self.settings()["namespaceOption"] = namespaceOption
 
     def namespaceOption(self):
         """
@@ -374,7 +360,7 @@ class BaseItem(studiolibrary.LibraryItem):
         )
         return namespaceOption
 
-    def namespaceFromCustom(self):
+    def namespacesFromCustom(self):
         """
         Return the namespace the user has set.
 
@@ -389,9 +375,9 @@ class BaseItem(studiolibrary.LibraryItem):
         :type namespaces: list[str]
         :rtype: None
         """
-        self.settings().set("namespaces", namespaces)
+        self.settings()["namespaces"] = namespaces
 
-    def namespaceFromFile(self):
+    def namespacesFromFile(self):
         """
         Return the namespaces from the transfer data.
 
@@ -400,7 +386,7 @@ class BaseItem(studiolibrary.LibraryItem):
         return self.transferObject().namespaces()
 
     @staticmethod
-    def namespaceFromSelection():
+    def namespacesFromSelection():
         """
         Return the current namespaces from the selected objects in Maya.
 
@@ -438,14 +424,25 @@ class BaseItem(studiolibrary.LibraryItem):
 
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
 
-    def save(self, objects, path=None, iconPath=None, contents=None, **kwargs):
+    def save(
+            self,
+            objects,
+            path=None,
+            iconPath=None,
+            contents=None,
+            description=None,
+            **kwargs
+    ):
         """
         Save the data to the transfer path on disc.
 
-        :type path: path
         :type objects: list
-        :type iconPath: str
-        :raise ValidateError:
+        :type path: path or None
+        :type iconPath: str or None
+        :type contents: list[str] or None
+        :type description: str or None
+        
+        :rtype: None
         """
         logger.info(u'Saving: {0}'.format(path))
 

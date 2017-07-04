@@ -146,7 +146,7 @@ class SetsMenu(QtWidgets.QMenu):
         if selectionSets:
             for selectionSet in selectionSets:
                 dirname = os.path.basename(selectionSet.dirname())
-                basename = selectionSet.name().replace(selectionSet.extension(),"")
+                basename = selectionSet.name().replace(selectionSet.extension(), "")
                 nicename = dirname + ": " + basename
 
                 action = QtWidgets.QAction(nicename, self)

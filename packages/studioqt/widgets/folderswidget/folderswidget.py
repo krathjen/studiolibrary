@@ -44,7 +44,7 @@ class FoldersWidget(QtWidgets.QTreeView):
         self._folders = {}
         self._isLocked = False
         self._blockSignals = False
-        self._enableFolderSettings = False
+        self._enableFolderSettings = True
 
         self._sourceModel = FileSystemModel(self)
 
@@ -256,7 +256,7 @@ class FoldersWidget(QtWidgets.QTreeView):
             "selectedPaths": self.selectedPaths(),
             # Saving the state of expanded folders is not supported yet!
             # "expandedPaths": self.expandedPaths(),
-            # "folderSettings": self.folderSettings(),
+            "folderSettings": self.folderSettings(),
         }
 
         if self._enableFolderSettings:
@@ -880,7 +880,6 @@ class SortFilterProxyModel(QtCore.QSortFilterProxyModel):
 def example():
     path = r'C:/Users/Hovel/Dropbox/libraries/animation'
     trashPath = path + r'/Trash'
-
 
     ignoreFilter = ['.', '.studiolibrary', '.pose', '.anim', '.set']
 
