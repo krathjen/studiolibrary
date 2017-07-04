@@ -39,10 +39,6 @@ class SetsItem(baseitem.BaseItem):
         self.setTransferBasename("set.json")
         self.setTransferClass(mutils.SelectionSet)
 
-        self.setTransferBasename("set.list")
-        if not os.path.exists(self.transferPath()):
-            self.setTransferBasename("set.json")
-
     def doubleClicked(self):
         """Overriding this method to load the item on double click."""
         self.loadFromSettings()
@@ -58,7 +54,7 @@ class SetsItem(baseitem.BaseItem):
         """
         self.selectContent(namespaces=namespaces)
 
-    def save(self, objects, path=None, iconPath=None):
+    def save(self, objects, path=None, iconPath=None, **kwargs):
         """
         Save all the given object data to the given path on disc.
     
@@ -69,7 +65,7 @@ class SetsItem(baseitem.BaseItem):
         if path and not path.endswith(".set"):
             path += ".set"
 
-        super(SetsItem, self).save(objects, path=path, iconPath=iconPath)
+        super(SetsItem, self).save(objects, path=path, iconPath=iconPath, **kwargs)
 
 
 class SetsCreateWidget(basecreatewidget.BaseCreateWidget):

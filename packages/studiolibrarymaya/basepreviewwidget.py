@@ -85,19 +85,18 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
-        self.ui.useFileNamespace.clicked.connect(self.updateState)
-        self.ui.useCustomNamespace.clicked.connect(
-            self._useCustomNamespaceClicked)
-        self.ui.useSelectionNamespace.clicked.connect(self.updateState)
+        self.ui.useFileNamespace.clicked.connect(self._namespaceOptionClicked)
+        self.ui.useCustomNamespace.clicked.connect(self._useCustomNamespaceClicked)
+        self.ui.useSelectionNamespace.clicked.connect(self._namespaceOptionClicked)
 
         self.ui.namespaceComboBox.activated[str].connect(self._namespaceEditChanged)
         self.ui.namespaceComboBox.editTextChanged[str].connect(self._namespaceEditChanged)
         self.ui.namespaceComboBox.currentIndexChanged[str].connect(self._namespaceEditChanged)
 
-        self.ui.iconToggleBoxButton.clicked.connect(self.updateState)
-        self.ui.infoToggleBoxButton.clicked.connect(self.updateState)
-        self.ui.optionsToggleBoxButton.clicked.connect(self.updateState)
-        self.ui.namespaceToggleBoxButton.clicked.connect(self.updateState)
+        self.ui.iconToggleBoxButton.clicked.connect(self.saveSettings)
+        self.ui.infoToggleBoxButton.clicked.connect(self.saveSettings)
+        self.ui.optionsToggleBoxButton.clicked.connect(self.saveSettings)
+        self.ui.namespaceToggleBoxButton.clicked.connect(self.saveSettings)
 
         self.ui.iconToggleBoxButton.toggled[bool].connect(self.ui.iconToggleBoxFrame.setVisible)
         self.ui.infoToggleBoxButton.toggled[bool].connect(self.ui.infoToggleBoxFrame.setVisible)
@@ -160,14 +159,6 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self.ui.thumbnailButton.setIcon(icon)
         self.ui.thumbnailButton.setIconSize(QtCore.QSize(200, 200))
         self.ui.thumbnailButton.setText("")
-
-    def settings(self):
-        """
-        Return the settings object for saving the state of the widget.
-
-        :rtype: studiolibrary.Settings
-        """
-        return studiolibrarymaya.settings()
 
     def showSelectionSetsMenu(self):
         """
@@ -262,6 +253,10 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self.ui.namespaceComboBox.setEditText(text)
         self.saveSettings()
 
+    def _namespaceOptionClicked(self):
+        self.updateNamespaceEdit()
+        self.saveSettings()
+
     def _useCustomNamespaceClicked(self):
         """
         Triggered when the custom namespace radio button is clicked.
@@ -269,12 +264,6 @@ class BasePreviewWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         self.ui.namespaceComboBox.setFocus()
-        self.updateState()
-
-    def updateState(self):
-        """
-        :rtype: None
-        """
         self.updateNamespaceEdit()
         self.saveSettings()
 
@@ -322,63 +311,61 @@ class BasePreviewWidget(QtWidgets.QWidget):
         else:
             self.ui.useSelectionNamespace.setChecked(True)
 
-    def setState(self, state):
+    def setSettings(self, settings):
         """
-        :type state: dict
+        :type settings: dict
         """
-        namespaces = state.get("namespaces", [])
+        namespaces = settings.get("namespaces", [])
         self.setNamespaces(namespaces)
 
-        namespaceOption = state.get("namespaceOption",
-                                    NamespaceOption.FromFile)
+        namespaceOption = settings.get("namespaceOption", NamespaceOption.FromFile)
         self.setNamespaceOption(namespaceOption)
 
-        toggleBoxChecked = state.get("iconToggleBoxChecked", True)
+        toggleBoxChecked = settings.get("iconToggleBoxChecked", True)
         self.ui.iconToggleBoxFrame.setVisible(toggleBoxChecked)
         self.ui.iconToggleBoxButton.setChecked(toggleBoxChecked)
 
-        toggleBoxChecked = state.get("infoToggleBoxChecked", True)
+        toggleBoxChecked = settings.get("infoToggleBoxChecked", True)
         self.ui.infoToggleBoxFrame.setVisible(toggleBoxChecked)
         self.ui.infoToggleBoxButton.setChecked(toggleBoxChecked)
 
-        toggleBoxChecked = state.get("optionsToggleBoxChecked", True)
+        toggleBoxChecked = settings.get("optionsToggleBoxChecked", True)
         self.ui.optionsToggleBoxFrame.setVisible(toggleBoxChecked)
         self.ui.optionsToggleBoxButton.setChecked(toggleBoxChecked)
 
-        toggleBoxChecked = state.get("namespaceToggleBoxChecked", True)
+        toggleBoxChecked = settings.get("namespaceToggleBoxChecked", True)
         self.ui.namespaceToggleBoxFrame.setVisible(toggleBoxChecked)
         self.ui.namespaceToggleBoxButton.setChecked(toggleBoxChecked)
 
-    def state(self):
+    def settings(self):
         """
         :rtype: dict
         """
-        state = {}
+        settings = {}
 
-        state["namespaces"] = self.namespaces()
-        state["namespaceOption"] = self.namespaceOption()
+        settings["namespaces"] = self.namespaces()
+        settings["namespaceOption"] = self.namespaceOption()
 
-        state["iconToggleBoxChecked"] = self.ui.iconToggleBoxButton.isChecked()
-        state["infoToggleBoxChecked"] = self.ui.infoToggleBoxButton.isChecked()
-        state["optionsToggleBoxChecked"] = self.ui.optionsToggleBoxButton.isChecked()
-        state["namespaceToggleBoxChecked"] = self.ui.namespaceToggleBoxButton.isChecked()
+        settings["iconToggleBoxChecked"] = self.ui.iconToggleBoxButton.isChecked()
+        settings["infoToggleBoxChecked"] = self.ui.infoToggleBoxButton.isChecked()
+        settings["optionsToggleBoxChecked"] = self.ui.optionsToggleBoxButton.isChecked()
+        settings["namespaceToggleBoxChecked"] = self.ui.namespaceToggleBoxButton.isChecked()
 
-        return state
+        return settings
 
     def loadSettings(self):
         """
         :rtype: None
         """
-        settings = self.settings()
-        self.setState(settings.data())
+        data = studiolibrarymaya.settings()
+        self.setSettings(data)
 
     def saveSettings(self):
         """
         :rtype: None
         """
-        settings = self.settings()
-        settings.data().update(self.state())
-        settings.save()
+        data = self.settings()
+        studiolibrarymaya.saveSettings(data)
 
     def selectionChanged(self):
         """

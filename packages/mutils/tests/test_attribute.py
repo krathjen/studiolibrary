@@ -46,8 +46,8 @@ class TestAttribute(unittest.TestCase):
         """
         Test the attribute limit when setting the attribute value.
         """
-        range = (-100, 100)
-        maya.cmds.cutKey("sphere", cl=True, time=range, f=range, at="testLimit")
+        range_ = (-100, 100)
+        maya.cmds.cutKey("sphere", cl=True, time=range_, f=range_, at="testLimit")
 
         attr = mutils.Attribute("sphere", "testLimit")
         attr.set(200)
@@ -79,8 +79,8 @@ class TestAttribute(unittest.TestCase):
         """
         Test if non-keyable attributes can be keyed.
         """
-        range = (-100, 100)
-        maya.cmds.cutKey("sphere", cl=True, time=range, f=range, at="testNonKeyable")
+        range_ = (-100, 100)
+        maya.cmds.cutKey("sphere", cl=True, time=range_, f=range_, at="testNonKeyable")
 
         attr = mutils.Attribute("sphere", "testNonKeyable")
         attr.setKeyframe(200)

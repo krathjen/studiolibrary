@@ -124,8 +124,10 @@ class SearchFilter(QtCore.QObject):
         :rtype: dict
         """
         settings = {}
+
         settings["pattern"] = self.pattern()
         settings["spaceOperator"] = self.spaceOperator()
+
         return settings
 
     def setSettings(self, settings):

@@ -157,7 +157,7 @@ def disableViews(fn):
         finally:
             for panel in modelPanels:
                 if maya.cmds.getPanel(to=panel) == 'modelPanel':
-                    maya.cmds.isolateSelect( panel, state=False )
+                    maya.cmds.isolateSelect(panel, state=False)
 
             maya.cmds.deleteUI(emptySelConn)
 

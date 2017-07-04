@@ -195,6 +195,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :type column: int or str
         :type icon: QtGui.QIcon
+        :type color: QtGui.QColor or None
         :rtype: None
         """
         # Safe guard for when the class is being used without the gui.
@@ -410,7 +411,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: None
         """
-        pass
+        self.resetBlending()
 
     def doubleClicked(self):
         """
@@ -1192,12 +1193,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         return self._blendPosition
 
-    def selectionChanged(self):
-        """
-        :rtype: QtGui.QPoint
-        """
-        self.resetBlending()
-
     # ------------------------------------------------------------------------
     # Support animated image sequence
     # ------------------------------------------------------------------------
@@ -1304,21 +1299,20 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type option: QtWidgets.QStyleOptionViewItem
         :rtype: None
         """
-        movie = self.imageSequence()
+        imageSequence = self.imageSequence()
 
-        if movie and self.underMouse():
+        if imageSequence and self.underMouse():
 
-            count = movie.frameCount()
-            current = movie.currentFrameNumber()
+            count = imageSequence.frameCount()
+            current = imageSequence.currentFrameNumber()
 
             if count > 0:
-                percent = float(((count) + current) + 1) / count - 1
+                percent = float((count + current) + 1) / count - 1
             else:
                 percent = 0
 
             r = self.iconRect(option)
             c = self.playheadColor()
-            imageSequence = self.imageSequence()
 
             painter.setPen(QtCore.Qt.NoPen)
             painter.setBrush(QtGui.QBrush(c))

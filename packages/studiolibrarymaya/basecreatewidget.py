@@ -97,15 +97,6 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         self.item().setDatabase(database)
 
-    def setLibrary(self, library):
-        """
-        Convenience method for setting the library for the item.
-        
-        :type library: studiolibrary.Library
-        :rtype: None 
-        """
-        self.item().setLibrary(library)
-
     def iconPath(self):
         """
         Return the icon path to be used for the thumbnail.
@@ -143,6 +134,15 @@ class BaseCreateWidget(QtWidgets.QWidget):
         :rtype: studiolibrary.Settings
         """
         return studiolibrarymaya.settings()
+
+    def saveSettings(self):
+        """
+        Save the current state of the widget to disc.
+        
+        :rtype: None
+        """
+        data = self.settings()
+        studiolibrarymaya.saveSettings(data)
 
     def showSelectionSetsMenu(self):
         """
@@ -360,8 +360,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
             description = self.description()
 
             self.save(
+                objects,
                 path=path,
-                objects=objects,
                 iconPath=self.iconPath(),
                 description=description,
             )
@@ -382,7 +382,11 @@ class BaseCreateWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        r = self.item()
-        r.setDescription(description)
-        r.save(objects=objects, path=path, iconPath=iconPath)
+        item = self.item()
+        item.save(
+            objects,
+            path=path,
+            iconPath=iconPath,
+            description=description,
+        )
         self.close()

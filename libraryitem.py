@@ -49,8 +49,6 @@ class LibraryItemSignals(QtCore.QObject):
 
 class LibraryItem(studioqt.CombinedWidgetItem):
 
-    # The meta path is still named record.json and camel case for legacy.
-    META_PATH = "{path}/.studioLibrary/record.json"
     ENABLE_DELETE = False
 
     MenuName = "Library Item"
@@ -76,13 +74,15 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtCore.QAction
         """
-        icon = QtGui.QIcon(cls.MenuIconPath)
-        callback = partial(cls.showCreateWidget, libraryWidget)
+        if cls.CreateWidgetClass:
 
-        action = QtWidgets.QAction(icon, cls.MenuName, menu)
-        action.triggered.connect(callback)
+            icon = QtGui.QIcon(cls.MenuIconPath)
+            callback = partial(cls.showCreateWidget, libraryWidget)
 
-        return action
+            action = QtWidgets.QAction(icon, cls.MenuName, menu)
+            action.triggered.connect(callback)
+
+            return action
 
     @classmethod
     def showCreateWidget(cls, libraryWidget):
@@ -97,7 +97,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     def __init__(
         self,
         path=None,
-        library=None,
         database=None,
         libraryWidget=None,
     ):
@@ -105,21 +104,17 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         The LibraryItem class provides an item for use with the LibraryWidget.
 
         :type path: str or None
-        :type library: studiolibrary.Library or None
+        :type libraryWidget: studiolibrary.LibraryWidget or None
         """
         studioqt.CombinedWidgetItem.__init__(self)
 
         self._path = ""
         self._error = ""
         self._library = None
-        self._metaFile = None
         self._iconPath = None
         self._database = None
         self._typePixmap = None
         self._libraryWidget = None
-
-        if library:
-            self.setLibrary(library)
 
         if libraryWidget:
             self.setLibraryWidget(libraryWidget)
@@ -137,14 +132,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :rtype: path or None
         """
         return self.TypeIconPath
-
-    def localSettings(self):
-        """
-        Return a settings object for saving data to the users local disc.
-
-        :rtype: studiolibrary.Settings
-        """
-        return studiolibrary.Settings.instance("StudioLibrary", "Items", self.__class__.__name__)
 
     def thumbnailPath(self):
         """
@@ -259,30 +246,21 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
     def ctime(self):
         """
-        :rtype: float
-        """
-        return os.path.getctime(self.path())
+        Return when the item was created.
 
-    def library(self):
+        :rtype: str
         """
-        :rtype: studiolibrary.Library
-        """
-        return self._library
+        path = self.path()
 
-    def setLibrary(self, library):
-        """
-        :type library: studiolibrary.Library
-        :rtype: None
-        """
-        self._library = library
+        if os.path.exists(path):
+            return int(os.path.getctime(path))
+
+        return None
 
     def libraryWidget(self):
         """
         :rtype: studiolibrary.LibraryWidget or None
         """
-        if not self._libraryWidget and self.library():
-            self._libraryWidget = self.library().libraryWidget()
-
         return self._libraryWidget
 
     def setLibraryWidget(self, libraryWidget):
@@ -305,8 +283,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         
         :rtype: studiolibrary.Database
         """
-        if not self._database and self.library():
-            self._database = self.library().database()
+        if not self._database and self.libraryWidget():
+            self._database = self.libraryWidget().database()
 
         return self._database
 
@@ -417,7 +395,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             raise ItemSaveError("Item already exists!")
 
         path = self.path()
-        self.metaFile().save()
         studiolibrary.moveContents(contents, path)
 
         if self.database():
@@ -469,7 +446,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self.setPath(dst)
 
         if self.database():
-            self.database().renameItem(src, dst)
+            self.database().renamePath(src, dst)
 
         self.renamed.emit(src, dst)
 
@@ -494,7 +471,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self.setPath(dst)
 
         if self.database():
-            self.database().renameItem(src, dst)
+            self.database().renamePath(src, dst)
 
         self.renamed.emit(src, dst)
 
@@ -562,59 +539,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             except Exception, e:
                 logger.exception(e)
                 studioqt.MessageBox.critical(parent, "Delete Error", str(e))
-
-    # -----------------------------------------------------------------
-    # Support for meta data
-    # -----------------------------------------------------------------
-
-    def description(self):
-        """
-        :rtype: str
-        """
-        return self.metaFile().get('description', "")
-
-    def setDescription(self, text):
-        """
-        :type: str
-        """
-        self.metaFile().setDescription(text)
-
-    def setOwner(self, text):
-        """
-        :type text: str
-        """
-        self.metaFile().set('owner', text)
-
-    def owner(self):
-        """
-        :rtype: str
-        """
-        return self.metaFile().get('owner', "")
-
-    def metaPath(self):
-        """
-        Return the meta path on disc for the item.
-
-        :rtype: str
-        """
-        path = self.META_PATH
-        return studiolibrary.formatPath(self.path(), path)
-
-    def metaFile(self):
-        """
-        Return the meta file object for the item.
-
-        :rtype: metafile.MetaFile
-        """
-        path = self.metaPath()
-
-        if self._metaFile:
-            if self._metaFile.path() != path:
-                self._metaFile.setPath(path)
-        else:
-            self._metaFile = studiolibrary.MetaFile(path, read=True)
-
-        return self._metaFile
 
     # -----------------------------------------------------------------
     # Support for painting the type icon

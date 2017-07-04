@@ -11,13 +11,16 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import re
 import os
 import json
 import shutil
+import urllib2
 import logging
+import getpass
 import platform
-import subprocess
+import threading
+import collections
+
 from datetime import datetime
 
 
@@ -28,11 +31,11 @@ __all__ = [
     "isMac",
     "isLinux",
     "isWindows",
+    "logScreen",
     "timeAgo",
-    "saveDict",
-    "readDict",
     "saveJson",
     "readJson",
+    "updateJson",
     "listPaths",
     "findPaths",
     "copyPath",
@@ -40,19 +43,29 @@ __all__ = [
     "splitPath",
     "removePath",
     "renamePath",
+    "localPath",
     "formatPath",
     "moveContents",
     "Direction",
     "stringToList",
     "listToString",
     "generateUniquePath",
-    "generateUniqueName",
     "PathRenameError",
-    "PathNotFoundError",
+    "registerItem",
+    "itemClasses",
+    "itemExtensions",
+    "itemFromPath",
+    "itemsFromPaths",
+    "itemsFromUrls",
+    "findItems",
+    "findItemsInFolders",
 ]
 
 
 logger = logging.getLogger(__name__)
+
+
+_itemClasses = collections.OrderedDict()
 
 
 class PathRenameError(IOError):
@@ -60,14 +73,179 @@ class PathRenameError(IOError):
     """
 
 
-class PathNotFoundError(IOError):
-    """
-    """
+class StudioLibraryError(Exception):
+    """"""
+    pass
+
+
+class StudioLibraryValidateError(StudioLibraryError):
+    """"""
+    pass
 
 
 class Direction:
     Up = "up"
     Down = "down"
+
+
+def registerItem(cls, extension, isDir=True, isFile=True, ignore=None):
+    """
+    Register the given item class to the given extension.
+
+    :type extension: str
+    :type cls: studiolibrary.LibraryItem
+    :type isDir: bool
+    :type isFile: bool
+    :type ignore: str or None
+    """
+    global _itemClasses
+    _itemClasses[extension] = {}
+    _itemClasses[extension]["cls"] = cls
+    _itemClasses[extension]["isDir"] = isDir
+    _itemClasses[extension]["isFile"] = isFile
+    _itemClasses[extension]["ignore"] = ignore
+
+
+def itemClasses():
+    """
+    Return all registered library item classes.
+
+    :rtype: list[studiolibrary.LibraryItem]
+    """
+    return [val['cls'] for val in _itemClasses.values()]
+
+
+def itemExtensions():
+    """
+    Register the given item class to the given extension.
+
+    :rtype: list[str]
+    """
+    return _itemClasses.keys()
+
+
+def clearItemClasses():
+    """
+    Remove all registered item class.
+
+    :rtype: None
+    """
+    global _itemClasses
+    _itemClasses = collections.OrderedDict()
+
+
+def itemFromPath(path, **kwargs):
+    """
+    Return a new item instance for the given path.
+
+    :type path: str
+    :rtype: studiolibrary.LibraryItem or None
+    """
+    item = None
+
+    for ext in _itemClasses:
+
+        val = _itemClasses[ext]
+
+        cls = val["cls"]
+        isDir = val.get("isDir")
+        isFile = val.get("isFile")
+        ignore = val.get("ignore")
+
+        if path.endswith(ext):
+
+            if ignore and ignore in path:
+                continue
+
+            isDir = isDir and os.path.isdir(path)
+            isFile = isFile and os.path.isfile(path)
+
+            if isDir or isFile:
+                item = cls(path, **kwargs)
+                break
+
+    return item
+
+
+def itemsFromPaths(paths, **kwargs):
+    """
+    Return new item instances for the given paths.
+
+    :type paths: list[str]:
+    :rtype: collections.Iterable[studiolibrary.LibraryItem]
+    """
+    for path in paths:
+        item = itemFromPath(path, **kwargs)
+        if item:
+            yield item
+
+
+def itemsFromUrls(urls, **kwargs):
+    """
+    Return new item instances for the given QUrl objects.
+
+    :type urls: list[QtGui.QUrl]
+    :rtype: list[studiolibrary.LibraryItem]
+    """
+    items = []
+    for url in urls:
+        path = url.toLocalFile()
+
+        # Fixes a bug when dragging from windows explorer on windows 10
+        if isWindows():
+            if path.startswith("/"):
+                path = path[1:]
+
+        item = itemFromPath(path, **kwargs)
+
+        if item:
+            items.append(item)
+        else:
+            msg = 'Cannot find the item for path "{0}"'
+            msg = msg.format(path)
+            logger.warning(msg)
+
+    return items
+
+
+def findItems(path, direction=Direction.Down, depth=3, **kwargs):
+    """
+    Find and create new item instances by walking the given path.
+
+    :type path: str
+    :type direction: studiolibrary.Direction or str
+    :type depth: int
+
+    :rtype: collections.Iterable[studiolibrary.LibraryItem]
+    """
+    ignore = [
+        ".studiolibrary",
+        ".studioLibrary",
+    ]
+
+    paths = findPaths(
+        path,
+        match=itemFromPath,
+        ignore=ignore,
+        direction=direction,
+        depth=depth
+    )
+
+    return itemsFromPaths(paths, **kwargs)
+
+
+def findItemsInFolders(folders, depth=3, **kwargs):
+    """
+    Find and create new item instances by walking the given paths.
+
+    :type folders: list[str]
+    :type depth: int
+
+    :rtype: collections.Iterable[studiolibrary.LibraryItem]
+    """
+    for folder in folders:
+        for item in findItems(folder, depth=depth, **kwargs):
+            yield item
 
 
 def user():
@@ -117,6 +295,18 @@ def isLinux():
     :rtype: bool
     """
     return system().startswith("lin")
+
+
+def localPath(*args):
+    """
+    Return the users local disc location.
+    
+    :rtype: str 
+    """
+    path = os.getenv('APPDATA') or os.getenv('HOME')
+    path = os.path.join(path, "StudioLibrary", *args)
+
+    return path
 
 
 def formatPath(src, dst, labels=None):
@@ -252,12 +442,29 @@ def moveContents(contents, path):
     Move the given contents to the specified path.
 
     :type contents: list[str]
+    :type path: str
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     for src in contents or []:
         basename = os.path.basename(src)
         dst = path + "/" + basename
         logger.info(u'Moving Content: {0} => {1}'.format(src, dst))
         shutil.move(src, dst)
+
+
+def updateJson(path, data):
+    """
+    Update a json file with the given data.
+
+    :type path: str
+    :type data: dict
+    :rtype: None
+    """
+    data_ = readJson(path)
+    data_.update(data)
+    saveJson(path, data_)
 
 
 def saveJson(path, data):
@@ -297,64 +504,8 @@ def readJson(path):
                     data = json.loads(data_)
                 except Exception, e:
                     logger.exception(e)
+
     return data
-
-
-def saveDict(path, data):
-    """
-    Write a python dict to the given path on disc.
-
-    :type path: str
-    :type data: dict
-    :rtype: None
-    """
-    dirname = os.path.dirname(path)
-
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-
-    with open(path, "w") as f:
-        d = str(data)
-        test = eval(d, {})  # Test that the data can be converted.
-        f.write(d)
-
-
-def readDict(path):
-    """
-    Read a python dict from the given path on disc.
-
-    :type path: str
-    :rtype: dict
-    """
-    data = {}
-    logger.debug(u'Reading dict file: {0}'.format(path))
-
-    if os.path.isfile(path):
-        with open(path, "r") as f:
-            data_ = f.read()
-            if data_:
-                try:
-                    data = eval(data_, {})
-                except Exception, e:
-                    logger.exception(e)
-    return data
-
-
-def generateUniqueName(name, names, attempts=1000):
-    """
-    :type name: str
-    :type names: list[str]
-    :type attempts: int
-    :rtype: str
-    """
-    for i in range(1, attempts):
-        result = name + str(i)
-        if result not in names:
-            return result
-
-    msg = u'Cannot generate unique name for "{name}"'
-    msg = msg.format(name=name)
-    raise StudioLibraryError(msg)
 
 
 def generateUniquePath(path, attempts=1000):
@@ -428,14 +579,23 @@ def listPaths(path):
         yield value
 
 
-def findPaths(path, match=None, ignore=None, direction=Direction.Down, depth=3):
+def findPaths(
+        path,
+        match=None,
+        ignore=None,
+        direction=Direction.Down,
+        depth=3
+):
     """
     Return a list of file paths by walking the root path either up or down.
 
     Example:
         path = r'C:\Users\Hovel\Dropbox\libraries\animation\Malcolm\anim'
+        
+        def matchSets(path):
+            return path.endswith(".set")
 
-        for path in findPaths(path, match=lambda path: path.endswith(".set"), direction=Direction.Up, depth=5):
+        for path in findPaths(path, match=matchSets, direction=Direction.Up, depth=5):
             print path
 
         for path in findPaths(path, match=lambda path: path.endswith(".anim"), direction=Direction.Down, depth=3):
@@ -444,6 +604,7 @@ def findPaths(path, match=None, ignore=None, direction=Direction.Down, depth=3):
     :type path: str
     :type match: func
     :type depth: int
+    :type ignore: str or None
     :type direction: Direction
     :rtype: collections.Iterable[str]
     """
@@ -502,6 +663,7 @@ def walk(path, match=None, ignore=None, depth=3):
     :type path: str
     :type match: func
     :type depth: int
+    :type ignore: str or None
     :rtype: collections.Iterable[str]
     """
     path = path.rstrip(os.path.sep)
@@ -584,3 +746,52 @@ def timeAgo(timeStamp):
     if v == 1:
         return str(v) + " year ago"
     return str(v) + " years ago"
+
+
+def logScreen(name, version="1.0.0", an="StudioLibrary", tid="UA-50172384-2"):
+    """
+    Send a screen view to google analytics.
+
+    Example:
+    logScreen("fudgeOpenUI")
+
+    :type name: str
+    :type version: str
+    :type an: str
+    :type tid: str
+    :rtype: None
+    """
+    cid = getpass.getuser() + "-" + platform.node()
+
+    url = "http://www.google-analytics.com/collect?" \
+          "v=1" \
+          "&ul=en-us" \
+          "&a=448166238" \
+          "&_u=.sB" \
+          "&_v=ma1b3" \
+          "&qt=2500" \
+          "&z=185" \
+          "&tid={tid}" \
+          "&an={an}" \
+          "&av={av}" \
+          "&cid={cid}" \
+          "&t=appview" \
+          "&cd={name}"
+
+    url = url.format(
+        tid=tid,
+        an=an,
+        av=version,
+        cid=cid,
+        name=name,
+    )
+
+    def _send(url):
+        try:
+            url = url.replace(" ", "")
+            f = urllib2.urlopen(url, None, 1.0)
+        except Exception:
+            pass
+
+    t = threading.Thread(target=_send, args=(url,))
+    t.start()

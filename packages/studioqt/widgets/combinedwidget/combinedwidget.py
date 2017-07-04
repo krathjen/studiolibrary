@@ -32,9 +32,12 @@ logger = logging.getLogger(__name__)
 
 class CombinedWidget(QtWidgets.QWidget):
 
+    IconMode = "icon"
+    TableMode = "table"
+
     DEFAULT_PADDING = 5
 
-    DEFAULT_ZOOM_AMOUNT = 32
+    DEFAULT_ZOOM_AMOUNT = 90
     DEFAULT_TEXT_HEIGHT = 20
     DEFAULT_WHEEL_SCROLL_STEP = 2
 
@@ -383,10 +386,6 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         Return all data for the given items and given column.
 
-        :type items: list[CombinedWidgetItem]
-        :type column: int or str
-        :type split: str
-        :type duplicates: bool
         :rtype: list[str]
         """
         return self.treeWidget().textFromItems(*args, **kwargs)
@@ -395,9 +394,6 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         Return all data for the given column.
 
-        :type column: int or str
-        :type split: str
-        :type duplicates: bool
         :rtype: list[str]
         """
         return self.treeWidget().textFromColumn(*args, **kwargs)
@@ -797,6 +793,8 @@ class CombinedWidget(QtWidgets.QWidget):
         Sets the items to the widget.
 
         :type items: list[CombinedWidgetItem]
+        :type sortEnabled: bool
+        
         :rtype: None
         """
         if sortEnabled:
@@ -998,9 +996,21 @@ class CombinedWidget(QtWidgets.QWidget):
         :type mode: str
         :rtype: None
         """
-        if mode == "icon":
+        if mode == self.IconMode:
+            self.setZoomAmount(self.DEFAULT_MIN_ICON_SIZE)
+        elif mode == self.TableMode:
+            self.setZoomAmount(self.DEFAULT_MIN_ICON_SIZE)
+
+    def _setViewMode(self, mode):
+        """
+        Set the view mode for this widget.
+
+        :type mode: str
+        :rtype: None
+        """
+        if mode == self.IconMode:
             self.setIconMode()
-        elif mode == "table":
+        elif mode == self.TableMode:
             self.setListMode()
 
     def setListMode(self):
@@ -1046,9 +1056,9 @@ class CombinedWidget(QtWidgets.QWidget):
         self.setIconSize(size)
 
         if value >= self.DEFAULT_MIN_ICON_SIZE:
-            self.setViewMode("icon")
+            self._setViewMode(self.IconMode)
         else:
-            self.setViewMode("table")
+            self._setViewMode(self.TableMode)
 
         self._treeWidget.setIndentation(0)
         self._treeWidget.setColumnWidth(0, value * self.dpi() + self.itemTextHeight())

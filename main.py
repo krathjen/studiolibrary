@@ -15,40 +15,56 @@ import studiolibrary
 
 
 def main(
-    name=None,
-    path=None,
-    show=True,
-    analytics=True,
-    **kwargs
+        name=None,
+        path=None,
+        show=True,
+        lock=False,
+        superusers=None,
+        lockFolder=None,
+        unlockFolder=None,
 ):
     """
     The main entry point for creating and loading a library.
+    
+    This is a convenience method.
 
-    :type name: str
-    :type path: str
+    :type name: str or None
+    :type path: str or None
     :type show: bool
-    :type analytics: bool
-    :type kwargs: dict
-
-    :rtype: studiolibrary.Library
+    :type lock: bool
+    :type superusers: str
+    :type lockFolder: str
+    :type unlockFolder: str
+    
+    :rtype: studiolibrary.LibraryWidget
     """
-    studiolibrary.analytics().setEnabled(analytics)
+    cls = studiolibrary.LIBRARY_WIDGET_CLASS or studiolibrary.LibraryWidget
 
-    isNewUser = not path and not studiolibrary.libraries()
+    libraryWidget = cls.instance(name, path)
 
-    if show and isNewUser:
-        library = studiolibrary.showWelcomeDialog(showOnAccepted=False)
-    elif name:
-        library = studiolibrary.Library.instance(name)
-    else:
-        library = studiolibrary.Library.default()
-
-    if path:
-        library.setPath(path)
-
-    library.setKwargs(kwargs)
+    libraryWidget.setLocked(lock)
+    libraryWidget.setSuperusers(superusers)
+    libraryWidget.setLockRegExp(lockFolder)
+    libraryWidget.setUnlockRegExp(unlockFolder)
 
     if show:
-        library.show()
+        libraryWidget.show()
 
-    return library
+    return libraryWidget
+
+
+if __name__ == "__main__":
+
+    import logging
+    import studioqt
+
+    # Turn on basic logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(levelname)s: %(funcName)s: %(message)s',
+        filemode='w'
+    )
+
+    # Run the Studio Library in a QApplication
+    with studioqt.app():
+        studiolibrary.main()

@@ -124,7 +124,7 @@ class MirrorItem(baseitem.BaseItem):
             time=time,
         )
 
-    def save(self, objects, leftSide, rightSide, path=None, iconPath=None):
+    def save(self, objects, leftSide, rightSide, path=None, iconPath=None, **kwargs):
         """
         Save the given objects to the location of the current mirror table.
 
@@ -148,7 +148,7 @@ class MirrorItem(baseitem.BaseItem):
         )
         t.save(tempPath)
 
-        studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath])
+        studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath], **kwargs)
 
 
 class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -240,8 +240,8 @@ class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
         """
         super(MirrorPreviewWidget, self).__init__(*args, **kwargs)
 
-        self.ui.mirrorAnimationCheckBox.stateChanged.connect(self.updateState)
-        self.ui.mirrorOptionComboBox.currentIndexChanged.connect(self.updateState)
+        self.ui.mirrorAnimationCheckBox.stateChanged.connect(self.saveSettings)
+        self.ui.mirrorOptionComboBox.currentIndexChanged.connect(self.saveSettings)
 
     def setItem(self, item):
         """
@@ -273,29 +273,29 @@ class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
         """
         return self.ui.mirrorAnimationCheckBox.isChecked()
 
-    def state(self):
+    def settings(self):
         """
         Return the state of the preview widget.
 
         :rtype: dict
         """
-        state = super(MirrorPreviewWidget, self).state()
+        settings = super(MirrorPreviewWidget, self).settings()
 
-        state["mirrorOption"] = int(self.mirrorOption())
-        state["mirrorAnimation"] = bool(self.mirrorAnimation())
+        settings["mirrorOption"] = int(self.mirrorOption())
+        settings["mirrorAnimation"] = bool(self.mirrorAnimation())
 
-        return state
+        return settings
 
-    def setState(self, state):
+    def setSettings(self, settings):
         """
         Set the state of the preview widget.
 
-        :type state: dict
+        :type settings: dict
         """
-        super(MirrorPreviewWidget, self).setState(state)
+        super(MirrorPreviewWidget, self).setSettings(settings)
 
-        mirrorOption = int(state.get("mirrorOption"))
-        mirrorAnimation = bool(state.get("mirrorAnimation"))
+        mirrorOption = int(settings.get("mirrorOption"))
+        mirrorAnimation = bool(settings.get("mirrorAnimation"))
 
         self.ui.mirrorOptionComboBox.setCurrentIndex(mirrorOption)
         self.ui.mirrorAnimationCheckBox.setChecked(mirrorAnimation)

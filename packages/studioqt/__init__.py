@@ -30,7 +30,6 @@ from studioqt.decorators import showWaitCursor
 from studioqt.imagesequence import ImageSequence
 from studioqt.imagesequence import ImageSequenceWidget
 
-from studioqt.widgets.hcolorbar import HColorBar
 from studioqt.widgets.messagebox import MessageBox
 from studioqt.widgets.toastwidget import ToastWidget
 from studioqt.widgets.statuswidget import StatusWidget

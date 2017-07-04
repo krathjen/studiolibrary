@@ -79,7 +79,7 @@ class Node(object):
 
     def toShortName(self):
         """
-        :rtype: None
+        :rtype: None or str
         """
         # Try to reduce any long names to short names when using namespaces
         names = maya.cmds.ls(self.shortname())

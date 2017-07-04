@@ -46,7 +46,7 @@ class AnimationTransferError(Exception):
     pass
 
 
-class OutOfBoundsError( AnimationTransferError ):
+class OutOfBoundsError(AnimationTransferError):
     """Exceptions for clips or ranges that are outside the expected range"""
     pass
 
@@ -55,9 +55,9 @@ def saveAnim(
     path,
     objects=None,
     time=None,
-    bakeConnected=False,
     sampleBy=1,
-    metadata=None
+    metadata=None,
+    bakeConnected=False
 ):
     """
     Save the anim data for the given objects.
@@ -66,10 +66,14 @@ def saveAnim(
         anim = "C:/example.anim"
         anim = saveAnim(path, metadata={'description': 'Example anim'})
         print anim.metadata()
-        # {'description': 'Example anim', 'user': 'Hovel', 'mayaVersion': u'2016'}
+        # {'description': 'test', 'user': 'Hovel', 'mayaVersion': u'2016'}
 
     :type path: str
-    :type objects: list[str]
+    :type objects: None or list[str]
+    :type time: None or int
+    :type sampleBy: int
+    :type metadata: dict or None
+    :type bakeConnected: bool
     :rtype: mutils.Animation
     """
     step = 1
@@ -111,37 +115,6 @@ def saveAnim(
     return anim
 
 
-def animCurvesFromMayaAscii(path):
-    """
-    Return all the animCurves from the given Maya ascii file.
-
-    :type path: str
-    :rtype: dict
-    """
-    with open(path, "r") as f:
-        lines = f.readlines()
-
-    curve = None
-    animCurves = {}
-
-    for i, line in enumerate(lines):
-
-        if line.startswith("createNode animCurve"):
-            curve = line.split('"')[1]
-        elif curve and ".fullname" in line:
-
-            try:
-                name, attr = line.split('"')[5].split(".")
-            except IndexError:
-                name, attr = lines[i + 1].split('"')[1].split(".")
-
-            animCurves.setdefault(name, {})
-            animCurves[name][attr] = curve
-            curve = None
-
-    return animCurves
-
-
 def clampRange(srcTime, dstTime):
     """
     Clips the given source time to within the given destination time.
@@ -159,9 +132,11 @@ def clampRange(srcTime, dstTime):
     """
     srcStart, srcEnd = srcTime
     dstStart, dstEnd = dstTime
-    
+
     if srcStart > dstEnd or srcEnd < dstStart:
-        raise OutOfBoundsError("srcTime and dstTime do not overlap. Unable to clip (src=%s, dest=%s)" , srcTime, dstTime)
+        msg = "The src and dst time do not overlap. " \
+              "Unable to clamp (src=%s, dest=%s)"
+        raise OutOfBoundsError(msg, srcTime, dstTime)
 
     if srcStart < dstStart:
         srcStart = dstStart
@@ -219,9 +194,8 @@ def findFirstLastKeyframes(curves, time=None):
         # first and last frame
         try:
             result = clampRange(time, result)
-        
-        except OutOfBoundsError, errMsg:
-            logger.warning( errMsg )
+        except OutOfBoundsError, e:
+            logger.warning(e)
             
     return result
 
@@ -386,9 +360,13 @@ class Animation(mutils.Pose):
         mutils.Pose.__init__(self)
 
         try:
-            self.setMetadata("timeUnit", maya.cmds.currentUnit(q=True, time=True))
-            self.setMetadata("linearUnit", maya.cmds.currentUnit(q=True, linear=True))
-            self.setMetadata("angularUnit", maya.cmds.currentUnit(q=True, angle=True))
+            timeUnit = maya.cmds.currentUnit(q=True, time=True)
+            linearUnit = maya.cmds.currentUnit(q=True, linear=True)
+            angularUnit = maya.cmds.currentUnit(q=True, angle=True)
+
+            self.setMetadata("timeUnit", timeUnit)
+            self.setMetadata("linearUnit", linearUnit)
+            self.setMetadata("angularUnit", angularUnit)
         except NameError, msg:
             logger.exception(msg)
 
@@ -423,18 +401,6 @@ class Animation(mutils.Pose):
         """
         return os.path.join(self.path(), "pose.json")
 
-    def poseDictPath(self):
-        """
-        :rtype: str
-        """
-        return os.path.join(self.path(), "pose.dict")
-
-    def isLegacy(self):
-        """
-        :rtype: bool
-        """
-        return os.path.exists(self.poseDictPath())
-
     def paths(self):
         """
         Return all the paths for Anim object.
@@ -456,6 +422,8 @@ class Animation(mutils.Pose):
 
         :type name: str
         :type attr: str
+        :type withNamespace: bool
+
         :rtype: str
         """
         curve = self.attr(name, attr).get("curve", None)
@@ -481,41 +449,11 @@ class Animation(mutils.Pose):
 
         :rtype: None
         """
-        if os.path.exists(self.poseJsonPath()):
-            path = self.poseJsonPath()
-        else:
-            path = self.poseDictPath()
+        path = self.poseJsonPath()
 
         logger.debug("Reading: " + path)
         mutils.Pose.read(self, path=path)
         logger.debug("Reading Done")
-
-        if self.isLegacy():
-            logger.debug("Reading legacy data: " + path)
-            self._readLegacy(self.mayaPath())
-            logger.debug("Reading legacy Done")
-
-    def _readLegacy(self, mayaPath):
-        """
-        We only need to read the maya ascii file if it's legacy data.
-
-        :type mayaPath: str
-        """
-        srcObjects = animCurvesFromMayaAscii(mayaPath)
-
-        matches = mutils.matchNames(
-            srcObjects=srcObjects.keys(),
-            dstObjects=self.objects().keys(),
-        )
-
-        for srcNode, dstNode in matches:
-            for attr in srcObjects[srcNode.name()]:
-
-                srcName = srcNode.name()
-                dstName = dstNode.name()
-                curve = srcObjects[srcName][attr]
-
-                self.setAnimCurve(name=dstName, attr=attr, curve=curve)
 
     @mutils.unifyUndo
     @mutils.restoreSelection
@@ -550,7 +488,9 @@ class Animation(mutils.Pose):
         # It is important that we remove the imported namespace,
         # otherwise another namespace will be created on next
         # animation open.
-        if Animation.IMPORT_NAMESPACE in maya.cmds.namespaceInfo(ls=True) or []:
+        namespaces = maya.cmds.namespaceInfo(ls=True) or []
+
+        if Animation.IMPORT_NAMESPACE in namespaces:
             maya.cmds.namespace(set=':')
             maya.cmds.namespace(rm=Animation.IMPORT_NAMESPACE)
 
@@ -576,14 +516,26 @@ class Animation(mutils.Pose):
     @mutils.unifyUndo
     @mutils.showWaitCursor
     @mutils.restoreSelection
-    def save(self, path, time=None, bakeConnected=True, sampleBy=1, fileType=None):
+    def save(
+        self,
+        path,
+        time=None,
+        sampleBy=1,
+        fileType=None,
+        description=None,
+        bakeConnected=True
+    ):
         """
         Save all animation data from the objects set on the Anim object.
 
         :type path: str
-        :type time: (int, int) or NOne
-        :type bakeConnected: bool
+        :type time: (int, int) or None
         :type sampleBy: int
+        :type fileType: str or None
+        :type description: str
+        :type bakeConnected: bool
+        
+        :rtype: None
         """
         objects = self.objects().keys()
 
@@ -674,7 +626,7 @@ class Animation(mutils.Pose):
 
             mayaPath = os.path.join(path, fileName)
             posePath = os.path.join(path, "pose.json")
-            mutils.Pose.save(self, posePath)
+            mutils.Pose.save(self, posePath, description=description)
 
             if validAnimCurves:
                 maya.cmds.select(validAnimCurves)
@@ -694,16 +646,17 @@ class Animation(mutils.Pose):
 
     @mutils.timing
     @mutils.showWaitCursor
-    def load(self,
-        objects=None,
-        namespaces=None,
-        attrs=None,
-        startFrame=None,
-        sourceTime=None,
-        option=None,
-        connect=False,
-        mirrorTable=None,
-        currentTime=None,
+    def load(
+            self,
+            objects=None,
+            namespaces=None,
+            attrs=None,
+            startFrame=None,
+            sourceTime=None,
+            option=None,
+            connect=False,
+            mirrorTable=None,
+            currentTime=None
     ):
         """
         Load the animation data to the given objects or namespaces.
@@ -714,7 +667,9 @@ class Animation(mutils.Pose):
         :type sourceTime: (int, int)
         :type attrs: list[str]
         :type option: PasteOption
-        :type currentTime: bool
+        :type connect: bool
+        :type mirrorTable: mutils.MirrorTable
+        :type currentTime: bool or None
         """
         connect = bool(connect)  # Make false if connect is None
 

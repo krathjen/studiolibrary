@@ -205,7 +205,8 @@ class Pose(mutils.SelectionSet):
         logger.debug("Close Load '%s'" % self.path())
 
     @mutils.timing
-    def load(self,
+    def load(
+        self,
         objects=None,
         namespaces=None,
         attrs=None,
@@ -345,6 +346,7 @@ class Pose(mutils.SelectionSet):
     def updateMirrorAxis(self, srcNode, dstNode, mirrorAxis):
         """
         :type srcNode: mutils.Node
+        :type dstNode: mutils.Node
         :type mirrorAxis: list[int]
         """
         self.setMirrorAxis(dstNode, mirrorAxis)

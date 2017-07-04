@@ -109,17 +109,18 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         self.setModel(treeWidget.model())
         self.setSelectionModel(treeWidget.selectionModel())
 
-    def scrollToItem(self, item, position=None):
+    def scrollToItem(self, item, pos=None):
         """
         Ensures that the item is visible.
 
         :type item: QtWidgets.QTreeWidgetItem
+        :type pos: QtCore.QPoint or None
         :rtype: None
         """
         index = self.indexFromItem(item)
-        position = position or QtWidgets.QAbstractItemView.PositionAtCenter
+        pos = pos or QtWidgets.QAbstractItemView.PositionAtCenter
 
-        self.scrollTo(index, position)
+        self.scrollTo(index, pos)
 
     def items(self):
         """
@@ -591,6 +592,8 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Show the drag pixmap for the given item.
 
         :type item: combinedwidgetitem.CombinedWidgetItem
+        :type items: list[combinedwidgetitem.CombinedWidgetItem]
+        
         :rtype: QtGui.QPixmap
         """
         rect = self.visualRect(self.indexFromItem(item))

@@ -1,11 +1,5 @@
-"""
-Run this file or the following code to show this example.
+# An example for creating a simple image library
 
-import studiolibrary
-from studiolibraryexamples import example1
-reload(example1)
-example1.main()
-"""
 import os
 
 import studiolibrary
@@ -14,10 +8,6 @@ import studiolibrary
 from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
-
-
-# At the moment all paths need to have forward slashes
-dirname = os.path.dirname(__file__).replace("\\", "/")
 
 
 class ImageItem(studiolibrary.LibraryItem):
@@ -104,13 +94,16 @@ def main():
     studiolibrary.registerItem(ImageItem, ".gif")
 
     # Show the library with the given name and path
-    studiolibrary.main(name="Example", path=dirname + "/data")
+    dirname = os.path.dirname(__file__)
+    path = os.path.join(dirname, "data")
+
+    studiolibrary.main(name="Image Library", path=path)
 
 
 if __name__ == "__main__":
 
     import studioqt
 
-    # The app context is used to check if a QApplication instance is running.
+    # Use the studioqt.app context to run a QApplication instance.
     with studioqt.app():
         main()

@@ -16,6 +16,7 @@ from studioqt import QtWidgets
 
 import studioqt
 
+
 class Pixmap(QtGui.QPixmap):
 
     def __init__(self, *args):

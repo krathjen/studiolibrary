@@ -290,7 +290,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         """
         Triggered when the image sequence changes frame.
 
-        :type filename: str or None
+        :type frame: int or None
         :rtype: None
         """
         if not self.isControlModifier():

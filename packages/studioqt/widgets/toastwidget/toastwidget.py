@@ -29,7 +29,6 @@ class ToastWidget(QtWidgets.QLabel):
     FOREGROUND_COLOR = QtGui.QColor(255, 255, 255)
     BACKGROUND_COLOR = QtGui.QColor(0, 0, 0)
 
-
     def __init__(self, *args):
         QtWidgets.QLabel.__init__(self, *args)
 

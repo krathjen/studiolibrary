@@ -134,6 +134,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
         :type items: list[studioqt.CombinedWidget]
         :type value: bool
+        :type scrollTo: bool
 
         :rtype: None
         """
@@ -742,6 +743,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         :type column: int
         :type sortOrder: int
         :type groupColumn: bool
+        :type groupOrder: bool
 
         :rtype: None
         """
@@ -836,13 +838,9 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
     def groupColumn(self):
         """
-        return the current group by column.
+        Return the current group column.
 
-        :type column: int
-        :type sortOrder: int
-        :type groupColumn: bool
-
-        :rtype: None
+        :rtype: int
         """
         return self._groupColumn
 
@@ -894,19 +892,12 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         for groupItem in self._groupItems:
             groupItem.updateChildren()
 
-    def groupColumn(self):
-        """
-        Return the current group column.
-
-        :rtype: int
-        """
-        return self._groupColumn
-
     def itemsGroupByColumn(self, groupColumn, groupOrder, items=None):
         """
         Return a list of items grouped by the given column.
 
-        :type column: int
+        :type groupColumn: int
+        :type groupOrder int
         :type items: None or list[studioqt.CombinedWidgetItem]
         :rtype: dict
         """
@@ -947,7 +938,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Group the items on the data in the given column.
 
-        :type column: int
+        :type groupColumn: int
+        :type groupOrder: int
         :rtype: None
         """
         sortOrder = self.sortOrder()
@@ -961,7 +953,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
         Note: The complexity of this method needs to be simplified!
 
-        :type column: int
+        :type groupColumn: int
+        :type groupOrder: int
         :rtype: None
         """
         if isinstance(groupColumn, basestring):

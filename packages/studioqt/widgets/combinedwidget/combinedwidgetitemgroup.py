@@ -97,10 +97,9 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         :type option: QtWidgets.QStyleOptionViewItem
         :rtype: QtCore.QRect
         """
-        width = self.combinedWidget().width() - 20
-
         rect = QtCore.QRect(option.rect)
-        rect.setWidth(width)
+        rect.setX(10 * self.dpi())
+        rect.setWidth(self.sizeHint().width())
         return rect
 
     def isTextVisible(self):
@@ -142,18 +141,6 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         :rtype: QtWidgets.QtColor
         """
         return QtGui.QColor(0, 0, 0, 0)
-
-    def visualRect(self, option):
-        """
-        Return the visual rect for the item.
-
-        :type option: QtWidgets.QStyleOptionViewItem
-        :rtype: QtCore.QRect
-        """
-        rect = QtCore.QRect(option.rect)
-        rect.setX(10 * self.dpi())
-        rect.setWidth(self.sizeHint().width())
-        return rect
 
     def paintRow(self, painter, option, index):
         """

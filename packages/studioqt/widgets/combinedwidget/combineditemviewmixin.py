@@ -211,6 +211,7 @@ class CombinedItemViewMixin(object):
         """
         Triggered on user key press events for the current viewport.
 
+        :type item: CombinedWidgetItem
         :type event: QtCore.QKeyEvent
         :rtype: None
         """

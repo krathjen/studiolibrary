@@ -73,7 +73,7 @@ def showMessageBox(
         headerColor=None,
         enableDontShowCheckBox=False,
         force=False
-    ):
+):
     """
     Open a question message box with the given options.
 

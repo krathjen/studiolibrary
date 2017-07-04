@@ -32,12 +32,12 @@ class TestAnim(test_base.TestBase):
         anim = mutils.Animation.fromObjects(self.srcObjects)
         anim.save(self.dstPath, bakeConnected=bakeConnected)
 
-    def test_older_version(self):
-        """
-        Test animation parser for an older animation format
-        """
-        srcPath = self.dataPath("test_older_version.anim")
-        a = mutils.Animation.fromPath(srcPath)
+    # def test_older_version(self):
+    #     """
+    #     Test animation parser for an older animation format
+    #     """
+    #     srcPath = self.dataPath("test_older_version.anim")
+    #     a = mutils.Animation.fromPath(srcPath)
 
     def test_load_replace_completely(self):
         """
