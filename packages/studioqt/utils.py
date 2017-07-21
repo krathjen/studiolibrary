@@ -11,6 +11,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import ctypes
 import os
 import sys
 import json
@@ -132,28 +133,36 @@ def isLinux():
 def showInFolder(path):
     """
     Show the given path in the system file explorer.
-    
-    :type path: str
+
+    :type path: unicode
     :rtype: None
     """
+    cmd = os.system
+
     if studioqt.SHOW_IN_FOLDER_CMD:
-        cmd = studioqt.SHOW_IN_FOLDER_CMD
+        args = [unicode(studioqt.SHOW_IN_FOLDER_CMD)]
 
     elif isLinux():
-        cmd = 'konqueror "{path}"&'
+        args = [u'konqueror "{path}"&']
 
     elif isWindows():
-        cmd = 'start explorer /select, "{path}"'
+        # os.system() nither subprocess.call() can't pass command with non ascii symbols,
+        # use ShellExecuteW directly
+        args = [None, u'open', u'explorer.exe', u'/n,/select, "{path}"', None, 1]
+        cmd = ctypes.windll.shell32.ShellExecuteW
 
     elif isMac():
-        cmd = 'open -R "{path}"'
+        args = [u'open -R "{path}"']
 
     # Normalize the pathname for windows
     path = os.path.normpath(path)
-    cmd = cmd.format(path=path)
 
-    logger.info(cmd)
-    os.system(cmd)
+    for i, a in enumerate(args):
+        if isinstance(a, basestring) and '{path}' in a:
+            args[i] = a.format(path=path)
+
+    logger.info("Call: '%s' with arguments: %s", cmd.__name__, args)
+    cmd(*args)
 
 
 def saveJson(path, data):
