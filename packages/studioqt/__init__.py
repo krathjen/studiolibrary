@@ -35,7 +35,6 @@ from studioqt.widgets.messagebox import MessageBox
 from studioqt.widgets.toastwidget import ToastWidget
 from studioqt.widgets.statuswidget import StatusWidget
 from studioqt.widgets.menubarwidget import MenuBarWidget
-from studioqt.widgets.treewidget.treewidget import TreeWidget
 
 from studioqt.widgets.searchwidget import SearchWidget
 from studioqt.widgets.searchwidget import SearchFilter
