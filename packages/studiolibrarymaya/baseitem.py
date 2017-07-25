@@ -53,7 +53,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :type libraryWidget: studiolibrary.LibraryWidget
         """
-        widget = cls.CreateWidgetClass()
+        widget = cls.CreateWidgetClass(parent=libraryWidget)
 
         path = libraryWidget.selectedFolderPath()
 

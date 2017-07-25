@@ -103,6 +103,39 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self.ui.optionsToggleBoxButton.toggled[bool].connect(self.ui.optionsToggleBoxFrame.setVisible)
         self.ui.namespaceToggleBoxButton.toggled[bool].connect(self.ui.namespaceToggleBoxFrame.setVisible)
 
+    def isEditable(self):
+        """
+        Return True if the user can edit the item.
+
+        :rtype: bool 
+        """
+        item = self.item()
+        editable = True
+
+        if item and item.libraryWidget():
+            editable = not item.libraryWidget().isLocked()
+
+        return editable
+
+    def setCaptureMenuEnabled(self, enable):
+        """
+        Enable the capture menu for editing the thumbnail.
+
+        :rtype: None 
+        """
+        if enable:
+            parent = self.item().libraryWidget()
+
+            iconPath = self.iconPath()
+            if iconPath == "":
+                iconPath = self.item().thumbnailPath()
+
+            menu = mutils.gui.ThumbnailCaptureMenu(iconPath, parent=parent)
+            menu.captured.connect(self.setIconPath)
+            self.ui.thumbnailButton.setMenu(menu)
+        else:
+            self.ui.thumbnailButton.setMenu(QtWidgets.QMenu(self))
+
     def item(self):
         """
         Return the library item to be created.
