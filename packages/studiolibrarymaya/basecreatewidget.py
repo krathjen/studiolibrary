@@ -65,6 +65,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self.ui.browseFolderButton.clicked.connect(self.browseFolder)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
+        self.setCaptureMenuEnabled(True)
+
         try:
             self.selectionChanged()
             self.setScriptJobEnabled(True)
@@ -330,6 +332,30 @@ class BaseCreateWidget(QtWidgets.QWidget):
         path = mutils.gui.tempThumbnailPath()
         mutils.gui.thumbnailCapture(path=path, captured=self._thumbnailCaptured)
 
+    def setCaptureMenuEnabled(self, enable):
+        """
+        Enable the capture menu for creating the thumbnail.
+
+        :type enable: bool
+        :rtype: None 
+        """
+        logger.info("Setting capture menu to %s", enable)
+
+        if enable:
+            parent = self.parent()
+            iconPath = mutils.gui.tempThumbnailPath()
+
+            menu = mutils.gui.ThumbnailCaptureMenu(
+                iconPath,
+                force=True,
+                parent=parent
+            )
+            menu.captured.connect(self._thumbnailCaptured)
+
+            self.ui.thumbnailButton.setMenu(menu)
+        else:
+            self.ui.thumbnailButton.setMenu(QtWidgets.QMenu(self))
+
     def showThumbnailCaptureDialog(self):
         """
         Ask the user if they would like to capture a thumbnail.
@@ -337,7 +363,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         :rtype: int
         """
         title = "Create a thumbnail"
-        text = "Would you like to capture a thumbanil?"
+        text = "Would you like to capture a thumbnail?"
 
         buttons = QtWidgets.QMessageBox.Yes | \
                   QtWidgets.QMessageBox.Ignore | \
