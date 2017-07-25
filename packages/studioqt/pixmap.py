@@ -11,10 +11,10 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from studioqt import QtGui
-from studioqt import QtWidgets
+from . import QtGui
 
-import studioqt
+from . import Color
+
 
 
 class Pixmap(QtGui.QPixmap):
@@ -30,7 +30,7 @@ class Pixmap(QtGui.QPixmap):
         :rtype: None
         """
         if isinstance(color, basestring):
-            color = studioqt.Color.fromString(color)
+            color = Color.fromString(color)
 
         if not self.isNull():
             painter = QtGui.QPainter(self)

@@ -13,14 +13,14 @@
 import os
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
+from ... import utils
+from ... import Theme
 
-import studioqt
-
-import folderitem
+from .folderitem import FolderItem
 
 
 __all__ = ["FoldersWidget"]
@@ -188,7 +188,7 @@ class FoldersWidget(QtWidgets.QTreeView):
         """
         folders = self._folders
         if path not in folders:
-            folders[path] = folderitem.FolderItem(path, self)
+            folders[path] = FolderItem(path, self)
         return folders[path]
 
     def indexFromFolder(self, folder):
@@ -227,11 +227,11 @@ class FoldersWidget(QtWidgets.QTreeView):
 
     def saveSettings(self, path):
         data = self.settings()
-        studioqt.saveJson(path, data)
+        utils.saveJson(path, data)
 
     def loadSettings(self, path):
         if os.path.exists(path):
-            data = studioqt.readJson(path)
+            data = utils.readJson(path)
             self.setSettings(data)
 
     def folderSettings(self):
@@ -352,7 +352,7 @@ class FoldersWidget(QtWidgets.QTreeView):
         """
         Return the expanded folder paths.
 
-        :rtype: list[studioqt.FolderItem]
+        :rtype: list[FolderItem]
         """
         folders = []
 
@@ -535,7 +535,7 @@ class FoldersWidget(QtWidgets.QTreeView):
 
     def mouseMoveEvent(self, event):
 
-        if studioqt.isControlModifier():
+        if utils.isControlModifier():
             return
 
         folder = self.folderAt(event.pos())
@@ -563,7 +563,7 @@ class FoldersWidget(QtWidgets.QTreeView):
         if not folder:
             self.clearSelection()
 
-        elif event.button() == QtCore.Qt.LeftButton and studioqt.isControlModifier():
+        elif event.button() == QtCore.Qt.LeftButton and utils.isControlModifier():
 
             if folder and isSelected:
                 self.clearSelection()
@@ -883,7 +883,7 @@ def example():
 
     ignoreFilter = ['.', '.studiolibrary', '.pose', '.anim', '.set']
 
-    with studioqt.app():
+    with utils.app():
 
         def itemSelectionChanged():
             print w.selectedFolders()
@@ -895,7 +895,7 @@ def example():
         w.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         w.customContextMenuRequested.connect(w.showContextMenu)
 
-        theme = studioqt.Theme()
+        theme = Theme()
         w.setStyleSheet(theme.styleSheet())
 
         w.setRootPath(path)

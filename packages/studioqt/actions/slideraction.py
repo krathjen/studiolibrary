@@ -11,8 +11,8 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from studioqt import QtCore
-from studioqt import QtWidgets
+from .. import QtCore
+from .. import QtWidgets
 
 
 __all__ = ["SliderAction"]

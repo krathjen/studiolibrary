@@ -13,10 +13,8 @@
 
 import logging
 
-from studioqt import QtWidgets
-from studioqt import QtCore
-
-import studioqt
+from ... import QtCore
+from ... import QtWidgets
 
 
 logger = logging.getLogger(__name__)
@@ -54,7 +52,7 @@ class CombinedItemViewMixin(object):
         """
         Return True if a control modifier is currently active.
 
-        :rtype: studioqt.CombinedWidget
+        :rtype: CombinedWidget
         """
         return self.parent()
 

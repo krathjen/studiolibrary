@@ -13,8 +13,8 @@
 
 import os
 
-from studioqt import QtGui
-from studioqt import Pixmap
+from . import QtGui
+from . import Pixmap
 
 
 PATH = os.path.abspath(__file__)

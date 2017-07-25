@@ -11,10 +11,10 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from studioqt import QtWidgets
-from studioqt import QtCore
+from ... import QtCore
+from ... import QtWidgets
 
-import studioqt
+from ... import resource
 
 
 class StatusWidget(QtWidgets.QFrame):
@@ -55,7 +55,7 @@ class StatusWidget(QtWidgets.QFrame):
         )
 
     def setError(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource.icon("error")
+        icon = resource.icon("error")
         self._button.setIcon(icon)
         self._button.show()
 
@@ -63,7 +63,7 @@ class StatusWidget(QtWidgets.QFrame):
         self.setText(text, msec)
 
     def setWarning(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource.icon("warning")
+        icon = resource.icon("warning")
 
         self._button.setIcon(icon)
         self._button.show()
@@ -72,7 +72,7 @@ class StatusWidget(QtWidgets.QFrame):
         self.setText(text, msec)
 
     def setInfo(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource.icon("info")
+        icon = resource.icon("info")
 
         self._button.setIcon(icon)
         self._button.show()
@@ -95,5 +95,5 @@ class StatusWidget(QtWidgets.QFrame):
         self._button.hide()
         self._label.setText("")
         self._label.setStyleSheet("")
-        icon = studioqt.resource.icon("blank")
+        icon = resource.icon("blank")
         self._button.setIcon(icon)

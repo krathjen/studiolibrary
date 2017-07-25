@@ -11,19 +11,20 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import studioqt
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
+
+from .combinedwidgetitem import CombinedWidgetItem
 
 
-class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
+class CombinedWidgetItemGroup(CombinedWidgetItem):
 
     DEFAULT_FONT_SIZE = 24
 
     def __init__(self, *args):
-        studioqt.CombinedWidgetItem.__init__(self, *args)
+        CombinedWidgetItem.__init__(self, *args)
 
         self._children = []
 
@@ -180,7 +181,7 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         :type index: QtCore.QModelIndex
         :rtype: None
         """
-        studioqt.CombinedWidgetItem.paintBackground(self, painter, option, index)
+        CombinedWidgetItem.paintBackground(self, painter, option, index)
 
         painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
         visualRect = self.visualRect(option)
