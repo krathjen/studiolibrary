@@ -28,7 +28,7 @@ class MessageBox(QtWidgets.QDialog):
         mb.setOptions(options)
         mb.header().setStyleSheet("background-color: rgb(50,150,200);")
 
-        p = studioqt.pixmap("question")
+        p = studioqt.resource.pixmap("question")
         mb.setPixmap(p)
 
         mb.setWindowTitle(title)
@@ -47,7 +47,7 @@ class MessageBox(QtWidgets.QDialog):
         mb.setOptions(QtWidgets.QDialogButtonBox.Ok)
         mb.header().setStyleSheet("background-color: rgb(200,50,50);")
 
-        p = studioqt.pixmap("critical")
+        p = studioqt.resource.pixmap("critical")
         mb.setPixmap(p)
 
         mb.setWindowTitle(title)

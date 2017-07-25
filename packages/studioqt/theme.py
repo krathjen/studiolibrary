@@ -91,7 +91,7 @@ class ThemeAction(QtWidgets.QAction):
         self._theme = theme
 
         color = theme.accentColor()
-        icon = studioqt.icon("radio_button_checked_white", color=color)
+        icon = studioqt.resource.icon("radio_button_checked_white", color=color)
         self.setIcon(icon)
 
     def theme(self):
@@ -129,13 +129,13 @@ class ThemesMenu(QtWidgets.QMenu):
         self.addSeparator()
 
         action = QtWidgets.QAction("Dark", self)
-        icon = studioqt.icon(self.DEFAULT_MENU_ICON, color="rgb(60,60,80)")
+        icon = studioqt.resource.icon(self.DEFAULT_MENU_ICON, color="rgb(60,60,80)")
         action.setIcon(icon)
 
         self.addAction(action)
 
         action = QtWidgets.QAction("Light", self)
-        icon = studioqt.icon(self.DEFAULT_MENU_ICON, color="rgb(245,245,255)")
+        icon = studioqt.resource.icon(self.DEFAULT_MENU_ICON, color="rgb(245,245,255)")
         action.setIcon(icon)
 
         self.addAction(action)
@@ -485,7 +485,7 @@ class Theme(object):
         :rtype: str
         """
         options = self.options()
-        path = studioqt.resource().get("css", "default.css")
+        path = studioqt.resource.get("css", "default.css")
         styleSheet = studioqt.StyleSheet.fromPath(path, options=options, dpi=self.dpi())
         return styleSheet.data()
 
