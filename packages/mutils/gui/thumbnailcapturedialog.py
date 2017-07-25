@@ -71,7 +71,15 @@ def tempPlayblastPath(clean=False):
 _instance = None
 
 
-def thumbnailCapture(path, startFrame=None, endFrame=None, step=1, clearCache=False, captured=None):
+def thumbnailCapture(
+        path,
+        startFrame=None,
+        endFrame=None,
+        step=1,
+        clearCache=False,
+        captured=None,
+        show=False
+):
     """
     Capture a playblast and save it to the given path.
 
@@ -109,7 +117,7 @@ def thumbnailCapture(path, startFrame=None, endFrame=None, step=1, clearCache=Fa
 
     d.show()
 
-    if not studioqt.isControlModifier():
+    if not show and not studioqt.isControlModifier():
         d.capture()
         d.close()
 

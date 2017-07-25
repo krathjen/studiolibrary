@@ -36,6 +36,7 @@ from .framerangemenu import FrameRangeMenu
 from .framerangemenu import showFrameRangeMenu
 from .modelpanelwidget import ModelPanelWidget
 from .thumbnailcapturedialog import *
+from .thumbnailcapturemenu import ThumbnailCaptureMenu
 
 
 def mayaWindow():
