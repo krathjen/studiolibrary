@@ -39,12 +39,12 @@ class SearchWidget(QtWidgets.QLineEdit):
         self._iconButton.clicked.connect(self._iconClicked)
         self._searchFilter = studioqt.SearchFilter("")
 
-        icon = studioqt.icon("search")
+        icon = studioqt.resource.icon("search")
         self.setIcon(icon)
 
         self._clearButton = QtWidgets.QPushButton(self)
         self._clearButton.setCursor(QtCore.Qt.ArrowCursor)
-        icon = studioqt.icon("cross")
+        icon = studioqt.resource.icon("cross")
         self._clearButton.setIcon(icon)
         self._clearButton.setToolTip("Clear all search text")
         self._clearButton.clicked.connect(self._clearClicked)

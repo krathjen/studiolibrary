@@ -78,7 +78,7 @@ def resource():
     global _resource
 
     if not _resource:
-        _resource = studioqt.Resource(dirname=RESOURCE_DIRNAME)
+        _resource = studioqt.Resource(RESOURCE_DIRNAME)
 
     return _resource
 

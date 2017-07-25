@@ -132,33 +132,33 @@ class LibraryWidget(QtWidgets.QWidget):
         # --------------------------------------------------------------------
 
         name = "New Item"
-        icon = studioqt.icon("add")
+        icon = studioqt.resource.icon("add")
         tip = "Add a new item to the selected folder"
         self.addMenuBarAction(name, icon, tip, callback=self.showNewMenu, side="Left")
 
         name = "Item View"
-        icon = studioqt.icon("view_settings")
+        icon = studioqt.resource.icon("view_settings")
         tip = "Change the style of the item view"
         self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
 
         name = "Group By"
-        icon = studioqt.icon("groupby")
+        icon = studioqt.resource.icon("groupby")
         tip = "Group the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showGroupByMenu)
 
         name = "Sort By"
-        icon = studioqt.icon("sortby")
+        icon = studioqt.resource.icon("sortby")
         tip = "Sort the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showSortByMenu)
 
         name = "View"
-        icon = studioqt.icon("view")
+        icon = studioqt.resource.icon("view")
         tip = "Choose to show/hide both the preview and navigation pane. " \
               "Click + CTRL will hide the menu bar as well."
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
 
         name = "Settings"
-        icon = studioqt.icon("settings")
+        icon = studioqt.resource.icon("settings")
         tip = "Settings menu"
         self.addMenuBarAction(name, icon, tip, callback=self.showSettingsMenu)
 
@@ -1850,11 +1850,11 @@ class LibraryWidget(QtWidgets.QWidget):
         action = self.menuBarWidget().findAction("New Item")
 
         if self.isLocked():
-            pixmap = studioqt.pixmap("lock")
+            pixmap = studioqt.resource.pixmap("lock")
             action.setEnabled(False)
             action.setIcon(pixmap)
         else:
-            pixmap = studioqt.pixmap("add")
+            pixmap = studioqt.resource.pixmap("add")
             action.setEnabled(True)
             action.setIcon(pixmap)
 
@@ -1942,9 +1942,9 @@ class LibraryWidget(QtWidgets.QWidget):
         action = self.menuBarWidget().findAction("View")
 
         if not compact:
-            icon = studioqt.icon("view_all")
+            icon = studioqt.resource.icon("view_all")
         else:
-            icon = studioqt.icon("view_compact")
+            icon = studioqt.resource.icon("view_compact")
 
         action.setIcon(icon)
 

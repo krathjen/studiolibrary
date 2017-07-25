@@ -253,7 +253,7 @@ def showExample():
 
         widget = studioqt.MenuBarWidget()
 
-        icon = studioqt.icon("add")
+        icon = studioqt.resource.icon("add")
         action = widget.addLeftAction("New Item")
         action.setIcon(icon)
         action.triggered.connect(triggered)
@@ -262,7 +262,7 @@ def showExample():
         widget.layout().insertWidget(1, lineedit)
         widget.setExpandedHeight(50)
 
-        icon = studioqt.icon("settings")
+        icon = studioqt.resource.icon("settings")
         action = widget.addRightAction("Settings")
         action.setIcon(icon)
         action.triggered.connect(triggered2)

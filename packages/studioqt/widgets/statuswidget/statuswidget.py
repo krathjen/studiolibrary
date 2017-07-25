@@ -55,7 +55,7 @@ class StatusWidget(QtWidgets.QFrame):
         )
 
     def setError(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource().icon("error")
+        icon = studioqt.resource.icon("error")
         self._button.setIcon(icon)
         self._button.show()
 
@@ -63,7 +63,7 @@ class StatusWidget(QtWidgets.QFrame):
         self.setText(text, msec)
 
     def setWarning(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource().icon("warning")
+        icon = studioqt.resource.icon("warning")
 
         self._button.setIcon(icon)
         self._button.show()
@@ -72,7 +72,7 @@ class StatusWidget(QtWidgets.QFrame):
         self.setText(text, msec)
 
     def setInfo(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource().icon("info")
+        icon = studioqt.resource.icon("info")
 
         self._button.setIcon(icon)
         self._button.show()
@@ -95,5 +95,5 @@ class StatusWidget(QtWidgets.QFrame):
         self._button.hide()
         self._label.setText("")
         self._label.setStyleSheet("")
-        icon = studioqt.resource().icon("blank")
+        icon = studioqt.resource.icon("blank")
         self._button.setIcon(icon)

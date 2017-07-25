@@ -169,11 +169,11 @@ class FolderItem(object):
 
         if not iconPath:
             if "Trash" in self.name():
-                iconPath = studioqt.resource().get("icons", "delete")
+                iconPath = studioqt.resource.get("icons", "delete")
             elif expanded:
-                iconPath = studioqt.resource().get("icons", "folder_open")
+                iconPath = studioqt.resource.get("icons", "folder_open")
             else:
-                iconPath = studioqt.resource().get("icons", "folder")
+                iconPath = studioqt.resource.get("icons", "folder")
 
         return iconPath
 
@@ -188,7 +188,7 @@ class FolderItem(object):
         :rtype: QtGui.QPixmap
         """
         if not self.isIconVisible():
-            return studioqt.resource().pixmap("")
+            return studioqt.resource.pixmap("")
 
         color = self.color()
         iconPath = self.iconPath()

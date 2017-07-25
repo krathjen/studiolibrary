@@ -152,7 +152,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         :rtype: str
         """
-        return studioqt.resource().get("icons", "thumbnail.png")
+        return studioqt.resource.get("icons", "thumbnail.png")
 
     def showPreviewWidget(self, libraryWidget):
         """

@@ -21,7 +21,7 @@ from studioqt.menu import Menu
 from studioqt.theme import Theme, ThemesMenu
 from studioqt.color import Color
 from studioqt.pixmap import Pixmap
-from studioqt.resource import Resource
+from studioqt.resource import Resource, RESOURCE_DIRNAME
 from studioqt.stylesheet import StyleSheet
 from studioqt.contextmenu import ContextMenu
 
@@ -49,45 +49,5 @@ from studioqt.widgets.folderswidget import FoldersWidget
 from studioqt.actions.slideraction import SliderAction
 from studioqt.actions.separatoraction import SeparatorAction
 
-PATH = os.path.abspath(__file__)
-DIRNAME = os.path.dirname(PATH).replace('\\', '/')
-PACKAGES_DIRNAME = DIRNAME + "/packages"
-RESOURCE_DIRNAME = DIRNAME + "/resource"
-
 # Studio Qt Config Vars
 SHOW_IN_FOLDER_CMD = None
-
-
-global _resource
-
-_resource = None
-
-
-def resource():
-    """
-    :rtype: studioqt.Resource
-    """
-    global _resource
-
-    if not _resource:
-        _resource = Resource(dirname=RESOURCE_DIRNAME)
-
-    return _resource
-
-
-def icon(*args, **kwargs):
-    """
-    :type name: str
-    :type extension: str
-    :rtype: QtWidgets.QIcon
-    """
-    return resource().icon(*args, **kwargs)
-
-
-def pixmap(*args, **kwargs):
-    """
-    :type name: str
-    :type extension: str
-    :rtype: QtWidgets.QPixmap
-    """
-    return resource().pixmap(*args, **kwargs)
