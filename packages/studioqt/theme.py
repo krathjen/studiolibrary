@@ -447,9 +447,11 @@ class Theme(object):
         else:
             darkness = "black"
 
+        resourceDirname = studioqt.RESOURCE_DIRNAME.replace("\\", "/")
+
         options = {
             "DARKNESS": darkness,
-            "RESOURCE_DIRNAME": studioqt.RESOURCE_DIRNAME,
+            "RESOURCE_DIRNAME": resourceDirname,
 
             "ACCENT_COLOR": accentColor.toString(),
             "ACCENT_COLOR_R": str(accentColor.red()),
