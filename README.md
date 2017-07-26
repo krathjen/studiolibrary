@@ -48,4 +48,4 @@ studiolibrary.main()
 
 Please send an email with the error message and a detailed step by step process of how you got the error.
 
-Comments, suggestions and bug reports are welcome. [Contact](www.studiolibrary.com/contact)
+Comments, suggestions and bug reports are welcome. [Contact](http://www.studiolibrary.com/contact)
