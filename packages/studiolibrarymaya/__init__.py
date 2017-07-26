@@ -122,6 +122,11 @@ def registerItems():
     from studiolibrarymaya import mirroritem
     from studiolibrarymaya import setsitem
 
+    # Register the MayaLibraryWidget to be used when main is called
+    if mutils.isMaya():
+        from studiolibrarymaya import mayalibrarywidget
+        studiolibrary.LIBRARY_WIDGET_CLASS = mayalibrarywidget.MayaLibraryWidget
+
     # Enable the Maya closed event
     enableMayaClosedEvent()
 

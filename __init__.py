@@ -27,7 +27,6 @@ RESOURCE_PATH = os.path.join(DIRNAME, "resource")
 HELP_URL = "http://www.studiolibrary.com"
 
 
-LIBRARY_WIDGET_CLASS = None
 
 
 def setup(path):
@@ -54,6 +53,8 @@ from studiolibrary.libraryitem import LibraryItem
 from studiolibrary.librarywidget import LibraryWidget
 
 from studiolibrary.main import main
+
+LIBRARY_WIDGET_CLASS = None
 
 
 def resource():
