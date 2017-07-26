@@ -55,7 +55,6 @@ def settings():
     settings.setdefault('byFrame', 1)
     settings.setdefault('fileType', DEFAULT_FILE_TYPE)
     settings.setdefault('currentTime', False)
-    settings.setdefault('byFrameDialog', True)
     settings.setdefault('connectOption', False)
     settings.setdefault('showHelpImage', False)
     settings.setdefault('pasteOption', "replace")

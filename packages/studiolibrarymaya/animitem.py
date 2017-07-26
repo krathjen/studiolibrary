@@ -487,19 +487,22 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         :rtype: None
         """
         msg = """To help speed up the playblast you can set the "by frame" to a number greater than 1. \
-For example if the "by frame" is set to 2 it will playblast every second frame.
+For example if the "by frame" is set to 2 it will playblast every second frame."""
 
-Would you like to show this message again?"""
+        if self.duration() > 100 and self.byFrame() == 1:
 
-        if self.settings().get("byFrameDialog") and self.duration() > 100 and self.byFrame() == 1:
+            buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel
 
-            buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-            result = studioqt.MessageBox.question(self, "Tip", msg, buttons)
+            result = studioqt.MessageBox.question(
+                self,
+                title="Anim Item Tip",
+                message=msg,
+                buttons=buttons,
+                enableDontShowCheckBox=True,
+            )
 
-            if result == QtWidgets.QMessageBox.Cancel:
-                raise Exception("Cancelled!")
-            elif result == QtWidgets.QMessageBox.No:
-                self.settings().set("byFrameDialog", False)
+            if result != QtWidgets.QMessageBox.Ok:
+                raise Exception("Canceled!")
 
     def _thumbnailCaptured(self, playblastPath):
         """
