@@ -334,6 +334,24 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         return text
 
+    def update(self):
+        """
+        Refresh the visual state of the icon.
+
+        :rtype: None 
+        """
+        self.updateIcon()
+        self.updateFrame()
+
+    def updateIcon(self):
+        """
+        Clear the pixmap cache for the item.
+
+        :rtype: None 
+        """
+        self._pixmap = {}
+        self._thumbnailIcon = None
+
     def updateData(self):
         """
         Update the text data to the corresponding column.
@@ -1266,8 +1284,9 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def updateFrame(self):
         """Triggered when the movie object updates the current frame."""
-        pixmap = self.imageSequence().currentPixmap()
-        self.setIcon(0, pixmap)
+        if self.imageSequence():
+            pixmap = self.imageSequence().currentPixmap()
+            self.setIcon(0, pixmap)
 
     def playheadColor(self):
         """

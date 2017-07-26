@@ -149,6 +149,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         icon = QtGui.QIcon(QtGui.QPixmap(path))
         self.setIcon(icon)
         self.updateThumbnailSize()
+        self.item().update()
 
     def setIcon(self, icon):
         """
