@@ -24,3 +24,4 @@ if maya.cmds.workspaceControl(_workspaceControl, exists=True):
 class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
     def show(self):
         super(MayaLibraryWidget, self).show(dockable=True)
+        self.raise_()
