@@ -100,9 +100,5 @@ def loadFromCommand():
     main(name=name)
 
 
-from studiolibrary import config
-
-
 if __name__ == "__main__":
     loadFromCommand()
-
