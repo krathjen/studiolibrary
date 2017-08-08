@@ -2294,7 +2294,7 @@ A network folder is recommended for sharing within a studio."""
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        return [studiolibrary.LibraryItem]
+        return []
 
     def findItemsInFolders(self, folders, depth=3, **kwargs):
         """
