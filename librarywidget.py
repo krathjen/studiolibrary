@@ -440,14 +440,13 @@ class LibraryWidget(QtWidgets.QWidget):
         if path:
             trashPath = self.trashPath()
             folderWidget = self.foldersWidget()
-            ignoreFilter = self.folderIgnoreFilter()
 
             path_ = studiolibrary.formatPath(path, self.DATABASE_PATH)
             self.setDatabasePath(path_)
 
             folderWidget.clearSelection()
             folderWidget.setRootPath(path)
-            folderWidget.setIgnoreFilter(ignoreFilter)
+            folderWidget.setIgnoreFilter(self.folderIgnoreFilter)
             folderWidget.setFolderOrderIndex(trashPath, 0)
         else:
             self.setError("Error: No path found! Please change the path from the settings menu!")
@@ -519,21 +518,26 @@ A network folder is recommended for sharing within a studio."""
         """
         return self._foldersWidget
 
-    def folderIgnoreFilter(self):
+    def folderIgnoreFilter(self, path):
         """
-        Return a list of folder names that should be hidden/ignored.
+        Return False if path have to be ignored in folders widget
 
-        :rtype: list[str]
+        :rtype: bool
         """
         ignoreFilter = ['.', '.studiolibrary', ".mayaswatches"]
 
         if not self.isTrashFolderVisible():
             ignoreFilter.append('trash')
 
-        for ext in studiolibrary.itemExtensions():
-            ignoreFilter.append(ext)
+        for f in ignoreFilter:
+            if path.endswith(f):
+                return False
 
-        return ignoreFilter
+        for cls in self.itemClasses():
+            if cls.isPathSuitable(path):
+                return False
+
+        return True
 
     def showCreateFolderDialog(self):
         """
@@ -695,13 +699,7 @@ A network folder is recommended for sharing within a studio."""
         if self.isRecursiveSearchEnabled():
             depth = 3
 
-        items = list(studiolibrary.findItemsInFolders(
-            paths,
-            depth,
-            database=self.database(),
-            libraryWidget=self,
-        )
-        )
+        items = list(self.findItemsInFolders(paths, depth))
 
         return items
 
@@ -711,10 +709,7 @@ A network folder is recommended for sharing within a studio."""
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        items = studiolibrary.itemsFromUrls(urls,
-                                            database=self.database(),
-                                            libraryWidget=self,
-                                            )
+        items = self.itemsFromUrls(urls)
 
         return items
 
@@ -739,10 +734,8 @@ A network folder is recommended for sharing within a studio."""
     @studioqt.showWaitCursor
     def reloadFolders(self):
         """Reload the folder widget."""
-        ignoreFilter = self.folderIgnoreFilter()
-
         self.foldersWidget().reload()
-        self.foldersWidget().setIgnoreFilter(ignoreFilter)
+        self.foldersWidget().setIgnoreFilter(self.folderIgnoreFilter)
 
     # -----------------------------------------------------------------
     # Support for custom context menus
@@ -2294,6 +2287,104 @@ A network folder is recommended for sharing within a studio."""
         :rtype: bool
         """
         return self._isDebug
+
+    def itemClasses(self):
+        """
+        Return ordered list of registred item classes.
+
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        return [studiolibrary.LibraryItem]
+
+    def findItemsInFolders(self, folders, depth=3, **kwargs):
+        """
+        Find and create new item instances by walking the given paths.
+
+        :type folders: list[str]
+        :type depth: int
+
+        :rtype: collections.Iterable[studiolibrary.LibraryItem]
+        """
+        for folder in folders:
+            for item in self.findItems(folder, depth=depth, **kwargs):
+                yield item
+
+    def itemsFromPaths(self, paths, **kwargs):
+        """
+        Return new item instances for the given paths.
+
+        :type paths: list[str]:
+        :rtype: collections.Iterable[studiolibrary.LibraryItem]
+        """
+        for path in paths:
+            item = self.itemFromPath(path, **kwargs)
+            if item:
+                yield item
+
+    def itemsFromUrls(self, urls, **kwargs):
+        """
+        Return new item instances for the given QUrl objects.
+
+        :type urls: list[QtGui.QUrl]
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        items = []
+        for url in urls:
+            path = url.toLocalFile()
+
+            # Fixes a bug when dragging from windows explorer on windows 10
+            if studiolibrary.isWindows():
+                if path.startswith("/"):
+                    path = path[1:]
+
+            item = self.itemFromPath(path, **kwargs)
+
+            if item:
+                items.append(item)
+            else:
+                msg = 'Cannot find the item for path "{0}"'
+                msg = msg.format(path)
+                logger.warning(msg)
+
+        return items
+
+    def findItems(self, path, direction=studiolibrary.Direction.Down, depth=3, **kwargs):
+        """
+        Find and create new item instances by walking the given path.
+
+        :type path: str
+        :type direction: studiolibrary.Direction or str
+        :type depth: int
+
+        :rtype: collections.Iterable[studiolibrary.LibraryItem]
+        """
+        ignore = [
+            ".studiolibrary",
+            ".studioLibrary",
+        ]
+
+        paths = studiolibrary.findPaths(
+            path,
+            match=self.itemFromPath,
+            ignore=ignore,
+            direction=direction,
+            depth=depth
+        )
+
+        return self.itemsFromPaths(paths, **kwargs)
+
+    def itemFromPath(self, path, **kwargs):
+        """
+        Return a new item instance for the given path.
+
+        :type path: str
+        :rtype: studiolibrary.LibraryItem or None
+        """
+        for cls in self.itemClasses():
+            if cls.isPathSuitable(path):
+                return cls(path, **kwargs)
+
+        return None
 
 
 if __name__ == "__main__":

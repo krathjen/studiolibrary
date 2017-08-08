@@ -290,7 +290,7 @@ class FoldersWidget(QtWidgets.QTreeView):
 
     def setIgnoreFilter(self, ignoreFilter):
         """
-        :type ignoreFilter: list[str]
+        :type ignoreFilter: func
         """
         self.model().sourceModel().setIgnoreFilter(ignoreFilter)
 
@@ -733,7 +733,7 @@ class FileSystemModel(QtWidgets.QFileSystemModel):
         """
         QtWidgets.QFileSystemModel.__init__(self, foldersWidget)
 
-        self._ignoreFilter = []
+        self._ignoreFilter = None
         self._foldersWidget = foldersWidget
         self.setFilter(QtCore.QDir.AllDirs)
 
@@ -752,15 +752,15 @@ class FileSystemModel(QtWidgets.QFileSystemModel):
 
     def ignoreFilter(self):
         """
-        :rtype: list or None
+        :rtype: func or None
         """
         return self._ignoreFilter
 
     def setIgnoreFilter(self, ignoreFilter):
         """
-        :type ignoreFilter: list or None
+        :type ignoreFilter: func or None
         """
-        self._ignoreFilter = ignoreFilter or []
+        self._ignoreFilter = ignoreFilter
 
     def isPathValid(self, path):
         """
@@ -768,9 +768,9 @@ class FileSystemModel(QtWidgets.QFileSystemModel):
         :rtype: bool
         """
         if os.path.isdir(path):
-            path = path.lower()
-            valid = [item for item in self._ignoreFilter if path.endswith(item)]
-            if not valid:
+            if not self._ignoreFilter:
+                return True
+            if self._ignoreFilter(path.lower()):
                 return True
         return False
 

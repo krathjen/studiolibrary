@@ -602,3 +602,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
                 self.paintTypeIcon(painter, option)
         finally:
             painter.restore()
+
+    @staticmethod
+    def isPathSuitable(path):
+        raise NotImplementedError()

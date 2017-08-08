@@ -116,12 +116,6 @@ def registerItems():
 
     :rtype: None
     """
-    # The following items are registered on import.
-    from studiolibrarymaya import animitem
-    from studiolibrarymaya import poseitem
-    from studiolibrarymaya import mirroritem
-    from studiolibrarymaya import setsitem
-
     # Enable the Maya closed event
     enableMayaClosedEvent()
 

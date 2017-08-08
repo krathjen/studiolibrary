@@ -14,6 +14,11 @@ import studiolibrary
 import maya.cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
+import studiolibrarymaya.animitem
+import studiolibrarymaya.poseitem
+import studiolibrarymaya.setsitem
+import studiolibrarymaya.mirroritem
+
 
 # @note workspace control could exists if module was reloaded
 _workspaceControl = 'studiolibraryWorkspaceControl'
@@ -25,3 +30,11 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
     def show(self):
         super(MayaLibraryWidget, self).show(dockable=True)
         self.raise_()
+
+    def itemClasses(self):
+        return [
+            studiolibrarymaya.animitem.AnimItem,
+            studiolibrarymaya.poseitem.PoseItem,
+            studiolibrarymaya.mirroritem.MirrorItem,
+            studiolibrarymaya.setsitem.SetsItem,
+        ] + super(MayaLibraryWidget, self).itemClasses()
