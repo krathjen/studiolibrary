@@ -39,7 +39,13 @@ class ImageItem(studiolibrary.LibraryItem):
         """
         return ImagePreviewWidget(self)
 
+    @staticmethod
     def isPathSuitable(self, path):
+        """
+        Return True if provided path is suitable to construct item with this class
+
+        :rtype: bool
+        """
         return ".png" in path or ".gif" in path or \
             (".jpg" in path and "thumbnail." not in path)
 
@@ -93,6 +99,11 @@ def main():
 
     class Widget(studiolibrary.LibraryWidget):
         def itemClasses(self):
+            """
+            Return list of item classes would be created by this widget implementation
+
+            :rtype: list[studiolibrary.LibraryItem]
+            """
             return [ImageItem]
 
     # Show the library with the given name and path
