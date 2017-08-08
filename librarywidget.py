@@ -2382,7 +2382,7 @@ A network folder is recommended for sharing within a studio."""
         """
         for cls in self.itemClasses():
             if cls.isPathSuitable(path):
-                return cls(path, **kwargs)
+                return cls(path, **dict(kwargs, database=self.database, libraryWidget=self))
 
         return None
 
