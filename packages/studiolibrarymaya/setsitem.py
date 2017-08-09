@@ -28,7 +28,39 @@ __all__ = [
 ]
 
 
+class SetsCreateWidget(basecreatewidget.BaseCreateWidget):
+
+    def __init__(self, item=None, parent=None):
+        """
+        :type parent: QtWidgets.QWidget
+        :type item: SelectionSetItem
+        """
+        item = item or SetsItem()
+        super(SetsCreateWidget, self).__init__(item, parent=parent)
+
+
+class SetsPreviewWidget(basepreviewwidget.BasePreviewWidget):
+
+    def __init__(self, *args, **kwargs):
+        """
+        :type parent: QtWidgets.QWidget
+        :type item: SelectionSetItem
+        """
+        super(SetsPreviewWidget, self).__init__(*args, **kwargs)
+
+        self.ui.optionsToggleBox.setVisible(False)
+
+    def accept(self):
+        """Triggered when the user clicks the apply button."""
+        self.item().loadFromSettings()
+
+
 class SetsItem(baseitem.BaseItem):
+    MenuName = "Selection Set"
+    MenuIconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
+    TypeIconPath = MenuIconPath
+    CreateWidgetClass = SetsCreateWidget
+    PreviewWidgetClass = SetsPreviewWidget
 
     def __init__(self, *args, **kwargs):
         """
@@ -57,7 +89,7 @@ class SetsItem(baseitem.BaseItem):
     def save(self, objects, path=None, iconPath=None, **kwargs):
         """
         Save all the given object data to the given path on disc.
-    
+
         :type path: path
         :type objects: list
         :type iconPath: str
@@ -66,42 +98,3 @@ class SetsItem(baseitem.BaseItem):
             path += ".set"
 
         super(SetsItem, self).save(objects, path=path, iconPath=iconPath, **kwargs)
-
-
-class SetsCreateWidget(basecreatewidget.BaseCreateWidget):
-
-    def __init__(self, item=None, parent=None):
-        """
-        :type parent: QtWidgets.QWidget
-        :type item: SelectionSetItem
-        """
-        item = item or SetsItem()
-        super(SetsCreateWidget, self).__init__(item, parent=parent)
-
-
-class SetsPreviewWidget(basepreviewwidget.BasePreviewWidget):
-
-    def __init__(self, *args, **kwargs):
-        """
-        :type parent: QtWidgets.QWidget
-        :type item: SelectionSetItem
-        """
-        super(SetsPreviewWidget, self).__init__(*args, **kwargs)
-
-        self.ui.optionsToggleBox.setVisible(False)
-
-    def accept(self):
-        """Triggered when the user clicks the apply button."""
-        self.item().loadFromSettings()
-
-
-# Register the selection set item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
-
-SetsItem.MenuName = "Selection Set"
-SetsItem.MenuIconPath = iconPath
-SetsItem.TypeIconPath = iconPath
-SetsItem.CreateWidgetClass = SetsCreateWidget
-SetsItem.PreviewWidgetClass = SetsPreviewWidget
-
-studiolibrary.registerItem(SetsItem, ".set")

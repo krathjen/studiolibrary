@@ -39,6 +39,16 @@ class ImageItem(studiolibrary.LibraryItem):
         """
         return ImagePreviewWidget(self)
 
+    @staticmethod
+    def isPathSuitable(self, path):
+        """
+        Return True if provided path is suitable to construct item with this class
+
+        :rtype: bool
+        """
+        return path.endswith(".png") or path.endswith(".gif") or \
+            (path.endswith(".jpg") and "thumbnail." not in path)
+
 
 class ImagePreviewWidget(QtWidgets.QWidget):
 
@@ -87,17 +97,20 @@ class ImagePreviewWidget(QtWidgets.QWidget):
 def main():
     """The main entry point for this example."""
 
-    # Register the item class to the extension and ignore all jpgs that
-    # contain the string "thumbnail."
-    studiolibrary.registerItem(ImageItem, ".jpg", ignore="thumbnail.")
-    studiolibrary.registerItem(ImageItem, ".png")
-    studiolibrary.registerItem(ImageItem, ".gif")
+    class Widget(studiolibrary.LibraryWidget):
+        def itemClasses(self):
+            """
+            Return list of item classes would be created by this widget implementation
+
+            :rtype: list[studiolibrary.LibraryItem]
+            """
+            return [ImageItem]
 
     # Show the library with the given name and path
     dirname = os.path.dirname(__file__)
     path = os.path.join(dirname, "data")
 
-    studiolibrary.main(name="Image Library", path=path)
+    studiolibrary.main(name="Image Library", path=path, widgetClass=Widget)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,8 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import importlib
+
 import studiolibrary
 
 
@@ -22,10 +24,11 @@ def main(
         superusers=None,
         lockFolder=None,
         unlockFolder=None,
+        widgetClass=None
 ):
     """
     The main entry point for creating and loading a library.
-    
+
     This is a convenience method.
 
     :type name: str or None
@@ -35,12 +38,23 @@ def main(
     :type superusers: str
     :type lockFolder: str
     :type unlockFolder: str
-    
+    :type widgetClass: studiolibrary.LibraryWidget class
+
     :rtype: studiolibrary.LibraryWidget
     """
-    cls = studiolibrary.LIBRARY_WIDGET_CLASS or studiolibrary.LibraryWidget
+    # @note do platform selection here to have it functional and to avoid using global variables
+    # and import side effects when you depend on import order or importing particular module. But
+    # this way we can't change bases for already defined classes.
+    if widgetClass is None:
+        widgetClass = studiolibrary.LibraryWidget
+        if studiolibrary.isMaya():
+            # @note import statement do something with variable scope inside of this function so
+            # studiolibrary becomes invisible here
+            importlib.import_module("studiolibrarymaya").registerItems()
+            widgetClass = importlib.import_module(
+                "studiolibrarymaya.mayalibrarywidget").MayaLibraryWidget
 
-    libraryWidget = cls.instance(name, path)
+    libraryWidget = widgetClass.instance(name, path)
 
     libraryWidget.setLocked(lock)
     libraryWidget.setSuperusers(superusers)

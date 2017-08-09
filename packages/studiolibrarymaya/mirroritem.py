@@ -69,88 +69,6 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class MirrorItem(baseitem.BaseItem):
-
-    def __init__(self, *args, **kwargs):
-        """
-        :type args: list
-        :type kwargs: dict
-        """
-        super(MirrorItem, self).__init__(*args, **kwargs)
-
-        self.setTransferBasename("mirrortable.json")
-        self.setTransferClass(mutils.MirrorTable)
-
-    def doubleClicked(self):
-        """Overriding this method to load the item on double click."""
-        self.loadFromSettings()
-
-    def loadFromSettings(self):
-        """Load the mirror table using the settings for this item."""
-        mirrorOption = self.settings().get("mirrorOption")
-        mirrorAnimation = self.settings().get("mirrorAnimation")
-        namespaces = self.namespaces()
-        objects = maya.cmds.ls(selection=True) or []
-
-        try:
-            self.load(
-                objects=objects,
-                option=mirrorOption,
-                animation=mirrorAnimation,
-                namespaces=namespaces,
-            )
-        except Exception, e:
-            studioqt.MessageBox.critical(None, "Item Error", str(e))
-            raise
-
-    @mutils.showWaitCursor
-    def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):
-        """
-        Load the current mirror table to the given objects and options.
-
-        :type objects: list[str]
-        :type namespaces: list[str]
-        :type option: MirrorOption
-        :type animation: bool
-        :type time: list[int]
-        """
-        objects = objects or []
-
-        self.transferObject().load(
-            objects=objects,
-            namespaces=namespaces,
-            option=option,
-            animation=animation,
-            time=time,
-        )
-
-    def save(self, objects, leftSide, rightSide, path=None, iconPath=None, **kwargs):
-        """
-        Save the given objects to the location of the current mirror table.
-
-        :type path: str
-        :type objects: list[str]
-        :type iconPath: str
-        :rtype: None
-        """
-        if path and not path.endswith(".mirror"):
-            path += ".mirror"
-
-        logger.info("Saving: %s" % self.transferPath())
-
-        tempDir = mutils.TempDir("Transfer", makedirs=True)
-        tempPath = os.path.join(tempDir.path(), self.transferBasename())
-
-        t = self.transferClass().fromObjects(
-            objects,
-            leftSide=leftSide,
-            rightSide=rightSide
-        )
-        t.save(tempPath)
-
-        studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath], **kwargs)
-
-
 class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
 
     def __init__(self, item=None, parent=None):
@@ -309,13 +227,88 @@ class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
         self.item().loadFromSettings()
 
 
-# Register the mirror table item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
+class MirrorItem(baseitem.BaseItem):
+    MenuName = "Mirror Table"
+    MenuIconPath = iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
+    TypeIconPath = MenuIconPath
+    CreateWidgetClass = MirrorCreateWidget
+    PreviewWidgetClass = MirrorPreviewWidget
 
-MirrorItem.MenuName = "Mirror Table"
-MirrorItem.MenuIconPath = iconPath
-MirrorItem.TypeIconPath = iconPath
-MirrorItem.CreateWidgetClass = MirrorCreateWidget
-MirrorItem.PreviewWidgetClass = MirrorPreviewWidget
+    def __init__(self, *args, **kwargs):
+        """
+        :type args: list
+        :type kwargs: dict
+        """
+        super(MirrorItem, self).__init__(*args, **kwargs)
 
-studiolibrary.registerItem(MirrorItem, ".mirror")
+        self.setTransferBasename("mirrortable.json")
+        self.setTransferClass(mutils.MirrorTable)
+
+    def doubleClicked(self):
+        """Overriding this method to load the item on double click."""
+        self.loadFromSettings()
+
+    def loadFromSettings(self):
+        """Load the mirror table using the settings for this item."""
+        mirrorOption = self.settings().get("mirrorOption")
+        mirrorAnimation = self.settings().get("mirrorAnimation")
+        namespaces = self.namespaces()
+        objects = maya.cmds.ls(selection=True) or []
+
+        try:
+            self.load(
+                objects=objects,
+                option=mirrorOption,
+                animation=mirrorAnimation,
+                namespaces=namespaces,
+            )
+        except Exception, e:
+            studioqt.MessageBox.critical(None, "Item Error", str(e))
+            raise
+
+    @mutils.showWaitCursor
+    def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):
+        """
+        Load the current mirror table to the given objects and options.
+
+        :type objects: list[str]
+        :type namespaces: list[str]
+        :type option: MirrorOption
+        :type animation: bool
+        :type time: list[int]
+        """
+        objects = objects or []
+
+        self.transferObject().load(
+            objects=objects,
+            namespaces=namespaces,
+            option=option,
+            animation=animation,
+            time=time,
+        )
+
+    def save(self, objects, leftSide, rightSide, path=None, iconPath=None, **kwargs):
+        """
+        Save the given objects to the location of the current mirror table.
+
+        :type path: str
+        :type objects: list[str]
+        :type iconPath: str
+        :rtype: None
+        """
+        if path and not path.endswith(".mirror"):
+            path += ".mirror"
+
+        logger.info("Saving: %s" % self.transferPath())
+
+        tempDir = mutils.TempDir("Transfer", makedirs=True)
+        tempPath = os.path.join(tempDir.path(), self.transferBasename())
+
+        t = self.transferClass().fromObjects(
+            objects,
+            leftSide=leftSide,
+            rightSide=rightSide
+        )
+        t.save(tempPath)
+
+        studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath], **kwargs)

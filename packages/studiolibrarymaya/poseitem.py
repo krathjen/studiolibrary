@@ -72,10 +72,129 @@ class PoseItemSignals(QtCore.QObject):
     mirrorChanged = QtCore.Signal(bool)
 
 
+class PoseCreateWidget(basecreatewidget.BaseCreateWidget):
+
+    def __init__(self, item=None, parent=None):
+        """"""
+        item = item or PoseItem()
+        super(PoseCreateWidget, self).__init__(item, parent=parent)
+
+
+class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
+
+    def __init__(self, *args, **kwargs):
+        """
+        :rtype: None
+        """
+        super(PosePreviewWidget, self).__init__(*args, **kwargs)
+
+        self.connect(self.ui.keyCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
+        self.connect(self.ui.mirrorCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
+        self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderMoved(int)"), self.sliderMoved)
+        self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderReleased()"), self.sliderReleased)
+
+        self.item().blendChanged.connect(self.updateSlider)
+        self.item().mirrorChanged.connect(self.updateMirror)
+
+    def setItem(self, item):
+        """
+        Set the current pose item for the preview widget.
+
+        :type item: PoseItem
+        :rtype: None
+        """
+        super(PosePreviewWidget, self).setItem(item)
+
+        # Mirror check box
+        mirrorTip = "Cannot find a mirror table!"
+        mirrorTable = item.mirrorTable()
+        if mirrorTable:
+            mirrorTip = "Using mirror table: %s" % mirrorTable.path()
+
+        self.ui.mirrorCheckBox.setToolTip(mirrorTip)
+        self.ui.mirrorCheckBox.setEnabled(mirrorTable is not None)
+
+    def updateMirror(self, mirror):
+        """
+        Triggered when the user changes the mirror option for the item.
+
+        :type mirror: bool
+        """
+        if mirror:
+            self.ui.mirrorCheckBox.setCheckState(QtCore.Qt.Checked)
+        else:
+            self.ui.mirrorCheckBox.setCheckState(QtCore.Qt.Unchecked)
+
+    def setSettings(self, settings):
+        """Set the current state of the widget with a dictionary."""
+        key = settings.get("keyEnabled")
+        mirror = settings.get("mirrorEnabled")
+
+        self.ui.keyCheckBox.setChecked(key)
+        self.ui.mirrorCheckBox.setChecked(mirror)
+
+        super(PosePreviewWidget, self).setSettings(settings)
+
+    def settings(self):
+        """
+        Return the current state of the widget as a dictionary.
+
+        :rtype: dict
+        """
+        settings = super(PosePreviewWidget, self).settings()
+
+        key = bool(self.ui.keyCheckBox.isChecked())
+        mirror = bool(self.ui.mirrorCheckBox.isChecked())
+
+        settings["keyEnabled"] = key
+        settings["mirrorEnabled"] = mirror
+
+        return settings
+
+    def updateSlider(self, value):
+        """
+        Trigger when the item changes blend value.
+
+        :type value: int
+        """
+        self.ui.blendSlider.setValue(value)
+
+    def sliderReleased(self):
+        """Triggered when the user releases the slider handle."""
+        blend = self.ui.blendSlider.value()
+        self.item().loadFromSettings(
+            blend=blend,
+            refresh=False,
+            showBlendMessage=True
+        )
+
+    def sliderMoved(self, value):
+        """
+        Triggered when the user moves the slider handle.
+
+        :type value: float
+        """
+        self.item().loadFromSettings(
+            blend=value,
+            batchMode=True,
+            showBlendMessage=True
+        )
+
+    def accept(self):
+        """Triggered when the user clicks the apply button."""
+        self.item().loadFromSettings(clearSelection=False)
+
+
 class PoseItem(baseitem.BaseItem):
 
     _poseItemSignals = PoseItemSignals()
     mirrorChanged = _poseItemSignals.mirrorChanged
+
+    MenuName = "Pose"
+    MenuIconPath = studiolibrarymaya.resource().get("icons", "pose.png")
+    TypeIconPath = MenuIconPath
+    CreateWidgetClass = PoseCreateWidget
+    PreviewWidgetClass = PosePreviewWidget
 
     def __init__(self, *args, **kwargs):
         """
@@ -329,127 +448,6 @@ class PoseItem(baseitem.BaseItem):
 
         super(PoseItem, self).save(objects, path=path, iconPath=iconPath, **kwargs)
 
-
-class PoseCreateWidget(basecreatewidget.BaseCreateWidget):
-
-    def __init__(self, item=None, parent=None):
-        """"""
-        item = item or PoseItem()
-        super(PoseCreateWidget, self).__init__(item, parent=parent)
-
-
-class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
-
-    def __init__(self, *args, **kwargs):
-        """
-        :rtype: None
-        """
-        super(PosePreviewWidget, self).__init__(*args, **kwargs)
-
-        self.connect(self.ui.keyCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
-        self.connect(self.ui.mirrorCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
-        self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderMoved(int)"), self.sliderMoved)
-        self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderReleased()"), self.sliderReleased)
-
-        self.item().blendChanged.connect(self.updateSlider)
-        self.item().mirrorChanged.connect(self.updateMirror)
-
-    def setItem(self, item):
-        """
-        Set the current pose item for the preview widget.
-
-        :type item: PoseItem
-        :rtype: None
-        """
-        super(PosePreviewWidget, self).setItem(item)
-
-        # Mirror check box
-        mirrorTip = "Cannot find a mirror table!"
-        mirrorTable = item.mirrorTable()
-        if mirrorTable:
-            mirrorTip = "Using mirror table: %s" % mirrorTable.path()
-
-        self.ui.mirrorCheckBox.setToolTip(mirrorTip)
-        self.ui.mirrorCheckBox.setEnabled(mirrorTable is not None)
-
-    def updateMirror(self, mirror):
-        """
-        Triggered when the user changes the mirror option for the item.
-
-        :type mirror: bool
-        """
-        if mirror:
-            self.ui.mirrorCheckBox.setCheckState(QtCore.Qt.Checked)
-        else:
-            self.ui.mirrorCheckBox.setCheckState(QtCore.Qt.Unchecked)
-
-    def setSettings(self, settings):
-        """Set the current state of the widget with a dictionary."""
-        key = settings.get("keyEnabled")
-        mirror = settings.get("mirrorEnabled")
-
-        self.ui.keyCheckBox.setChecked(key)
-        self.ui.mirrorCheckBox.setChecked(mirror)
-
-        super(PosePreviewWidget, self).setSettings(settings)
-
-    def settings(self):
-        """
-        Return the current state of the widget as a dictionary.
-
-        :rtype: dict
-        """
-        settings = super(PosePreviewWidget, self).settings()
-
-        key = bool(self.ui.keyCheckBox.isChecked())
-        mirror = bool(self.ui.mirrorCheckBox.isChecked())
-
-        settings["keyEnabled"] = key
-        settings["mirrorEnabled"] = mirror
-
-        return settings
-
-    def updateSlider(self, value):
-        """
-        Trigger when the item changes blend value.
-
-        :type value: int
-        """
-        self.ui.blendSlider.setValue(value)
-
-    def sliderReleased(self):
-        """Triggered when the user releases the slider handle."""
-        blend = self.ui.blendSlider.value()
-        self.item().loadFromSettings(
-            blend=blend,
-            refresh=False,
-            showBlendMessage=True
-        )
-
-    def sliderMoved(self, value):
-        """
-        Triggered when the user moves the slider handle.
-
-        :type value: float
-        """
-        self.item().loadFromSettings(
-            blend=value,
-            batchMode=True,
-            showBlendMessage=True
-        )
-
-    def accept(self):
-        """Triggered when the user clicks the apply button."""
-        self.item().loadFromSettings(clearSelection=False)
-
-
-# Register the pose item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "pose.png")
-
-PoseItem.MenuName = "Pose"
-PoseItem.MenuIconPath = iconPath
-PoseItem.TypeIconPath = iconPath
-PoseItem.CreateWidgetClass = PoseCreateWidget
-PoseItem.PreviewWidgetClass = PosePreviewWidget
-
-studiolibrary.registerItem(PoseItem, ".pose")
+    @staticmethod
+    def isPathSuitable(path):
+        return path.endswith(".pose")

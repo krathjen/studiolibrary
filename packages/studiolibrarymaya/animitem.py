@@ -86,205 +86,159 @@ class ValidateAnimError(AnimItemError):
     """Raised when there is an invalid animation option"""
 
 
-class AnimItem(baseitem.BaseItem):
+class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
     def __init__(self, *args, **kwargs):
         """
-        Create a new instance of the anim item from the given path.
-
-        :type path: str
-        :type args: list
-        :type kwargs: dict
+        :type item: AnimItem
+        :type libraryWidget: studiolibrary.LibraryWidget
         """
-        baseitem.BaseItem.__init__(self, *args, **kwargs)
+        super(AnimPreviewWidget, self).__init__(*args, **kwargs)
 
         self._items = []
 
-        self.setTransferClass(mutils.Animation)
-        self.setTransferBasename("")
+        self.createSequenceWidget()
 
-    def previewWidget(self, libraryWidget):
-        """
-        Return the widget to be shown when the user clicks on the item.
-        
-        Overriding this method to add support for loading many animations.
+        self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.saveSettings)
+        self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
+        self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
+        self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
 
-        :type libraryWidget: studiolibrary.LibraryWidget
-        :rtype: AnimationPreviewWidget
+    def createSequenceWidget(self):
         """
-        items = libraryWidget.selectedItems()
-        self.setItems(items)
-        return AnimPreviewWidget(parent=None, item=self)
+        Create a sequence widget to replace the static thumbnail widget.
 
-    def imageSequencePath(self):
+        :rtype: None
         """
-        Return the image sequence location for playing the animation preview.
+        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
+        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
+        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+        self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
 
-        :rtype: str
-        """
-        return self.path() + "/sequence"
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+        self.ui.thumbnailButton.hide()
+        self.ui.thumbnailButton = self.ui.sequenceWidget
 
-    def items(self):
+    def setItem(self, item):
         """
-        :rtype: list[AnimItem]
+        :type item: AnimItem
+        :rtype: None
         """
-        return self._items
+        super(AnimPreviewWidget, self).setItem(item)
+
+        startFrame = str(item.startFrame())
+        endFrame = str(item.endFrame())
+
+        self.ui.start.setText(startFrame)
+        self.ui.end.setText(endFrame)
+        self.ui.sourceStartEdit.setText(startFrame)
+        self.ui.sourceEndEdit.setText(endFrame)
 
     def setItems(self, items):
         """
-        :type items: list[AnimItem]
+        :rtype: list[AnimItem]
         """
         self._items = items
 
-    def startFrame(self):
-        """Return the start frame for the animation."""
-        return self.transferObject().startFrame()
-
-    def endFrame(self):
-        """Return the end frame for the animation."""
-        return self.transferObject().endFrame()
-
-    def doubleClicked(self):
-        """Overriding this method to load the animation on double click."""
-        self.loadFromSettings()
-
-    def loadFromSettings(self, sourceStart=None, sourceEnd=None):
+    def sourceStart(self):
         """
-        Load the animation using the settings for this item.
-
-        :type sourceStart: int
-        :type sourceEnd: int
+        :rtype int
         """
-        objects = maya.cmds.ls(selection=True) or []
-        namespaces = self.namespaces()
+        return int(self.ui.sourceStartEdit.text())
 
-        settings = self.settings()
-        option = str(settings.get("pasteOption"))
-        connect = bool(settings.get("connectOption"))
-        currentTime = bool(settings.get("currentTime"))
-
-        try:
-            self.load(
-                objects=objects,
-                option=option,
-                connect=connect,
-                namespaces=namespaces,
-                currentTime=currentTime,
-                sourceStart=sourceStart,
-                sourceEnd=sourceEnd,
-            )
-
-        except Exception, e:
-            studioqt.MessageBox.critical(None, "Item Error", str(e))
-            raise
-
-    def load(
-        self,
-        objects=None,
-        namespaces=None,
-        startFrame=None,
-        sourceStart=None,
-        sourceEnd=None,
-        option=None,
-        connect=None,
-        currentTime=False,
-    ):
+    def sourceEnd(self):
         """
-        :type objects: list[str]
-        :type namespaces: list[str]
-        :type startFrame: bool
-        :type sourceStart: int
-        :type sourceEnd: int
-        :type option: PasteOption or str
-        :type connect: bool
-        :type currentTime: bool
-        :rtype: None
+        :rtype int
         """
-        logger.info(u'Loading: {0}'.format(self.path()))
+        return int(self.ui.sourceEndEdit.text())
 
-        objects = objects or []
-
-        if sourceStart is None:
-            sourceStart = self.startFrame()
-
-        if sourceEnd is None:
-            sourceEnd = self.endFrame()
-
-        items = self.items()
-
-        if len(items) > 1:
-
-            paths = []
-            for item in items:
-                path = item.transferObject().path()
-                paths.append(path)
-
-            mutils.loadAnims(
-                paths=paths,
-                spacing=5,
-                objects=objects,
-                namespaces=namespaces,
-                currentTime=currentTime,
-                option=option,
-                connect=connect,
-                startFrame=startFrame,
-                showDialog=True,
-            )
+    def showHelpImage(self, value, save=True):
+        """
+        :type value:
+        :type save:
+        """
+        if value:
+            self.ui.helpImage.show()
         else:
-            self.transferObject().load(
-                objects=objects,
-                namespaces=namespaces,
-                currentTime=currentTime,
-                connect=connect,
-                option=option,
-                startFrame=startFrame,
-                sourceTime=(sourceStart, sourceEnd)
-            )
+            self.ui.helpImage.hide()
+        if save:
+            self.saveSettings()
 
-        logger.info(u'Loaded: {0}'.format(self.path()))
-
-    def save(
-        self,
-        objects,
-        path=None,
-        contents=None,
-        iconPath=None,
-        fileType=None,
-        startFrame=None,
-        endFrame=None,
-        bakeConnected=False,
-        description=None,
-    ):
+    def settings(self):
         """
-        :type path: path
-        :type objects: list or None
-        :type contents: list[str] or None
-        :type iconPath: str or None
-        :type startFrame: int or None
-        :type endFrame: int or None
-        :type fileType: str or None
-        :type bakeConnected: bool
-        :type description: str or None
-        
+        :rtype: dict
+        """
+        settings = super(AnimPreviewWidget, self).settings()
+
+        settings["pasteOption"] = str(self.ui.option.currentText())
+        settings["currentTime"] = bool(self.ui.currentTime.isChecked())
+        settings["showHelpImage"] = bool(self.ui.helpCheckBox.isChecked())
+        settings["connectOption"] = float(self.ui.connectCheckBox.isChecked())
+
+        return settings
+
+    def setSettings(self, settings):
+        """
+        :type settings: dict
+        """
+        connect = settings.get("connectOption")
+        pasteOption = settings.get("pasteOption")
+        currentTime = settings.get("currentTime")
+        showHelpImage = settings.get("showHelpImage")
+
+        self.ui.currentTime.setChecked(currentTime)
+        self.ui.connectCheckBox.setChecked(bool(connect))
+        self.ui.helpCheckBox.setChecked(showHelpImage)
+
+        self.optionChanged(pasteOption, save=False)
+        self.showHelpImage(showHelpImage, save=False)
+
+        super(AnimPreviewWidget, self).setSettings(settings)
+
+    def connectChanged(self, value):
+        """
+        :type value: bool
+        """
+        self.optionChanged(str(self.ui.option.currentText()))
+
+    def optionChanged(self, text, save=True):
+        """
+        :type text: str
+        :type save: bool
+        """
+        imageText = text
+
+        if text == "replace all":
+            imageText = "replaceCompletely"
+            self.ui.connectCheckBox.setEnabled(False)
+        else:
+            self.ui.connectCheckBox.setEnabled(True)
+
+        connect = ""
+        if self.ui.connectCheckBox.isChecked() and text != "replace all":
+            connect = "Connect"
+
+        basename = "{0}{1}".format(imageText, connect)
+        imageIcon = studiolibrarymaya.resource().icon(basename)
+
+        self.ui.helpImage.setIcon(imageIcon)
+        index = self.ui.option.findText(text)
+        if index:
+            self.ui.option.setCurrentIndex(index)
+        if save:
+            self.saveSettings()
+
+    def accept(self):
+        """
         :rtype: None
         """
-        if path and not path.endswith(".anim"):
-            path += ".anim"
+        sourceStart = self.sourceStart()
+        sourceEnd = self.sourceEnd()
 
-        contents = contents or list()
-
-        tempDir = mutils.TempDir("Transfer", clean=True)
-        tempPath = tempDir.path() + "/transfer.anim"
-
-        t = self.transferClass().fromObjects(objects)
-        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType, bakeConnected=bakeConnected, description=description)
-
-        if iconPath:
-            contents.append(iconPath)
-
-        contents.extend(t.paths())
-
-        studiolibrary.LibraryItem.save(self, path=path, contents=contents)
+        self.item().loadFromSettings(
+            sourceStart=sourceStart,
+            sourceEnd=sourceEnd
+        )
 
 
 class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -333,7 +287,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         """
         Create a sequence widget to replace the static thumbnail widget.
 
-        :rtype: None 
+        :rtype: None
         """
         self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
         self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
@@ -359,7 +313,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
     def setSequencePath(self, path):
         """
         Set the disk location for the image sequence to be saved.
-        
+
         :type path: str
         :rtype: None
         """
@@ -591,167 +545,210 @@ For example if the "by frame" is set to 2 it will playblast every second frame."
         )
 
 
-class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
+class AnimItem(baseitem.BaseItem):
+    MenuName = "Animation"
+    MenuIconPath = studiolibrarymaya.resource().get("icons", "animation.png")
+    TypeIconPath = MenuIconPath
+    CreateWidgetClass = AnimCreateWidget
 
     def __init__(self, *args, **kwargs):
         """
-        :type item: AnimItem
-        :type libraryWidget: studiolibrary.LibraryWidget
+        Create a new instance of the anim item from the given path.
+
+        :type path: str
+        :type args: list
+        :type kwargs: dict
         """
-        super(AnimPreviewWidget, self).__init__(*args, **kwargs)
+        baseitem.BaseItem.__init__(self, *args, **kwargs)
 
         self._items = []
 
-        self.createSequenceWidget()
+        self.setTransferClass(mutils.Animation)
+        self.setTransferBasename("")
 
-        self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.saveSettings)
-        self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
-        self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
-        self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
-
-    def createSequenceWidget(self):
+    def previewWidget(self, libraryWidget):
         """
-        Create a sequence widget to replace the static thumbnail widget.
-        
-        :rtype: None 
+        Return the widget to be shown when the user clicks on the item.
+
+        Overriding this method to add support for loading many animations.
+
+        :type libraryWidget: studiolibrary.LibraryWidget
+        :rtype: AnimationPreviewWidget
         """
-        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
-        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
-        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
-        self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
+        items = libraryWidget.selectedItems()
+        self.setItems(items)
+        return AnimPreviewWidget(parent=None, item=self)
 
-        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
-        self.ui.thumbnailButton.hide()
-        self.ui.thumbnailButton = self.ui.sequenceWidget
-
-    def setItem(self, item):
+    def imageSequencePath(self):
         """
-        :type item: AnimItem
-        :rtype: None
+        Return the image sequence location for playing the animation preview.
+
+        :rtype: str
         """
-        super(AnimPreviewWidget, self).setItem(item)
+        return self.path() + "/sequence"
 
-        startFrame = str(item.startFrame())
-        endFrame = str(item.endFrame())
-
-        self.ui.start.setText(startFrame)
-        self.ui.end.setText(endFrame)
-        self.ui.sourceStartEdit.setText(startFrame)
-        self.ui.sourceEndEdit.setText(endFrame)
-
-    def setItems(self, items):
+    def items(self):
         """
         :rtype: list[AnimItem]
         """
+        return self._items
+
+    def setItems(self, items):
+        """
+        :type items: list[AnimItem]
+        """
         self._items = items
 
-    def sourceStart(self):
+    def startFrame(self):
+        """Return the start frame for the animation."""
+        return self.transferObject().startFrame()
+
+    def endFrame(self):
+        """Return the end frame for the animation."""
+        return self.transferObject().endFrame()
+
+    def doubleClicked(self):
+        """Overriding this method to load the animation on double click."""
+        self.loadFromSettings()
+
+    def loadFromSettings(self, sourceStart=None, sourceEnd=None):
         """
-        :rtype int
+        Load the animation using the settings for this item.
+
+        :type sourceStart: int
+        :type sourceEnd: int
         """
-        return int(self.ui.sourceStartEdit.text())
+        objects = maya.cmds.ls(selection=True) or []
+        namespaces = self.namespaces()
 
-    def sourceEnd(self):
+        settings = self.settings()
+        option = str(settings.get("pasteOption"))
+        connect = bool(settings.get("connectOption"))
+        currentTime = bool(settings.get("currentTime"))
+
+        try:
+            self.load(
+                objects=objects,
+                option=option,
+                connect=connect,
+                namespaces=namespaces,
+                currentTime=currentTime,
+                sourceStart=sourceStart,
+                sourceEnd=sourceEnd,
+            )
+
+        except Exception, e:
+            studioqt.MessageBox.critical(None, "Item Error", str(e))
+            raise
+
+    def load(
+        self,
+        objects=None,
+        namespaces=None,
+        startFrame=None,
+        sourceStart=None,
+        sourceEnd=None,
+        option=None,
+        connect=None,
+        currentTime=False,
+    ):
         """
-        :rtype int
-        """
-        return int(self.ui.sourceEndEdit.text())
-
-    def showHelpImage(self, value, save=True):
-        """
-        :type value:
-        :type save:
-        """
-        if value:
-            self.ui.helpImage.show()
-        else:
-            self.ui.helpImage.hide()
-        if save:
-            self.saveSettings()
-
-    def settings(self):
-        """
-        :rtype: dict
-        """
-        settings = super(AnimPreviewWidget, self).settings()
-
-        settings["pasteOption"] = str(self.ui.option.currentText())
-        settings["currentTime"] = bool(self.ui.currentTime.isChecked())
-        settings["showHelpImage"] = bool(self.ui.helpCheckBox.isChecked())
-        settings["connectOption"] = float(self.ui.connectCheckBox.isChecked())
-
-        return settings
-
-    def setSettings(self, settings):
-        """
-        :type settings: dict
-        """
-        connect = settings.get("connectOption")
-        pasteOption = settings.get("pasteOption")
-        currentTime = settings.get("currentTime")
-        showHelpImage = settings.get("showHelpImage")
-
-        self.ui.currentTime.setChecked(currentTime)
-        self.ui.connectCheckBox.setChecked(bool(connect))
-        self.ui.helpCheckBox.setChecked(showHelpImage)
-
-        self.optionChanged(pasteOption, save=False)
-        self.showHelpImage(showHelpImage, save=False)
-
-        super(AnimPreviewWidget, self).setSettings(settings)
-
-    def connectChanged(self, value):
-        """
-        :type value: bool
-        """
-        self.optionChanged(str(self.ui.option.currentText()))
-
-    def optionChanged(self, text, save=True):
-        """
-        :type text: str
-        :type save: bool
-        """
-        imageText = text
-
-        if text == "replace all":
-            imageText = "replaceCompletely"
-            self.ui.connectCheckBox.setEnabled(False)
-        else:
-            self.ui.connectCheckBox.setEnabled(True)
-
-        connect = ""
-        if self.ui.connectCheckBox.isChecked() and text != "replace all":
-            connect = "Connect"
-
-        basename = "{0}{1}".format(imageText, connect)
-        imageIcon = studiolibrarymaya.resource().icon(basename)
-
-        self.ui.helpImage.setIcon(imageIcon)
-        index = self.ui.option.findText(text)
-        if index:
-            self.ui.option.setCurrentIndex(index)
-        if save:
-            self.saveSettings()
-
-    def accept(self):
-        """
+        :type objects: list[str]
+        :type namespaces: list[str]
+        :type startFrame: bool
+        :type sourceStart: int
+        :type sourceEnd: int
+        :type option: PasteOption or str
+        :type connect: bool
+        :type currentTime: bool
         :rtype: None
         """
-        sourceStart = self.sourceStart()
-        sourceEnd = self.sourceEnd()
+        logger.info(u'Loading: {0}'.format(self.path()))
 
-        self.item().loadFromSettings(
-            sourceStart=sourceStart,
-            sourceEnd=sourceEnd
-        )
+        objects = objects or []
 
+        if sourceStart is None:
+            sourceStart = self.startFrame()
 
-# Register the anim item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "animation.png")
+        if sourceEnd is None:
+            sourceEnd = self.endFrame()
 
-AnimItem.MenuName = "Animation"
-AnimItem.MenuIconPath = iconPath
-AnimItem.TypeIconPath = iconPath
-AnimItem.CreateWidgetClass = AnimCreateWidget
+        items = self.items()
 
-studiolibrary.registerItem(AnimItem, ".anim")
+        if len(items) > 1:
+
+            paths = []
+            for item in items:
+                path = item.transferObject().path()
+                paths.append(path)
+
+            mutils.loadAnims(
+                paths=paths,
+                spacing=5,
+                objects=objects,
+                namespaces=namespaces,
+                currentTime=currentTime,
+                option=option,
+                connect=connect,
+                startFrame=startFrame,
+                showDialog=True,
+            )
+        else:
+            self.transferObject().load(
+                objects=objects,
+                namespaces=namespaces,
+                currentTime=currentTime,
+                connect=connect,
+                option=option,
+                startFrame=startFrame,
+                sourceTime=(sourceStart, sourceEnd)
+            )
+
+        logger.info(u'Loaded: {0}'.format(self.path()))
+
+    def save(
+        self,
+        objects,
+        path=None,
+        contents=None,
+        iconPath=None,
+        fileType=None,
+        startFrame=None,
+        endFrame=None,
+        bakeConnected=False,
+        description=None,
+    ):
+        """
+        :type path: path
+        :type objects: list or None
+        :type contents: list[str] or None
+        :type iconPath: str or None
+        :type startFrame: int or None
+        :type endFrame: int or None
+        :type fileType: str or None
+        :type bakeConnected: bool
+        :type description: str or None
+
+        :rtype: None
+        """
+        if path and not path.endswith(".anim"):
+            path += ".anim"
+
+        contents = contents or list()
+
+        tempDir = mutils.TempDir("Transfer", clean=True)
+        tempPath = tempDir.path() + "/transfer.anim"
+
+        t = self.transferClass().fromObjects(objects)
+        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType, bakeConnected=bakeConnected, description=description)
+
+        if iconPath:
+            contents.append(iconPath)
+
+        contents.extend(t.paths())
+
+        studiolibrary.LibraryItem.save(self, path=path, contents=contents)
+
+    @staticmethod
+    def isPathSuitable(path):
+        return path.endswith(".anim")
