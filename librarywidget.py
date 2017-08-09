@@ -103,11 +103,6 @@ class LibraryWidget(QtWidgets.QWidget):
             w = cls(name=name, path=path)
             cls._instances[name] = w
 
-            # TODO: This needs to move to studiolibrarymaya.
-            import mutils
-            if mutils.isMaya():
-                mutils.gui.makeMayaStandaloneWindow(w)
-
         return w
 
     def __init__(self, parent=None, name=None, path=None):
