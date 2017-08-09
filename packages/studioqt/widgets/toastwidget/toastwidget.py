@@ -13,11 +13,12 @@
 
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
-import studioqt
+from ... import Color
+
 
 logger = logging.getLogger(__name__)
 
@@ -125,11 +126,11 @@ class ToastWidget(QtWidgets.QLabel):
         backgroundColor = ToastWidget.BACKGROUND_COLOR
 
         # color = self.palette().color(self.foregroundRole())
-        color = studioqt.Color.fromColor(color)
+        color = Color.fromColor(color)
         color.setAlpha(textAlpha)
 
         # backgroundColor = self.palette().color(self.backgroundRole())
-        backgroundColor = studioqt.Color.fromColor(backgroundColor)
+        backgroundColor = Color.fromColor(backgroundColor)
         backgroundColor.setAlpha(backgroundAlpha)
 
         styleSheet = "color: {0}; background-color: {1};"

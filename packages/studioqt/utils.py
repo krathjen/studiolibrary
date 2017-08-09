@@ -20,11 +20,11 @@ import logging
 import platform
 import contextlib
 
-import studioqt
+from . import QtCore
+from . import QtUiTools
+from . import QtWidgets
 
-from studioqt import QtCore
-from studioqt import QtUiTools
-from studioqt import QtWidgets
+from . import SHOW_IN_FOLDER_CMD
 
 
 __all__ = [
@@ -140,8 +140,8 @@ def showInFolder(path):
     cmd = os.system
     args = []
 
-    if studioqt.SHOW_IN_FOLDER_CMD:
-        args = [unicode(studioqt.SHOW_IN_FOLDER_CMD)]
+    if SHOW_IN_FOLDER_CMD:
+        args = [unicode(SHOW_IN_FOLDER_CMD)]
 
     elif isLinux():
         args = [u'konqueror "{path}"&']

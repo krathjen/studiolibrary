@@ -11,10 +11,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from studioqt import QtWidgets
-from studioqt import QtCore
-
-import studioqt
+from ... import QtWidgets
 
 
 class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
@@ -31,7 +28,7 @@ class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
         """
         Return the CombinedWidget that contains the item delegate.
 
-        :rtype: studioqt.CombinedWidget
+        :rtype: CombinedWidget
         """
         return self._combinedWidget
 
@@ -39,7 +36,7 @@ class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
         """
         Set the CombinedWidget for the delegate.
 
-        :type combinedWidget: studioqt.CombinedWidget
+        :type combinedWidget: CombinedWidget
         :rtype: None
         """
         self._combinedWidget = combinedWidget

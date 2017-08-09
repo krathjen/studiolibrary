@@ -14,9 +14,9 @@
 import re
 import os
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from . import QtGui
+from . import QtCore
+from . import QtWidgets
 
 
 __all__ = ['ImageSequence', 'ImageSequenceWidget']
@@ -344,8 +344,9 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
 
 if __name__ == "__main__":
 
-    import studioqt
-    with studioqt.app():
+    from . import app
+
+    with app():
         w = ImageSequenceWidget(None)
         w.setDirname("C:/temp/sequence")
         w.show()

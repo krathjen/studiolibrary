@@ -13,12 +13,10 @@
 
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
-
-import studioqt
 
 from .combineditemviewmixin import CombinedItemViewMixin
 
@@ -214,7 +212,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         """
         Set the selected state for the given items.
 
-        :type items: list[studioqt.CombinedWidgetItem]
+        :type items: list[CombinedWidgetItem]
         :type value: bool
         :rtype: None
         """
@@ -227,8 +225,8 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         """
         Move the given items to the position of the destination row.
 
-        :type items: list[studioqt.CombinedWidgetItem]
-        :type itemAt: studioqt.CombinedWidgetItem
+        :type items: list[CombinedWidgetItem]
+        :type itemAt: CombinedWidgetItem
         :rtype: None
         """
         self.treeWidget().moveItems(items, itemAt)
@@ -405,7 +403,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return items from the given url objects.
 
         :type urls: list[QtCore.QUrl]
-        :rtype: list[studioqt.CombinedWidgetItem]
+        :rtype: list[CombinedWidgetItem]
         """
         items = []
         for url in urls:
@@ -419,7 +417,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return the item from the given url object.
 
         :type url: QtCore.QUrl
-        :rtype: studioqt.CombinedWidgetItem
+        :rtype: CombinedWidgetItem
         """
         return self.itemFromPath(url.path())
 
@@ -428,7 +426,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return the items from the given paths.
 
         :type paths: list[str]
-        :rtype: list[studioqt.CombinedWidgetItem]
+        :rtype: list[CombinedWidgetItem]
         """
         items = []
         for path in paths:
@@ -442,7 +440,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return the item from the given path.
 
         :type path: str
-        :rtype: studioqt.ListWidgetItem
+        :rtype: CombinedWidgetItem
         """
         for item in self.items():
             path_ = item.url().path()
@@ -470,7 +468,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
 
     def mimeData(self, items):
         """
-        :type items: list[studioqt.ListWidgetItem]
+        :type items: list[CombinedWidgetItem]
         :rtype: QtCore.QMimeData
         """
         mimeData = QtCore.QMimeData()

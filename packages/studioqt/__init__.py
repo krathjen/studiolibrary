@@ -11,42 +11,41 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from studioqt.vendor.Qt import QtGui, QtCore, QtWidgets, QtUiTools
-
-import os
-
-from studioqt.utils import *
-from studioqt.icon import Icon
-from studioqt.menu import Menu
-from studioqt.theme import Theme, ThemesMenu
-from studioqt.color import Color
-from studioqt.pixmap import Pixmap
-from studioqt.resource import Resource, RESOURCE_DIRNAME
-from studioqt.stylesheet import StyleSheet
-from studioqt.contextmenu import ContextMenu
-
-from studioqt.decorators import showWaitCursor
-
-from studioqt.imagesequence import ImageSequence
-from studioqt.imagesequence import ImageSequenceWidget
-
-from studioqt.widgets.messagebox import MessageBox
-from studioqt.widgets.toastwidget import ToastWidget
-from studioqt.widgets.statuswidget import StatusWidget
-from studioqt.widgets.menubarwidget import MenuBarWidget
-
-from studioqt.widgets.searchwidget import SearchWidget
-from studioqt.widgets.searchwidget import SearchFilter
-
-from studioqt.widgets.combinedwidget.combinedwidget import CombinedWidget
-from studioqt.widgets.combinedwidget.combinedwidgetitem import CombinedWidgetItem
-from studioqt.widgets.combinedwidget.combinedwidgetitemgroup import CombinedWidgetItemGroup
-
-from studioqt.widgets.folderswidget import FoldersWidget
-
-# Custom qt actions
-from studioqt.actions.slideraction import SliderAction
-from studioqt.actions.separatoraction import SeparatorAction
+from .vendor.Qt import QtGui, QtCore, QtWidgets, QtUiTools
 
 # Studio Qt Config Vars
 SHOW_IN_FOLDER_CMD = None
+
+from .utils import *
+
+from .icon import Icon
+from .menu import Menu
+from .color import Color
+from .pixmap import Pixmap
+from .resource import Resource, RESOURCE_DIRNAME
+from .stylesheet import StyleSheet
+
+from .theme import Theme, ThemesMenu
+from .contextmenu import ContextMenu
+from .decorators import showWaitCursor
+
+from .imagesequence import ImageSequence
+from .imagesequence import ImageSequenceWidget
+
+from .actions.slideraction import SliderAction
+from .actions.separatoraction import SeparatorAction
+
+from .widgets.hcolorbar import HColorBar
+from .widgets.messagebox import MessageBox
+from .widgets.toastwidget import ToastWidget
+from .widgets.statuswidget import StatusWidget
+from .widgets.menubarwidget import MenuBarWidget
+
+from .widgets.searchwidget import SearchWidget
+from .widgets.searchwidget import SearchFilter
+
+from .widgets.combinedwidget.combinedwidget import CombinedWidget
+from .widgets.combinedwidget.combinedwidgetitem import CombinedWidgetItem
+from .widgets.combinedwidget.combinedwidgetitemgroup import CombinedWidgetItemGroup
+from .widgets.folderswidget import FoldersWidget
+

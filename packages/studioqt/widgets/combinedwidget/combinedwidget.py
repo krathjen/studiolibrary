@@ -11,20 +11,22 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
-import studioqt
+from ... import ToastWidget
+from ... import SliderAction
+from ... import SeparatorAction
 
 from .combinedlistview import CombinedListView
 from .combinedtreewidget import CombinedTreeWidget
 
 from .combinedwidgetitem import CombinedWidgetItem
 from .combineditemdelegate import CombinedItemDelegate
+from .combinedwidgetitemgroup import CombinedWidgetItemGroup
 
 
 logger = logging.getLogger(__name__)
@@ -78,7 +80,7 @@ class CombinedWidget(QtWidgets.QWidget):
         self._listView.setItemDelegate(self._delegate)
         self._treeWidget.setItemDelegate(self._delegate)
 
-        self._toastWidget = studioqt.ToastWidget(self)
+        self._toastWidget = ToastWidget(self)
         self._toastWidget.hide()
         self._toastEnabled = True
 
@@ -120,10 +122,10 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         Triggered when the given item has been clicked.
 
-        :type item: studioqt.CombinedWidgetItem
+        :type item: CombinedWidgetItem
         :rtype: None
         """
-        if isinstance(item, studioqt.CombinedWidgetItemGroup):
+        if isinstance(item, CombinedWidgetItemGroup):
             self.groupClicked.emit(item)
         else:
             self.itemClicked.emit(item)
@@ -132,7 +134,7 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         Triggered when the given item has been double clicked.
 
-        :type item: studioqt.CombinedWidgetItem
+        :type item: CombinedWidgetItem
         :rtype: None
         """
         self.itemDoubleClicked.emit(item)
@@ -293,7 +295,7 @@ class CombinedWidget(QtWidgets.QWidget):
         Return the current item at the given pos.
 
         :type pos: QtWidgets.QPoint
-        :rtype: studioqt.CombinedWidgetItem
+        :rtype: CombinedWidgetItem
         """
         if self.isIconView():
             return self.listView().itemAt(pos)
@@ -304,8 +306,8 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         Insert the given items at the given itemAt position.
 
-        :type items: list[studioqt.CombinedWidgetItem]
-        :type itemAt: studioqt.CombinedWidgetItem
+        :type items: list[CombinedWidgetItem]
+        :type itemAt: CombinedWidgetItem
         :rtype: Nones
         """
         self.addItems(items)
@@ -316,8 +318,8 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         Move the given items to the given itemAt position.
 
-        :type items: list[studioqt.CombinedWidgetItem]
-        :type itemAt: studioqt.CombinedWidgetItem
+        :type items: list[CombinedWidgetItem]
+        :type itemAt: CombinedWidgetItem
         :rtype: None
         """
         self.listView().moveItems(items, itemAt=itemAt)
@@ -512,31 +514,31 @@ class CombinedWidget(QtWidgets.QWidget):
 
         menu = QtWidgets.QMenu("Item View", self)
 
-        action = studioqt.SeparatorAction("View Settings", menu)
+        action = SeparatorAction("View Settings", menu)
         menu.addAction(action)
 
-        action = studioqt.SliderAction("Size", menu)
+        action = SliderAction("Size", menu)
         action.slider().setMinimum(10)
         action.slider().setMaximum(200)
         action.slider().setValue(self.zoomAmount())
         action.slider().valueChanged.connect(self.setZoomAmount)
         menu.addAction(action)
 
-        action = studioqt.SliderAction("Border", menu)
+        action = SliderAction("Border", menu)
         action.slider().setMinimum(0)
         action.slider().setMaximum(20)
         action.slider().setValue(self.padding())
         action.slider().valueChanged.connect(self.setPadding)
         menu.addAction(action)
         #
-        action = studioqt.SliderAction("Spacing", menu)
+        action = SliderAction("Spacing", menu)
         action.slider().setMinimum(self.DEFAULT_MIN_SPACING)
         action.slider().setMaximum(self.DEFAULT_MAX_SPACING)
         action.slider().setValue(self.spacing())
         action.slider().valueChanged.connect(self.setSpacing)
         menu.addAction(action)
 
-        action = studioqt.SeparatorAction("Item Options", menu)
+        action = SeparatorAction("Item Options", menu)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Show labels", menu)
@@ -576,21 +578,21 @@ class CombinedWidget(QtWidgets.QWidget):
 
         menu.addSeparator()
 
-        action = studioqt.SliderAction("Size", menu)
+        action = SliderAction("Size", menu)
         action.slider().setMinimum(10)
         action.slider().setMaximum(200)
         action.slider().setValue(self.zoomAmount())
         action.slider().valueChanged.connect(self.setZoomAmount)
         menu.addAction(action)
 
-        action = studioqt.SliderAction("Border", menu)
+        action = SliderAction("Border", menu)
         action.slider().setMinimum(0)
         action.slider().setMaximum(20)
         action.slider().setValue(self.padding())
         action.slider().valueChanged.connect(self.setPadding)
         menu.addAction(action)
         #
-        action = studioqt.SliderAction("Spacing", menu)
+        action = SliderAction("Spacing", menu)
         action.slider().setMinimum(self.DEFAULT_MIN_SPACING)
         action.slider().setMaximum(self.DEFAULT_MAX_SPACING)
         action.slider().setValue(self.spacing())
@@ -758,7 +760,7 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         Add the given items to the combined widget.
 
-        :type items: list[studioqt.CombinedWidgetItem]
+        :type items: list[CombinedWidgetItem]
         :rtype: None
         """
         self._treeWidget.addTopLevelItems(items)

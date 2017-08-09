@@ -16,14 +16,15 @@ import logging
 from functools import partial
 from collections import OrderedDict
 
-import studioqt
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import showWaitCursor
+from ... import SeparatorAction
 
 from .combineditemviewmixin import CombinedItemViewMixin
-
+from .combinedwidgetitemgroup import CombinedWidgetItemGroup
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +133,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Select the given items.
 
-        :type items: list[studioqt.CombinedWidget]
+        :type items: list[CombinedWidget]
         :type value: bool
         :type scrollTo: bool
 
@@ -148,7 +149,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Return the last selected non-hidden item.
 
-        :rtype: studioqt.CombinedWidgetItem
+        :rtype: CombinedWidgetItem
         """
         items = self.selectedItems()
 
@@ -161,13 +162,13 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Return all the selected items.
 
-        :rtype: list[studioqt.CombinedWidgetItem]
+        :rtype: list[CombinedWidgetItem]
         """
         items = []
         items_ = QtWidgets.QTreeWidget.selectedItems(self)
 
         for item in items_:
-            if not isinstance(item, studioqt.CombinedWidgetItemGroup):
+            if not isinstance(item, CombinedWidgetItemGroup):
                 items.append(item)
 
         return items
@@ -186,7 +187,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Return the row for the given item.
 
-        :type item: studioqt.TreeWidgetItem
+        :type item: TreeWidgetItem
         :rtype: int
         """
         index = self.indexFromItem(item)
@@ -196,12 +197,12 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Return a list of all the items in the tree widget.
 
-        :rtype: lsit[studioqt.TreeWidgetItem]
+        :rtype: lsit[TreeWidgetItem]
         """
         items = []
 
         for item in self._items():
-            if not isinstance(item, studioqt.CombinedWidgetItemGroup):
+            if not isinstance(item, CombinedWidgetItemGroup):
                 items.append(item)
 
         return items
@@ -210,7 +211,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Return a list of all the items in the tree widget.
 
-        :rtype: lsit[studioqt.TreeWidgetItem]
+        :rtype: lsit[TreeWidgetItem]
         """
         return self.findItems(
             "*",
@@ -480,7 +481,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Return the items sorted by the custom order data.
 
-        :rtype: list[studioqt.CombinedWidgetItem]
+        :rtype: list[CombinedWidgetItem]
         """
         items = self.items()
         column = self.columnFromLabel("Custom Order")
@@ -492,8 +493,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         """
         Move the given items to the position of the destination row.
 
-        :type items: list[studioqt.CombinedWidgetItem]
-        :type itemAt: studioqt.CombinedWidgetItem
+        :type items: list[CombinedWidgetItem]
+        :type itemAt: CombinedWidgetItem
         :rtype: None
         """
         row = 0
@@ -787,7 +788,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         sortOrder = self.sortOrder()
         sortColumn = self.sortColumn()
 
-        action = studioqt.SeparatorAction("Sort By", menu)
+        action = SeparatorAction("Sort By", menu)
         menu.addAction(action)
 
         for column in range(self.columnCount()):
@@ -805,7 +806,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
             callback = partial(self.sortByColumn, column, sortOrder)
             action.triggered.connect(callback)
 
-        action = studioqt.SeparatorAction("Sort Order", menu)
+        action = SeparatorAction("Sort Order", menu)
         menu.addAction(action)
 
         action = menu.addAction("Ascending")
@@ -861,10 +862,10 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         Create a new group item for the given text and children.
 
         :type text: str
-        :type children: list[studioqt.CombinedWidgetItem]
-        :rtype: studioqt.CombinedWidgetItemGroup
+        :type children: list[CombinedWidgetItem]
+        :rtype: CombinedWidgetItemGroup
         """
-        groupItem = studioqt.CombinedWidgetItemGroup()
+        groupItem = CombinedWidgetItemGroup()
         groupItem.setName(text)
         groupItem.setStretchToWidget(self.parent())
         groupItem.setChildren(children)
@@ -875,8 +876,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         Add a new group item for the given text and children.
 
         :type text: str
-        :type children: list[studioqt.CombinedWidgetItem]
-        :rtype: studioqt.CombinedWidgetItemGroup
+        :type children: list[CombinedWidgetItem]
+        :rtype: CombinedWidgetItemGroup
         """
         groupItem = self.createGroupItem(text, children)
         self.addTopLevelItem(groupItem)
@@ -898,7 +899,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
         :type groupColumn: int
         :type groupOrder int
-        :type items: None or list[studioqt.CombinedWidgetItem]
+        :type items: None or list[CombinedWidgetItem]
         :rtype: dict
         """
         items = items or self.items()
@@ -933,7 +934,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
         return orderedGroups
 
-    @studioqt.showWaitCursor
+    @showWaitCursor
     def groupByColumn(self, groupColumn, groupOrder):
         """
         Group the items on the data in the given column.
@@ -1007,7 +1008,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         groupOrder = self._groupOrder
         groupColumn = self._groupColumn
 
-        action = studioqt.SeparatorAction("Group By", menu)
+        action = SeparatorAction("Group By", menu)
         menu.addAction(action)
 
         action = menu.addAction("None")
@@ -1038,7 +1039,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
             callback = partial(self.groupByColumn, column, groupOrder)
             action.triggered.connect(callback)
 
-        action = studioqt.SeparatorAction("Group Order", menu)
+        action = SeparatorAction("Group Order", menu)
         menu.addAction(action)
 
         action = menu.addAction("Ascending")

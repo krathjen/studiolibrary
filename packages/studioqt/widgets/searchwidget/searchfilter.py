@@ -32,7 +32,7 @@ Please see the search filter tests for more example.
 """
 import re
 
-from studioqt import QtCore
+from ... import QtCore
 
 
 class SearchFilter(QtCore.QObject):

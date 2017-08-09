@@ -12,7 +12,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 
-from studioqt import QtWidgets
+from . import QtWidgets
 
 
 class Menu(QtWidgets.QMenu):

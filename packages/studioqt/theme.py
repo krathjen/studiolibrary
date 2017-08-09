@@ -11,11 +11,15 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from . import QtGui
+from . import QtCore
+from . import QtWidgets
 
-import studioqt
+from . import Color
+from . import resource
+from . import StyleSheet
+
+from .resource import RESOURCE_DIRNAME
 
 __all__ = ["Theme", "ThemeAction", "ThemesMenu"]
 
@@ -91,7 +95,7 @@ class ThemeAction(QtWidgets.QAction):
         self._theme = theme
 
         color = theme.accentColor()
-        icon = studioqt.resource.icon("radio_button_checked_white", color=color)
+        icon = resource.icon("radio_button_checked_white", color=color)
         self.setIcon(icon)
 
     def theme(self):
@@ -129,13 +133,13 @@ class ThemesMenu(QtWidgets.QMenu):
         self.addSeparator()
 
         action = QtWidgets.QAction("Dark", self)
-        icon = studioqt.resource.icon(self.DEFAULT_MENU_ICON, color="rgb(60,60,80)")
+        icon = resource.icon(self.DEFAULT_MENU_ICON, color="rgb(60,60,80)")
         action.setIcon(icon)
 
         self.addAction(action)
 
         action = QtWidgets.QAction("Light", self)
-        icon = studioqt.resource.icon(self.DEFAULT_MENU_ICON, color="rgb(245,245,255)")
+        icon = resource.icon(self.DEFAULT_MENU_ICON, color="rgb(245,245,255)")
         action.setIcon(icon)
 
         self.addAction(action)
@@ -238,11 +242,11 @@ class Theme(object):
         self.setName(name)
 
         accentColor = settings.get("accentColor", self.accentColor().toString())
-        accentColor = studioqt.Color.fromString(accentColor)
+        accentColor = Color.fromString(accentColor)
         self.setAccentColor(accentColor)
 
         backgroundColor = settings.get("backgroundColor", self.backgroundColor().toString())
-        backgroundColor = studioqt.Color.fromString(backgroundColor)
+        backgroundColor = Color.fromString(backgroundColor)
         self.setBackgroundColor(backgroundColor)
 
     def dpi(self):
@@ -299,7 +303,7 @@ class Theme(object):
         """
         Return the icon color for the theme.
 
-        :rtype: studioqt.Color 
+        :rtype: Color 
         """
         return self.forgroundColor()
 
@@ -307,45 +311,45 @@ class Theme(object):
         """
         Return the foreground color for the accent color.
 
-        :rtype: studioqt.Color 
+        :rtype: Color 
         """
-        return studioqt.Color(255, 255, 255, 255)
+        return Color(255, 255, 255, 255)
 
     def forgroundColor(self):
         """
         Return the foreground color for the theme.
 
-        :rtype: studioqt.Color 
+        :rtype: Color 
         """
         if self.isDark():
-            return studioqt.Color(250, 250, 250, 225)
+            return Color(250, 250, 250, 225)
         else:
-            return studioqt.Color(0, 40, 80, 180)
+            return Color(0, 40, 80, 180)
 
     def itemBackgroundColor(self):
         """
         Return the item background color.
 
-        :rtype: studioqt.Color 
+        :rtype: Color 
         """
         if self.isDark():
-            return studioqt.Color(255, 255, 255, 20)
+            return Color(255, 255, 255, 20)
         else:
-            return studioqt.Color(255, 255, 255, 120)
+            return Color(255, 255, 255, 120)
 
     def itemBackgroundHoverColor(self):
         """
         Return the item background color when the mouse hovers over the item.
 
-        :rtype: studioqt.Color 
+        :rtype: Color 
         """
-        return studioqt.Color(255, 255, 255, 60)
+        return Color(255, 255, 255, 60)
 
     def accentColor(self):
         """
         Return the accent color for the theme.
 
-        :rtype: studioqt.Color
+        :rtype: Color
         """
         return self._accentColor
 
@@ -353,7 +357,7 @@ class Theme(object):
         """
         Return the background color for the theme.
 
-        :rtype: studioqt.Color
+        :rtype: Color
         """
         return self._backgroundColor
 
@@ -361,13 +365,13 @@ class Theme(object):
         """
         Set the accent color for the theme.
 
-        :type color: studioqt.Color | QtGui.QColor
+        :type color: Color | QtGui.QColor
         """
         if isinstance(color, basestring):
-            color = studioqt.Color.fromString(color)
+            color = Color.fromString(color)
 
         if isinstance(color, QtGui.QColor):
-            color = studioqt.Color.fromColor(color)
+            color = Color.fromColor(color)
 
         self._accentColor = color
 
@@ -375,13 +379,13 @@ class Theme(object):
         """
         Set the background color for the theme.
 
-        :type color: studioqt.Color | QtGui.QColor
+        :type color: Color | QtGui.QColor
         """
         if isinstance(color, basestring):
-            color = studioqt.Color.fromString(color)
+            color = Color.fromString(color)
 
         if isinstance(color, QtGui.QColor):
-            color = studioqt.Color.fromColor(color)
+            color = Color.fromColor(color)
 
         self._backgroundColor = color
 
@@ -447,7 +451,7 @@ class Theme(object):
         else:
             darkness = "black"
 
-        resourceDirname = studioqt.RESOURCE_DIRNAME.replace("\\", "/")
+        resourceDirname = RESOURCE_DIRNAME.replace("\\", "/")
 
         options = {
             "DARKNESS": darkness,
@@ -487,8 +491,8 @@ class Theme(object):
         :rtype: str
         """
         options = self.options()
-        path = studioqt.resource.get("css", "default.css")
-        styleSheet = studioqt.StyleSheet.fromPath(path, options=options, dpi=self.dpi())
+        path = resource.get("css", "default.css")
+        styleSheet = StyleSheet.fromPath(path, options=options, dpi=self.dpi())
         return styleSheet.data()
 
 
@@ -504,5 +508,8 @@ def example():
 
 
 if __name__ == "__main__":
-    with studioqt.app():
+
+    from . import app
+
+    with app():
         example()

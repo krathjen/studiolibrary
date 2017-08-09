@@ -13,12 +13,13 @@
 
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
-
-import studioqt
+from ... import app
+from ... import Icon
+from ... import Color
 
 
 logger = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ class MenuBarWidget(QtWidgets.QFrame):
 
     def updateIconColor(self):
         color = self.palette().color(self.foregroundRole())
-        color = studioqt.Color.fromColor(color)
+        color = Color.fromColor(color)
         self.setIconColor(color)
 
     def addLeftAction(self, text):
@@ -205,7 +206,7 @@ class MenuBarWidget(QtWidgets.QFrame):
     def setIconColor(self, color):
         for action in self.actions():
             icon = action.icon()
-            icon = studioqt.Icon(icon)
+            icon = Icon(icon)
             icon.setColor(color)
             action.setIcon(icon)
 
@@ -243,7 +244,7 @@ def showExample():
     :rtype: QtWidgets.QWidget
     """
 
-    with studioqt.app():
+    with app():
 
         def triggered():
             print "Triggered"
@@ -251,9 +252,10 @@ def showExample():
         def triggered2():
             print "Triggered2"
 
-        widget = studioqt.MenuBarWidget()
+        widget = MenuBarWidget()
 
-        icon = studioqt.resource.icon("add")
+
+        icon = resource.icon("add")
         action = widget.addLeftAction("New Item")
         action.setIcon(icon)
         action.triggered.connect(triggered)
@@ -262,7 +264,7 @@ def showExample():
         widget.layout().insertWidget(1, lineedit)
         widget.setExpandedHeight(50)
 
-        icon = studioqt.resource.icon("settings")
+        icon = resource.icon("settings")
         action = widget.addRightAction("Settings")
         action.setIcon(icon)
         action.triggered.connect(triggered2)

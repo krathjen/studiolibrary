@@ -14,8 +14,6 @@
 import os
 import re
 
-import studioqt
-
 
 class StyleSheet(object):
 

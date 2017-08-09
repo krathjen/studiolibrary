@@ -14,10 +14,12 @@
 import os
 import logging
 
-from studioqt import QtGui
-from studioqt import QtWidgets
+from ... import QtGui
 
-import studioqt
+from ... import utils
+from ... import Color
+from ... import Pixmap
+from ... import resource
 
 
 __all__ = ["Folder"]
@@ -52,7 +54,7 @@ class FolderItem(object):
         self._orderIndex = orderIndex
 
     def showInFolder(self):
-        studioqt.showInFolder(self.path())
+        utils.showInFolder(self.path())
 
     def orderIndex(self):
         """
@@ -111,7 +113,7 @@ class FolderItem(object):
 
         if not color and not iconPath:
             color = self.treeWidget().palette().color(self.treeWidget().foregroundRole())
-            color = studioqt.Color.fromColor(color).toString()
+            color = Color.fromColor(color).toString()
 
         return color
 
@@ -169,11 +171,12 @@ class FolderItem(object):
 
         if not iconPath:
             if "Trash" in self.name():
-                iconPath = studioqt.resource.get("icons", "delete")
+
+                iconPath = resource.get("icons", "delete")
             elif expanded:
-                iconPath = studioqt.resource.get("icons", "folder_open")
+                iconPath = resource.get("icons", "folder_open")
             else:
-                iconPath = studioqt.resource.get("icons", "folder")
+                iconPath = resource.get("icons", "folder")
 
         return iconPath
 
@@ -188,12 +191,12 @@ class FolderItem(object):
         :rtype: QtGui.QPixmap
         """
         if not self.isIconVisible():
-            return studioqt.resource.pixmap("")
+            return resource.pixmap("")
 
         color = self.color()
         iconPath = self.iconPath()
 
-        self._pixmap = studioqt.Pixmap(iconPath)
+        self._pixmap = Pixmap(iconPath)
         if color:
             self._pixmap.setColor(color)
 

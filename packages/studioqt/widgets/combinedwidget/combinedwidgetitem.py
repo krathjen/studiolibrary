@@ -15,11 +15,15 @@ import os
 import math
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
-import studioqt
+from ... import utils
+from ... import resource
+
+from ... import Color
+from ... import ImageSequence
 
 logger = logging.getLogger(__name__)
 
@@ -205,8 +209,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         if isinstance(icon, basestring):
             if not os.path.exists(icon):
-                color = color or studioqt.Color(255, 255, 255, 20)
-                icon = studioqt.resource.icon("image", color=color)
+                color = color or Color(255, 255, 255, 20)
+                icon = resource.icon("image", color=color)
             else:
                 icon = QtGui.QIcon(icon)
 
@@ -566,7 +570,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         if not os.path.exists(thumbnailPath):
             color = self.textColor()
-            thumbnailPath = studioqt.resource.icon("thumbnail", color=color)
+            thumbnailPath = resource.icon("thumbnail", color=color)
 
         if not self._thumbnailIcon:
 
@@ -1203,7 +1207,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :rtype: None
         """
         if self.imageSequence():
-            if studioqt.isControlModifier():
+            if utils.isControlModifier():
                 if self.rect():
                     x = event.pos().x() - self.rect().x()
                     width = self.rect().width()
@@ -1217,13 +1221,13 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def imageSequence(self):
         """
-        :rtype: studioqt.ImageSequence
+        :rtype: ImageSequence
         """
         return self._imageSequence
 
     def setImageSequence(self, value):
         """
-        :type value: studioqt.ImageSequence
+        :type value: ImageSequence
         """
         self._imageSequence = value
 
@@ -1265,7 +1269,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         elif os.path.isdir(path):
 
             if not self.imageSequence():
-                movie = studioqt.ImageSequence(path)
+                movie = ImageSequence(path)
                 movie.frameChanged.connect(self._frameChanged)
 
         if movie:
@@ -1274,7 +1278,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def _frameChanged(self, frame):
         """Triggered when the movie object updates to the given frame."""
-        if not studioqt.isControlModifier():
+        if not utils.isControlModifier():
             self.updateFrame()
 
     def updateFrame(self):

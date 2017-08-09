@@ -14,12 +14,16 @@
 import logging
 from functools import partial
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from ... import QtGui
+from ... import QtCore
+from ... import QtWidgets
 
+from ... import app
+from ... import Icon
+from ... import Color
+from ... import resource
 
-import studioqt
+from .searchfilter import SearchFilter
 
 
 logger = logging.getLogger(__name__)
@@ -37,14 +41,14 @@ class SearchWidget(QtWidgets.QLineEdit):
         self._iconPadding = 6
         self._iconButton = QtWidgets.QPushButton(self)
         self._iconButton.clicked.connect(self._iconClicked)
-        self._searchFilter = studioqt.SearchFilter("")
+        self._searchFilter = SearchFilter("")
 
-        icon = studioqt.resource.icon("search")
+        icon = resource.icon("search")
         self.setIcon(icon)
 
         self._clearButton = QtWidgets.QPushButton(self)
         self._clearButton.setCursor(QtCore.Qt.ArrowCursor)
-        icon = studioqt.resource.icon("cross")
+        icon = resource.icon("cross")
         self._clearButton.setIcon(icon)
         self._clearButton.setToolTip("Clear all search text")
         self._clearButton.clicked.connect(self._clearClicked)
@@ -67,7 +71,7 @@ class SearchWidget(QtWidgets.QLineEdit):
         :rtype: None
         """
         color = self.palette().color(self.foregroundRole())
-        color = studioqt.Color.fromColor(color)
+        color = Color.fromColor(color)
         self.setIconColor(color)
 
     def _clearClicked(self):
@@ -123,7 +127,7 @@ class SearchWidget(QtWidgets.QLineEdit):
         """
         Set the space operator for the search filter.
 
-        :type operator: studioqt.SearchFilter.Operator
+        :type operator: SearchFilter.Operator
         :rtype: None
         """
         self._searchFilter.setSpaceOperator(operator)
@@ -192,7 +196,7 @@ class SearchWidget(QtWidgets.QLineEdit):
         """
         Return the search filter for the widget.
 
-        :rtype: studioqt.SearchFilter
+        :rtype: SearchFilter
         """
         return self._searchFilter
 
@@ -213,12 +217,12 @@ class SearchWidget(QtWidgets.QLineEdit):
         :rtype: None
         """
         icon = self._iconButton.icon()
-        icon = studioqt.Icon(icon)
+        icon = Icon(icon)
         icon.setColor(color)
         self._iconButton.setIcon(icon)
 
         icon = self._clearButton.icon()
-        icon = studioqt.Icon(icon)
+        icon = Icon(icon)
         icon.setColor(color)
         self._clearButton.setIcon(icon)
 
@@ -270,12 +274,11 @@ class SearchWidget(QtWidgets.QLineEdit):
 def showExample():
     """
     Run a simple example of the search widget.
-
     :rtype: SearchWidget
     """
 
-    with studioqt.app():
-        searchWidget = studioqt.SearchWidget()
+    with app():
+        searchWidget = SearchWidget()
 
         items = [
             "This is a dog",

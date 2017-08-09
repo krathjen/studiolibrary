@@ -13,10 +13,12 @@
 
 import os
 
-from studioqt import QtCore
-from studioqt import QtWidgets
+from .. import QtCore
+from .. import QtWidgets
 
-import studioqt
+from .. import utils
+from .. import resource
+
 
 HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
 SETTINGS_PATH = os.path.join(HOME_PATH, 'studioqt.ini')
@@ -52,7 +54,7 @@ def createMessageBox(
     mb.setButtons(buttons)
 
     if headerIcon:
-        p = studioqt.resource.pixmap(headerIcon)
+        p = resource.pixmap(headerIcon)
         mb.setPixmap(p)
 
     headerColor = headerColor or "rgb(50, 150, 200)"
@@ -96,7 +98,7 @@ def showMessageBox(
     dontShowAgain = settings.value(key + "dontShowAgain") == "true"
 
     # Force show the dialog if the user is holding the ctrl key down
-    if studioqt.isControlModifier() or studioqt.isAltModifier():
+    if utils.isControlModifier() or utils.isAltModifier():
         force = True
 
     if force or not dontShowAgain or not enableDontShowCheckBox:
@@ -385,7 +387,7 @@ class MessageBox(QtWidgets.QDialog):
 
 def showExample():
 
-    with studioqt.app():
+    with utils.app():
 
         title = "Create a snapshot icon"
         message = "Would you like to create a snapshot icon?"
