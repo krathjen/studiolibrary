@@ -25,7 +25,7 @@ def main(
 ):
     """
     The main entry point for creating and loading a library.
-    
+
     This is a convenience method.
 
     :type name: str or None
@@ -35,7 +35,7 @@ def main(
     :type superusers: str
     :type lockFolder: str
     :type unlockFolder: str
-    
+
     :rtype: studiolibrary.LibraryWidget
     """
     cls = studiolibrary.LIBRARY_WIDGET_CLASS or studiolibrary.LibraryWidget

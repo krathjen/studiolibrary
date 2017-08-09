@@ -47,7 +47,7 @@ class Database(QtCore.QObject):
 
         :type enable: bool
         :type repeatRate: int
-        :rtype: None 
+        :rtype: None
         """
         repeatRate = repeatRate or self.DEFAULT_WATCHER_REPEAT_RATE
 
@@ -64,7 +64,7 @@ class Database(QtCore.QObject):
         """
         Triggered when the watcher has reached it's repeat rate.
 
-        :rtype: None 
+        :rtype: None
         """
         if self.isDirty():
             self.setDirty(False)
@@ -88,7 +88,7 @@ class Database(QtCore.QObject):
         """
         Update the database object with the current timestamp of the db path.
 
-        :rtype: None 
+        :rtype: None
         """
         if value:
             self._mtime = None
@@ -99,7 +99,7 @@ class Database(QtCore.QObject):
         """
         Return True if the database has changed on disc.
 
-        :rtype: bool 
+        :rtype: bool
         """
         return self._mtime != self.mtime()
 
@@ -107,7 +107,7 @@ class Database(QtCore.QObject):
         """
         Return the disc location of the db.
 
-        :rtype: str 
+        :rtype: str
         """
         return self._path
 
@@ -116,7 +116,7 @@ class Database(QtCore.QObject):
         Normalize all the given paths to a consistent format.
 
         :type paths: list[str]
-        :rtype: list[str] 
+        :rtype: list[str]
         """
         return [self.normPath(path) for path in paths]
 
@@ -125,7 +125,7 @@ class Database(QtCore.QObject):
         Normalize the path and make all back slashes to forward slashes.
 
         :type path: str
-        :rtype: str 
+        :rtype: str
         """
         path = os.path.normpath(path)
         path = path.replace("\\", "/")
@@ -135,8 +135,8 @@ class Database(QtCore.QObject):
     def relPath(self):
         """
         Return the relative path to the database path.
-        
-        :rtype: str 
+
+        :rtype: str
         """
         relPath = os.path.dirname(self.path())
         return self.normPath(relPath)
@@ -145,7 +145,7 @@ class Database(QtCore.QObject):
         """
         Return the parent relative path.
 
-        :rtype: str 
+        :rtype: str
         """
         relPath2 = os.path.dirname(self.relPath())
         return self.normPath(relPath2)
@@ -153,12 +153,12 @@ class Database(QtCore.QObject):
     def searchReplace(self, old, new, count=-1):
         """
         Replace the old value with the new value in the database.
-        
+
         :type old: str
         :type new: str
         :type count: int
-        
-        :rtype: None 
+
+        :rtype: None
         """
         data = self._read()
 
@@ -170,7 +170,7 @@ class Database(QtCore.QObject):
         """
         Return the data from the database as a valid dict object.
 
-        :rtype: dict 
+        :rtype: dict
         """
         data = self._read()
 
@@ -182,8 +182,8 @@ class Database(QtCore.QObject):
         """
         Write the given dict object to disc.
 
-        :type data: dict 
-        :rtype: None 
+        :type data: dict
+        :rtype: None
         """
         data = json.dumps(data, indent=4)
 
@@ -216,7 +216,7 @@ class Database(QtCore.QObject):
         Write the given data to the database.
 
         :type data: str
-        :rtype: None 
+        :rtype: None
         """
         relPath = self.relPath()
         relPath2 = self.relPath2()
@@ -237,7 +237,7 @@ class Database(QtCore.QObject):
         Update the database with the given data.
 
         :type data: dict
-        :rtype: None 
+        :rtype: None
         """
         data_ = self.read()
         data_.update(data)
@@ -247,9 +247,9 @@ class Database(QtCore.QObject):
         """
         Insert the given data at the given key.
 
-        :type key: str 
+        :type key: str
         :type data: dict
-        :rtype: None 
+        :rtype: None
         """
         self.updateMultiple([key], data)
 
@@ -259,7 +259,7 @@ class Database(QtCore.QObject):
 
         :type keys: list
         :type data: dict
-        :rtype: None 
+        :rtype: None
         """
         data_ = self.read()
 
@@ -278,7 +278,7 @@ class Database(QtCore.QObject):
         Delete the given key in the JSON path.
 
         :type key: str
-        :rtype: None 
+        :rtype: None
         """
         self.deleteMultiple([key])
 
@@ -287,7 +287,7 @@ class Database(QtCore.QObject):
         Delete the given keys in the JSON path.
 
         :type keys: list[str]
-        :rtype: None 
+        :rtype: None
         """
         data = self.read()
 

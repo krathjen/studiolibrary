@@ -82,7 +82,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Return all the library instances that have been initialised.
 
-        :rtype: list[LibraryWidget] 
+        :rtype: list[LibraryWidget]
         """
         return cls._instances.values()
 
@@ -230,7 +230,8 @@ class LibraryWidget(QtWidgets.QWidget):
         self._foldersFrame.layout().addWidget(self._foldersWidget)
 
         self._splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal, self)
-        self._splitter.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
+        self._splitter.setSizePolicy(QtWidgets.QSizePolicy.Ignored,
+                                     QtWidgets.QSizePolicy.Expanding)
         self._splitter.setHandleWidth(2)
         self._splitter.setChildrenCollapsible(False)
 
@@ -400,7 +401,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Return the name of the library.
 
-        :rtype: str 
+        :rtype: str
         """
         return self._name
 
@@ -421,7 +422,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Return the root path from the settings file.
 
-        :rtype: str 
+        :rtype: str
         """
         settings = self.readSettings()
         return settings.get("path", "")
@@ -470,8 +471,8 @@ class LibraryWidget(QtWidgets.QWidget):
         title = "Studio Library - {} - {} "
         title = title.format(studiolibrary.version(), name)
 
-        text = """Welcolme! Before you get started please choose a folder location for storing the data.
-A network folder is recommended for sharing within a studio."""
+        text = "Welcolme! Before you get started please choose a folder location for storing " \
+               "the data. A network folder is recommended for sharing within a studio."""
 
         dialog = QtWidgets.QMessageBox(None)
         dialog.setWindowTitle(title)
@@ -554,7 +555,7 @@ A network folder is recommended for sharing within a studio."""
         """
         Return the selected folder paths.
 
-        :rtype: list[str] 
+        :rtype: list[str]
         """
         folder = self.selectedFolder()
         if folder:
@@ -575,7 +576,7 @@ A network folder is recommended for sharing within a studio."""
         """
         Return the selected folder items.
 
-        :rtype: list[studioqt.FolderItem] 
+        :rtype: list[studioqt.FolderItem]
         """
         return self.foldersWidget().selectedFolders()
 
@@ -583,8 +584,8 @@ A network folder is recommended for sharing within a studio."""
         """
         Select the given folder paths.
 
-        :type folders: list[str] 
-        :rtype: None 
+        :type folders: list[str]
+        :rtype: None
         """
         self.foldersWidget().selectPaths(folders)
 
@@ -628,8 +629,8 @@ A network folder is recommended for sharing within a studio."""
         """
         Select the given items.
 
-        :type items: list[studiolibrary.LibraryItem] 
-        :rtype: None 
+        :type items: list[studiolibrary.LibraryItem]
+        :rtype: None
         """
         paths = [item.path() for item in items]
         self.selectPaths(paths)
@@ -638,7 +639,7 @@ A network folder is recommended for sharing within a studio."""
         """
         Return the selected items.
 
-        :rtype: list[studiolibrary.LibraryItem] 
+        :rtype: list[studiolibrary.LibraryItem]
         """
         return self._itemsWidget.selectedItems()
 
@@ -1080,7 +1081,7 @@ A network folder is recommended for sharing within a studio."""
         """
         Return the database location on disc.
 
-        :rtype: str 
+        :rtype: str
         """
         return self.database().path()
 
@@ -1089,7 +1090,7 @@ A network folder is recommended for sharing within a studio."""
         Set the database path for the catalog.
 
         :type path: str
-        :rtype: None 
+        :rtype: None
         """
         self._database = studiolibrary.Database(path)
 
@@ -1206,7 +1207,8 @@ A network folder is recommended for sharing within a studio."""
         path = item.path()
         items = [item]
         title = "Warning"
-        message = 'Item already exists! Would you like to move the existing item "{name}" to the trash?'
+        message = 'Item already exists! Would you like to move the existing item "{name}" to ' \
+                  'the trash?'
         message = message.format(name=item.name())
 
         result = self.trashItemsDialog(items, title=title, message=message)
@@ -1625,7 +1627,7 @@ A network folder is recommended for sharing within a studio."""
         """
         Read the settings data.
 
-        :rtype: dict 
+        :rtype: dict
         """
         key = self.name()
         path = self.settingsPath()
@@ -1645,7 +1647,7 @@ A network folder is recommended for sharing within a studio."""
         Set if the widget has been shown.
 
         :type loaded: bool
-        :rtype: None 
+        :rtype: None
         """
         self._isLoaded = loaded
 
@@ -1789,8 +1791,8 @@ A network folder is recommended for sharing within a studio."""
         """
         Set the theme for the catalog widget.
 
-        :type theme: studioqt.Theme 
-        :rtype: None 
+        :type theme: studioqt.Theme
+        :rtype: None
         """
         self._theme = theme
         self.reloadStyleSheet()
@@ -1799,7 +1801,7 @@ A network folder is recommended for sharing within a studio."""
         """
         Return the current theme for the catalog widget.
 
-        :rtype: studioqt.Theme 
+        :rtype: studioqt.Theme
         """
         return self._theme or studioqt.Theme()
 
@@ -1993,7 +1995,8 @@ A network folder is recommended for sharing within a studio."""
         return studioqt.MessageBox.critical(self, title, message)
 
     def questionDialog(self, message, title="Question"):
-        buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
+        buttons = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | \
+                  QtWidgets.QMessageBox.Cancel
         return studioqt.MessageBox.question(self, title, str(message), buttons)
 
     def updateWindowTitle(self):
@@ -2043,7 +2046,7 @@ A network folder is recommended for sharing within a studio."""
         """
         Update the plus icon depending on if the library widget is locked.
 
-        :rtype: None 
+        :rtype: None
         """
         action = self.menuBarWidget().findAction("New Item")
 
@@ -2085,9 +2088,9 @@ A network folder is recommended for sharing within a studio."""
 
     def superusers(self):
         """
-        Return the superusers for the widget. 
+        Return the superusers for the widget.
 
-        :rtype: list[str] 
+        :rtype: list[str]
         """
         return self._superusers
 
@@ -2156,7 +2159,7 @@ A network folder is recommended for sharing within a studio."""
         )
 
     def updateLock(self):
-        """        
+        """
         Update the lock state for the library.
 
         This is triggered when the user clicks on a folder.

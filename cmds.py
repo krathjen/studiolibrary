@@ -300,8 +300,8 @@ def isLinux():
 def localPath(*args):
     """
     Return the users local disc location.
-    
-    :rtype: str 
+
+    :rtype: str
     """
     path = os.getenv('APPDATA') or os.getenv('HOME')
     path = os.path.join(path, "StudioLibrary", *args)
@@ -377,7 +377,7 @@ def movePath(src, dst):
 
 def removePath(path):
     """
-    Delete the given path from disc. 
+    Delete the given path from disc.
 
     :type path: str
     :rtype: None
@@ -591,14 +591,15 @@ def findPaths(
 
     Example:
         path = r'C:\Users\Hovel\Dropbox\libraries\animation\Malcolm\anim'
-        
+
         def matchSets(path):
             return path.endswith(".set")
 
         for path in findPaths(path, match=matchSets, direction=Direction.Up, depth=5):
             print path
 
-        for path in findPaths(path, match=lambda path: path.endswith(".anim"), direction=Direction.Down, depth=3):
+        for path in findPaths(path, match=lambda path: path.endswith(".anim"),
+                              direction=Direction.Down, depth=3):
             print path
 
     :type path: str
@@ -789,7 +790,7 @@ def logScreen(name, version="1.0.0", an="StudioLibrary", tid="UA-50172384-2"):
     def _send(url):
         try:
             url = url.replace(" ", "")
-            f = urllib2.urlopen(url, None, 1.0)
+            urllib2.urlopen(url, None, 1.0)
         except Exception:
             pass
 

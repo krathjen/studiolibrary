@@ -167,9 +167,9 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     def contextEditMenu(self, menu, items=None):
         """
         Called when the user would like to edit the item from the menu.
-        
+
         The given menu is shown as a submenu of the main context menu.
-        
+
         :type menu: QtWidgets.QMenu
         :type items: list[LibraryItem]
         :rtype: None
@@ -272,7 +272,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     def setDatabase(self, database):
         """
         Set the database for the item.
-        
+
         :type database: studiolibrary.Database
         """
         self._database = database
@@ -280,7 +280,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     def database(self):
         """
         Return the database for the item.
-        
+
         :rtype: studiolibrary.Database
         """
         if not self._database and self.libraryWidget():
@@ -410,8 +410,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     def delete(self):
         """
         Delete the item from disc and the database.
-        
-        :rtype: None 
+
+        :rtype: None
         """
         path = self.path()
         studiolibrary.removePath(path)
