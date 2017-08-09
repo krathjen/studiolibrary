@@ -39,7 +39,7 @@ def readSettings():
     """
     Return the local settings from the location of the SETTING_PATH.
 
-    :rtype: dict 
+    :rtype: dict
     """
     return studiolibrary.readJson(SETTINGS_PATH)
 
@@ -47,9 +47,9 @@ def readSettings():
 def saveSettings(data):
     """
     Save the given dict to the local location of the SETTING_PATH.
-    
+
     :type data: dict
-    :rtype: dict 
+    :rtype: dict
     """
     global _settings
     _settings = None

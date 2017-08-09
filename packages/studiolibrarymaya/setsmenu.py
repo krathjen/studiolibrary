@@ -112,11 +112,10 @@ class SetsMenu(QtWidgets.QMenu):
         :rtype: list[setsitem.SetsItem]
         """
         path = self.item().path()
-        match = lambda path: path.endswith(".set")
 
         paths = studiolibrary.findPaths(
             path,
-            match=match,
+            match=lambda path: path.endswith(".set"),
             direction=studiolibrary.Direction.Up,
             depth=10,
         )

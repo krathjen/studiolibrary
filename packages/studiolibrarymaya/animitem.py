@@ -106,7 +106,7 @@ class AnimItem(baseitem.BaseItem):
     def previewWidget(self, libraryWidget):
         """
         Return the widget to be shown when the user clicks on the item.
-        
+
         Overriding this method to add support for loading many animations.
 
         :type libraryWidget: studiolibrary.LibraryWidget
@@ -265,7 +265,7 @@ class AnimItem(baseitem.BaseItem):
         :type fileType: str or None
         :type bakeConnected: bool
         :type description: str or None
-        
+
         :rtype: None
         """
         if path and not path.endswith(".anim"):
@@ -277,7 +277,8 @@ class AnimItem(baseitem.BaseItem):
         tempPath = tempDir.path() + "/transfer.anim"
 
         t = self.transferClass().fromObjects(objects)
-        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType, bakeConnected=bakeConnected, description=description)
+        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType,
+               bakeConnected=bakeConnected, description=description)
 
         if iconPath:
             contents.append(iconPath)
@@ -333,7 +334,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
         """
         Create a sequence widget to replace the static thumbnail widget.
 
-        :rtype: None 
+        :rtype: None
         """
         self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
         self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
@@ -359,7 +360,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
     def setSequencePath(self, path):
         """
         Set the disk location for the image sequence to be saved.
-        
+
         :type path: str
         :rtype: None
         """
@@ -486,8 +487,9 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
         :rtype: None
         """
-        msg = """To help speed up the playblast you can set the "by frame" to a number greater than 1. \
-For example if the "by frame" is set to 2 it will playblast every second frame."""
+        msg = 'To help speed up the playblast you can set the "by frame" to a number greater ' \
+              'than 1. For example if the "by frame" is set to 2 it will playblast every second ' \
+              'frame.'
 
         if self.duration() > 100 and self.byFrame() == 1:
 
@@ -606,14 +608,16 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
         self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.saveSettings)
         self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
-        self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
-        self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
+        self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'),
+                     self.connectChanged)
+        self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'),
+                     self.optionChanged)
 
     def createSequenceWidget(self):
         """
         Create a sequence widget to replace the static thumbnail widget.
-        
-        :rtype: None 
+
+        :rtype: None
         """
         self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
         self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())

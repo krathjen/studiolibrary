@@ -55,7 +55,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self._focusWidget = None
 
         self.ui.thumbnailButton.setToolTip(
-            "Click to capture a thumbnail from the current model panel.\nCTRL + Click to show the capture window for better framing.")
+            "Click to capture a thumbnail from the current model panel.\nCTRL + Click to show "
+            "the capture window for better framing.")
 
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
@@ -93,7 +94,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         Convenience method for setting the database for the item.
 
         :type database: studiolibrary.Database
-        :rtype: None 
+        :rtype: None
         """
         self.item().setDatabase(database)
 
@@ -120,7 +121,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
     def setIcon(self, icon):
         """
         Set the icon for the create widget thumbnail.
-        
+
         :type icon: QtGui.QIcon
         """
         self.ui.thumbnailButton.setIcon(icon)
@@ -130,7 +131,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
     def settings(self):
         """
         Return the settings object for saving the state of the widget.
-        
+
         :rtype: studiolibrary.Settings
         """
         return studiolibrarymaya.settings()
@@ -138,7 +139,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
     def saveSettings(self):
         """
         Save the current state of the widget to disc.
-        
+
         :rtype: None
         """
         data = self.settings()
@@ -170,7 +171,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
     def scriptJob(self):
         """
         Return the script job object used when the users selection changes.
-        
+
         :rtype: mutils.ScriptJob
         """
         return self._scriptJob
@@ -178,7 +179,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
     def setScriptJobEnabled(self, enable):
         """
         Enable the script job used when the users selection changes.
-        
+
         :rtype: None
         """
         if enable:
@@ -203,7 +204,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         Update the thumbnail button to the size of the widget.
 
-        :rtype: None 
+        :rtype: None
         """
         if hasattr(self.ui, "thumbnailButton"):
             width = self.width() - 10
@@ -326,7 +327,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         title = "Create a thumbnail"
         message = "Would you like to capture a thumbanil?"
-        options = QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Cancel
+        options = \
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Cancel
         result = studioqt.MessageBox.question(None, title, str(message), options)
 
         if result == QtWidgets.QMessageBox.Yes:
@@ -374,7 +376,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
     def save(self, objects, path, iconPath, description):
         """
         Save the item with the given objects to the given disc location path.
-        
+
         :type objects: list[str]
         :type path: str
         :type iconPath: str

@@ -100,8 +100,10 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
         self.ui.iconToggleBoxButton.toggled[bool].connect(self.ui.iconToggleBoxFrame.setVisible)
         self.ui.infoToggleBoxButton.toggled[bool].connect(self.ui.infoToggleBoxFrame.setVisible)
-        self.ui.optionsToggleBoxButton.toggled[bool].connect(self.ui.optionsToggleBoxFrame.setVisible)
-        self.ui.namespaceToggleBoxButton.toggled[bool].connect(self.ui.namespaceToggleBoxFrame.setVisible)
+        self.ui.optionsToggleBoxButton.toggled[bool].connect(
+            self.ui.optionsToggleBoxFrame.setVisible)
+        self.ui.namespaceToggleBoxButton.toggled[bool].connect(
+            self.ui.namespaceToggleBoxFrame.setVisible)
 
     def item(self):
         """
@@ -114,7 +116,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
     def setItem(self, item):
         """
         Set the item for the preview widget.
-        
+
         :type item: BaseItem
         """
         self._item = item
@@ -153,7 +155,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
     def setIcon(self, icon):
         """
         Set the icon to be shown for the preview.
-        
+
         :type icon: QtGui.QIcon
         """
         self.ui.thumbnailButton.setIcon(icon)
@@ -178,8 +180,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
     def updateThumbnailSize(self):
         """
         Update the thumbnail button to the size of the widget.
-        
-        :rtype: None 
+
+        :rtype: None
         """
         if hasattr(self.ui, "thumbnailButton"):
             width = self.width() - 10
@@ -227,7 +229,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
     def objectCount(self):
         """
         Return the number of controls contained in the item.
-        
+
         :rtype: int
         """
         return self.item().objectCount()
@@ -235,7 +237,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
     def updateContains(self):
         """
         Refresh the contains information.
-        
+
         :rtype: None
         """
         count = self.objectCount()
@@ -261,7 +263,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         """
         Triggered when the custom namespace radio button is clicked.
 
-        :rtype: None 
+        :rtype: None
         """
         self.ui.namespaceComboBox.setFocus()
         self.updateNamespaceEdit()
@@ -270,7 +272,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
     def namespaces(self):
         """
         Return the namespace names from the namespace edit widget.
-        
+
         :rtype: list[str]
         """
         namespaces = str(self.ui.namespaceComboBox.currentText())
@@ -280,7 +282,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
     def setNamespaces(self, namespaces):
         """
         Set the namespace names for the namespace edit.
-        
+
         :type namespaces: list
         :rtype: None
         """

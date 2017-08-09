@@ -57,7 +57,7 @@ class SetsItem(baseitem.BaseItem):
     def save(self, objects, path=None, iconPath=None, **kwargs):
         """
         Save all the given object data to the given path on disc.
-    
+
         :type path: path
         :type objects: list
         :type iconPath: str

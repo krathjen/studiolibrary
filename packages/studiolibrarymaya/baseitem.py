@@ -45,10 +45,10 @@ class BaseItem(studiolibrary.LibraryItem):
 
     @classmethod
     def showCreateWidget(cls, libraryWidget):
-        """  
-        Overriding this method to set the destination location 
-        for the create widget. 
-        
+        """
+        Overriding this method to set the destination location
+        for the create widget.
+
         Triggered when the user clicks the item action in the new item menu.
 
         :type libraryWidget: studiolibrary.LibraryWidget
@@ -441,7 +441,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type iconPath: str or None
         :type contents: list[str] or None
         :type description: str or None
-        
+
         :rtype: None
         """
         logger.info(u'Saving: {0}'.format(path))
