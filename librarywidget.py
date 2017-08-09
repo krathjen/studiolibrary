@@ -818,7 +818,7 @@ A network folder is recommended for sharing within a studio."""
         separator.setSeparator(True)
         menu.addAction(separator)
 
-        for itemClass in studiolibrary.itemClasses():
+        for itemClass in self.itemClasses():
             action = itemClass.createAction(menu, self)
 
             if action:
