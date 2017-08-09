@@ -81,6 +81,7 @@ class Direction:
     Up = "up"
     Down = "down"
 
+
 def user():
     """
     :rtype: str
