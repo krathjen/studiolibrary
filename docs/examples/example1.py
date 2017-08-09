@@ -46,8 +46,8 @@ class ImageItem(studiolibrary.LibraryItem):
 
         :rtype: bool
         """
-        return ".png" in path or ".gif" in path or \
-            (".jpg" in path and "thumbnail." not in path)
+        return path.endswith(".png") or path.endswith(".gif") or \
+            (path.endswith(".jpg") and "thumbnail." not in path)
 
 
 class ImagePreviewWidget(QtWidgets.QWidget):
