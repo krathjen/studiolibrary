@@ -2296,7 +2296,7 @@ A network folder is recommended for sharing within a studio."""
         """
         return []
 
-    def findItemsInFolders(self, folders, depth=3, **kwargs):
+    def findItemsInFolders(self, folders, depth=3):
         """
         Find and create new item instances by walking the given paths.
 
@@ -2306,10 +2306,10 @@ A network folder is recommended for sharing within a studio."""
         :rtype: collections.Iterable[studiolibrary.LibraryItem]
         """
         for folder in folders:
-            for item in self.findItems(folder, depth=depth, **kwargs):
+            for item in self.findItems(folder, depth=depth):
                 yield item
 
-    def itemsFromPaths(self, paths, **kwargs):
+    def itemsFromPaths(self, paths):
         """
         Return new item instances for the given paths.
 
@@ -2317,11 +2317,11 @@ A network folder is recommended for sharing within a studio."""
         :rtype: collections.Iterable[studiolibrary.LibraryItem]
         """
         for path in paths:
-            item = self.itemFromPath(path, **kwargs)
+            item = self.itemFromPath(path)
             if item:
                 yield item
 
-    def itemsFromUrls(self, urls, **kwargs):
+    def itemsFromUrls(self, urls):
         """
         Return new item instances for the given QUrl objects.
 
@@ -2337,7 +2337,7 @@ A network folder is recommended for sharing within a studio."""
                 if path.startswith("/"):
                     path = path[1:]
 
-            item = self.itemFromPath(path, **kwargs)
+            item = self.itemFromPath(path)
 
             if item:
                 items.append(item)
@@ -2348,7 +2348,7 @@ A network folder is recommended for sharing within a studio."""
 
         return items
 
-    def findItems(self, path, direction=studiolibrary.Direction.Down, depth=3, **kwargs):
+    def findItems(self, path, direction=studiolibrary.Direction.Down, depth=3):
         """
         Find and create new item instances by walking the given path.
 
@@ -2371,9 +2371,9 @@ A network folder is recommended for sharing within a studio."""
             depth=depth
         )
 
-        return self.itemsFromPaths(paths, **kwargs)
+        return self.itemsFromPaths(paths)
 
-    def itemFromPath(self, path, **kwargs):
+    def itemFromPath(self, path):
         """
         Return a new item instance for the given path.
 
@@ -2382,7 +2382,7 @@ A network folder is recommended for sharing within a studio."""
         """
         for cls in self.itemClasses():
             if cls.isPathSuitable(path):
-                return cls(path, **dict(kwargs, database=self.database, libraryWidget=self))
+                return cls(path, database=self.database, libraryWidget=self)
 
         return None
 
