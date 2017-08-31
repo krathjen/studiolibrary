@@ -446,14 +446,13 @@ class LibraryWidget(QtWidgets.QWidget):
         if path:
             trashPath = self.trashPath()
             folderWidget = self.foldersWidget()
-            ignoreFilter = self.folderIgnoreFilter()
 
             path_ = studiolibrary.formatPath(path, self.DATABASE_PATH)
             self.setDatabasePath(path_)
 
             folderWidget.clearSelection()
             folderWidget.setRootPath(path)
-            folderWidget.setIgnoreFilter(ignoreFilter)
+            folderWidget.setIgnoreFilter(self.folderIgnoreFilter)
             folderWidget.setFolderOrderIndex(trashPath, 0)
         else:
             self.setError("Error: No path found! Please change the path from the settings menu!")
@@ -525,21 +524,23 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         return self._foldersWidget
 
-    def folderIgnoreFilter(self):
+    def folderIgnoreFilter(self, path):
         """
-        Return a list of folder names that should be hidden/ignored.
+        Return True if folder should be hidden/ignored in folders widget.
 
-        :rtype: list[str]
+        :rtype: bool
         """
-        ignoreFilter = ['.', '.studiolibrary', ".mayaswatches"]
+        ignoreNames = ['.', '.studiolibrary', ".mayaswatches"]
+        ignoreNames += studiolibrary.itemExtensions()
 
         if not self.isTrashFolderVisible():
-            ignoreFilter.append('trash')
+            ignoreNames.append('trash')
 
-        for ext in studiolibrary.itemExtensions():
-            ignoreFilter.append(ext)
+        for n in ignoreNames:
+            if path.endswith(n):
+                return True
 
-        return ignoreFilter
+        return False
 
     def showCreateFolderDialog(self):
         """
@@ -745,10 +746,8 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showWaitCursor
     def reloadFolders(self):
         """Reload the folder widget."""
-        ignoreFilter = self.folderIgnoreFilter()
-
         self.foldersWidget().reload()
-        self.foldersWidget().setIgnoreFilter(ignoreFilter)
+        self.foldersWidget().setIgnoreFilter(self.folderIgnoreFilter)
 
     # -----------------------------------------------------------------
     # Support for custom context menus
