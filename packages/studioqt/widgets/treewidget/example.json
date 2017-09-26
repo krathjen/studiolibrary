@@ -1,0 +1,61 @@
+{
+    "P:/production/shared/anim": {
+      "text": "FOLDERS",
+      "bold": true,
+      "isExpanded": true,
+      "iconPath": "none",
+      "iconColor": "rgb(100, 100, 150)",
+      "textColor": "rgb(100, 100, 150, 150)"
+    },
+
+    "P:/production/shared/anim/walks/fast.anim": {},
+    "P:/production/shared/anim/walks/slow.anim": {},
+    "P:/production/shared/anim/rigs/prop.rig": {},
+    "P:/production/shared/anim/rigs/character.rig": {},
+
+    "Users/libraries/animation/Character/Boris/stressed.pose": {},
+    "Users/libraries/animation/Character/Boris/smile.pose": {},
+    "Users/libraries/animation/Character/Cornilous/normal.pose": {},
+    "Users/libraries/animation/Character/Cornilous/relaxed.pose": {},
+    "Users/libraries/animation/Character/Cornilous/surprised.pose": {},
+    "Users/libraries/animation/Character/Figaro/test.anim": {},
+    "Users/libraries/animation/Character/Figaro/anim/hiccup.anim": {},
+
+    "props/car/color/red": {},
+    "props/car/color/orange": {},
+    "props/car/color/yellow": {},
+    "props/plane/color/blue": {},
+    "props/plane/color/green": {},
+
+  "tags": {
+      "text": "TAGS",
+      "bold": true,
+      "isExpanded": true,
+      "iconPath": "none",
+      "iconColor": "rgb(100, 100, 150)",
+      "textColor": "rgb(100, 100, 150, 150)"
+  },
+  "tags/red": {
+    "iconColor": "rgb(200, 50, 50)",
+    "iconPath": ".../resource/icons/circle.png"
+  },
+  "tags/orange": {
+    "bold": true,
+    "textColor": "rgb(250, 150, 50)",
+    "iconColor": "rgb(250, 150, 50)",
+    "iconPath": ".../resource/icons/circle.png"
+  },
+  "tags/yellow": {
+    "iconColor": "rgb(250, 200, 0)",
+    "iconPath": ".../resource/icons/circle.png"
+  },
+  "tags/blue": {
+    "iconColor": "rgb(50, 150, 250)",
+    "iconPath": ".../resource/icons/circle.png"
+  },
+  "tags/green": {
+    "iconColor": "rgb(100, 200, 0)",
+    "iconPath": ".../resource/icons/circle.png"
+  }
+}
+
