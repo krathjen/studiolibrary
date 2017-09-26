@@ -139,6 +139,15 @@ def itemFromPath(path, **kwargs):
     :type path: str
     :rtype: studiolibrary.LibraryItem or None
     """
+    invalidNames = [
+        ".studiolibrary",
+        ".studioLibrary",
+    ]
+
+    for invalidName in invalidNames:
+        if invalidName in path:
+            return None
+
     for cls in itemClasses():
         if cls.isValidPath(path):
             return cls(path, **kwargs)
@@ -197,15 +206,9 @@ def findItems(path, direction=Direction.Down, depth=3, **kwargs):
 
     :rtype: collections.Iterable[studiolibrary.LibraryItem]
     """
-    ignore = [
-        ".studiolibrary",
-        ".studioLibrary",
-    ]
-
     paths = findPaths(
         path,
         match=itemFromPath,
-        ignore=ignore,
         direction=direction,
         depth=depth
     )
@@ -515,12 +518,22 @@ def generateUniquePath(path, attempts=1000):
     return path
 
 
+def normPath(path):
+    """
+    Return a normalized path with forward slashes
+    
+    :type path: str
+    :rtype: str 
+    """
+    return path.replace("\\", "/")
+
+
 def splitPath(path):
     """
     :type path: str
     :rtype: list[str]
     """
-    path = path.replace("\\", "/")
+    path = normPath(path)
     filename, extension = os.path.splitext(path)
     return os.path.dirname(filename), os.path.basename(filename), extension
 
@@ -561,7 +574,6 @@ def listPaths(path):
 def findPaths(
         path,
         match=None,
-        ignore=None,
         direction=Direction.Down,
         depth=3
 ):
@@ -582,9 +594,8 @@ def findPaths(
             print path
 
     :type path: str
-    :type match: func
+    :type key: func
     :type depth: int
-    :type ignore: str or None
     :type direction: Direction
     :rtype: collections.Iterable[str]
     """
@@ -595,7 +606,7 @@ def findPaths(
         paths = listPaths(path)
 
     elif direction == Direction.Down:
-        paths = walk(path, match=match, depth=depth, ignore=ignore)
+        paths = walk(path, match=match, depth=depth)
 
     elif direction == Direction.Up:
         paths = walkup(path, match=match, depth=depth)
@@ -615,7 +626,7 @@ def walkup(path, match=None, depth=3):
     """
     sep = "/"
     path = os.path.realpath(path)
-    path = path.replace("\\", "/")
+    path = normPath(path)
 
     if not path.endswith(sep):
         path += sep
@@ -635,15 +646,14 @@ def walkup(path, match=None, depth=3):
                 for filename in os.listdir(folder):
                     path = os.path.join(folder, filename)
                     if match is None or match(path):
-                        yield path
+                        yield normPath(path)
 
 
-def walk(path, match=None, ignore=None, depth=3):
+def walk(path, match=None, depth=3):
     """
     :type path: str
     :type match: func
     :type depth: int
-    :type ignore: str or None
     :rtype: collections.Iterable[str]
     """
     path = path.rstrip(os.path.sep)
@@ -656,16 +666,11 @@ def walk(path, match=None, ignore=None, depth=3):
 
     for root, dirs, files in os.walk(path):
         files.extend(dirs)
+
         for filename in files:
             path = os.path.join(root, filename)
-
-            valid = True
-            for pattern in ignore or []:
-                if pattern in path:
-                    valid = False
-                    break
-
-            if valid and (match is None or match(path)):
+            path = normPath(path)
+            if match is None or match(path):
                 yield path
 
         currentDepth = root.count(os.path.sep)

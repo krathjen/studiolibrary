@@ -191,13 +191,22 @@ def readJson(path):
     :type path: str
     :rtype: dict
     """
-    data = {}
+    path = os.path.abspath(path)
+    path = path.replace("\\", "/")
 
-    if os.path.exists(path):
-        with open(path, "r") as f:
-            data_ = f.read()
-            if data_:
-                data = json.loads(data_)
+    with open(path, "r") as f:
+        data = f.read()
+
+    relPath = os.path.dirname(path)
+    relPath2 = os.path.dirname(relPath)
+    relPath3 = os.path.dirname(relPath2)
+
+    data = data.replace('\".../', '"' + relPath3 + '/')
+    data = data.replace('\"../', '"' + relPath2 + '/')
+    data = data.replace('\"./', '"' + relPath + '/')
+
+    if data:
+        data = json.loads(data)
 
     return data
 

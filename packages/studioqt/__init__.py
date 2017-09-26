@@ -42,7 +42,7 @@ from studioqt.widgets.combinedwidget.combinedwidget import CombinedWidget
 from studioqt.widgets.combinedwidget.combinedwidgetitem import CombinedWidgetItem
 from studioqt.widgets.combinedwidget.combinedwidgetitemgroup import CombinedWidgetItemGroup
 
-from studioqt.widgets.folderswidget import FoldersWidget
+from studioqt.widgets.treewidget import TreeWidget
 
 # Custom qt actions
 from studioqt.actions.slideraction import SliderAction

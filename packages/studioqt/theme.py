@@ -295,6 +295,22 @@ class Theme(object):
 
         return True
 
+    def setDark(self):
+        """
+        Set the current theme to the default dark color.
+        
+        :rtype: None 
+        """
+        self.setBackgroundColor(ThemesMenu.DEFAULT_DARK_COLOR)
+
+    def setLight(self):
+        """
+        Set the current theme to the default light color.
+
+        :rtype: None 
+        """
+        self.setBackgroundColor(ThemesMenu.DEFAULT_LIGHT_COLOR)
+
     def iconColor(self):
         """
         Return the icon color for the theme.

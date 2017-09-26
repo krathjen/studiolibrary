@@ -203,7 +203,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         action.triggered.connect(self.showMoveDialog)
         menu.addAction(action)
 
-        action = QtWidgets.QAction("Show in folder", menu)
+        action = QtWidgets.QAction("Show in Folder", menu)
         action.triggered.connect(self.showInFolder)
         menu.addAction(action)
 
