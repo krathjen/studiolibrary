@@ -87,13 +87,28 @@ class LibraryWidget(QtWidgets.QWidget):
         return cls._instances.values()
 
     @classmethod
-    def instance(cls, name=None, path=None):
+    def instance(
+            cls,
+            name=None,
+            path=None,
+            show=False,
+            lock=False,
+            superusers=None,
+            lockRegExp=None,
+            unlockRegExp=None,
+    ):
         """
         Return the library widget for the given path.
 
         :type name: str
         :type path: str
-        :rtype: CatalogWidget
+        :type show: bool
+        :type lock: bool
+        :type superusers: list[str]
+        :type lockRegExp: str
+        :type unlockRegExp: str
+        
+        :rtype: LibraryWidget
         """
         name = name or cls.DEFAULT_NAME
 
@@ -108,9 +123,22 @@ class LibraryWidget(QtWidgets.QWidget):
             if mutils.isMaya():
                 mutils.gui.makeMayaStandaloneWindow(w)
 
+        w.setLocked(lock)
+        w.setSuperusers(superusers)
+        w.setLockRegExp(lockRegExp)
+        w.setUnlockRegExp(unlockRegExp)
+
+        if show:
+            w.show()
+
         return w
 
-    def __init__(self, parent=None, name=None, path=None):
+    def __init__(
+            self,
+            parent=None,
+            name=None,
+            path=None,
+    ):
         """
         Return the a new instance of the Library Widget.
 

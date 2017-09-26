@@ -25,7 +25,12 @@ if __name__ == "__main__":
 
     import studioqt
 
-    # Use the studioqt.app context to run a QApplication instance.
+    # Use the studioqt.app context to create and run a QApplication instance.
     with studioqt.app():
-        libraryWidget = CustomLibraryWidget.instance()
+
+        libraryWidget = CustomLibraryWidget.instance(
+            name="Example2",
+            path="data"
+        )
+
         libraryWidget.show()
