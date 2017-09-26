@@ -1,7 +1,5 @@
 # An example for creating a simple image library
 
-import os
-
 import studiolibrary
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
@@ -61,6 +59,7 @@ class ImagePreviewWidget(QtWidgets.QWidget):
         self._image.setAlignment(QtCore.Qt.AlignHCenter)
 
         self._loadButton = QtWidgets.QPushButton("Load")
+        self._loadButton.setObjectName("acceptButton")
         self._loadButton.setFixedHeight(40)
         self._loadButton.clicked.connect(self.load)
 
@@ -93,13 +92,13 @@ def main():
     # Register the item class to be shown for the valid path extensions
     studiolibrary.registerItem(ImageItem)
 
-    studiolibrary.main(name="Image Library", path="data")
+    studiolibrary.main(name="Example1", path="data")
 
 
 if __name__ == "__main__":
 
     import studioqt
 
-    # Use the studioqt.app context to run a QApplication instance.
+    # Use the studioqt.app context to create and run a QApplication instance.
     with studioqt.app():
         main()

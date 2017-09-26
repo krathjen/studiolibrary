@@ -15,46 +15,47 @@ import studiolibrary
 
 
 def main(
+        cls=None,
         name=None,
         path=None,
         show=True,
         lock=False,
         superusers=None,
-        lockFolder=None,
-        unlockFolder=None,
+        lockRegExp=None,
+        unlockRegExp=None,
 ):
     """
-    The main entry point for creating and loading a library.
+    Convenience method for creating and loading a library widget instance.
 
-    This is a convenience method.
-
+    :type cls: studiolibrary.LibraryWidget.__class__
     :type name: str or None
     :type path: str or None
     :type show: bool
     :type lock: bool
-    :type superusers: str
-    :type lockFolder: str
-    :type unlockFolder: str
+    :type superusers: list[str]
+    :type lockRegExp: str
+    :type unlockRegExp: str
 
     :rtype: studiolibrary.LibraryWidget
     """
-    cls = studiolibrary.LIBRARY_WIDGET_CLASS or studiolibrary.LibraryWidget
+    cls = cls \
+        or studiolibrary.LIBRARY_WIDGET_CLASS \
+        or studiolibrary.LibraryWidget
 
-    libraryWidget = cls.instance(name, path)
-
-    libraryWidget.setLocked(lock)
-    libraryWidget.setSuperusers(superusers)
-    libraryWidget.setLockRegExp(lockFolder)
-    libraryWidget.setUnlockRegExp(unlockFolder)
-
-    if show:
-        libraryWidget.show()
+    libraryWidget = cls.instance(
+        name,
+        path,
+        show=show,
+        lock=lock,
+        superusers=superusers,
+        lockRegExp=lockRegExp,
+        unlockRegExp=unlockRegExp,
+    )
 
     return libraryWidget
 
 
 if __name__ == "__main__":
-
     import logging
     import studioqt
 

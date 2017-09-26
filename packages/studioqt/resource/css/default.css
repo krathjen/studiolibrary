@@ -63,10 +63,17 @@ QPushButton#updateButton {
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 220);
 }
 
-QPushButton#updateButton:hover {
-    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 255);
+
+QPushButton#acceptButton {
+	font: bold 12*DPIpx;
+	color: FOREGROUND_COLOR;
+    background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 230);
 }
 
+QPushButton#acceptButton:hover {
+	color: FOREGROUND_COLOR;
+    background-color: ACCENT_COLOR;
+}
 
 /*
  --------------------------------------------------------------------------
