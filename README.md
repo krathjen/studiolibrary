@@ -8,7 +8,6 @@ Studio Library is a free python script for managing poses and animation in Maya.
 Most of the changes in version 2 are to help with maintaining the project.
 There have been many API changes, so the major version was changed.
 
-* Docking in Maya is not supported yet
 * Items created before version 1.5.x (mid-2014) are no longer supported
 * Creating and switching between libraries from the UI is no longer supported
 
