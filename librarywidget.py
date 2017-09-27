@@ -120,11 +120,6 @@ class LibraryWidget(QtWidgets.QWidget):
             w = cls(name=name, path=path)
             cls._instances[name] = w
 
-            # TODO: This needs to move to studiolibrarymaya.
-            import mutils
-            if mutils.isMaya():
-                mutils.gui.makeMayaStandaloneWindow(w)
-
         w.setLocked(lock)
         w.setSuperusers(superusers)
         w.setLockRegExp(lockRegExp)
@@ -1711,12 +1706,11 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: dict
         """
-
         geometry = (
-            self.geometry().x(),
-            self.geometry().y(),
-            self.geometry().width(),
-            self.geometry().height()
+            self.window().geometry().x(),
+            self.window().geometry().y(),
+            self.window().geometry().width(),
+            self.window().geometry().height()
         )
 
         settings = {}
@@ -1752,6 +1746,22 @@ class LibraryWidget(QtWidgets.QWidget):
         self.setRefreshEnabled(False)
 
         try:
+            if settings.get("geometry"):
+                defaultGeometry = [200, 200, 860, 680]
+                x, y, width, height = settings.get("geometry", defaultGeometry)
+                self.window().setGeometry(x, y, width, height)
+
+            # Make sure the window is on the screen.
+            x = self.window().geometry().x()
+            y = self.window().geometry().y()
+
+            screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
+            screenWidth = screenGeometry.width()
+            screenHeight = screenGeometry.height()
+
+            if x <= 0 or y <= 0 or x >= screenWidth or y >= screenHeight:
+                self.centerWindow()
+
             themeSettings = settings.get("theme", None)
             if themeSettings:
                 theme = studioqt.Theme()
@@ -1769,21 +1779,6 @@ class LibraryWidget(QtWidgets.QWidget):
             sizes = settings.get('sizes', [140, 280, 180])
             if len(sizes) == 3:
                 self.setSizes(sizes)
-
-            x, y, width, height = settings.get("geometry", [200, 200, 860, 680])
-            self.setGeometry(x, y, width, height)
-
-            # Make sure the window is on the screen.
-            screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
-            screenWidth = screenGeometry.width()
-            screenHeight = screenGeometry.height()
-
-            if x < 0 or y < 0 or x > screenWidth or y > screenHeight:
-                self.centerWindow()
-
-            # Reload the stylesheet before loading the dock widget settings.
-            # Otherwise the widget will show docked without a stylesheet.
-            self.reloadStyleSheet()
 
             value = settings.get("foldersWidgetVisible", True)
             self.setFoldersWidgetVisible(value)
@@ -1805,6 +1800,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         finally:
             self.setRefreshEnabled(True)
+            self.reloadStyleSheet()
             self.refresh()
 
         foldersWidgetSettings = settings.get('foldersWidget', {})
@@ -1896,7 +1892,7 @@ class LibraryWidget(QtWidgets.QWidget):
         centerPoint = QtWidgets.QApplication.desktop().screenGeometry(
             screen).center()
         geometry.moveCenter(centerPoint)
-        self.move(geometry.topLeft())
+        self.window().move(geometry.topLeft())
 
     # -----------------------------------------------------------------------
     # Overloading events

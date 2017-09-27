@@ -110,12 +110,14 @@ def resource():
     return _resource
 
 
-def registerItems():
+def setup():
     """
     Called by the studiolibrary config file to register the items.
 
     :rtype: None
     """
+    import studiolibrarymaya.mayalibrarywidget
+
     # The following items are registered on import.
     from studiolibrarymaya import animitem
     from studiolibrarymaya import poseitem
