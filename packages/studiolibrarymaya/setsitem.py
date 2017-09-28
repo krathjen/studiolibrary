@@ -98,10 +98,11 @@ class SetsPreviewWidget(basepreviewwidget.BasePreviewWidget):
 # Register the selection set item to the Studio Library
 iconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
 
+SetsItem.Extensions = [".set"]
 SetsItem.MenuName = "Selection Set"
 SetsItem.MenuIconPath = iconPath
 SetsItem.TypeIconPath = iconPath
 SetsItem.CreateWidgetClass = SetsCreateWidget
 SetsItem.PreviewWidgetClass = SetsPreviewWidget
 
-studiolibrary.registerItem(SetsItem, ".set")
+studiolibrary.registerItem(SetsItem)

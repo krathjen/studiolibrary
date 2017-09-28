@@ -51,6 +51,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
     ENABLE_DELETE = False
 
+    Extensions = []
+
     MenuName = "Library Item"
     MenuIconPath = ""
 
@@ -93,6 +95,19 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         widget = cls.CreateWidgetClass()
         libraryWidget.setCreateWidget(widget)
+
+    @classmethod
+    def isValidPath(cls, path):
+        """
+        Return True if the given path location is supported by the item.
+        
+        :type path: str
+        :rtype: bool 
+        """
+        for ext in cls.Extensions:
+            if path.endswith(ext):
+                return True
+        return False
 
     def __init__(
         self,

@@ -753,9 +753,10 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 # Register the anim item to the Studio Library
 iconPath = studiolibrarymaya.resource().get("icons", "animation.png")
 
+AnimItem.Extensions = [".anim"]
 AnimItem.MenuName = "Animation"
 AnimItem.MenuIconPath = iconPath
 AnimItem.TypeIconPath = iconPath
 AnimItem.CreateWidgetClass = AnimCreateWidget
 
-studiolibrary.registerItem(AnimItem, ".anim")
+studiolibrary.registerItem(AnimItem)

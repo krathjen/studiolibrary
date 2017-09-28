@@ -312,10 +312,11 @@ class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
 # Register the mirror table item to the Studio Library
 iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
 
+MirrorItem.Extensions = [".mirror"]
 MirrorItem.MenuName = "Mirror Table"
 MirrorItem.MenuIconPath = iconPath
 MirrorItem.TypeIconPath = iconPath
 MirrorItem.CreateWidgetClass = MirrorCreateWidget
 MirrorItem.PreviewWidgetClass = MirrorPreviewWidget
 
-studiolibrary.registerItem(MirrorItem, ".mirror")
+studiolibrary.registerItem(MirrorItem)

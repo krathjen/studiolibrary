@@ -12,6 +12,9 @@ from studioqt import QtWidgets
 
 class ImageItem(studiolibrary.LibraryItem):
 
+    # Set the path extensions that this item supports
+    Extensions = [".jpg", ".png", ".gif"]
+
     """An item to display image files in the Studio Library."""
 
     def load(self):
@@ -87,17 +90,10 @@ class ImagePreviewWidget(QtWidgets.QWidget):
 def main():
     """The main entry point for this example."""
 
-    # Register the item class to the extension and ignore all jpgs that
-    # contain the string "thumbnail."
-    studiolibrary.registerItem(ImageItem, ".jpg", ignore="thumbnail.")
-    studiolibrary.registerItem(ImageItem, ".png")
-    studiolibrary.registerItem(ImageItem, ".gif")
+    # Register the item class to be shown for the valid path extensions
+    studiolibrary.registerItem(ImageItem)
 
-    # Show the library with the given name and path
-    dirname = os.path.dirname(__file__)
-    path = os.path.join(dirname, "data")
-
-    studiolibrary.main(name="Image Library", path=path)
+    studiolibrary.main(name="Image Library", path="data")
 
 
 if __name__ == "__main__":
