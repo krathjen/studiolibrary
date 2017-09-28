@@ -4,6 +4,8 @@ Studio Library is a free python script for managing poses and animation in Maya.
 
 * www.studiolibrary.com
 
+* https://github.com/krathjen/studiolibrary
+
 ## What's changed in version 2?
 Most of the changes in version 2 are to help with maintaining the project.
 There have been many API changes, so the major version was changed.
