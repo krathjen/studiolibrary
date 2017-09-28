@@ -740,7 +740,7 @@ class LibraryWidget(QtWidgets.QWidget):
             if accept:
                 path = studiolibrary.renamePath(path, name)
                 self.refreshFolders()
-                self.selectedFolderPath(path)
+                self.selectFolderPath(path)
 
     def showCreateFolderDialog(self, parent=None):
         """
