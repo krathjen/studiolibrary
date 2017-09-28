@@ -88,22 +88,15 @@ class Direction:
     Down = "down"
 
 
-def registerItem(cls, extension, isDir=True, isFile=True, ignore=None):
+def registerItem(cls):
     """
     Register the given item class to the given extension.
 
-    :type extension: str
     :type cls: studiolibrary.LibraryItem
-    :type isDir: bool
-    :type isFile: bool
-    :type ignore: str or None
+    :rtype: None
     """
     global _itemClasses
-    _itemClasses[extension] = {}
-    _itemClasses[extension]["cls"] = cls
-    _itemClasses[extension]["isDir"] = isDir
-    _itemClasses[extension]["isFile"] = isFile
-    _itemClasses[extension]["ignore"] = ignore
+    _itemClasses[cls.__name__] = cls
 
 
 def itemClasses():
@@ -112,7 +105,7 @@ def itemClasses():
 
     :rtype: list[studiolibrary.LibraryItem]
     """
-    return [val['cls'] for val in _itemClasses.values()]
+    return _itemClasses.values()
 
 
 def itemExtensions():
@@ -121,7 +114,12 @@ def itemExtensions():
 
     :rtype: list[str]
     """
-    return _itemClasses.keys()
+    extensions = []
+
+    for cls in itemClasses():
+        extensions.extend(cls.Extensions)
+
+    return extensions
 
 
 def clearItemClasses():
@@ -141,30 +139,11 @@ def itemFromPath(path, **kwargs):
     :type path: str
     :rtype: studiolibrary.LibraryItem or None
     """
-    item = None
+    for cls in itemClasses():
+        if cls.isValidPath(path):
+            return cls(path, **kwargs)
 
-    for ext in _itemClasses:
-
-        val = _itemClasses[ext]
-
-        cls = val["cls"]
-        isDir = val.get("isDir")
-        isFile = val.get("isFile")
-        ignore = val.get("ignore")
-
-        if path.endswith(ext):
-
-            if ignore and ignore in path:
-                continue
-
-            isDir = isDir and os.path.isdir(path)
-            isFile = isFile and os.path.isfile(path)
-
-            if isDir or isFile:
-                item = cls(path, **kwargs)
-                break
-
-    return item
+    return None
 
 
 def itemsFromPaths(paths, **kwargs):

@@ -446,10 +446,11 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
 # Register the pose item to the Studio Library
 iconPath = studiolibrarymaya.resource().get("icons", "pose.png")
 
+PoseItem.Extensions = [".pose"]
 PoseItem.MenuName = "Pose"
 PoseItem.MenuIconPath = iconPath
 PoseItem.TypeIconPath = iconPath
 PoseItem.CreateWidgetClass = PoseCreateWidget
 PoseItem.PreviewWidgetClass = PosePreviewWidget
 
-studiolibrary.registerItem(PoseItem, ".pose")
+studiolibrary.registerItem(PoseItem)
