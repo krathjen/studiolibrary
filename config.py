@@ -13,6 +13,6 @@
 
 import studiolibrary
 
-if studiolibrary.isMaya():
-    import studiolibrarymaya
-    studiolibrarymaya.setup()
+
+import studiolibrarymaya
+studiolibrarymaya.setup()

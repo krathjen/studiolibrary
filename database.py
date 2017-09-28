@@ -224,6 +224,12 @@ class Database(QtCore.QObject):
         data = data.replace(relPath, '.')
         data = data.replace(relPath2, '..')
 
+        path = self.path()
+
+        dirname = os.path.dirname(path)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
         with open(self.path(), "w") as f:
 
             # Test the given data by converting it to a json object.
