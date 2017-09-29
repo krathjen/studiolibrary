@@ -125,6 +125,9 @@ class LibraryWidget(QtWidgets.QWidget):
         w.setLockRegExp(lockRegExp)
         w.setUnlockRegExp(unlockRegExp)
 
+        if path:
+            w.setPath(path)
+
         if show:
             w.show()
 
@@ -309,10 +312,16 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.updateViewButton()
 
-        path = path or self.pathFromSettings()
+        # Check and update the path to the given path.
+        pathFromSettings = self.readPathSettings()
+        rootPath = path or pathFromSettings
 
-        if path is None or not os.path.isdir(path):
+        isNewUser = not rootPath or not os.path.isdir(rootPath)
+
+        if isNewUser:
             self.showWelomeDialog()
+        elif rootPath != pathFromSettings:
+            self.savePathSettings(rootPath)
 
     def _folderRenamed(self, src, dst):
         """
@@ -443,7 +452,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return path
 
-    def pathFromSettings(self):
+    def readPathSettings(self):
         """
         Return the root path from the settings file.
 
@@ -451,6 +460,20 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         settings = self.readSettings()
         return settings.get("path", "")
+
+    def savePathSettings(self, path):
+        """
+        Save the given path to the settings on disc.
+        
+        :type path: str
+        :rtype: None 
+        """
+        path = studiolibrary.normPath(path)
+        settings = self.readSettings()
+
+        if path != settings.get("path"):
+            settings["path"] = path
+            self.saveSettings(settings=settings)
 
     def setPath(self, path):
         """
@@ -468,17 +491,19 @@ class LibraryWidget(QtWidgets.QWidget):
         :type path: str
         :rtype: None
         """
+        path = studiolibrary.normPath(path)
+
         if path:
-            self._path = path
+            if path != self.path():
 
-            path_ = studiolibrary.formatPath(path, self.DATABASE_PATH)
-            self.setDatabasePath(path_)
+                self._path = path
 
-            self.refresh()
+                path_ = studiolibrary.formatPath(path, self.DATABASE_PATH)
+                self.setDatabasePath(path_)
+
+                self.refresh()
         else:
             self.setError("Error: No path found! Please change the path from the settings menu!")
-
-        self.updateWindowTitle()
 
     def showWelomeDialog(self):
         """
@@ -536,8 +561,8 @@ class LibraryWidget(QtWidgets.QWidget):
         dialog.setFileMode(QtWidgets.QFileDialog.DirectoryOnly)
 
         if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-            path_ = dialog.selectedFiles()[0]
-            root = path_.replace("\\", "/")
+            root = dialog.selectedFiles()[0]
+            root = studiolibrary.normPath(root)
 
         return root
 
@@ -562,6 +587,7 @@ class LibraryWidget(QtWidgets.QWidget):
             self.refreshSearch()
 
             self.selectItems(items)
+            self.updateWindowTitle()
 
     # -----------------------------------------------------------------
     # Methods for the navigation widget
@@ -1810,20 +1836,22 @@ class LibraryWidget(QtWidgets.QWidget):
         self.itemsWidget().setSettings(itemsWidgetSettings)
         self.itemsWidget().setToastEnabled(True)
 
-    def saveSettings(self):
+    def saveSettings(self, settings=None):
         """
         Save the settings dictionary to a local json location.
 
+        :type settings: dict or None
         :rtype: None
         """
-        settings = self.settings()
+        settings = settings or self.settings()
 
         path = self.settingsPath()
-        key = self._name
+        key = self.name()
 
         data = studiolibrary.readJson(path)
         data[key] = settings
 
+        logger.debug("Saving settings {path}".format(path=path))
         studiolibrary.saveJson(path, data)
 
     def loadSettings(self):
@@ -1844,7 +1872,10 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         key = self.name()
         path = self.settingsPath()
+
+        logger.debug("Reading settings {path}".format(path=path))
         data = studiolibrary.readJson(path)
+
         return data.get(key, {})
 
     def isLoaded(self):

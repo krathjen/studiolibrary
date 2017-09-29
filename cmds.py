@@ -40,6 +40,7 @@ __all__ = [
     "findPaths",
     "copyPath",
     "movePath",
+    "normPath",
     "splitPath",
     "removePath",
     "renamePath",
@@ -380,8 +381,8 @@ def renamePath(src, dst, extension=None, force=False):
     :type force: bool
     :rtype: str
     """
-    src = src.replace("\\", "/")
-    dst = dst.replace("\\", "/")
+    src = normPath(src)
+    dst = normPath(dst)
 
     dirname = os.path.dirname(src)
 
@@ -525,6 +526,7 @@ def normPath(path):
     :type path: str
     :rtype: str 
     """
+    path = os.path.realpath(path)
     return path.replace("\\", "/")
 
 
@@ -617,15 +619,14 @@ def findPaths(
     return paths
 
 
-def walkup(path, match=None, depth=3):
+def walkup(path, match=None, depth=3, sep="/"):
     """
     :type path: str
     :type match: func
     :type depth: int
+    :type sep: str
     :rtype: collections.Iterable[str]
     """
-    sep = "/"
-    path = os.path.realpath(path)
     path = normPath(path)
 
     if not path.endswith(sep):
