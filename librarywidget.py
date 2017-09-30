@@ -1773,10 +1773,9 @@ class LibraryWidget(QtWidgets.QWidget):
         self.setRefreshEnabled(False)
 
         try:
-            if settings.get("geometry"):
-                defaultGeometry = [200, 200, 860, 680]
-                x, y, width, height = settings.get("geometry", defaultGeometry)
-                self.window().setGeometry(x, y, width, height)
+            defaultGeometry = [200, 100, 860, 680]
+            x, y, width, height = settings.get("geometry", defaultGeometry)
+            self.window().setGeometry(x, y, width, height)
 
             # Make sure the window is on the screen.
             x = self.window().geometry().x()
@@ -1787,6 +1786,9 @@ class LibraryWidget(QtWidgets.QWidget):
             screenHeight = screenGeometry.height()
 
             if x <= 0 or y <= 0 or x >= screenWidth or y >= screenHeight:
+                self.centerWindow()
+
+            if settings.get("geometry") is None:
                 self.centerWindow()
 
             themeSettings = settings.get("theme", None)
@@ -1803,7 +1805,7 @@ class LibraryWidget(QtWidgets.QWidget):
             dpi = settings.get("dpi", 1.0)
             self.setDpi(dpi)
 
-            sizes = settings.get('sizes', [140, 280, 180])
+            sizes = settings.get('sizes', [160, 280, 180])
             if len(sizes) == 3:
                 self.setSizes(sizes)
 
@@ -2048,7 +2050,10 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: studioqt.Theme
         """
-        return self._theme or studioqt.Theme()
+        if not self._theme:
+            self._theme = studioqt.Theme()
+
+        return self._theme
 
     def reloadStyleSheet(self):
         """
