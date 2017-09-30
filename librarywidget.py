@@ -862,6 +862,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         selection = self.selectedItems()
 
+        self.clearPreviewWidget()
         self.itemsWidget().clearSelection()
         self.itemsWidget().selectPaths(paths)
 

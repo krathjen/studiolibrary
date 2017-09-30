@@ -124,7 +124,15 @@ class MirrorItem(baseitem.BaseItem):
             time=time,
         )
 
-    def save(self, objects, leftSide, rightSide, path=None, iconPath=None, **kwargs):
+    def save(
+            self,
+            objects,
+            leftSide,
+            rightSide,
+            path=None,
+            iconPath=None,
+            description=None,
+            **kwargs):
         """
         Save the given objects to the location of the current mirror table.
 
@@ -146,9 +154,15 @@ class MirrorItem(baseitem.BaseItem):
             leftSide=leftSide,
             rightSide=rightSide
         )
-        t.save(tempPath)
 
-        studiolibrary.LibraryItem.save(self, path=path, contents=[tempPath, iconPath], **kwargs)
+        t.save(tempPath, description=description)
+
+        studiolibrary.LibraryItem.save(
+            self,
+            path=path,
+            contents=[tempPath, iconPath],
+            **kwargs
+        )
 
 
 class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -219,15 +233,13 @@ class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
         leftSide = self.leftText()
         rightSide = self.rightText()
 
-        r = self.item()
-        r.setDescription(description)
-
         self.item().save(
             path=path,
             objects=objects,
             iconPath=iconPath,
             leftSide=leftSide,
             rightSide=rightSide,
+            description=description,
         )
 
 
