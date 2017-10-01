@@ -10,8 +10,9 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import json
 import logging
+
+import studiolibrary
 
 import studioqt
 from studioqt import QtCore
@@ -38,8 +39,7 @@ class Database(QtCore.QObject):
         self._watcher = None
 
         self.setDirty(False)
-        if self.ENABLE_WATCHER:
-            self.setWatcherEnabled(True)
+        self.setWatcherEnabled(self.ENABLE_WATCHER)
 
     def setWatcherEnabled(self, enable, repeatRate=None):
         """
@@ -49,18 +49,37 @@ class Database(QtCore.QObject):
         :type repeatRate: int
         :rtype: None
         """
+        if enable:
+            self.startWatcher(repeatRate=repeatRate)
+        else:
+            self.stopWatcher()
+
+    def startWatcher(self, repeatRate=None):
+        """
+        Create and start a file system watcher for the current database. 
+
+        :type repeatRate: int
+        :rtype: None 
+        """
+        self.stopWatcher()
+
         repeatRate = repeatRate or self.DEFAULT_WATCHER_REPEAT_RATE
 
-        if enable:
-            if not self._watcher:
-                self._watcher = studioqt.InvokeRepeatingThread(repeatRate)
-                self._watcher.triggered.connect(self._watcherTrggered)
-                self._watcher.start()
-        elif self._watcher:
+        self._watcher = studioqt.InvokeRepeatingThread(repeatRate)
+        self._watcher.triggered.connect(self._fileChanged)
+        self._watcher.start()
+
+    def stopWatcher(self):
+        """
+        Stop watching the current database for changes.
+        
+        :rtype: None 
+        """
+        if self._watcher:
             self._watcher.terminate()
             self._watcher = None
 
-    def _watcherTrggered(self):
+    def _fileChanged(self):
         """
         Triggered when the watcher has reached it's repeat rate.
 
@@ -127,28 +146,7 @@ class Database(QtCore.QObject):
         :type path: str
         :rtype: str
         """
-        path = os.path.normpath(path)
-        path = path.replace("\\", "/")
-        path = path.replace("\\\\", "/")
-        return path
-
-    def relPath(self):
-        """
-        Return the relative path to the database path.
-
-        :rtype: str
-        """
-        relPath = os.path.dirname(self.path())
-        return self.normPath(relPath)
-
-    def relPath2(self):
-        """
-        Return the parent relative path.
-
-        :rtype: str
-        """
-        relPath2 = os.path.dirname(self.relPath())
-        return self.normPath(relPath2)
+        return studiolibrary.normPath(path)
 
     def searchReplace(self, old, new, count=-1):
         """
@@ -160,83 +158,29 @@ class Database(QtCore.QObject):
 
         :rtype: None
         """
-        data = self._read()
+        path = self.path()
 
+        data = studiolibrary.read(path)
         data = data.replace(old, new, count)
 
-        self._write(data)
+        studiolibrary.write(path, data)
 
-    def read(self):
+    def readJson(self):
         """
         Return the data from the database as a valid dict object.
 
         :rtype: dict
         """
-        data = self._read()
+        return studiolibrary.readJson(self.path())
 
-        data = json.loads(data)
-
-        return data
-
-    def write(self, data):
+    def saveJson(self, data):
         """
         Write the given dict object to disc.
 
         :type data: dict
         :rtype: None
         """
-        data = json.dumps(data, indent=4)
-
-        self._write(data)
-
-    def _read(self):
-        """
-        Read the database and return the data.
-
-        :rtype: str
-        """
-        path = self.path()
-
-        data = "{}"
-
-        if os.path.isfile(path):
-            with open(path, "r") as f:
-                data = f.read() or data
-
-        relPath = self.relPath()
-        relPath2 = self.relPath2()
-
-        data = data.replace('\"../', '"' + relPath2 + '/')
-        data = data.replace('\"./', '"' + relPath + '/')
-
-        return data
-
-    def _write(self, data):
-        """
-        Write the given data to the database.
-
-        :type data: str
-        :rtype: None
-        """
-        relPath = self.relPath()
-        relPath2 = self.relPath2()
-
-        data = data.replace(relPath, '.')
-        data = data.replace(relPath2, '..')
-
-        path = self.path()
-
-        dirname = os.path.dirname(path)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-
-        with open(self.path(), "w") as f:
-
-            # Test the given data by converting it to a json object.
-            data = json.loads(data)
-            data = json.dumps(data, indent=4)
-
-            f.write(data)
+        studiolibrary.saveJson(self.path(), data)
 
     def update(self, data):
         """
@@ -245,9 +189,9 @@ class Database(QtCore.QObject):
         :type data: dict
         :rtype: None
         """
-        data_ = self.read()
+        data_ = self.readJson()
         data_.update(data)
-        self.write(data_)
+        self.saveJson(data_)
 
     def insert(self, key, data):
         """
@@ -267,7 +211,7 @@ class Database(QtCore.QObject):
         :type data: dict
         :rtype: None
         """
-        data_ = self.read()
+        data_ = self.readJson()
 
         keys = self.normPaths(keys)
 
@@ -277,7 +221,7 @@ class Database(QtCore.QObject):
             else:
                 data_[key] = data
 
-        self.write(data_)
+        self.saveJson(data_)
 
     def delete(self, key):
         """
@@ -295,7 +239,7 @@ class Database(QtCore.QObject):
         :type keys: list[str]
         :rtype: None
         """
-        data = self.read()
+        data = self.readJson()
 
         keys = self.normPaths(keys)
 
@@ -303,7 +247,7 @@ class Database(QtCore.QObject):
             if key in data:
                 del data[key]
 
-        self.write(data)
+        self.saveJson(data)
 
     def renamePath(self, src, dst):
         """

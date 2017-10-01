@@ -93,7 +93,7 @@ class LibraryWidget(QtWidgets.QWidget):
             cls,
             name=None,
             path=None,
-            show=False,
+            show=True,
             lock=False,
             superusers=None,
             lockRegExp=None,
@@ -1338,7 +1338,7 @@ class LibraryWidget(QtWidgets.QWidget):
         logger.debug("Loading item data")
 
         db = self.database()
-        data = db.read()
+        data = db.readJson()
 
         try:
             self.itemsWidget().setItemData(data)

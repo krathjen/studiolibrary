@@ -1,5 +1,7 @@
 # An example for creating a custom settings action
 
+import os
+
 import studiolibrary
 
 
@@ -28,9 +30,6 @@ if __name__ == "__main__":
     # Use the studioqt.app context to create and run a QApplication instance.
     with studioqt.app():
 
-        libraryWidget = CustomLibraryWidget.instance(
-            name="Example2",
-            path="data"
-        )
+        path = os.path.abspath("data")
 
-        libraryWidget.show()
+        w = CustomLibraryWidget.instance(name="Example2", path=path)

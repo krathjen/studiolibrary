@@ -33,6 +33,8 @@ __all__ = [
     "isWindows",
     "logScreen",
     "timeAgo",
+    "read",
+    "write",
     "saveJson",
     "readJson",
     "updateJson",
@@ -381,16 +383,16 @@ def renamePath(src, dst, extension=None, force=False):
     :type force: bool
     :rtype: str
     """
-    src = normPath(src)
-    dst = normPath(dst)
-
     dirname = os.path.dirname(src)
 
     if "/" not in dst:
-        dst = dirname + "/" + dst
+        dst = os.path.join(dirname, dst)
 
     if extension and extension not in dst:
         dst += extension
+
+    src = normPath(src)
+    dst = normPath(dst)
 
     logger.debug(u'Renaming: {0} => {1}'.format(src, dst))
 
@@ -437,6 +439,45 @@ def moveContents(contents, path):
         shutil.move(src, dst)
 
 
+def read(path):
+    """
+    Return the contents of the given path
+    
+    :type path: str 
+    :rtype: str 
+    """
+    data = ""
+    path = normPath(path)
+
+    if os.path.isfile(path):
+        with open(path, "r") as f:
+            data = f.read() or data
+
+    data = resolveRelativePath(path, data)
+
+    return data
+
+
+def write(path, data):
+    """
+    Write the given data to the given path location on disc.
+
+    :type path: str 
+    :type data: str 
+    :rtype: None 
+    """
+    path = normPath(path)
+    dirname = os.path.dirname(path)
+
+    data = formatRelativePath(path, data)
+
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    with open(path, "w") as f:
+        f.write(data)
+
+
 def updateJson(path, data):
     """
     Update a json file with the given data.
@@ -458,14 +499,9 @@ def saveJson(path, data):
     :type data: dict
     :rtype: None
     """
-    dirname = os.path.dirname(path)
-
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-
-    with open(path, "w") as f:
-        data = json.dumps(data, indent=4)
-        f.write(data)
+    path = normPath(path)
+    data = json.dumps(data, indent=4)
+    write(path, data)
 
 
 def readJson(path):
@@ -477,16 +513,77 @@ def readJson(path):
     """
     logger.debug(u'Reading json file: {0}'.format(path))
 
-    data = {}
+    path = normPath(path)
 
-    if os.path.isfile(path):
-        with open(path, "r") as f:
-            data_ = f.read()
-            if data_:
-                try:
-                    data = json.loads(data_)
-                except Exception, e:
-                    logger.exception(e)
+    data = read(path) or "{}"
+
+    try:
+        data = json.loads(data)
+    except Exception, e:
+        logger.exception(e)
+
+    return data
+
+
+def resolveRelativePath(path, data, sep="/"):
+    """
+    Resolve all relative paths in the given data object.
+    
+    This function is not pretty, however, the complexity increases when 
+    making it a loop.
+    
+    :type path: str
+    :type data: str 
+    :type sep: str 
+    :rtype: str 
+    """
+    relPath = os.path.dirname(path)
+    relPath2 = os.path.dirname(relPath)
+    relPath3 = os.path.dirname(relPath2)
+
+    if relPath.endswith(sep):
+        relPath = relPath[:-1]
+
+    if relPath2.endswith(sep):
+        relPath2 = relPath2[:-1]
+
+    if relPath3.endswith(sep):
+        relPath3 = relPath3[:-1]
+
+    data = data.replace('\"...' + sep, '"' + relPath3 + sep)
+    data = data.replace('\"..' + sep, '"' + relPath2 + sep)
+    data = data.replace('\".' + sep, '"' + relPath + sep)
+
+    return data
+
+
+def formatRelativePath(path, data, sep="/"):
+    """
+    Replace all paths in the data that start with the given path.
+
+    This function is not pretty, however, the complexity increases when 
+    making it a loop.
+
+    :type path: str
+    :type data: str 
+    :rtype: str 
+    """
+    relPath = os.path.dirname(path)
+    relPath2 = os.path.dirname(relPath)
+    relPath3 = os.path.dirname(relPath2)
+
+    if not relPath.endswith(sep):
+        relPath = relPath + sep
+
+    if not relPath2.endswith(sep):
+        relPath2 = relPath2 + sep
+
+    if not relPath3.endswith(sep):
+        relPath3 = relPath3 + sep
+
+    data = data.replace(relPath, '.' + sep)
+    data = data.replace(relPath2, '..' + sep)
+    data = data.replace(relPath3, '...' + sep)
 
     return data
 
@@ -526,7 +623,6 @@ def normPath(path):
     :type path: str
     :rtype: str 
     """
-    path = os.path.realpath(path)
     return path.replace("\\", "/")
 
 
@@ -781,3 +877,38 @@ def logScreen(name, version="1.0.0", an="StudioLibrary", tid="UA-50172384-2"):
 
     t = threading.Thread(target=_send, args=(url,))
     t.start()
+
+
+def testRelativePaths():
+    """
+    A simple test for resolving relative paths.
+    
+    :rtype: None 
+    """
+    data = """
+    { 
+    "P:/path/head.anim": {},
+    "P:/test/path/face.anim": {},
+    "P:/test/relative/path/hand.anim": {},    
+    }
+    """
+
+    expected = """
+    { 
+    ".../path/head.anim": {},
+    "../path/face.anim": {},
+    "./path/hand.anim": {},    
+    }
+    """
+
+    data_ = formatRelativePath("P:/test/relative/file.database", data)
+    msg = "Data does not match {} {}".format(expected, data_)
+    assert data_ == expected, msg
+
+    data_ = resolveRelativePath("P:/test/relative/file.database", data_)
+    msg = "Data does not match {} {}".format(data, data_)
+    assert data_ == data, msg
+
+
+if __name__ == "__main__":
+    testRelativePaths()

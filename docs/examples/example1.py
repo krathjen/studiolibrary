@@ -1,5 +1,7 @@
 # An example for creating a simple image library
 
+import os
+
 import studiolibrary
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
@@ -92,7 +94,9 @@ def main():
     # Register the item class to be shown for the valid path extensions
     studiolibrary.registerItem(ImageItem)
 
-    studiolibrary.main(name="Example1", path="data")
+    path = os.path.abspath("data")
+
+    studiolibrary.main(name="Example1", path=path)
 
 
 if __name__ == "__main__":
