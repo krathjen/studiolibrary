@@ -253,7 +253,7 @@ class PoseItem(baseitem.BaseItem):
                 **self._options
             )
         except Exception, e:
-            studioqt.MessageBox.critical(None, "Item Error", str(e))
+            self.showErrorDialog("Item Error", str(e))
             raise
 
     def load(

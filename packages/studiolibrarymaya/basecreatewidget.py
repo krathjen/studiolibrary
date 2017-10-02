@@ -53,6 +53,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self._iconPath = ""
         self._scriptJob = None
         self._focusWidget = None
+        self._libraryWidget = None
 
         self.ui.thumbnailButton.setToolTip(
             "Click to capture a thumbnail from the current model panel.\nCTRL + Click to show "
@@ -72,6 +73,23 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self.setItem(item)
         self.updateContains()
         self.updateThumbnailSize()
+
+    def setLibraryWidget(self, libraryWidget):
+        """
+        Set the library widget for the item.
+        
+        :type libraryWidget: studiolibrary.LibraryWidget
+        :rtype: None
+        """
+        self.item().setLibraryWidget(libraryWidget)
+
+    def libraryWidget(self):
+        """
+        Return the library widget for the item.
+
+        :rtype: libraryWidget: studiolibrary.LibraryWidget
+        """
+        return self.item().libraryWidget()
 
     def item(self):
         """
@@ -154,9 +172,10 @@ class BaseCreateWidget(QtWidgets.QWidget):
         import setsmenu
 
         path = self.folderPath()
-        menu = setsmenu.SetsMenu.fromPath(path, parent=self)
         position = QtGui.QCursor().pos()
+        libraryWidget = self.libraryWidget()
 
+        menu = setsmenu.SetsMenu.fromPath(path, libraryWidget=libraryWidget)
         menu.exec_(position)
 
     def close(self):
@@ -326,10 +345,14 @@ class BaseCreateWidget(QtWidgets.QWidget):
         :rtype: int
         """
         title = "Create a thumbnail"
-        message = "Would you like to capture a thumbanil?"
-        options = \
-            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Ignore | QtWidgets.QMessageBox.Cancel
-        result = studioqt.MessageBox.question(None, title, str(message), options)
+        text = "Would you like to capture a thumbanil?"
+
+        options = QtWidgets.QMessageBox.Yes | \
+                  QtWidgets.QMessageBox.Ignore | \
+                  QtWidgets.QMessageBox.Cancel
+
+        parent = self.item().libraryWidget()
+        result = studioqt.MessageBox.question(parent, title, text, options)
 
         if result == QtWidgets.QMessageBox.Yes:
             self.thumbnailCapture()
@@ -368,9 +391,9 @@ class BaseCreateWidget(QtWidgets.QWidget):
                 description=description,
             )
 
-        except Exception, msg:
+        except Exception, e:
             title = "Error while saving"
-            studioqt.MessageBox.critical(self, title, str(msg))
+            studioqt.MessageBox.critical(self.libraryWidget(), title, str(e))
             raise
 
     def save(self, objects, path, iconPath, description):

@@ -57,13 +57,13 @@ def showSetsMenu(path, **kwargs):
 class SetsMenu(QtWidgets.QMenu):
 
     @classmethod
-    def fromPath(cls, path, **kwargs):
+    def fromPath(cls, path, libraryWidget=None, **kwargs):
         """
         :type path: str
         :type kwargs: dict
         :rtype: QtWidgets.QAction
         """
-        item = setsitem.SetsItem(path)
+        item = setsitem.SetsItem(path, libraryWidget=libraryWidget)
         return cls(item, enableSelectContent=False, **kwargs)
 
     def __init__(
@@ -120,11 +120,13 @@ class SetsMenu(QtWidgets.QMenu):
             depth=10,
         )
 
-        paths = list(paths)
         items = []
+        paths = list(paths)
+        libraryWidget = self.item().libraryWidget()
 
         for path in paths:
             item = setsitem.SetsItem(path)
+            item.setLibraryWidget(libraryWidget)
             items.append(item)
 
         return items

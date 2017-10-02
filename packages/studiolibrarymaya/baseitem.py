@@ -64,6 +64,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         widget.setFolderPath(path)
         widget.setDatabase(libraryWidget.database())
+        widget.setLibraryWidget(libraryWidget)
 
         libraryWidget.setCreateWidget(widget)
         libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
@@ -234,6 +235,8 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         import setsmenu
 
+        parent = parent or self.libraryWidget()
+
         namespaces = self.namespaces()
 
         menu = setsmenu.SetsMenu(
@@ -242,6 +245,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 namespaces=namespaces,
                 enableSelectContent=enableSelectContent,
         )
+
         return menu
 
     def selectContent(self, namespaces=None, **kwargs):
@@ -259,9 +263,8 @@ class BaseItem(studiolibrary.LibraryItem):
 
         try:
             self.transferObject().select(namespaces=namespaces, **kwargs)
-        except Exception, msg:
-            title = "Error while selecting content"
-            studioqt.MessageBox.critical(None, title, str(msg))
+        except Exception, e:
+            self.showErrorDialog("Item Error", str(e))
             raise
 
     def mirrorTable(self):

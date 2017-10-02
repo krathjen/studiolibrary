@@ -24,6 +24,10 @@ MenuBarWidget, QToolBar, QToolButton  {
 	background-color: ACCENT_COLOR;
 }
 
+/*
+DIALOG
+*/
+
 QDialog QPushButton:focus {
     color: ACCENT_FOREGROUND_COLOR;
     background-color: ACCENT_COLOR;
@@ -34,15 +38,6 @@ QDialog QPushButton, QDialog QDialogButtonBox QPushButton {
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 30);
 }
 
-
-/*
-DIALOG
-*/
-QMessageBox QPushButton, QDialog QPushButton  {
-    width: 100px;
-    height: 32px;
-}
-
 /*
  --------------------------------------------------------------------------
  Push Button
@@ -50,8 +45,7 @@ QMessageBox QPushButton, QDialog QPushButton  {
 */
 
 QPushButton:hover {
-	color: ACCENT_FOREGROUND_COLOR;
-	background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 230);
+	background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 200);
 }
 
 QPushButton#updateButton {
@@ -63,16 +57,14 @@ QPushButton#updateButton {
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 220);
 }
 
-
 QPushButton#acceptButton {
 	font: bold 12*DPIpx;
-	color: FOREGROUND_COLOR;
+	color: ACCENT_FOREGROUND_COLOR;
     background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 230);
 }
 
 QPushButton#acceptButton:hover {
-	color: FOREGROUND_COLOR;
-    background-color: ACCENT_COLOR;
+    background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 250);
 }
 
 /*
@@ -105,12 +97,12 @@ QSlider::sub-page:horizontal {
     border-bottom: 1px solid ACCENT_COLOR;
 }
 
-
 /*
  --------------------------------------------------------------------------
  Scroll Bar
  --------------------------------------------------------------------------
 */
+
 QScrollBar:vertical {
 	width: 10*DPIpx;
 }
@@ -216,10 +208,6 @@ QTreeView {
 	font: 13*DPIpx;
 	color: FOREGROUND_COLOR;
 }
-
-/*QTreeWidget {*/
-	/*font: 12*DPIpx;*/
-/*}*/
 
 QTreeView, QListView, QPushButton {
     border: 0px;
@@ -600,10 +588,76 @@ PreviewFrame QPushButton {
 }
 
 PreviewFrame QPushButton:hover {
-    color: FOREGROUND_COLOR;
+    color: ACCENT_FOREGROUND_COLOR;
 }
 
 
+ /*--------------------------------------------------------------------------*/
+ /* CUSTOM MESSAGE BOX */
+ /*--------------------------------------------------------------------------*/
 
+#messageBoxHeaderLabel {
+    font: 14pt;
+    color: rgb(255,255,255);
+}
 
+#messageBoxHeaderFrame {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
 
+#messageBox {
+    border-radius: 7px;
+    background-color: rgb(255,255,255,255);
+}
+
+#messageBox QWidget {
+    background-color: rgb(255,255,255,0);
+}
+
+#messageBox #messageBoxInputEdit {
+    background-color: rgb(240, 240, 240, 180);
+}
+
+#messageBoxBody QWidget {
+    font: 10pt;
+    color: rgb(100,100,110);
+}
+
+#messageBox QPushButton {
+    font: 11pt;
+    color: rgb(250, 250, 250, 250);
+    min-width: 92px;
+    min-height: 32px;
+    border-radius: 16px;
+    background-color: rgb(180, 180, 180, 230);
+}
+
+#messageBox QPushButton:focus, #messageBox QPushButton:hover {
+    color: ACCENT_FOREGROUND_COLOR;
+    background-color: ACCENT_COLOR;
+}
+
+#messageBox QRadioButton::indicator:checked {
+    image: url(RESOURCE_DIRNAME/icons/radio_button_checked_black.png)
+}
+
+#messageBox QRadioButton::indicator:unchecked {
+    image: url(RESOURCE_DIRNAME/icons/radio_button_unchecked_black.png)
+}
+
+#messageBox QCheckBox::indicator:checked {
+    image: url(RESOURCE_DIRNAME/icons/check_box_checked_black.png)
+}
+
+#messageBox QCheckBox::indicator:unchecked {
+    image: url(RESOURCE_DIRNAME/icons/check_box_unchecked_black.png)
+}
+
+#messageBox QCheckBox::indicator:disabled {
+    image: url(RESOURCE_DIRNAME/icons/check_box_unchecked_black.png)
+}
+
+#messageBoxFrame {
+    background-color: rgb(BACKGROUND_COLOR_R,BACKGROUND_COLOR_G,BACKGROUND_COLOR_B,210);
+}

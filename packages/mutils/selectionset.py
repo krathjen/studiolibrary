@@ -73,7 +73,10 @@ class SelectionSet(mutils.TransferObject):
             # Return the focus to the Maya window
             maya.cmds.setFocus("MayaWindow")
         else:
-            raise mutils.NoMatchFoundError("No objects match when loading data")
+            text = "No objects match when loading data. " \
+                   "Turn on debug mode to see more details."
+
+            raise mutils.NoMatchFoundError(text)
 
     def select(self, objects=None, namespaces=None, **kwargs):
         """
