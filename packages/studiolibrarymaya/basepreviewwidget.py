@@ -167,7 +167,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         :rtype: None
         """
         item = self.item()
-        item.showSelectionSetsMenu(parent=self)
+        item.showSelectionSetsMenu()
 
     def resizeEvent(self, event):
         """
@@ -435,7 +435,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         """
         try:
             self.item().load()
-        except Exception, msg:
+        except Exception, e:
             title = "Error while loading"
-            studioqt.MessageBox.critical(self, title, str(msg))
+            self.item().showErrorDialog(title, str(e))
             raise

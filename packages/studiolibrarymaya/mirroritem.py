@@ -41,8 +41,6 @@ item.load(objects=objects, namespaces=namespaces, animation=True, time=None)
 import os
 import logging
 
-import studioqt
-
 from studioqt import QtCore
 
 import mutils
@@ -100,7 +98,7 @@ class MirrorItem(baseitem.BaseItem):
                 namespaces=namespaces,
             )
         except Exception, e:
-            studioqt.MessageBox.critical(None, "Item Error", str(e))
+            self.showErrorDialog("Item Error", str(e))
             raise
 
     @mutils.showWaitCursor

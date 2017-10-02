@@ -140,6 +140,16 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if path:
             self.setPath(path)
 
+    def showErrorDialog(self, title, text):
+        """
+        Convenience method for showing an error dialog to the user.
+        
+        :type title: str
+        :type text: str
+        :rtype: QMessageBox.StandardButton
+        """
+        return studioqt.MessageBox.critical(self.libraryWidget(), title, text)
+
     def typeIconPath(self):
         """
         Return the type icon path on disc.
@@ -498,22 +508,21 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         parent = parent or self.libraryWidget()
 
-        name, accepted = QtWidgets.QInputDialog.getText(
+        name, button = studioqt.MessageBox.input(
             parent,
-            "Rename",
-            "New Name",
-            QtWidgets.QLineEdit.Normal,
-            self.name()
+            "Rename item",
+            "Rename the current item to:",
+            inputText=self.name()
         )
 
-        if accepted:
+        if button == QtWidgets.QDialogButtonBox.Ok:
             try:
                 self.rename(name)
             except Exception, e:
                 logger.exception(e)
-                studioqt.MessageBox.critical(parent, "Rename Error", str(e))
+                self.showErrorDialog("Rename Error", str(e))
 
-        return accepted
+        return button
 
     def showMoveDialog(self, parent=None):
         """

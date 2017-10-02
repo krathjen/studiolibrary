@@ -651,7 +651,11 @@ class MirrorTable(mutils.SelectionSet):
         maya.cmds.setFocus("MayaWindow")
 
         if not foundObject:
-            raise mutils.NoMatchFoundError("No objects match when loading data")
+
+            text = "No objects match when loading data. " \
+                   "Turn on debug mode to see more details."
+
+            raise mutils.NoMatchFoundError(text)
 
     def transferStatic(self, srcObj, dstObj, mirrorAxis=None, attrs=None, option=MirrorOption.Swap):
         """

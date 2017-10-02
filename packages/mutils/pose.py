@@ -306,7 +306,10 @@ class Pose(mutils.SelectionSet):
                 )
 
         if not self.cache():
-            raise mutils.NoMatchFoundError("No objects match when loading data")
+            text = "No objects match when loading data. " \
+                   "Turn on debug mode to see more details."
+
+            raise mutils.NoMatchFoundError(text)
 
     def setMirrorAxis(self, name, mirrorAxis):
         """

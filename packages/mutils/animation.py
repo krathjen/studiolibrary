@@ -695,7 +695,11 @@ class Animation(mutils.Pose):
                 break
 
         if not matches or not valid:
-            raise mutils.NoMatchFoundError("No objects match when loading data")
+
+            text = "No objects match when loading data. " \
+                   "Turn on debug mode to see more details."
+
+            raise mutils.NoMatchFoundError(text)
 
         # Load the animation data.
         srcCurves = self.open()

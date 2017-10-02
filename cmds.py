@@ -520,6 +520,7 @@ def readJson(path):
     try:
         data = json.loads(data)
     except Exception, e:
+        data = {}
         logger.exception(e)
 
     return data

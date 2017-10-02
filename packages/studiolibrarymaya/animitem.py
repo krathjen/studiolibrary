@@ -175,7 +175,7 @@ class AnimItem(baseitem.BaseItem):
             )
 
         except Exception, e:
-            studioqt.MessageBox.critical(None, "Item Error", str(e))
+            self.showErrorDialog("Item Error", str(e))
             raise
 
     def load(
@@ -277,8 +277,14 @@ class AnimItem(baseitem.BaseItem):
         tempPath = tempDir.path() + "/transfer.anim"
 
         t = self.transferClass().fromObjects(objects)
-        t.save(tempPath, time=[startFrame, endFrame], fileType=fileType,
-               bakeConnected=bakeConnected, description=description)
+
+        t.save(
+            tempPath,
+            fileType=fileType,
+            time=[startFrame, endFrame],
+            bakeConnected=bakeConnected,
+            description=description
+        )
 
         if iconPath:
             contents.append(iconPath)
@@ -487,18 +493,18 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
         :rtype: None
         """
-        msg = 'To help speed up the playblast you can set the "by frame" to a number greater ' \
-              'than 1. For example if the "by frame" is set to 2 it will playblast every second ' \
-              'frame.'
+        text = 'To help speed up the playblast you can set the "by frame" ' \
+               'to a number greater than 1. For example if the "by frame" ' \
+               'is set to 2 it will playblast every second frame.'
 
         if self.duration() > 100 and self.byFrame() == 1:
 
             buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel
 
             result = studioqt.MessageBox.question(
-                self,
+                self.libraryWidget(),
                 title="Anim Item Tip",
-                message=msg,
+                text=text,
                 buttons=buttons,
                 enableDontShowCheckBox=True,
             )
@@ -546,9 +552,9 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
                 captured=self._thumbnailCaptured,
             )
 
-        except Exception, msg:
+        except Exception, e:
             title = "Error while capturing thumbnail"
-            QtWidgets.QMessageBox.critical(None, title, str(msg))
+            QtWidgets.QMessageBox.critical(self.libraryWidget(), title, str(e))
             raise
 
     def validateFrameRange(self):

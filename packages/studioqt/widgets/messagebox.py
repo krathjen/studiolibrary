@@ -25,10 +25,13 @@ SETTINGS_PATH = os.path.join(HOME_PATH, 'studioqt.ini')
 def createMessageBox(
         parent,
         title,
-        message,
+        text,
+        width=None,
+        height=None,
         buttons=None,
         headerIcon=None,
         headerColor=None,
+        enableInputEdit=False,
         enableDontShowCheckBox=False
 ):
     """
@@ -36,7 +39,7 @@ def createMessageBox(
 
     :type parent: QWidget
     :type title: str
-    :type message: str
+    :type text: str
     :type buttons: list[QMessageBox.StandardButton]
     :type headerIcon: str
     :type headerColor: str
@@ -44,9 +47,15 @@ def createMessageBox(
 
     :rtype: MessageBox
     """
-    mb = MessageBox(parent, enableDontShowCheckBox=enableDontShowCheckBox)
+    mb = MessageBox(
+        parent,
+        width=width,
+        height=height,
+        enableInputEdit=enableInputEdit,
+        enableDontShowCheckBox=enableDontShowCheckBox
+    )
 
-    mb.setText(message)
+    mb.setText(text)
 
     buttons = buttons or QtWidgets.QDialogButtonBox.Ok
     mb.setButtons(buttons)
@@ -54,6 +63,11 @@ def createMessageBox(
     if headerIcon:
         p = studioqt.resource.pixmap(headerIcon)
         mb.setPixmap(p)
+
+    try:
+        headerColor = headerColor or parent.theme().accentColor().toString()
+    except:
+        pass
 
     headerColor = headerColor or "rgb(50, 150, 200)"
     mb.setHeaderColor(headerColor)
@@ -67,7 +81,9 @@ def createMessageBox(
 def showMessageBox(
         parent,
         title,
-        message,
+        text,
+        width=None,
+        height=None,
         buttons=None,
         headerIcon=None,
         headerColor=None,
@@ -79,7 +95,7 @@ def showMessageBox(
 
     :type parent: QWidget
     :type title: str
-    :type message: str
+    :type text: str
     :type buttons: list[QMessageBox.StandardButton]
     :type headerIcon: str
     :type headerColor: str
@@ -104,7 +120,9 @@ def showMessageBox(
         mb = createMessageBox(
             parent,
             title,
-            message,
+            text,
+            width=width,
+            height=height,
             buttons=buttons,
             headerIcon=headerIcon,
             headerColor=headerColor,
@@ -128,13 +146,63 @@ def showMessageBox(
 class MessageBox(QtWidgets.QDialog):
 
     @staticmethod
+    def input(
+        parent,
+        title,
+        text,
+        inputText="",
+        width=None,
+        height=None,
+        buttons=None,
+        headerIcon=None,
+        headerColor=None,
+    ):
+        """
+        Convenience dialog to get a single text value from the user.
+        
+        :type parent: QWidget
+        :type title: str
+        :type text: str
+        :type width: int
+        :type height: int
+        :type buttons: list[QMessageBox.StandardButton]
+        :type headerIcon: str
+        :type headerColor: str
+        :rtype: QMessageBox.StandardButton
+        """
+        buttons = buttons or \
+                  QtWidgets.QDialogButtonBox.Ok | \
+                  QtWidgets.QDialogButtonBox.Cancel
+
+        dialog = createMessageBox(
+            parent,
+            title,
+            text,
+            width=width,
+            height=height,
+            buttons=buttons,
+            headerIcon=headerIcon,
+            headerColor=headerColor,
+            enableInputEdit=True,
+        )
+
+        dialog.setInputText(inputText)
+        dialog.exec_()
+
+        clickedButton = dialog.clickedStandardButton()
+
+        return dialog.inputText(), clickedButton
+
+    @staticmethod
     def question(
         parent,
         title,
-        message,
+        text,
+        width=None,
+        height=None,
         buttons=None,
-        headerIcon="question",
-        headerColor="rgb(50, 150, 200)",
+        headerIcon=None,
+        headerColor=None,
         enableDontShowCheckBox=False
     ):
         """
@@ -142,7 +210,7 @@ class MessageBox(QtWidgets.QDialog):
 
         :type parent: QWidget
         :type title: str
-        :type message: str
+        :type text: str
         :type headerIcon: str
         :type headerColor: str
         :type buttons: list[QMessageBox.StandardButton]
@@ -152,7 +220,9 @@ class MessageBox(QtWidgets.QDialog):
         clickedButton = showMessageBox(
             parent,
             title,
-            message,
+            text,
+            width=width,
+            height=height,
             buttons=buttons,
             headerIcon=headerIcon,
             headerColor=headerColor,
@@ -165,10 +235,12 @@ class MessageBox(QtWidgets.QDialog):
     def warning(
         parent,
         title,
-        message,
+        text,
+        width=None,
+        height=None,
         buttons=None,
-        headerIcon="warning2",
-        headerColor="rgb(200, 128, 0)",
+        headerIcon=None,
+        headerColor="rgb(250, 160, 0)",
         enableDontShowCheckBox=False,
         force=False,
     ):
@@ -177,7 +249,7 @@ class MessageBox(QtWidgets.QDialog):
 
         :type parent: QWidget
         :type title: str
-        :type message: str
+        :type text: str
         :type buttons: list[QMessageBox.StandardButton]
         :type headerIcon: str
         :type headerColor: str
@@ -191,7 +263,9 @@ class MessageBox(QtWidgets.QDialog):
         clickedButton = showMessageBox(
             parent,
             title,
-            message,
+            text,
+            width=width,
+            height=height,
             buttons=buttons,
             headerIcon=headerIcon,
             headerColor=headerColor,
@@ -205,17 +279,19 @@ class MessageBox(QtWidgets.QDialog):
     def critical(
         parent,
         title,
-        message,
+        text,
+        width=None,
+        height=None,
         buttons=None,
-        headerIcon="critical",
-        headerColor="rgb(200, 50, 50)"
+        headerIcon=None,
+        headerColor="rgb(230, 80, 80)"
     ):
         """
         Open a critical message box with the given options.
 
         :type parent: QWidget
         :type title: str
-        :type message: str
+        :type text: str
         :type headerIcon: str
         :type headerColor: str
         :type buttons: list[QMessageBox.StandardButton]
@@ -225,7 +301,9 @@ class MessageBox(QtWidgets.QDialog):
         clickedButton = showMessageBox(
             parent,
             title,
-            message,
+            text,
+            width=width,
+            height=height,
             buttons=buttons,
             headerIcon=headerIcon,
             headerColor=headerColor
@@ -233,17 +311,38 @@ class MessageBox(QtWidgets.QDialog):
 
         return clickedButton
 
-    def __init__(self, parent=None, enableDontShowCheckBox=False):
-
+    def __init__(
+            self,
+            parent=None,
+            width=None,
+            height=None,
+            enableInputEdit=False,
+            enableDontShowCheckBox=False
+    ):
         super(MessageBox, self).__init__(parent)
+        self.setObjectName("messageBox")
 
-        self.setMinimumWidth(300)
-        self.setMaximumWidth(400)
+        self._frame = None
+
+        self.setMinimumWidth(width or 320)
+        self.setMinimumHeight(height or 220)
+
+        self._effect = None
+        self._animation = None
 
         self._dontShowCheckbox = False
         self._clickedStandardButton = None
 
+        parent = self.parent()
+        if parent:
+            parent.installEventFilter(self)
+            self._frame = QtWidgets.QFrame(parent)
+            self._frame.setObjectName("messageBoxFrame")
+            self._frame.show()
+            self.setParent(self._frame)
+
         self._header = QtWidgets.QFrame(self)
+        self._header.setObjectName("messageBoxHeaderFrame")
         self._header.setStyleSheet("background-color: rgb(0,0,0,0);")
         self._header.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self._header.setFixedHeight(46)
@@ -251,55 +350,193 @@ class MessageBox(QtWidgets.QDialog):
         self._icon = QtWidgets.QLabel(self._header)
         self._icon.setAlignment(QtCore.Qt.AlignTop)
         self._icon.setScaledContents(True)
-        self._icon.setFixedWidth(28)
-        self._icon.setFixedHeight(28)
+        self._icon.setFixedWidth(32)
+        self._icon.setFixedHeight(32)
         self._icon.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        self._icon.hide()
 
         self._title = QtWidgets.QLabel(self._header)
-        self._title.setStyleSheet("font: 14pt bold; color:rgb(255,255,255);")
+        self._title.setObjectName("messageBoxHeaderLabel")
         self._title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         hlayout = QtWidgets.QHBoxLayout(self._header)
+        hlayout.setContentsMargins(15, 7, 15, 10)
         hlayout.setSpacing(10)
         hlayout.addWidget(self._icon)
         hlayout.addWidget(self._title)
 
         self._header.setLayout(hlayout)
 
-        self._message = QtWidgets.QLabel()
-        self._message.setMinimumHeight(50)
+        bodyLayout = QtWidgets.QVBoxLayout(self)
+
+        self._body = QtWidgets.QFrame(self)
+        self._body.setObjectName("messageBoxBody")
+        self._body.setLayout(bodyLayout)
+
+        self._message = QtWidgets.QLabel(self._body)
+        self._message.setMinimumHeight(15)
         self._message.setWordWrap(True)
         self._message.setAlignment(QtCore.Qt.AlignLeft)
         self._message.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         self._message.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
+        bodyLayout.addWidget(self._message)
+        bodyLayout.setContentsMargins(15, 15, 15, 15)
+
+        if enableInputEdit:
+            self._inputEdit = QtWidgets.QLineEdit(self._body)
+            self._inputEdit.setObjectName("messageBoxInputEdit")
+            self._inputEdit.setMinimumHeight(32)
+            self._inputEdit.setFocus()
+
+            bodyLayout.addStretch(1)
+            bodyLayout.addWidget(self._inputEdit)
+            bodyLayout.addStretch(10)
+
+        if enableDontShowCheckBox:
+            msg = "Don't show this message again"
+            self._dontShowCheckbox = QtWidgets.QCheckBox(msg, self._body)
+
+            bodyLayout.addStretch(10)
+            bodyLayout.addWidget(self._dontShowCheckbox)
+            bodyLayout.addStretch(2)
+
         self._buttonBox = QtWidgets.QDialogButtonBox(None, QtCore.Qt.Horizontal, self)
         self._buttonBox.clicked.connect(self._clicked)
-        self._buttonBox.accepted.connect(self.accept)
-        self._buttonBox.rejected.connect(self.reject)
+        self._buttonBox.accepted.connect(self._accept)
+        self._buttonBox.rejected.connect(self._reject)
 
         vlayout1 = QtWidgets.QVBoxLayout(self)
         vlayout1.setContentsMargins(0, 0, 0, 0)
+
         vlayout1.addWidget(self._header)
-
-        vlayout2 = QtWidgets.QVBoxLayout(self)
-        vlayout2.setSpacing(25)
-        vlayout2.setContentsMargins(15, 5, 15, 5)
-
-        vlayout2.addWidget(self._message)
-
-        vlayout1.addLayout(vlayout2)
-
-        if enableDontShowCheckBox:
-
-            msg = "Don't show this message again"
-            self._dontShowCheckbox = QtWidgets.QCheckBox(msg, self)
-
-            vlayout2.addWidget(self._dontShowCheckbox)
-
-        vlayout2.addWidget(self._buttonBox)
+        vlayout1.addWidget(self._body)
+        bodyLayout.addWidget(self._buttonBox)
 
         self.setLayout(vlayout1)
+        self.updateGeometry()
+
+    def eventFilter(self, object, event):
+        """
+        Update the geometry when the parent widget changes size.
+        
+        :type object: QtWidget.QWidget
+        :type event: QtCore.QEvent 
+        :rtype: bool 
+        """
+        if event.type() == QtCore.QEvent.Resize:
+            self.updateGeometry()
+        return super(MessageBox, self).eventFilter(object, event)
+
+    def showEvent(self, event):
+        """
+        Fade in the dialog on show.
+
+        :type event: QtCore.QEvent 
+        :rtype: None 
+        """
+        self.updateGeometry()
+        self.fadeIn()
+
+    def updateGeometry(self):
+        """
+        Update the geometry to be in the center of it's parent.
+
+        :rtype: None
+        """
+        if self._frame:
+            self._frame.setGeometry(self._frame.parent().geometry())
+            self._frame.move(0, 0)
+
+            geometry = self.geometry()
+            centerPoint = self._frame.geometry().center()
+            geometry.moveCenter(centerPoint)
+            geometry.setY(geometry.y() - 50)
+            self.move(geometry.topLeft())
+
+    def fadeIn(self, duration=200):
+        """
+        Fade in the dialog using the opacity effect.
+
+        :type duration: int 
+        :rtype: QtCore.QPropertyAnimation 
+        """
+        if self._frame:
+            self._effect = QtWidgets.QGraphicsOpacityEffect(self._frame)
+            self._frame.setGraphicsEffect(self._effect)
+            self._animation = QtCore.QPropertyAnimation(self._effect, "opacity")
+            self._animation.setDuration(duration)
+            self._animation.setStartValue(0.0)
+            self._animation.setEndValue(1.0)
+            self._animation.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
+            self._animation.start()
+
+    def fadeOut(self, duration=200):
+        """
+        Fade out the dialog using the opacity effect.
+        
+        :type duration: int 
+        :rtype: QtCore.QPropertyAnimation 
+        """
+        self._animation = None
+
+        if self._frame:
+            self._effect = QtWidgets.QGraphicsOpacityEffect(self._frame)
+            self._frame.setGraphicsEffect(self._effect)
+            self._animation = QtCore.QPropertyAnimation(self._effect, "opacity")
+            self._animation.setDuration(duration)
+            self._animation.setStartValue(1.0)
+            self._animation.setEndValue(0.0)
+            self._animation.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
+            self._animation.start()
+
+        return self._animation
+
+    def _accept(self):
+        """
+        Triggered when the DialogButtonBox has been accepted.
+        
+        :rtype: None 
+        """
+        animation = self.fadeOut()
+
+        if animation:
+            animation.finished.connect(self._acceptAnimationFinished)
+        else:
+            self._acceptAnimationFinished()
+
+    def _reject(self):
+        """
+        Triggered when the DialogButtonBox has been rejected.
+
+        :rtype: None 
+        """
+        animation = self.fadeOut()
+
+        if animation:
+            animation.finished.connect(self._rejectAnimationFinished)
+        else:
+            self._rejectAnimationFinished()
+
+    def _acceptAnimationFinished(self):
+        """
+        Triggered when the animation has finished on accepted.
+
+        :rtype: None 
+        """
+        parent = self._frame or self
+        parent.close()
+        self.accept()
+
+    def _rejectAnimationFinished(self):
+        """
+        Triggered when the animation has finished on rejected.
+
+        :rtype: None 
+        """
+        parent = self._frame or self
+        parent.close()
+        self.reject()
 
     def header(self):
         """
@@ -327,6 +564,22 @@ class MessageBox(QtWidgets.QDialog):
         """
         self._message.setText(text)
 
+    def inputText(self):
+        """
+        Return the text that the user has given the input edit.
+
+        :rtype: str 
+        """
+        return self._inputEdit.text()
+
+    def setInputText(self, text):
+        """
+        Set the input text.
+
+        :type text: str 
+        """
+        self._inputEdit.setText(text)
+
     def setButtons(self, buttons):
         """
         Set the buttons to be displayed in message box.
@@ -353,6 +606,7 @@ class MessageBox(QtWidgets.QDialog):
         :rtype: None 
         """
         self._icon.setPixmap(pixmap)
+        self._icon.show()
 
     def _clicked(self, button):
         """
@@ -382,44 +636,48 @@ class MessageBox(QtWidgets.QDialog):
         else:
             return False
 
+    @studioqt.showArrowCursor
+    def exec_(self):
+        QtWidgets.QDialog.exec_(self)
+
 
 def showExample():
 
     with studioqt.app():
 
         title = "Create a snapshot icon"
-        message = "Would you like to create a snapshot icon?"
+        text = "Would you like to create a snapshot icon?"
         buttons = QtWidgets.QDialogButtonBox.Yes | QtWidgets.QDialogButtonBox.Ignore | QtWidgets.QDialogButtonBox.Cancel
-        result = MessageBox.question(None, title, message, buttons)
+        result = MessageBox.question(None, title, text, buttons)
         print result
 
         title = "Create a snapshot icon"
-        message = "This is to test a very long message. This is to test a very long message. This is to test a very long message. This is to test a very long message. This is to test a very long message. "
+        text = "This is to test a very long message. This is to test a very long message. This is to test a very long message. This is to test a very long message. This is to test a very long message. "
         buttons = QtWidgets.QDialogButtonBox.Yes | QtWidgets.QDialogButtonBox.Ignore | QtWidgets.QDialogButtonBox.Cancel
-        result = MessageBox.question(None, title, message, buttons)
+        result = MessageBox.question(None, title, text, buttons)
         print result
 
         title = "By Frame Tip"
-        message = "Testing the don't show check box. "
+        text = "Testing the don't show check box. "
         buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-        result = MessageBox.question(None, title, message, buttons, enableDontShowCheckBox=True)
+        result = MessageBox.question(None, title, text, buttons, enableDontShowCheckBox=True)
         print result
 
         title = "Create a new thumbnail icon"
-        message = "This will override the existing thumbnail. Are you sure you would like to continue?"
+        text = "This will override the existing thumbnail. Are you sure you would like to continue?"
         buttons = QtWidgets.QDialogButtonBox.Yes | QtWidgets.QDialogButtonBox.No
-        result = MessageBox.warning(None, title, message, buttons, enableDontShowCheckBox=True)
+        result = MessageBox.warning(None, title, text, buttons, enableDontShowCheckBox=True)
         print result
 
         title = "Error saving item!"
-        message = "An error has occurred while saving an item."
-        result = MessageBox.critical(None, title, message)
+        text = "An error has occurred while saving an item."
+        result = MessageBox.critical(None, title, text)
         print result
 
         if result == QtWidgets.QDialogButtonBox.Yes:
             title = "Error while saving!"
-            message = "There was an error while saving"
-            MessageBox.critical(None, title, message)
+            text = "There was an error while saving"
+            MessageBox.critical(None, title, text)
 
 
 if __name__ == "__main__":
