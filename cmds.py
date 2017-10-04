@@ -31,7 +31,7 @@ __all__ = [
     "isMac",
     "isLinux",
     "isWindows",
-    "logScreen",
+    "sendEvent",
     "timeAgo",
     "read",
     "write",
@@ -62,6 +62,8 @@ __all__ = [
     "itemsFromUrls",
     "findItems",
     "findItemsInFolders",
+    "ANALYTICS_ID",
+    "ANALYTICS_ENABLED",
 ]
 
 
@@ -69,6 +71,10 @@ logger = logging.getLogger(__name__)
 
 
 _itemClasses = collections.OrderedDict()
+
+
+ANALYTICS_ENABLED = True
+ANALYTICS_ID = "UA-50172384-1"
 
 
 class PathRenameError(IOError):
@@ -831,12 +837,12 @@ def timeAgo(timeStamp):
     return str(v) + " years ago"
 
 
-def logScreen(name, version="1.0.0", an="StudioLibrary", tid="UA-50172384-2"):
+def sendEvent(name, version="1.0.0", an="StudioLibrary", tid=None):
     """
-    Send a screen view to google analytics.
+    Send a screen view event to google analytics.
 
     Example:
-    logScreen("fudgeOpenUI")
+    sendEvent("mainWindow")
 
     :type name: str
     :type version: str
@@ -844,6 +850,10 @@ def logScreen(name, version="1.0.0", an="StudioLibrary", tid="UA-50172384-2"):
     :type tid: str
     :rtype: None
     """
+    if not ANALYTICS_ENABLED:
+        return
+
+    tid = tid or ANALYTICS_ID
     cid = getpass.getuser() + "-" + platform.node()
 
     url = "http://www.google-analytics.com/collect?" \
@@ -872,7 +882,7 @@ def logScreen(name, version="1.0.0", an="StudioLibrary", tid="UA-50172384-2"):
     def _send(url):
         try:
             url = url.replace(" ", "")
-            urllib2.urlopen(url, None, 1.0)
+            f = urllib2.urlopen(url, None, 1.0)
         except Exception:
             pass
 
@@ -913,3 +923,4 @@ def testRelativePaths():
 
 if __name__ == "__main__":
     testRelativePaths()
+

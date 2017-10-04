@@ -150,7 +150,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.setObjectName("studiolibrary")
 
-        studiolibrary.logScreen("MainWindow")
+        studiolibrary.sendEvent("MainWindow", version=studiolibrary.version())
 
         resource = studiolibrary.resource()
         self.setWindowIcon(resource.icon("icon_black"))
