@@ -56,6 +56,10 @@ from studiolibrary.librarywidget import LibraryWidget
 from studiolibrary.main import main
 
 
+# Wrapping the following functions for convenience
+app = studioqt.app
+
+
 def resource():
     """
     Return a resource object for getting content from the resource folder.

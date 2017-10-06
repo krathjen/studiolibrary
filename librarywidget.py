@@ -55,7 +55,6 @@ class LibraryWidget(QtWidgets.QWidget):
                                  "LibraryWidget.json")
 
     TRASH_ENABLED = True
-    THEMES_MENU_ENABLED = True
     RECURSIVE_SEARCH_ENABLED = False
     DEFAULT_GROUP_BY_COLUMNS = ["Category", "Modified", "Type"]
 
@@ -113,6 +112,10 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: LibraryWidget
         """
         path = path or ""
+
+        if path:
+            path = os.path.abspath(path)
+
         name = name or cls.DEFAULT_NAME
 
         w = cls._instances.get(name)
@@ -166,9 +169,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self._previewWidget = None
         self._currentItem = None
         self._refreshEnabled = False
-        self._itemLoaderEnabled = True
 
-        self._watcher = None
         self._superusers = None
         self._lockRegExp = None
         self._unlockRegExp = None
@@ -381,7 +382,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
                 # Check if the item is moving to another folder.
                 if folder.path() != item.dirname():
-                    self.moveItemsToFolder(items, folder=folder)
+                    self.showMoveItemsDialog(items, folder=folder)
                     break
 
     def _itemSaving(self, item):
@@ -693,7 +694,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         if len(selectedFolders) == 1:
             action = QtWidgets.QAction("Rename", menu)
-            action.triggered.connect(self.showFolderRenameDialog)
+            action.triggered.connect(self.showRenameFolderDialog)
             menu.addAction(action)
 
             action = QtWidgets.QAction("Show in Folder", menu)
@@ -705,7 +706,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
                 action = QtWidgets.QAction("Move to Trash", menu)
                 action.setEnabled(not self.isTrashSelected())
-                action.triggered.connect(self.trashSelectedFoldersDialog)
+                action.triggered.connect(self.showTrashSelectedFoldersDialog)
                 menu.addAction(action)
 
         return menu
@@ -719,7 +720,7 @@ class LibraryWidget(QtWidgets.QWidget):
         path = self.selectedFolderPath()
         studioqt.showInFolder(path)
 
-    def showFolderRenameDialog(self, parent=None):
+    def showRenameFolderDialog(self, parent=None):
         """
         Show the dialog for renaming the selected folder.
         
@@ -896,19 +897,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.refreshSearch()
 
-    def setItemLoaderEnabled(self, value):
-        """
-        :type value: bool
-        :rtype: None
-        """
-        self._itemLoaderEnabled = value
-
-    def itemLoaderEnabled(self):
-        """
-        :rtype: func
-        """
-        return self._itemLoaderEnabled
-
     def refreshItems(self):
         """
         Convenience method for updating the items widget.
@@ -934,9 +922,6 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showWaitCursor
     def createItems(self):
         """Reload the items widget."""
-        if not self.itemLoaderEnabled():
-            logger.debug("Loader disabled!")
-            return
 
         elapsedTime = time.time()
 
@@ -1092,12 +1077,11 @@ class LibraryWidget(QtWidgets.QWidget):
         action.triggered.connect(self.showChangePathDialog)
         menu.addAction(action)
 
-        if self.THEMES_MENU_ENABLED:
-            menu.addSeparator()
-            themesMenu = studioqt.ThemesMenu(menu)
-            themesMenu.setCurrentTheme(self.theme())
-            themesMenu.themeTriggered.connect(self.setTheme)
-            menu.addMenu(themesMenu)
+        menu.addSeparator()
+        themesMenu = studioqt.ThemesMenu(menu)
+        themesMenu.setCurrentTheme(self.theme())
+        themesMenu.themeTriggered.connect(self.setTheme)
+        menu.addMenu(themesMenu)
 
         menu.addSeparator()
 
@@ -1259,7 +1243,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
                     action = QtWidgets.QAction("Move to Trash", editMenu)
                     action.setEnabled(not self.isTrashSelected())
-                    action.triggered.connect(self.trashSelectedItemsDialog)
+                    action.triggered.connect(self.showTrashSelectedItemsDialog)
                     editMenu.addAction(action)
 
         menu.addSeparator()
@@ -1344,7 +1328,7 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for moving items with drag and drop
     # -------------------------------------------------------------------
 
-    def moveItemsDialog(self, parent=None):
+    def createMoveItemsDialog(self, parent=None):
         """
         :type parent: QtWidgets.QWidget
         :rtype: QtWidgets.QMessageBox
@@ -1360,7 +1344,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return msgBox
 
-    def moveItemsToFolder(self, items, folder):
+    def showMoveItemsDialog(self, items, folder):
         """
         :type items: list[studiolibrary.LibraryItem]
         :type folder: studiolibrary.Folder
@@ -1371,7 +1355,7 @@ class LibraryWidget(QtWidgets.QWidget):
         Cancel = 2
         movedItems = []
 
-        dialog = self.moveItemsDialog()
+        dialog = self.createMoveItemsDialog()
         action = dialog.exec_()
         dialog.close()
 
@@ -2166,7 +2150,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return False
 
-    def trashSelectedFoldersDialog(self):
+    def showTrashSelectedFoldersDialog(self):
         """
         :rtype: None
         """
@@ -2194,7 +2178,7 @@ class LibraryWidget(QtWidgets.QWidget):
         studiolibrary.movePath(folder.path(), trashPath)
         self.refresh()
 
-    def trashSelectedItemsDialog(self):
+    def showTrashSelectedItemsDialog(self):
         """
         Show the "move to trash" dialog for the selected items.
 
@@ -2296,6 +2280,18 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self.statusWidget().setWarning(text)
         self.setStatusBarWidgetVisible(True)
+
+    def showInfoDialog(self, title, text):
+        """
+        A convenience method for showing an information dialog to the user.
+
+        :type title: str
+        :type text: str
+        :rtype: QMessageBox.StandardButton
+        """
+        buttons = QtWidgets.QMessageBox.Ok
+
+        return studioqt.MessageBox.question(self, title, text, buttons=buttons)
 
     def showErrorDialog(self, title, text):
         """

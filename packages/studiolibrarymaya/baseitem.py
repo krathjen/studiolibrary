@@ -454,7 +454,7 @@ class BaseItem(studiolibrary.LibraryItem):
         transferPath = tempDir.path() + "/" + self.transferBasename()
 
         t = self.transferClass().fromObjects(objects)
-        t.save(transferPath, **kwargs)
+        t.save(transferPath, description=description, **kwargs)
 
         if iconPath:
             contents.append(iconPath)

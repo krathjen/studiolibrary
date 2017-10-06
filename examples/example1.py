@@ -1,7 +1,5 @@
 # An example for creating a simple image library
 
-import os
-
 import studiolibrary
 
 # studioqt supports both pyside (Qt4) and pyside2 (Qt5)
@@ -19,7 +17,11 @@ class ImageItem(studiolibrary.LibraryItem):
 
     def load(self):
         """ Trigged when the user double clicks or clicks the load button."""
-        print "Loaded", self.path()
+        text = "Loaded: {path}".format(path=self.path())
+
+        print text
+        self.libraryWidget().setInfo(text)
+        self.libraryWidget().showInfoDialog("Loaded", text)
 
     def doubleClicked(self):
         """Overriding this method to load any data on double click."""
@@ -94,15 +96,11 @@ def main():
     # Register the item class to be shown for the valid path extensions
     studiolibrary.registerItem(ImageItem)
 
-    path = os.path.abspath("data")
-
-    studiolibrary.main(name="Example1", path=path)
+    studiolibrary.main(name="Example1", path="data")
 
 
 if __name__ == "__main__":
 
-    import studioqt
-
-    # Use the studioqt.app context to create and run a QApplication instance.
-    with studioqt.app():
+    # Use the studiolibrary.app context for creating a QApplication instance
+    with studiolibrary.app():
         main()

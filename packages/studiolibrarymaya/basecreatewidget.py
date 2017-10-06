@@ -55,9 +55,10 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self._focusWidget = None
         self._libraryWidget = None
 
-        self.ui.thumbnailButton.setToolTip(
-            "Click to capture a thumbnail from the current model panel.\nCTRL + Click to show "
-            "the capture window for better framing.")
+        text = "Click to capture a thumbnail from the current model panel.\n" \
+               "CTRL + Click to show the capture window for better framing."
+
+        self.ui.thumbnailButton.setToolTip(text)
 
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
@@ -338,7 +339,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         path = mutils.gui.tempThumbnailPath()
         mutils.gui.thumbnailCapture(path=path, captured=self._thumbnailCaptured)
 
-    def thumbnailCaptureQuestion(self):
+    def showThumbnailCaptureDialog(self):
         """
         Ask the user if they would like to capture a thumbnail.
 
@@ -347,17 +348,22 @@ class BaseCreateWidget(QtWidgets.QWidget):
         title = "Create a thumbnail"
         text = "Would you like to capture a thumbanil?"
 
-        options = QtWidgets.QMessageBox.Yes | \
+        buttons = QtWidgets.QMessageBox.Yes | \
                   QtWidgets.QMessageBox.Ignore | \
                   QtWidgets.QMessageBox.Cancel
 
         parent = self.item().libraryWidget()
-        result = studioqt.MessageBox.question(parent, title, text, options)
+        button = studioqt.MessageBox.question(
+            parent,
+            title,
+            text,
+            buttons=buttons
+        )
 
-        if result == QtWidgets.QMessageBox.Yes:
+        if button == QtWidgets.QMessageBox.Yes:
             self.thumbnailCapture()
 
-        return result
+        return button
 
     def accept(self):
         """Triggered when the user clicks the save button."""
@@ -377,8 +383,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
                 raise Exception("No objects selected. Please select at least one object.")
 
             if not os.path.exists(self.iconPath()):
-                result = self.thumbnailCaptureQuestion()
-                if result == QtWidgets.QMessageBox.Cancel:
+                button = self.showThumbnailCaptureDialog()
+                if button == QtWidgets.QMessageBox.Cancel:
                     return
 
             path += "/" + name

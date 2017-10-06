@@ -217,6 +217,11 @@ class MessageBox(QtWidgets.QDialog):
 
         :rtype: QMessageBox.StandardButton
         """
+        buttons = buttons or \
+            QtWidgets.QDialogButtonBox.Yes | \
+            QtWidgets.QDialogButtonBox.No | \
+            QtWidgets.QDialogButtonBox.Cancel
+
         clickedButton = showMessageBox(
             parent,
             title,
@@ -334,6 +339,7 @@ class MessageBox(QtWidgets.QDialog):
         self._clickedStandardButton = None
 
         parent = self.parent()
+
         if parent:
             parent.installEventFilter(self)
             self._frame = QtWidgets.QFrame(parent)
@@ -444,15 +450,25 @@ class MessageBox(QtWidgets.QDialog):
 
         :rtype: None
         """
-        if self._frame:
-            self._frame.setGeometry(self._frame.parent().geometry())
-            self._frame.move(0, 0)
+        frame = self._frame
+
+        if frame:
+            frame.setGeometry(self._frame.parent().geometry())
+            frame.move(0, 0)
 
             geometry = self.geometry()
-            centerPoint = self._frame.geometry().center()
+            centerPoint = frame.geometry().center()
             geometry.moveCenter(centerPoint)
             geometry.setY(geometry.y() - 50)
             self.move(geometry.topLeft())
+
+            if geometry.width() > frame.geometry().width():
+                width = frame.geometry().width()
+                self.setFixedWidth(width-50)
+
+            if geometry.height() > frame.geometry().height():
+                height = frame.geometry().height()
+                self.setFixedHeight(height-150)
 
     def fadeIn(self, duration=200):
         """

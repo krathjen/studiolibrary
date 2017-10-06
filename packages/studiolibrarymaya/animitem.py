@@ -614,10 +614,8 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
         self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.saveSettings)
         self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
-        self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'),
-                     self.connectChanged)
-        self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'),
-                     self.optionChanged)
+        self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
+        self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
 
     def createSequenceWidget(self):
         """

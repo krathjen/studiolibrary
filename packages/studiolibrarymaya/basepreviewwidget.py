@@ -100,10 +100,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
         self.ui.iconToggleBoxButton.toggled[bool].connect(self.ui.iconToggleBoxFrame.setVisible)
         self.ui.infoToggleBoxButton.toggled[bool].connect(self.ui.infoToggleBoxFrame.setVisible)
-        self.ui.optionsToggleBoxButton.toggled[bool].connect(
-            self.ui.optionsToggleBoxFrame.setVisible)
-        self.ui.namespaceToggleBoxButton.toggled[bool].connect(
-            self.ui.namespaceToggleBoxFrame.setVisible)
+        self.ui.optionsToggleBoxButton.toggled[bool].connect(self.ui.optionsToggleBoxFrame.setVisible)
+        self.ui.namespaceToggleBoxButton.toggled[bool].connect(self.ui.namespaceToggleBoxFrame.setVisible)
 
     def item(self):
         """
@@ -396,8 +394,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
         if namespaces:
             self.ui.namespaceComboBox.setToolTip("")
         else:
-            self.ui.namespaceComboBox.setToolTip(
-                "No namespaces found in scene.")
+            text = "No namespaces found in scene."
+            self.ui.namespaceComboBox.setToolTip(text)
 
         self.ui.namespaceComboBox.clear()
         self.ui.namespaceComboBox.addItems(namespaces)
