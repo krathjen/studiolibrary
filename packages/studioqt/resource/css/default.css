@@ -371,19 +371,13 @@ QMenu, QMenu QWidget {
 	/*background-color: BACKGROUND_COLOR;*/
 }
 
-QMenu::item:selected {
-    color: ACCENT_FOREGROUND_COLOR;
-    background-color: ACCENT_COLOR;
-}
-
-QMenu::item {
-	border: 1px solid rgb(0, 0, 0, 0);
-	padding: 2px 25px 2px 22px;
-}
-
 QMenu::separator {
 	height: 1px;
 	padding: 0px 1px 0px 1px;
+}
+
+QMenu::icon {
+	padding: 4px;
 }
 
 QMenu::indicator:non-exclusive {
@@ -394,11 +388,19 @@ QMenu::indicator:non-exclusive {
 
 QMenu::item {
 	color: FOREGROUND_COLOR;
+	padding: 3px 25px 3px 25px;
+	border: 1px solid rgb(0, 0, 0, 0);
 }
 
 QMenu::item:disabled {
 	color: FOREGROUND_COLOR;
 }
+
+QMenu::item:selected {
+    color: ACCENT_FOREGROUND_COLOR;
+    background-color: ACCENT_COLOR;
+}
+
 
 /*
  --------------------------------------------------------------------------

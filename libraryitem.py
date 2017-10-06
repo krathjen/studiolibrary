@@ -150,6 +150,16 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         return studioqt.MessageBox.critical(self.libraryWidget(), title, text)
 
+    def showQuestionDialog(self, title, text):
+        """
+        Convenience method for showing a question dialog to the user.
+
+        :type title: str
+        :type text: str
+        :rtype: QMessageBox.StandardButton
+        """
+        return studioqt.MessageBox.question(self.libraryWidget(), title, text)
+
     def typeIconPath(self):
         """
         Return the type icon path on disc.
@@ -445,7 +455,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             self.database().delete(path)
 
         if self.libraryWidget():
-            self.libraryWidget().loadItems()
+            self.libraryWidget().refresh()
 
     def copy(self, dst):
         """
@@ -540,29 +550,25 @@ class LibraryItem(studioqt.CombinedWidgetItem):
                 self.move(dst)
             except Exception, e:
                 logger.exception(e)
-                studioqt.MessageBox.critical(parent, "Move Error", str(e))
+                self.showErrorDialog("Move Error", str(e))
 
-    def showDeleteDialog(self, parent=None):
+    def showDeleteDialog(self):
         """
         Show the delete item dialog.
 
-        :type parent: QtWidgets.QWidget
+        :rtype: None
         """
 
-        msgBox = QtWidgets.QMessageBox(parent)
-        msgBox.setWindowTitle("Delete")
-        msgBox.setText('Are you sure you want to delete this item?')
-        msgBox.addButton('Yes', QtWidgets.QMessageBox.AcceptRole)
-        msgBox.addButton('Cancel', QtWidgets.QMessageBox.RejectRole)
+        text = 'Are you sure you want to delete this item?'
 
-        result = msgBox.exec_()
+        button = self.showQuestionDialog("Delete Item", text)
 
-        if result == 0:
+        if button == QtWidgets.QDialogButtonBox.Yes:
             try:
                 self.delete()
             except Exception, e:
                 logger.exception(e)
-                studioqt.MessageBox.critical(parent, "Delete Error", str(e))
+                self.showErrorDialog("Delete Error", str(e))
 
     # -----------------------------------------------------------------
     # Support for painting the type icon

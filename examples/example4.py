@@ -1,27 +1,26 @@
 # An example for showing the message box dialog.
 
-import os
-
 import studiolibrary
 
 import studioqt
 
+from studioqt import QtWidgets
 
 if __name__ == "__main__":
 
-    with studioqt.app():
+    # Use the studiolibrary.app context for creating a QApplication instance
+    with studiolibrary.app():
 
-        path = os.path.abspath("data")
-        w = studiolibrary.main(name="Example4", path=path)
+        libraryWidget = studiolibrary.main(name="Example4", path="data")
 
         text = "Before you get started please choose a folder location " \
               "for storing the data. A network folder is recommended for " \
               "sharing within a studio."
 
-        print studioqt.MessageBox.warning(w, "Warning", text)
+        print studioqt.MessageBox.warning(libraryWidget, "Warning", text)
 
-        print studioqt.MessageBox.question(
-            w,
+        button = studioqt.MessageBox.question(
+            libraryWidget,
             "Welcome",
             text,
             width=450,
@@ -29,11 +28,16 @@ if __name__ == "__main__":
             enableDontShowCheckBox=True
         )
 
+        if button == QtWidgets.QDialogButtonBox.Yes:
+            print "Accepted"
+        else:
+            print "Rejected"
+
         print studioqt.MessageBox.input(
-            w,
+            libraryWidget,
             "Rename",
             "Rename the selected item?",
             inputText="face.anim",
         )
 
-        print studioqt.MessageBox.critical(w, "Error", text)
+        print studioqt.MessageBox.critical(libraryWidget, "Error", text)
