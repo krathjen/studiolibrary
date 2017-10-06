@@ -263,7 +263,9 @@ class MessageBox(QtWidgets.QDialog):
 
         :rtype: (QMessageBox.StandardButton, bool)
         """
-        buttons = buttons or (QtWidgets.QDialogButtonBox.Yes | QtWidgets.QDialogButtonBox.No)
+        buttons = buttons or \
+                  QtWidgets.QDialogButtonBox.Yes | \
+                  QtWidgets.QDialogButtonBox.No
 
         clickedButton = showMessageBox(
             parent,
@@ -303,6 +305,8 @@ class MessageBox(QtWidgets.QDialog):
 
         :rtype: QMessageBox.StandardButton
         """
+        buttons = buttons or QtWidgets.QDialogButtonBox.Ok
+
         clickedButton = showMessageBox(
             parent,
             title,
@@ -336,6 +340,8 @@ class MessageBox(QtWidgets.QDialog):
         self._animation = None
 
         self._dontShowCheckbox = False
+
+        self._clickedButton = None
         self._clickedStandardButton = None
 
         parent = self.parent()
@@ -421,6 +427,18 @@ class MessageBox(QtWidgets.QDialog):
 
         self.setLayout(vlayout1)
         self.updateGeometry()
+
+    def buttonBox(self):
+        """
+        Return the button box widget for the dialog.
+        
+        :rtype: QtGui.QDialogButtonBox 
+        """
+        return self._buttonBox
+
+    def addButton(self, *args):
+        """Create a push button with the given text and role"""
+        self.buttonBox().addButton(*args)
 
     def eventFilter(self, object, event):
         """
@@ -603,7 +621,7 @@ class MessageBox(QtWidgets.QDialog):
         :type buttons: QMessageBox.StandardButton
         :rtype: None 
         """
-        self._buttonBox.setStandardButtons(buttons)
+        self.buttonBox().setStandardButtons(buttons)
 
     def setHeaderColor(self, color):
         """
@@ -628,16 +646,35 @@ class MessageBox(QtWidgets.QDialog):
         """
         Triggered when the user clicks a button.
         
-        :type button: QMessageBox.StandardButton
+        :type button: QWidgets.QPushButton
         :rtype: None 
         """
-        self._clickedStandardButton = self._buttonBox.standardButton(button)
+        self._clickedButton = button
+        self._clickedStandardButton = self.buttonBox().standardButton(button)
+
+    def clickedIndex(self):
+        """
+        Return the button that was clicked by its index.
+        
+        :rtype: int or None
+        """
+        for i, button in enumerate(self.buttonBox().buttons()):
+            if button == self.clickedButton():
+                return i
+
+    def clickedButton(self):
+        """
+        Return the button that was clicked.
+        
+        :rtype: QtWidgets.QPushButton or None 
+        """
+        return self._clickedButton
 
     def clickedStandardButton(self):
         """
         Return the button that was clicked by the user.
 
-        :rtype: QMessageBox.StandardButton
+        :rtype: QMessageBox.StandardButton or None
         """
         return self._clickedStandardButton
 
@@ -654,7 +691,13 @@ class MessageBox(QtWidgets.QDialog):
 
     @studioqt.showArrowCursor
     def exec_(self):
+        """
+        Shows the dialog as a modal dialog
+        
+        :rtype: int or None
+        """
         QtWidgets.QDialog.exec_(self)
+        return self.clickedIndex()
 
 
 def showExample():

@@ -51,8 +51,7 @@ class LibraryWidget(QtWidgets.QWidget):
     HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
 
     DATABASE_PATH = "{path}/.studiolibrary/items.json"
-    SETTINGS_PATH = os.path.join(HOME_PATH, "StudioLibrary",
-                                 "LibraryWidget.json")
+    SETTINGS_PATH = os.path.join(HOME_PATH, "StudioLibrary", "LibraryWidget.json")
 
     TRASH_ENABLED = True
     RECURSIVE_SEARCH_ENABLED = False
@@ -146,8 +145,11 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Return the a new instance of the Library Widget.
 
+        :type parent: QtWidgets.QWidget
         :type name: str
         :type path: str
+        
+        :rtype: LibraryWidget
         """
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -301,10 +303,8 @@ class LibraryWidget(QtWidgets.QWidget):
         itemsWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         itemsWidget.itemMoved.connect(self._itemMoved)
         itemsWidget.itemSelectionChanged.connect(self._itemSelectionChanged)
-        itemsWidget.customContextMenuRequested.connect(
-            self.showItemsContextMenu)
-        itemsWidget.treeWidget().setValidGroupByColumns(
-            self.DEFAULT_GROUP_BY_COLUMNS)
+        itemsWidget.customContextMenuRequested.connect(self.showItemsContextMenu)
+        itemsWidget.treeWidget().setValidGroupByColumns(self.DEFAULT_GROUP_BY_COLUMNS)
 
         folderWidget = self.foldersWidget()
         folderWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -468,7 +468,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         path = self.path()
 
-        title = "Path Error!"
+        title = "Path Error"
 
         text = 'The current root path does not exist "{path}". ' \
                'Please select a new root path to continue.'
@@ -491,7 +491,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         name = self.name()
 
-        title = "Welcolme!"
+        title = "Welcolme"
         title = title.format(studiolibrary.version(), name)
 
         text = "Before you get started please choose a folder " \
@@ -499,8 +499,6 @@ class LibraryWidget(QtWidgets.QWidget):
                "recommended for sharing within a studio."
 
         dialog = studioqt.createMessageBox(self, title, text)
-
-        dialog.setHeaderColor(self.theme().accentColor().toString())
         dialog.show()
 
         dialog.accepted.connect(self.showChangePathDialog)
@@ -511,11 +509,11 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        path = self._changePathDialog()
+        path = self._showChangePathDialog()
         self.setPath(path)
 
     @studioqt.showArrowCursor
-    def _changePathDialog(self):
+    def _showChangePathDialog(self):
         """
         Open the file dialog for setting a new path.
 
@@ -1328,24 +1326,27 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for moving items with drag and drop
     # -------------------------------------------------------------------
 
-    def createMoveItemsDialog(self, parent=None):
+    def createMoveItemsDialog(self):
         """
-        :type parent: QtWidgets.QWidget
-        :rtype: QtWidgets.QMessageBox
+        Create and return a dialog for moving items.
+        
+        :rtype: studioqt.MessageBox
         """
-        parent = parent or self
+        text = 'Would you like to copy or move the selected item/s?'
 
-        msgBox = QtWidgets.QMessageBox(parent)
-        msgBox.setWindowTitle("Move or Copy items?")
-        msgBox.setText('Would you like to copy or move the selected item/s?')
-        msgBox.addButton('Copy', QtWidgets.QMessageBox.AcceptRole)
-        msgBox.addButton('Move', QtWidgets.QMessageBox.AcceptRole)
-        msgBox.addButton('Cancel', QtWidgets.QMessageBox.RejectRole)
+        dialog = studioqt.createMessageBox(self, "Move or Copy items?", text)
+        dialog.buttonBox().clear()
 
-        return msgBox
+        dialog.addButton(u'Copy', QtWidgets.QDialogButtonBox.AcceptRole)
+        dialog.addButton(u'Move', QtWidgets.QDialogButtonBox.AcceptRole)
+        dialog.addButton(u'Cancel', QtWidgets.QDialogButtonBox.RejectRole)
+
+        return dialog
 
     def showMoveItemsDialog(self, items, folder):
         """
+        Show the move items dialog for the given items.
+        
         :type items: list[studiolibrary.LibraryItem]
         :type folder: studiolibrary.Folder
         :rtype: None
