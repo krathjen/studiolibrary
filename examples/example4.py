@@ -14,8 +14,8 @@ if __name__ == "__main__":
         libraryWidget = studiolibrary.main(name="Example4", path="data")
 
         text = "Before you get started please choose a folder location " \
-              "for storing the data. A network folder is recommended for " \
-              "sharing within a studio."
+               "for storing the data. A network folder is recommended for " \
+               "sharing within a studio."
 
         print studioqt.MessageBox.warning(libraryWidget, "Warning", text)
 
@@ -41,3 +41,14 @@ if __name__ == "__main__":
         )
 
         print studioqt.MessageBox.critical(libraryWidget, "Error", text)
+
+        dialog = studioqt.createMessageBox(libraryWidget, "Move Item", text)
+        dialog.buttonBox().clear()
+
+        dialog.addButton(u'Copy', QtWidgets.QDialogButtonBox.AcceptRole)
+        dialog.addButton(u'Move', QtWidgets.QDialogButtonBox.AcceptRole)
+        dialog.addButton(u'Cancel', QtWidgets.QDialogButtonBox.RejectRole)
+
+        print dialog.exec_()
+
+

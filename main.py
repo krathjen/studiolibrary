@@ -56,16 +56,7 @@ def main(
 
 
 if __name__ == "__main__":
-    import logging
-    import studioqt
 
-    # Turn on basic logging
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(levelname)s: %(funcName)s: %(message)s',
-        filemode='w'
-    )
-
-    # Run the Studio Library in a QApplication
-    with studioqt.app():
+    # Run the Studio Library in a QApplication instance
+    with studiolibrary.app():
         studiolibrary.main()
