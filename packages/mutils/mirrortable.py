@@ -65,8 +65,8 @@ __all__ = ["MirrorTable", "MirrorPlane", "MirrorOption", "Axis"]
 logger = logging.getLogger(__name__)
 
 
-RE_LEFT_SIDE = "Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|left|Left|\|l_|:l_|^l_|_l$|:L|^L"
-RE_RIGHT_SIDE = "Rt|rt_|_rt|_r_|_R|R_|right|Right|\|r_|:r_|^r_|_r$|:R|^R"
+RE_LEFT_SIDE = "Left|left|Lf|lt_|_lt|lf_|_lf|_l_|_L|L_|:l_|^l_|_l$|:L|^L"
+RE_RIGHT_SIDE = "Right|right|Rt|rt_|_rt|_r_|_R|R_|:r_|^r_|_r$|:R|^R"
 
 VALID_NODE_TYPES = ["joint", "transform"]
 
@@ -140,31 +140,39 @@ class MirrorTable(mutils.SelectionSet):
         """
         return MirrorTable.findSide(objects, RE_RIGHT_SIDE)
 
-    @staticmethod
-    def findSide(objects, reSide):
+    @classmethod
+    def findSide(cls, objects, reSides):
         """
-        Return the naming convention for the given names.
+        Return the naming convention for the given object names.
         
         :type objects: list[str]
-        :type reSide: str
+        :type reSides: str or list[str]
         :rtype: str
         """
-        reSide = re.compile(reSide)
+        if isinstance(reSides, basestring):
+            reSides = reSides.split("|")
+
+        # Compile the list of regular expressions into a re.object
+        reSides = [re.compile(side) for side in reSides]
+
         for obj in objects:
             obj = obj.split("|")[-1]
             obj = obj.split(":")[-1]
 
-            m = reSide.search(obj)
-            if m:
-                side = m.group()
+            for reSide in reSides:
 
-                if obj.startswith(side):
-                    side += "*"
+                m = reSide.search(obj)
+                if m:
+                    side = m.group()
 
-                if obj.endswith(side):
-                    side = "*" + side
+                    if obj.startswith(side):
+                        side += "*"
 
-                return side
+                    if obj.endswith(side):
+                        side = "*" + side
+
+                    return side
+
         return ""
 
     @staticmethod
