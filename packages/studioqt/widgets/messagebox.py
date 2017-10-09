@@ -65,11 +65,15 @@ def createMessageBox(
         mb.setPixmap(p)
 
     try:
-        headerColor = headerColor or parent.theme().accentColor().toString()
-    except:
-        pass
+        theme = parent.theme()
+    except AttributeError:
+        theme = studioqt.Theme()
 
+    mb.setStyleSheet(theme.styleSheet())
+
+    headerColor = headerColor or theme.accentColor().toString()
     headerColor = headerColor or "rgb(50, 150, 200)"
+
     mb.setHeaderColor(headerColor)
 
     mb.setWindowTitle(title)
@@ -700,32 +704,63 @@ class MessageBox(QtWidgets.QDialog):
         return self.clickedIndex()
 
 
-def showExample():
+def testMessageBox():
 
     with studioqt.app():
 
-        title = "Create a snapshot icon"
+        title = "Test question dialog"
         text = "Would you like to create a snapshot icon?"
-        buttons = QtWidgets.QDialogButtonBox.Yes | QtWidgets.QDialogButtonBox.Ignore | QtWidgets.QDialogButtonBox.Cancel
-        result = MessageBox.question(None, title, text, buttons)
+
+        buttons = QtWidgets.QDialogButtonBox.Yes | \
+                  QtWidgets.QDialogButtonBox.Ignore | \
+                  QtWidgets.QDialogButtonBox.Cancel
+
+        result = MessageBox.question(None, title, text, buttons=buttons)
         print result
 
-        title = "Create a snapshot icon"
-        text = "This is to test a very long message. This is to test a very long message. This is to test a very long message. This is to test a very long message. This is to test a very long message. "
-        buttons = QtWidgets.QDialogButtonBox.Yes | QtWidgets.QDialogButtonBox.Ignore | QtWidgets.QDialogButtonBox.Cancel
-        result = MessageBox.question(None, title, text, buttons)
+        title = "Test long text message"
+        text = "This is to test a very long message. " \
+               "This is to test a very long message. " \
+               "This is to test a very long message. " \
+               "This is to test a very long message. " \
+               "This is to test a very long message. "
+
+        buttons = QtWidgets.QDialogButtonBox.Yes | \
+                  QtWidgets.QDialogButtonBox.Ignore | \
+                  QtWidgets.QDialogButtonBox.Cancel
+
+        result = MessageBox.question(None, title, text, buttons=buttons)
         print result
 
-        title = "By Frame Tip"
+        title = "Test checkbox"
         text = "Testing the don't show check box. "
-        buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
-        result = MessageBox.question(None, title, text, buttons, enableDontShowCheckBox=True)
+
+        buttons = QtWidgets.QDialogButtonBox.Ok | \
+                  QtWidgets.QDialogButtonBox.Cancel
+
+        result = MessageBox.question(
+            None,
+            title,
+            text,
+            buttons=buttons,
+            enableDontShowCheckBox=True
+        )
         print result
 
         title = "Create a new thumbnail icon"
-        text = "This will override the existing thumbnail. Are you sure you would like to continue?"
-        buttons = QtWidgets.QDialogButtonBox.Yes | QtWidgets.QDialogButtonBox.No
-        result = MessageBox.warning(None, title, text, buttons, enableDontShowCheckBox=True)
+        text = "This will override the existing thumbnail. " \
+               "Are you sure you would like to continue?"
+
+        buttons = QtWidgets.QDialogButtonBox.Yes | \
+                  QtWidgets.QDialogButtonBox.No
+
+        result = MessageBox.warning(
+            None,
+            title,
+            text,
+            buttons=buttons,
+            enableDontShowCheckBox=True
+        )
         print result
 
         title = "Error saving item!"
@@ -740,4 +775,4 @@ def showExample():
 
 
 if __name__ == "__main__":
-    showExample()
+    testMessageBox()
