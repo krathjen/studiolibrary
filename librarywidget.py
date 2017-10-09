@@ -50,7 +50,7 @@ class LibraryWidget(QtWidgets.QWidget):
     DEFAULT_NAME = "Default"
     HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
 
-    DATABASE_PATH = "{path}/.studiolibrary/items.json"
+    DATABASE_PATH = "{path}/.studiolibrary/database.json"
     SETTINGS_PATH = os.path.join(HOME_PATH, "StudioLibrary", "LibraryWidget.json")
 
     TRASH_ENABLED = True

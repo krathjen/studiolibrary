@@ -42,13 +42,15 @@ __all__ = [
     "findPaths",
     "copyPath",
     "movePath",
+    "movePaths",
     "normPath",
     "splitPath",
     "removePath",
     "renamePath",
+    "relPath",
+    "formatRelPath",
     "localPath",
     "formatPath",
-    "moveContents",
     "Direction",
     "stringToList",
     "listToString",
@@ -315,7 +317,10 @@ def formatPath(src, dst, labels=None):
     """
     dirname, name, extension = splitPath(src)
 
+    home = os.getenv('APPDATA') or os.getenv('HOME')
+
     labels_ = {
+        "home": home,
         "name": name,
         "path": src,
         "dirname": dirname,
@@ -364,6 +369,26 @@ def movePath(src, dst):
 
     shutil.move(src, dst)
     return dst
+
+
+def movePaths(srcPaths, dst):
+    """
+    Move the given src paths to the specified dst path.
+
+    :type srcPaths: list[str]
+    :type dst: str
+    """
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+
+    for src in srcPaths or []:
+        basename = os.path.basename(src)
+
+        dst_ = os.path.join(dst, basename)
+        dst_ = normPath(dst_)
+
+        logger.info(u'Moving Content: {0} => {1}'.format(src, dst_))
+        shutil.move(src, dst_)
 
 
 def removePath(path):
@@ -428,23 +453,6 @@ def renamePath(src, dst, extension=None, force=False):
     return dst
 
 
-def moveContents(contents, path):
-    """
-    Move the given contents to the specified path.
-
-    :type contents: list[str]
-    :type path: str
-    """
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    for src in contents or []:
-        basename = os.path.basename(src)
-        dst = path + "/" + basename
-        logger.info(u'Moving Content: {0} => {1}'.format(src, dst))
-        shutil.move(src, dst)
-
-
 def read(path):
     """
     Return the contents of the given path
@@ -459,7 +467,7 @@ def read(path):
         with open(path, "r") as f:
             data = f.read() or data
 
-    data = resolveRelativePath(path, data)
+    data = formatRelPath(data, path)
 
     return data
 
@@ -475,7 +483,7 @@ def write(path, data):
     path = normPath(path)
     dirname = os.path.dirname(path)
 
-    data = formatRelativePath(path, data)
+    data = relPath(data, path)
 
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -532,65 +540,56 @@ def readJson(path):
     return data
 
 
-def resolveRelativePath(path, data, sep="/"):
+def relPath(data, start):
     """
-    Resolve all relative paths in the given data object.
-    
-    This function is not pretty, however, the complexity increases when 
-    making it a loop.
-    
-    :type path: str
+    Return a relative version of all the paths in data from the start path.
+
     :type data: str 
-    :type sep: str 
+    :type start: str
     :rtype: str 
     """
-    relPath = os.path.dirname(path)
-    relPath2 = os.path.dirname(relPath)
-    relPath3 = os.path.dirname(relPath2)
+    rpath = start
 
-    if relPath.endswith(sep):
-        relPath = relPath[:-1]
+    for i in range(0, 3):
 
-    if relPath2.endswith(sep):
-        relPath2 = relPath2[:-1]
+        rpath = os.path.dirname(rpath)
+        token = os.path.relpath(rpath, start)
 
-    if relPath3.endswith(sep):
-        relPath3 = relPath3[:-1]
+        rpath = normPath(rpath)
+        token = normPath(token)
 
-    data = data.replace('\"...' + sep, '"' + relPath3 + sep)
-    data = data.replace('\"..' + sep, '"' + relPath2 + sep)
-    data = data.replace('\".' + sep, '"' + relPath + sep)
+        if rpath.endswith("/"):
+            rpath = rpath[:-1]
+
+        data = data.replace(rpath, token)
 
     return data
 
 
-def formatRelativePath(path, data, sep="/"):
+def formatRelPath(data, start):
     """
-    Replace all paths in the data that start with the given path.
-
-    This function is not pretty, however, the complexity increases when 
-    making it a loop.
-
-    :type path: str
+    Return a absolute version of all the paths in data from the start path.
+    
     :type data: str 
+    :type start: str
     :rtype: str 
     """
-    relPath = os.path.dirname(path)
-    relPath2 = os.path.dirname(relPath)
-    relPath3 = os.path.dirname(relPath2)
+    relPath = normPath(os.path.dirname(start))
+    relPath2 = normPath(os.path.dirname(relPath))
+    relPath3 = normPath(os.path.dirname(relPath2))
 
-    if not relPath.endswith(sep):
-        relPath = relPath + sep
+    if not relPath.endswith("/"):
+        relPath = relPath + "/"
 
-    if not relPath2.endswith(sep):
-        relPath2 = relPath2 + sep
+    if not relPath2.endswith("/"):
+        relPath2 = relPath2 + "/"
 
-    if not relPath3.endswith(sep):
-        relPath3 = relPath3 + sep
+    if not relPath3.endswith("/"):
+        relPath3 = relPath3 + "/"
 
-    data = data.replace(relPath, '.' + sep)
-    data = data.replace(relPath2, '..' + sep)
-    data = data.replace(relPath3, '...' + sep)
+    data = data.replace('../../../', relPath3)
+    data = data.replace('../../', relPath2)
+    data = data.replace('../', relPath)
 
     return data
 
@@ -630,11 +629,19 @@ def normPath(path):
     :type path: str
     :rtype: str 
     """
-    return path.replace("\\", "/")
+    return unicode(path.replace("\\", "/"))
 
 
 def splitPath(path):
     """
+    Split the given path into directory, basename and extension.
+    
+    Example:
+    
+        print splitPath("P:/production/rigs/character/mario.ma
+        
+        # (u'P:/production/rigs/character', u'mario', u'.ma')
+    
     :type path: str
     :rtype: list[str]
     """
@@ -645,6 +652,14 @@ def splitPath(path):
 
 def listToString(data):
     """
+    Return a string from the given list.
+    
+    Example:
+    
+        print listToString(['apple', 'pear', 'cherry'])
+        
+        # apple,pear,cherry
+    
     :type data: list
     :rtype: str
     """
@@ -657,6 +672,14 @@ def listToString(data):
 
 def stringToList(data):
     """
+    Return a string from the given list.
+        
+    Example:
+    
+        print listToString('apple, pear, cherry')
+        
+        # ['apple', 'pear', 'cherry']
+    
     :type data: str
     :rtype: list
     """
@@ -668,6 +691,8 @@ def stringToList(data):
 
 def listPaths(path):
     """
+    Return the list of paths that are in the given directory.
+    
     :type path: str
     :rtype: collections.Iterable[str]
     """
@@ -699,7 +724,7 @@ def findPaths(
             print path
 
     :type path: str
-    :type key: func
+    :type match: func
     :type depth: int
     :type direction: Direction
     :rtype: collections.Iterable[str]
@@ -890,6 +915,22 @@ def sendEvent(name, version="1.0.0", an="StudioLibrary", tid=None):
     t.start()
 
 
+def testSplitPath():
+    """
+    Small test for the split path method.
+    
+    :rtype: None 
+    """
+
+    path = "P:/production/rigs/character/mario.ma"
+
+    result = splitPath(path)
+    expected = (u'P:/production/rigs/character', u'mario', u'.ma')
+
+    msg = "Data does not match {} {}".format(expected, result)
+    assert expected == result, msg
+
+
 def testRelativePaths():
     """
     A simple test for resolving relative paths.
@@ -906,21 +947,35 @@ def testRelativePaths():
 
     expected = """
     { 
-    ".../path/head.anim": {},
-    "../path/face.anim": {},
-    "./path/hand.anim": {},    
+    "../../../path/head.anim": {},
+    "../../path/face.anim": {},
+    "../path/hand.anim": {},    
     }
     """
 
-    data_ = formatRelativePath("P:/test/relative/file.database", data)
+    data_ = relPath(data, "P:/test/relative/file.database")
+    print data_
     msg = "Data does not match {} {}".format(expected, data_)
     assert data_ == expected, msg
 
-    data_ = resolveRelativePath("P:/test/relative/file.database", data_)
+    data_ = formatRelPath(data_, "P:/test/relative/file.database")
+    print data_
     msg = "Data does not match {} {}".format(data, data_)
     assert data_ == data, msg
 
+    path = "P:/path/head.anim"
+    start = "P:/test/relative/file.database"
+    expected = "../../../path/head.anim"
+
+    result = relPath(path, start)
+    msg = 'Data does not match "{}" "{}"'.format(result, expected)
+    assert result == expected, msg
+
+    result = formatRelPath(result, start)
+    msg = 'Data does not match "{}" "{}"'.format(result, path)
+    assert result == path, msg
+
 
 if __name__ == "__main__":
+    testSplitPath()
     testRelativePaths()
-
