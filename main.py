@@ -27,14 +27,14 @@ def main(
     """
     Convenience method for creating and loading a library widget instance.
 
-    :type cls: studiolibrary.LibraryWidget.__class__
+    :type cls: studiolibrary.LibraryWidget.__class__ or None
     :type name: str or None
     :type path: str or None
     :type show: bool
     :type lock: bool
-    :type superusers: list[str]
-    :type lockRegExp: str
-    :type unlockRegExp: str
+    :type superusers: list[str] or None
+    :type lockRegExp: str or None
+    :type unlockRegExp: str or None
 
     :rtype: studiolibrary.LibraryWidget
     """

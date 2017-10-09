@@ -296,9 +296,6 @@ class LibraryWidget(QtWidgets.QWidget):
         searchWidget = self.searchWidget()
         searchWidget.searchChanged.connect(self._searchChanged)
 
-        studiolibrary.LibraryItem.saved.connect(self._itemSaved)
-        studiolibrary.LibraryItem.saving.connect(self._itemSaving)
-
         itemsWidget = self.itemsWidget()
         itemsWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         itemsWidget.itemMoved.connect(self._itemMoved)
@@ -384,31 +381,6 @@ class LibraryWidget(QtWidgets.QWidget):
                 if folder.path() != item.dirname():
                     self.showMoveItemsDialog(items, folder=folder)
                     break
-
-    def _itemSaving(self, item):
-        """
-        Triggered when an item is saving.
-
-        :type item: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        if self.path() in item.path():
-            if item.exists():
-                self.showItemExistsDialog(item)
-
-    def _itemSaved(self, item):
-        """
-        Triggered when an item has finished saving.
-
-        :type item: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        folder = self.selectedFolderPath()
-
-        if folder and folder == item.dirname():
-            path = item.path()
-            self.refreshItems()
-            self.selectPath(path)
 
     def statusWidget(self):
         """
@@ -1386,28 +1358,6 @@ class LibraryWidget(QtWidgets.QWidget):
         finally:
             self.itemsWidget().addItems(movedItems)
             self.selectItems(movedItems)
-
-    def showItemExistsDialog(self, item):
-        """
-        :type item: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        path = item.path()
-        items = [item]
-        title = "Item already exists"
-
-        text = 'Would you like to move the existing item "{}" to the trash?'
-        text = text.format(item.name())
-
-        button = self.showTrashItemsDialog(items, title=title, text=text)
-
-        if button == QtWidgets.QMessageBox.Cancel:
-            item.setErrorString("Item was not saved! Saving was canceled.")
-        elif button != QtWidgets.QMessageBox.Yes:
-            item.setErrorString(
-                "Item was not saved! You cannot save over an existsing item.")
-
-        item.setPath(path)
 
     # -----------------------------------------------------------------------
     # Support for search
