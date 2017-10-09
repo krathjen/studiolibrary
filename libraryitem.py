@@ -408,7 +408,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if os.path.exists(path):
             self.showAlreadyExistsDialog()
 
-        studiolibrary.moveContents(contents, path)
+        studiolibrary.movePaths(contents, path)
 
         if self.database():
             self.database().insert(path, {})
