@@ -24,6 +24,9 @@ class TestMirrorTable(unittest.TestCase):
         """
         msg = "Cannot find the left side from the given objects"
 
+        objects = ["Character3_Ctrl_LeftForeArm"]
+        assert "Left" == MirrorTable.findLeftSide(objects), msg
+
         objects = ["r_cool_ik", "l_arm_cool_l"]
         assert "l_*" == MirrorTable.findLeftSide(objects), msg
 
@@ -59,6 +62,9 @@ class TestMirrorTable(unittest.TestCase):
         Test the clamp range command
         """
         msg = "Cannot find the right side from the given objects"
+
+        objects = ["Character3_Ctrl_RightForeArm"]
+        assert "Right" == MirrorTable.findRightSide(objects), msg
 
         objects = ["l_car_ik", "r_arm_car_r"]
         assert "r_*" == MirrorTable.findRightSide(objects), msg
@@ -175,3 +181,7 @@ def run():
     """
     tests = unittest.TextTestRunner()
     tests.run(testSuite())
+
+
+if __name__ == "__main__":
+    run()
