@@ -113,7 +113,10 @@ def showMessageBox(
     key = 'MessageBox/{}/'.format(title.replace(" ", "_"))
 
     clickedButton = int(settings.value(key + "clickedButton") or -1)
-    dontShowAgain = settings.value(key + "dontShowAgain") == "true"
+    dontShowAgain = settings.value(key + "dontShowAgain")
+
+    if isinstance(dontShowAgain, basestring):
+        dontShowAgain = dontShowAgain == "true"
 
     # Force show the dialog if the user is holding the ctrl key down
     if studioqt.isControlModifier() or studioqt.isAltModifier():
@@ -143,6 +146,8 @@ def showMessageBox(
         # Save the dont show again checked state
         dontShowAgain = mb.isDontShowCheckboxChecked()
         settings.setValue(key + "dontShowAgain", dontShowAgain)
+
+        settings.sync()
 
     return clickedButton
 
