@@ -333,9 +333,11 @@ class TreeWidget(QtWidgets.QTreeWidget):
         """
         Return the last selected path
 
-        :rtype: str 
+        :rtype: str or None
         """
-        return self.selectedPaths()[-1]
+        paths = self.selectedPaths()
+        if paths:
+            return paths[-1]
 
     def selectedPaths(self):
         """
