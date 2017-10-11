@@ -321,52 +321,22 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Triggered when a folder has been renamed from the folder widget.
 
-        :str src: str
-        :str dst: str
+        :type src: str
+        :type dst: str
         :rtype: None
         """
         db = self.database()
         db.renameFolder(src, dst)
 
-        self.loadItemData()
+        self.refreshItemData()
+
         self.folderRenamed.emit(src, dst)
-
-    def _itemSelectionChanged(self):
-        """
-        Triggered when an item is selected or deselected.
-
-        :rtype: None
-        """
-        item = self.itemsWidget().selectedItem()
-
-        self.setPreviewWidgetFromItem(item)
-        self.itemSelectionChanged.emit(item)
-
-    def _folderSelectionChanged(self):
-        """
-        Triggered when an item is selected or deselected.
-
-        :rtype: None
-        """
-        self.refreshItems()
-        path = self.selectedFolderPath()
-        self.folderSelectionChanged.emit(path)
-        self.globalSignal.folderSelectionChanged.emit(self, path)
-
-    def _itemMoved(self, item):
-        """
-        Triggered when an item has been moved.
-
-        :type item: studiolibrary.LibraryItem
-        :rtype: None
-        """
-        self.saveCustomOrder()
 
     def _folderDropped(self, event):
         """
         Triggered when an item has been dropped on the folder widget.
 
-        :type event: list[studiolibrary.LibraryItem]
+        :type event: QtCore.QEvent
         :rtype: None
         """
         mimeData = event.mimeData()
@@ -381,6 +351,54 @@ class LibraryWidget(QtWidgets.QWidget):
                 if folder.path() != item.dirname():
                     self.showMoveItemsDialog(items, folder=folder)
                     break
+
+    def _folderSelectionChanged(self):
+        """
+        Triggered when an item is selected or deselected.
+
+        :rtype: None
+        """
+        path = self.selectedFolderPath()
+        self.refreshItems()
+        self.emitFolderSelectionChanged(path)
+
+    def emitFolderSelectionChanged(self, path):
+        """
+        Trigger the folderSelectionChanged signal.
+        
+        :type path: str or None 
+        :rtype: None 
+        """
+        self.folderSelectionChanged.emit(path)
+        self.globalSignal.folderSelectionChanged.emit(self, path)
+
+    def _itemSelectionChanged(self):
+        """
+        Triggered when an item is selected or deselected.
+
+        :rtype: None
+        """
+        item = self.itemsWidget().selectedItem()
+
+        self.setPreviewWidgetFromItem(item)
+        self.itemSelectionChanged.emit(item)
+
+    def _itemMoved(self, item):
+        """
+        Triggered when an item has been moved.
+
+        :type item: studiolibrary.LibraryItem
+        :rtype: None
+        """
+        self.saveCustomOrder()
+
+    def _searchChanged(self):
+        """
+        Triggered when the search widget text has changed.
+
+        :rtype: None
+        """
+        self.refreshSearch()
 
     def statusWidget(self):
         """
@@ -536,13 +554,8 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         if self.isRefreshEnabled():
-            items = self.selectedItems()
-
-            self.clearItems()
             self.refreshFolders()
-            self.refreshSearch()
-
-            self.selectItems(items)
+            self.refreshItems()
             self.updateWindowTitle()
 
     # -----------------------------------------------------------------
@@ -749,9 +762,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: str or None
         """
-        paths = self.selectedFolderPaths()
-        if paths:
-            return paths[-1]
+        return self.foldersWidget().selectedPath()
 
     def selectedFolderPaths(self):
         """
@@ -860,20 +871,50 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.itemsWidget().setItems(items, sortEnabled=sortEnabled)
 
-        self.loadItemData()
+        self.refreshItemData()
 
         if selectedItems:
             self.selectItems(selectedItems)
 
-        self.refreshSearch()
-
+    @studioqt.showWaitCursor
     def refreshItems(self):
         """
-        Convenience method for updating the items widget.
+        Update the items for the library widget.
 
-        :rtype: None 
+        :rtype: list[studiolibrary.LibraryItem]
         """
-        self.createItems()
+        elapsedTime = time.time()
+
+        paths = self.itemsWidget().selectedPaths()
+
+        self.clearItems()
+        items = self.createItems()
+        self.setItems(items, sortEnabled=False)
+
+        self.itemsWidget().selectPaths(paths)
+
+        elapsedTime = time.time() - elapsedTime
+        self.setLoadedMessage(elapsedTime)
+
+    def createItems(self):
+        """
+        Return a new instance of the items to be shown in the items widget.
+
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        paths = self.foldersWidget().selectedPaths()
+
+        depth = 1
+        if self.isRecursiveSearchEnabled():
+            depth = 3
+
+        items = studiolibrary.findItemsInFolders(
+            paths,
+            depth,
+            libraryWidget=self,
+        )
+
+        return list(items)
 
     def createItemsFromUrls(self, urls):
         """
@@ -885,46 +926,6 @@ class LibraryWidget(QtWidgets.QWidget):
             urls,
             database=self.database(),
             libraryWidget=self,
-        )
-
-        return items
-
-    @studioqt.showWaitCursor
-    def createItems(self):
-        """Reload the items widget."""
-
-        elapsedTime = time.time()
-
-        paths = self.itemsWidget().selectedPaths()
-
-        items = self._createItems()
-        self.setItems(items, sortEnabled=False)
-
-        self.itemsWidget().selectPaths(paths)
-
-        elapsedTime = time.time() - elapsedTime
-        self.setLoadedMessage(elapsedTime)
-
-        logger.debug("Loaded items")
-
-    def _createItems(self):
-        """
-        Return a new instance of the items to be shown.
-
-        :rtype: list[studiolibrary.LibraryItem]
-        """
-        paths = self.foldersWidget().selectedPaths()
-        depth = 1
-
-        if self.isRecursiveSearchEnabled():
-            depth = 3
-
-        items = list(studiolibrary.findItemsInFolders(
-            paths,
-            depth,
-            database=self.database(),
-            libraryWidget=self,
-        )
         )
 
         return items
@@ -1250,6 +1251,15 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self._database = studiolibrary.Database(path)
 
+    def refreshItemData(self):
+        """
+        Update the current items with the data from the database.
+        
+        :rtype: None 
+        """
+        self.loadItemData()
+        self.refreshSearch()
+
     def loadItemData(self):
         """
         Load the item data to the current items.
@@ -1268,7 +1278,6 @@ class LibraryWidget(QtWidgets.QWidget):
             except Exception, msg:
                 logger.exception(msg)
 
-            self.refreshSearch()
             self.itemsWidget().refreshSortBy()
 
     def saveItemData(self, columns):
@@ -1284,7 +1293,7 @@ class LibraryWidget(QtWidgets.QWidget):
         db = self.database()
         db.update(data)
 
-        self.loadItemData()
+        self.refreshItemData()
 
     def saveCustomOrder(self):
         """
@@ -1476,30 +1485,10 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        self._searchChanged()
+        if not self.isRefreshEnabled():
+            logger.debug('Refresh search is disabled!')
+            return
 
-    def itemsVisibleCount(self):
-        """
-        Return the number of items visible.
-
-        :rtype:  int
-        """
-        return self._itemsVisibleCount
-
-    def itemsHiddenCount(self):
-        """
-        Return the number of items hidden.
-
-        :rtype:  int
-        """
-        return self._itemsHiddenCount
-
-    def _searchChanged(self):
-        """
-        Triggered when the search widget has changed.
-
-        :rtype: None
-        """
         t = time.time()
 
         items = self.items()
@@ -1532,6 +1521,22 @@ class LibraryWidget(QtWidgets.QWidget):
         msg = "Found {0} item{1} in {2:.3f} seconds."
         msg = msg.format(self._itemsVisibleCount, plural, t)
         self.statusWidget().setInfo(msg)
+
+    def itemsVisibleCount(self):
+        """
+        Return the number of items visible.
+
+        :rtype:  int
+        """
+        return self._itemsVisibleCount
+
+    def itemsHiddenCount(self):
+        """
+        Return the number of items hidden.
+
+        :rtype:  int
+        """
+        return self._itemsHiddenCount
 
     # -----------------------------------------------------------------------
     # Support for custom preview widgets
@@ -1675,6 +1680,9 @@ class LibraryWidget(QtWidgets.QWidget):
         :type settings: dict
         """
         try:
+            isRefreshEnabled = self.isRefreshEnabled()
+            self.setRefreshEnabled(False)
+
             defaultGeometry = [200, 100, 860, 680]
             x, y, width, height = settings.get("geometry", defaultGeometry)
             self.window().setGeometry(x, y, width, height)
@@ -1733,6 +1741,9 @@ class LibraryWidget(QtWidgets.QWidget):
 
         finally:
             self.reloadStyleSheet()
+
+            self.setRefreshEnabled(isRefreshEnabled)
+            self.refresh()
 
         foldersWidgetSettings = settings.get('foldersWidget', {})
         self.foldersWidget().setSettings(foldersWidgetSettings)
@@ -2308,6 +2319,8 @@ class LibraryWidget(QtWidgets.QWidget):
         msg = msg.format(itemCount, plural, elapsedTime, hiddenText)
         self.statusWidget().setInfo(msg)
 
+        logger.debug(msg)
+
     # -----------------------------------------------------------------------
     # Support for locking via regex
     # -----------------------------------------------------------------------
@@ -2534,7 +2547,6 @@ class LibraryWidget(QtWidgets.QWidget):
         Enable recursive search for searching sub folders.
 
         :type value: int
-        :type refresh: bool
 
         :rtype: None
         """
