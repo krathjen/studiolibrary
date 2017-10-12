@@ -1,4 +1,4 @@
-## Studio Library 2
+## Studio Library
 
 Studio Library is a free python script for managing poses and animation in Maya.
 
@@ -7,17 +7,14 @@ Studio Library is a free python script for managing poses and animation in Maya.
 * https://github.com/krathjen/studiolibrary
 
 
-## What's changed in version 2?
-
-Most of the changes in version 2 are to help with maintaining the project.
-There have been many API changes, so the major version was changed.
+### What's changed?
 
 * Only supports Maya 2017 and Maya 2018
 * Items created before version 1.5.x (mid-2014) are no longer supported
 * Creating and switching between libraries from the UI is no longer supported
 
 
-## Features
+### Features
 
 * Save poses and animation
 * Mirror poses and animation
@@ -29,7 +26,7 @@ There have been many API changes, so the major version was changed.
 * Supports Maya 2017 and Maya 2018
 
 
-## Contributing
+### Contributing
 
 Whether it's reporting bugs, discussing ideas or committing code: Contributions to Studio Library are welcome!
 
@@ -42,7 +39,7 @@ Whether it's reporting bugs, discussing ideas or committing code: Contributions 
 * Please follow the same coding style as the "[Python Qt Style Guidelines](http://bitesofcode.blogspot.co.uk/2011/10/pyqt-coding-style-guidelines.html)".
 
 
-## How to install?
+### How to install?
 
 1. Download and unzip the *studiolibrary.zip* file
 
@@ -62,7 +59,7 @@ Whether it's reporting bugs, discussing ideas or committing code: Contributions 
 *C:/Users/USERNAME/Documents/maya/scripts*
 
 
-## How to run?
+### How to run?
 
 3. Start Maya and run the following code in the **Python** script editor.
 
@@ -72,7 +69,7 @@ studiolibrary.main()
 ```
 
 
-## Having Issues?
+### Having Issues?
 
 Please send an email with the error message and a detailed step by step process of how you got the error.
 
