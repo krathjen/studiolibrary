@@ -394,8 +394,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
         if namespaces:
             self.ui.namespaceComboBox.setToolTip("")
         else:
-            text = "No namespaces found in scene."
-            self.ui.namespaceComboBox.setToolTip(text)
+            toolTip = "No namespaces found in scene."
+            self.ui.namespaceComboBox.setToolTip(toolTip)
 
         self.ui.namespaceComboBox.clear()
         self.ui.namespaceComboBox.addItems(namespaces)
