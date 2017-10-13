@@ -29,6 +29,8 @@ from studioqt import QtWidgets
 
 __all__ = [
     "app",
+    "fadeIn",
+    "fadeOut",
     "loadUi",
     "saveJson",
     "readJson",
@@ -88,6 +90,148 @@ def app():
 
     if not isAppRunning:
         sys.exit(app_.exec_())
+
+
+def uiPath(cls):
+    """
+    Return the ui path for the given widget class.
+    
+    :type cls: type
+    :rtype: str
+    """
+    name = cls.__name__
+    path = inspect.getfile(cls)
+    dirname = os.path.dirname(path)
+
+    path = dirname + "/resource/ui/" + name + ".ui"
+    return path
+
+
+def loadUi(widget, path=None):
+    """
+    .. code-block:: python
+        import studioqt
+
+        class Widget(QtWidgets.QWidget):
+            def __init__(self)
+                super(Widget, self).__init__()
+                studioqt.loadUi(self)
+
+        with studioqt.app():
+            widget = Widget()
+            widget.show()
+
+    :type widget: QWidget or QDialog
+    :type path: str
+    :rtype: None
+    """
+    if not path:
+        path = uiPath(widget.__class__)
+
+    loadUiPySide(widget, path)
+
+
+def loadUiPySide(widget, path=None):
+    """
+    :type widget: QtWidgets.QWidget
+    :type path: str
+    :rtype: None
+    """
+    loader = QtUiTools.QUiLoader()
+    loader.setWorkingDirectory(os.path.dirname(path))
+
+    f = QtCore.QFile(path)
+    f.open(QtCore.QFile.ReadOnly)
+    widget.ui = loader.load(path, widget)
+    f.close()
+
+    layout = QtWidgets.QVBoxLayout()
+    layout.setObjectName("uiLayout")
+    layout.addWidget(widget.ui)
+    widget.setLayout(layout)
+    layout.setContentsMargins(0, 0, 0, 0)
+
+    widget.setMinimumWidth(widget.ui.minimumWidth())
+    widget.setMinimumHeight(widget.ui.minimumHeight())
+    widget.setMaximumWidth(widget.ui.maximumWidth())
+    widget.setMaximumHeight(widget.ui.maximumHeight())
+
+
+def isModifier():
+    """
+    Return True if either the alt key or control key is down.
+    
+    :rtype: bool 
+    """
+    return isAltModifier() or isControlModifier()
+
+
+def isAltModifier():
+    """
+    Return True if the alt key is down.
+
+    :rtype: bool
+    """
+    modifiers = QtWidgets.QApplication.keyboardModifiers()
+    return modifiers == QtCore.Qt.AltModifier
+
+
+def isControlModifier():
+    """
+    Return True if the control key is down.
+    
+    :rtype: bool
+    """
+    modifiers = QtWidgets.QApplication.keyboardModifiers()
+    return modifiers == QtCore.Qt.ControlModifier
+
+
+def fadeIn(widget, duration=200, onFinished=None):
+    """
+    Fade in the given widget using the opacity effect.
+
+    :type widget: QtWidget.QWidgets
+    :type duration: int 
+    :type onFinished: func
+    :rtype: QtCore.QPropertyAnimation 
+    """
+    effect = QtWidgets.QGraphicsOpacityEffect(widget)
+    widget.setGraphicsEffect(effect)
+    animation = QtCore.QPropertyAnimation(effect, "opacity")
+    animation.setDuration(duration)
+    animation.setStartValue(0.0)
+    animation.setEndValue(1.0)
+    animation.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
+    animation.start()
+
+    if onFinished:
+        animation.finished.connect(onFinished)
+
+    return animation
+
+
+def fadeOut(widget, duration=200, onFinished=None):
+    """
+    Fade out the given widget using the opacity effect.
+    
+    :type widget: QtWidget.QWidgets
+    :type duration: int
+    :type onFinished: func
+    :rtype: QtCore.QPropertyAnimation 
+    """
+    effect = QtWidgets.QGraphicsOpacityEffect(widget)
+    widget.setGraphicsEffect(effect)
+    animation = QtCore.QPropertyAnimation(effect, "opacity")
+    animation.setDuration(duration)
+    animation.setStartValue(1.0)
+    animation.setEndValue(0.0)
+    animation.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
+    animation.start()
+
+    if onFinished:
+        animation.finished.connect(onFinished)
+
+    return animation
 
 
 def currentScreenGeometry():
@@ -209,106 +353,3 @@ def readJson(path):
         data = json.loads(data)
 
     return data
-
-
-def uiPath(cls):
-    """
-    :type cls: type
-    :rtype: str
-    """
-    name = cls.__name__
-    path = inspect.getfile(cls)
-    dirname = os.path.dirname(path)
-
-    path = dirname + "/resource/ui/" + name + ".ui"
-    return path
-
-
-def loadUi(widget, path=None):
-    """
-    .. code-block:: python
-        import studioqt
-
-        class Widget(QtWidgets.QWidget):
-            def __init__(self)
-                super(Widget, self).__init__()
-                studioqt.loadUi(self)
-
-        with studioqt.app():
-            widget = Widget()
-            widget.show()
-
-    :type widget: QWidget or QDialog
-    :type path: str
-    :rtype: None
-    """
-    if not path:
-        path = uiPath(widget.__class__)
-
-    loadUiPySide(widget, path)
-
-
-def loadUiPySide(widget, path=None):
-    """
-    :type widget: QtWidgets.QWidget
-    :type path: str
-    :rtype: None
-    """
-    loader = QtUiTools.QUiLoader()
-    loader.setWorkingDirectory(os.path.dirname(path))
-
-    f = QtCore.QFile(path)
-    f.open(QtCore.QFile.ReadOnly)
-    widget.ui = loader.load(path, widget)
-    f.close()
-
-    layout = QtWidgets.QVBoxLayout()
-    layout.setObjectName("uiLayout")
-    layout.addWidget(widget.ui)
-    widget.setLayout(layout)
-    layout.setContentsMargins(0, 0, 0, 0)
-
-    widget.setMinimumWidth(widget.ui.minimumWidth())
-    widget.setMinimumHeight(widget.ui.minimumHeight())
-    widget.setMaximumWidth(widget.ui.maximumWidth())
-    widget.setMaximumHeight(widget.ui.maximumHeight())
-
-
-def mayaWindow():
-    """
-    :rtype: QtCore.QObject
-    """
-    instance = None
-    try:
-        import maya.OpenMayaUI as mui
-        import sip
-
-        ptr = mui.MQtUtil.mainWindow()
-        instance = sip.wrapinstance(long(ptr), QtCore.QObject)
-
-    except Exception:
-        logger.debug("Warning: Cannot find a maya window.")
-        pass
-
-    return instance
-
-
-def isModifier():
-    return isAltModifier() or isControlModifier()
-
-
-def isAltModifier():
-    """
-
-    :rtype: bool
-    """
-    modifiers = QtWidgets.QApplication.keyboardModifiers()
-    return modifiers == QtCore.Qt.AltModifier
-
-
-def isControlModifier():
-    """
-    :rtype: bool
-    """
-    modifiers = QtWidgets.QApplication.keyboardModifiers()
-    return modifiers == QtCore.Qt.ControlModifier
