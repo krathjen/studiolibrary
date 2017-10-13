@@ -341,17 +341,13 @@ class MessageBox(QtWidgets.QDialog):
         self.setObjectName("messageBox")
 
         self._frame = None
+        self._animation = None
+        self._dontShowCheckbox = False
+        self._clickedButton = None
+        self._clickedStandardButton = None
 
         self.setMinimumWidth(width or 320)
         self.setMinimumHeight(height or 220)
-
-        self._effect = None
-        self._animation = None
-
-        self._dontShowCheckbox = False
-
-        self._clickedButton = None
-        self._clickedStandardButton = None
 
         parent = self.parent()
 
@@ -505,14 +501,8 @@ class MessageBox(QtWidgets.QDialog):
         :rtype: QtCore.QPropertyAnimation 
         """
         if self._frame:
-            self._effect = QtWidgets.QGraphicsOpacityEffect(self._frame)
-            self._frame.setGraphicsEffect(self._effect)
-            self._animation = QtCore.QPropertyAnimation(self._effect, "opacity")
-            self._animation.setDuration(duration)
-            self._animation.setStartValue(0.0)
-            self._animation.setEndValue(1.0)
-            self._animation.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
-            self._animation.start()
+            self._animation = studioqt.fadeIn(self._frame, duration=duration)
+        return self._animation
 
     def fadeOut(self, duration=200):
         """
@@ -521,18 +511,8 @@ class MessageBox(QtWidgets.QDialog):
         :type duration: int 
         :rtype: QtCore.QPropertyAnimation 
         """
-        self._animation = None
-
         if self._frame:
-            self._effect = QtWidgets.QGraphicsOpacityEffect(self._frame)
-            self._frame.setGraphicsEffect(self._effect)
-            self._animation = QtCore.QPropertyAnimation(self._effect, "opacity")
-            self._animation.setDuration(duration)
-            self._animation.setStartValue(1.0)
-            self._animation.setEndValue(0.0)
-            self._animation.setEasingCurve(QtCore.QEasingCurve.InOutCubic)
-            self._animation.start()
-
+            self._animation = studioqt.fadeOut(self._frame, duration=duration)
         return self._animation
 
     def _accept(self):
