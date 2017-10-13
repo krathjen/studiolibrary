@@ -223,6 +223,12 @@ class MenuBarWidget(QtWidgets.QFrame):
         width = height + (padding * 2)
         height = height - padding
 
+        if width < 0:
+            width = 0
+
+        if height < 0:
+            height = 0
+
         self._leftToolBar.setFixedHeight(height)
         self._leftToolBar.setIconSize(QtCore.QSize(width, height))
 
