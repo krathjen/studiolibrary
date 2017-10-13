@@ -117,24 +117,24 @@ class LibraryWidget(QtWidgets.QWidget):
 
         name = name or cls.DEFAULT_NAME
 
-        w = cls._instances.get(name)
+        libraryWidget = cls._instances.get(name)
 
-        if not w:
-            w = cls(name=name)
-            cls._instances[name] = w
+        if not libraryWidget:
+            libraryWidget = cls(name=name)
+            cls._instances[name] = libraryWidget
 
-        w.setLocked(lock)
-        w.setSuperusers(superusers)
-        w.setLockRegExp(lockRegExp)
-        w.setUnlockRegExp(unlockRegExp)
+        libraryWidget.setLocked(lock)
+        libraryWidget.setSuperusers(superusers)
+        libraryWidget.setLockRegExp(lockRegExp)
+        libraryWidget.setUnlockRegExp(unlockRegExp)
 
         if path:
-            w.setPath(path)
+            libraryWidget.setPath(path)
 
         if show:
-            w.show()
+            libraryWidget.show()
 
-        return w
+        return libraryWidget
 
     def __init__(
             self,
@@ -2098,6 +2098,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def isTrashSelected(self):
         """
+        Return True if the selected folders is in the trash.
+        
         :rtype: bool
         """
         folders = self.selectedFolderPaths()
@@ -2114,6 +2116,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def showTrashSelectedFoldersDialog(self):
         """
+        Show the move to trash dialog for the selected items.
+        
         :rtype: None
         """
         item = self.foldersWidget().selectedItem()
@@ -2126,9 +2130,9 @@ class LibraryWidget(QtWidgets.QWidget):
             result = self.showQuestionDialog(title, text)
 
             if result == QtWidgets.QMessageBox.Yes:
-                self.moveToTrash(item)
+                self.moveFolderToTrash(item)
 
-    def moveToTrash(self, folder):
+    def moveFolderToTrash(self, folder):
         """
         Move the given folder item to the trash path.
 
@@ -2175,12 +2179,14 @@ class LibraryWidget(QtWidgets.QWidget):
             result = self.showQuestionDialog(title, text)
 
             if result == QtWidgets.QMessageBox.Yes:
-                self.trashItems(items)
+                self.moveItemsToTrash(items)
 
         return result
 
-    def trashItems(self, items):
+    def moveItemsToTrash(self, items):
         """
+        Move the given items to trash path.
+        
         :items items: list[studiolibrary.LibraryItem]
         :rtype: None
         """
