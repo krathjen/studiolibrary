@@ -336,12 +336,17 @@ QComboBox:focus, QLineEdit:focus {
 
 QComboBox QAbstractItemView {
 	selection-background-color: ACCENT_COLOR;
-	selection-color: rgb(ACCENT_FOREGROUND_COLOR);
+	selection-color: ACCENT_FOREGROUND_COLOR;
 }
 
 QComboBox QAbstractItemView::item {
 }
 
+
+QLabel {
+    selection-color: ACCENT_FOREGROUND_COLOR;
+	selection-background-color: ACCENT_COLOR;
+}
 
 /*
  --------------------------------------------------------------------------
