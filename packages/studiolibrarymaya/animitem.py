@@ -439,8 +439,12 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
             self.ui.fileTypeComboBox.setCurrentIndex(fileTypeIndex)
 
     def settings(self):
-
-        settings = super(AnimPreviewWidget, self).settings()
+        """
+        Overriding this method to add support for saving the byFrame and type.
+        
+        :rtype: dict 
+        """
+        settings = super(AnimCreateWidget, self).settings()
 
         settings["byFrame"] = self.byFrame()
         settings["fileType"] = self.fileType()
@@ -674,6 +678,7 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
             self.ui.helpImage.show()
         else:
             self.ui.helpImage.hide()
+
         if save:
             self.saveSettings()
 
