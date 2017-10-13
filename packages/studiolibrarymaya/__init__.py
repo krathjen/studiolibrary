@@ -28,7 +28,7 @@ DIRNAME = os.path.dirname(PATH).replace('\\', '/')
 RESOURCE_DIRNAME = DIRNAME + "/resource"
 
 DEFAULT_FILE_TYPE = "mayaBinary"
-SETTINGS_PATH = studiolibrary.localPath("ItemSettings.json")
+SETTINGS_PATH = studiolibrary.localPath("LibraryItem.json")
 
 _resource = None
 _settings = None
@@ -49,14 +49,12 @@ def saveSettings(data):
     Save the given dict to the local location of the SETTING_PATH.
 
     :type data: dict
-    :rtype: dict
+    :rtype: None
     """
     global _settings
     _settings = None
 
-    data_ = readSettings()
-    data_.update(data)
-    return studiolibrary.saveJson(SETTINGS_PATH, data_)
+    studiolibrary.updateJson(SETTINGS_PATH, data)
 
 
 def settings():
