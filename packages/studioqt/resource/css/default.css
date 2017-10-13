@@ -24,6 +24,13 @@ MenuBarWidget, QToolBar, QToolButton  {
 	background-color: ACCENT_COLOR;
 }
 
+QToolTip {
+    background-color: rgb(255, 255, 204);
+    color: black;
+    border: black solid 1px;
+    margins: 2px;
+}
+
 /*
 DIALOG
 */
