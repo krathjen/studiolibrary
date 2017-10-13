@@ -74,6 +74,61 @@ class TransferObject(object):
             t.add(obj)
         return t
 
+    @staticmethod
+    def readJson(path):
+        """
+        Read the given json path
+
+        :type path: str
+        :rtype: dict
+        """
+        with open(path, "r") as f:
+            # data = json.loads(data)
+            # We don't use json.loads for performance reasons in python 2.6.
+            data = f.read()
+            data = data.replace(": false", ": False")
+            data = data.replace(": true", ": True")
+            data = eval(data, {})
+
+        return data
+
+    @staticmethod
+    def readList(path):
+        """
+        Legacy method for reading older .list file type.
+
+        :rtype: dict 
+        """
+        with open(path, "r") as f:
+            data = f.read()
+
+        data = eval(data, {})
+        result = {}
+        for obj in data:
+            result.setdefault(obj, {})
+
+        return {"objects": result}
+
+    @staticmethod
+    def readDict(path):
+        """
+        Legacy method for reading older .dict file type.
+
+        :rtype: dict 
+        """
+        with open(path, "r") as f:
+            data = f.read()
+
+        data = eval(data, {})
+        result = {}
+        for obj in data:
+            result.setdefault(obj, {"attrs": {}})
+            for attr in data[obj]:
+                typ, val = data[obj][attr]
+                result[obj]["attrs"][attr] = {"type": typ, "value": val}
+
+        return {"objects": result}
+
     def __init__(self):
         self._path = None
         self._namespaces = None
@@ -93,6 +148,17 @@ class TransferObject(object):
 
         :type path: str
         """
+        dictPath = path.replace(".json", ".dict")
+        listPath = path.replace(".json", ".list")
+
+        if not os.path.exists(path):
+
+            if os.path.exists(dictPath):
+                path = dictPath
+
+            elif os.path.exists(listPath):
+                path = listPath
+
         self._path = path
 
     def mtime(self):
@@ -208,41 +274,39 @@ class TransferObject(object):
 
     def metadata(self):
         """
-        data = {
-            "User": "",
-            "Scene": "",
-            "Reference": {"filename": "", "namespace": ""},
-            "Description": "",
-        }
+        Return the current metadata for the transfer object.
+        
+        Example: print self.metadata()
+            Result # {
+                "User": "",
+                "Scene": "",
+                "Reference": {"filename": "", "namespace": ""},
+                "Description": "",
+            }
+        
         :rtype: dict
         """
         return self.data().get("metadata", {})
 
-    def read(self, path=None):
+    def read(self, path=""):
         """
         Return the data from the path set on the Transfer object.
 
-        :rtype: dict
-        """
-        data = self.readJson(path)
-        self.setData(data)
-
-    def readJson(self, path=None):
-        """
         :type path: str
         :rtype: dict
         """
         path = path or self.path()
 
-        with open(path, "r") as f:
-            # data = json.loads(data)
-            # We don't use json.loads for performance reasons in python 2.6.
-            data = f.read()
-            data = data.replace(": false", ": False")
-            data = data.replace(": true", ": True")
-            data = eval(data, {})
+        if path.endswith(".dict"):
+            data = self.readDict(path)
 
-        return data
+        elif path.endswith(".list"):
+            data = self.readList(path)
+
+        else:
+            data = self.readJson(path)
+
+        self.setData(data)
 
     @abc.abstractmethod
     def load(self, *args, **kwargs):
@@ -251,6 +315,9 @@ class TransferObject(object):
     @mutils.showWaitCursor
     def save(self, path, description=None):
         """
+        Save the current data to the given path.
+        
+        :type description: str | None
         :type path: str
         """
         logger.info("Saving pose: %s" % path)

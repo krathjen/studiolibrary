@@ -63,7 +63,6 @@ class BaseItem(studiolibrary.LibraryItem):
             path = libraryWidget.path()
 
         widget.setFolderPath(path)
-        widget.setDatabase(libraryWidget.database())
         widget.setLibraryWidget(libraryWidget)
 
         libraryWidget.setCreateWidget(widget)
@@ -137,8 +136,7 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         if not self._transferObject:
             path = self.transferPath()
-            if os.path.exists(path):
-                self._transferObject = self.transferClass().fromPath(path)
+            self._transferObject = self.transferClass().fromPath(path)
         return self._transferObject
 
     def thumbnailPath(self):
@@ -163,12 +161,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: str or None
         """
-        user = ""
-
-        if self.transferObject():
-            user = self.transferObject().metadata().get("user")
-
-        return user
+        return self.transferObject().metadata().get("user", "")
 
     def description(self):
         """
@@ -176,12 +169,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: str
         """
-        description = ""
-
-        if self.transferObject():
-            description = self.transferObject().metadata().get("description")
-
-        return description
+        return self.transferObject().metadata().get("description", "")
 
     def objectCount(self):
         """
@@ -189,10 +177,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: int
         """
-        if self.transferObject():
-            return self.transferObject().count()
-        else:
-            return 0
+        return self.transferObject().count()
 
     def contextMenu(self, menu, items=None):
         """
@@ -324,14 +309,14 @@ class BaseItem(studiolibrary.LibraryItem):
         namespaces = []
         namespaceOption = self.namespaceOption()
 
-        # When creating a new item we can only get the namespaces from
-        # selection because the file (transferObject) doesn't exist yet.
-        if not self.transferObject():
+        # # When creating a new item we can only get the namespaces from
+        # # selection because the file (transferObject) doesn't exist yet.
+        if not self.exists():
             namespaces = self.namespacesFromSelection()
 
         # If the file (transferObject) exists then we can use the namespace
         # option to determined which namespaces to return.
-        elif namespaceOption == NamespaceOption.FromFile:
+        if namespaceOption == NamespaceOption.FromFile:
             namespaces = self.namespacesFromFile()
 
         elif namespaceOption == NamespaceOption.FromCustom:
@@ -449,17 +434,17 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         logger.info(u'Saving: {0}'.format(path))
 
-        contents = contents or list()
         tempDir = mutils.TempDir("Transfer", clean=True)
-        transferPath = tempDir.path() + "/" + self.transferBasename()
+        tempPath = tempDir.path() + "/" + self.transferBasename()
 
         t = self.transferClass().fromObjects(objects)
-        t.save(transferPath, description=description, **kwargs)
+        t.save(tempPath, description=description, **kwargs)
 
+        contents = contents or list()
         if iconPath:
             contents.append(iconPath)
+        contents.append(tempPath)
 
-        contents.append(transferPath)
         studiolibrary.LibraryItem.save(self, path=path, contents=contents)
 
         logger.info(u'Saved: {0}'.format(path))
