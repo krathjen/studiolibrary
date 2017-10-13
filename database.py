@@ -187,11 +187,9 @@ class Database(QtCore.QObject):
         Update the database with the given data.
 
         :type data: dict
-        :rtype: None
+        :rtype: dict
         """
-        data_ = self.readJson()
-        data_.update(data)
-        self.saveJson(data_)
+        studiolibrary.updateJson(self.path(), data)
 
     def insert(self, key, data):
         """
