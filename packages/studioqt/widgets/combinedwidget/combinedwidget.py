@@ -481,10 +481,6 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         self.setToastEnabled(False)
 
-        # Must set the column labels first for sorting and grouping.
-        columnLabels = settings.get("columnLabels", [])
-        self.setColumnLabels(columnLabels)
-
         padding = settings.get("padding", 5)
         self.setPadding(padding)
 
@@ -685,25 +681,25 @@ class CombinedWidget(QtWidgets.QWidget):
 
         return itemData
 
-    def setItemData(self, itemData, indexByColumn="Path"):
+    def setItemData(self, data, indexByColumn="Path"):
         """
         Set the item data for all the current items.
 
-        :type itemData: dict
+        :type data: dict
         :type indexByColumn: str
         """
-        column1 = self.treeWidget().columnFromLabel(indexByColumn)
+        # column1 = self.treeWidget().columnFromLabel(indexByColumn)
 
         for item in self.items():
-            key = item.data(column1, QtCore.Qt.EditRole)
+            key = item.id()
 
-            if key in itemData:
+            if key in data:
 
-                for columnLabel in itemData[key]:
-                    value = itemData[key].get(columnLabel)
+                for column in data[key]:
+                    value = data[key].get(column)
 
                     if value is not None:
-                        item.setText(columnLabel, value)
+                        item.setText(column, value)
 
                 item.updateData()
 

@@ -204,8 +204,9 @@ class LibraryWidget(QtWidgets.QWidget):
         name = "New Item"
         icon = studioqt.resource.icon("add")
         tip = "Add a new item to the selected folder"
-        self.addMenuBarAction(name, icon, tip, callback=self.showNewMenu,
-                              side="Left")
+        self.addMenuBarAction(name, icon, tip, callback=self.showNewMenu)
+
+        self._menuBarWidget.addWidget(self._searchWidget)
 
         name = "Item View"
         icon = studioqt.resource.icon("view_settings")
@@ -232,8 +233,6 @@ class LibraryWidget(QtWidgets.QWidget):
         icon = studioqt.resource.icon("settings")
         tip = "Settings menu"
         self.addMenuBarAction(name, icon, tip, callback=self.showSettingsMenu)
-
-        self._menuBarWidget.layout().insertWidget(1, self._searchWidget)
 
         # -------------------------------------------------------------------
         # Setup Layout
@@ -664,6 +663,7 @@ class LibraryWidget(QtWidgets.QWidget):
         }
 
         for p in studiolibrary.findPaths(root, ignore=ignore):
+
             paths[p] = {}
 
             if trashPath == p:
@@ -980,24 +980,34 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for custom context menus
     # -----------------------------------------------------------------
 
-    def addMenuBarAction(self, name, icon, tip, side="Right", callback=None):
+    def addMenuBarAction(self, name, icon, tip, callback=None):
         """
         Add a button/action to menu bar widget.
 
         :type name: str
         :type icon: QtWidget.QIcon
-        :param tip: str
-        :param side: str
-        :param callback: func
-        :rtype: QtWidget.QAction
+        :type tip: str
+        :type callback: func
+        :type: QtWidget.QAction
         """
-        return self.menuBarWidget().addAction(
-            name=name,
-            icon=icon,
-            tip=tip,
-            side=side,
-            callback=callback,
-        )
+
+        # The method below is needed to fix an issue with PySide2.
+        def _callback():
+            callback()
+
+        action = self.menuBarWidget().addAction(name)
+
+        if icon:
+            action.setIcon(icon)
+
+        if tip:
+            action.setToolTip(tip)
+            action.setStatusTip(tip)
+
+        if callback:
+            action.triggered.connect(_callback)
+
+        return action
 
     def showGroupByMenu(self):
         """
@@ -2481,7 +2491,7 @@ class LibraryWidget(QtWidgets.QWidget):
             action.setEnabled(True)
             action.setIcon(pixmap)
 
-        self.menuBarWidget().update()
+        self.menuBarWidget().refresh()
 
     def isLocked(self):
         """
@@ -2671,7 +2681,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         action.setIcon(icon)
 
-        self.menuBarWidget().update()
+        self.menuBarWidget().refresh()
 
     def isRecursiveSearchEnabled(self):
         """

@@ -139,6 +139,14 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if path:
             self.setPath(path)
 
+    def id(self):
+        """
+        Return the unique id for the item.
+    
+        :rtype: str 
+        """
+        return self.path()
+
     def showToastMessage(self, text):
         """
         A convenience method for showing the toast widget with the given text.

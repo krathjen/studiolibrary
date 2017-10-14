@@ -22,6 +22,7 @@ QLineEdit, QPushButton, QToolBar, QToolButton, QTabBar, QTabBar::tab {
 MenuBarWidget, QToolBar, QToolButton  {
 	color: ACCENT_FOREGROUND_COLOR;
 	background-color: ACCENT_COLOR;
+	spacing:4*DPIpx;
 }
 
 QToolTip {
