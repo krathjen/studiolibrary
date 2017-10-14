@@ -239,7 +239,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     def showInFolder(self):
         """Open the file explorer at the given path location."""
         path = self.path()
-        studioqt.showInFolder(path)
+        studiolibrary.showInFolder(path)
 
     def name(self):
         """

@@ -406,10 +406,6 @@ class TreeWidget(QtWidgets.QTreeWidget):
     def normPaths(self, paths):
         return [path.replace("\\", "/") for path in paths]
 
-    def loadFromJson(self, path):
-        data = studioqt.readJson(path)
-        self.setPaths(data)
-
     def setPaths(self, paths, root="", split=None):
         """
         Set the items to the given items.
@@ -491,15 +487,9 @@ class ExampleWindow(QtWidgets.QWidget):
         layout = QtGui.QVBoxLayout(self)
         self.setLayout(layout)
 
-        self._jsonPath = ""
-
         self._lineEdit = QtGui.QLineEdit()
         self._lineEdit.textChanged.connect(self.searchChanged)
         self._treeWidget = TreeWidget(self)
-
-        self._button = QtGui.QPushButton("Refresh")
-        self._button.clicked.connect(self.refresh)
-        self._button.setFixedHeight(32)
 
         self._slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self._slider.valueChanged.connect(self._valueChanged)
@@ -507,7 +497,6 @@ class ExampleWindow(QtWidgets.QWidget):
         self._slider.setValue(100)
         self._slider.setFixedHeight(18)
 
-        layout.addWidget(self._button)
         layout.addWidget(self._slider)
         layout.addWidget(self._lineEdit)
         layout.addWidget(self._treeWidget)
@@ -526,12 +515,8 @@ class ExampleWindow(QtWidgets.QWidget):
         self._treeWidget.setDpi(value)
         self._treeWidget.setStyleSheet(theme.styleSheet())
 
-    def refresh(self):
-        self.loadFromJson(self._jsonPath)
-
-    def loadFromJson(self, path):
-        self._jsonPath = path
-        self._treeWidget.loadFromJson(path)
+    def setData(self, data):
+        self._treeWidget.setPaths(data)
 
     def itemClicked(self):
         print "ITEM CLICKED"
@@ -562,8 +547,70 @@ class ExampleWindow(QtWidgets.QWidget):
 
 
 def showExampleWindow():
+
+    data = {
+        "P:/production/shared/anim": {
+            "text": "FOLDERS",
+            "bold": True,
+            "isExpanded": True,
+            "iconPath": "none",
+            "iconColor": "rgb(100, 100, 150)",
+            "textColor": "rgb(100, 100, 150, 150)"
+        },
+
+        "P:/production/shared/anim/walks/fast.anim": {},
+        "P:/production/shared/anim/walks/slow.anim": {},
+        "P:/production/shared/anim/rigs/prop.rig": {},
+        "P:/production/shared/anim/rigs/character.rig": {},
+
+        "Users/libraries/animation/Character/Boris/stressed.pose": {},
+        "Users/libraries/animation/Character/Boris/smile.pose": {},
+        "Users/libraries/animation/Character/Cornilous/normal.pose": {},
+        "Users/libraries/animation/Character/Cornilous/relaxed.pose": {},
+        "Users/libraries/animation/Character/Cornilous/surprised.pose": {},
+        "Users/libraries/animation/Character/Figaro/test.anim": {},
+        "Users/libraries/animation/Character/Figaro/anim/hiccup.anim": {},
+
+        "props/car/color/red": {},
+        "props/car/color/orange": {},
+        "props/car/color/yellow": {},
+        "props/plane/color/blue": {},
+        "props/plane/color/green": {},
+
+        "tags": {
+            "text": "TAGS",
+            "bold": True,
+            "isExpanded": True,
+            "iconPath": "none",
+            "iconColor": "rgb(100, 100, 150)",
+            "textColor": "rgb(100, 100, 150, 150)"
+        },
+        "tags/red": {
+            "iconColor": "rgb(200, 50, 50)",
+            "iconPath": "../../resource/icons/circle.png"
+        },
+        "tags/orange": {
+            "bold": True,
+            "textColor": "rgb(250, 150, 50)",
+            "iconColor": "rgb(250, 150, 50)",
+            "iconPath": "../../resource/icons/circle.png"
+        },
+        "tags/yellow": {
+            "iconColor": "rgb(250, 200, 0)",
+            "iconPath": "../../resource/icons/circle.png"
+        },
+        "tags/blue": {
+            "iconColor": "rgb(50, 150, 250)",
+            "iconPath": "../../resource/icons/circle.png"
+        },
+        "tags/green": {
+            "iconColor": "rgb(100, 200, 0)",
+            "iconPath": "../../resource/icons/circle.png"
+        }
+    }
+
     window = ExampleWindow(None)
-    window.loadFromJson("example.json")
+    window.setData(data)
     window.show()
     window.setGeometry(300, 300, 300, 600)
     return window

@@ -701,7 +701,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         path = self.selectedFolderPath()
-        studioqt.showInFolder(path)
+        studiolibrary.showInFolder(path)
 
     def showRenameFolderDialog(self, parent=None):
         """

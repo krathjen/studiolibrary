@@ -13,6 +13,7 @@
 
 import os
 import json
+import ctypes
 import shutil
 import urllib2
 import logging
@@ -54,6 +55,7 @@ __all__ = [
     "Direction",
     "stringToList",
     "listToString",
+    "showInFolder",
     "generateUniquePath",
     "PathRenameError",
     "registerItem",
@@ -66,6 +68,7 @@ __all__ = [
     "findItemsInFolders",
     "ANALYTICS_ID",
     "ANALYTICS_ENABLED",
+    "SHOW_IN_FOLDER_CMD",
 ]
 
 
@@ -77,6 +80,8 @@ _itemClasses = collections.OrderedDict()
 
 ANALYTICS_ENABLED = True
 ANALYTICS_ID = "UA-50172384-1"
+
+SHOW_IN_FOLDER_CMD = None
 
 
 class PathRenameError(IOError):
@@ -809,6 +814,12 @@ def walk(path, match=None, depth=3):
 
 def timeAgo(timeStamp):
     """
+    Return a pretty string for how long ago the given timeStamp was.
+    
+    Example:
+        print timeAgo("2015-04-27 22:29:55"
+        # 2 years ago
+    
     :type timeStamp: str
     :rtype: str
     """
@@ -867,7 +878,7 @@ def sendEvent(name, version="1.0.0", an="StudioLibrary", tid=None):
     Send a screen view event to google analytics.
 
     Example:
-    sendEvent("mainWindow")
+        sendEvent("mainWindow")
 
     :type name: str
     :type version: str
@@ -913,6 +924,42 @@ def sendEvent(name, version="1.0.0", an="StudioLibrary", tid=None):
 
     t = threading.Thread(target=_send, args=(url,))
     t.start()
+
+
+def showInFolder(path):
+    """
+    Show the given path in the system file explorer.
+
+    :type path: unicode
+    :rtype: None
+    """
+    cmd = os.system
+    args = []
+
+    if SHOW_IN_FOLDER_CMD:
+        args = [unicode(SHOW_IN_FOLDER_CMD)]
+
+    elif isLinux():
+        args = [u'konqueror "{path}"&']
+
+    elif isWindows():
+        # os.system() and subprocess.call() can't pass command with
+        # non ascii symbols, use ShellExecuteW directly
+        args = [None, u'open', u'explorer.exe', u'/n,/select, "{path}"', None, 1]
+        cmd = ctypes.windll.shell32.ShellExecuteW
+
+    elif isMac():
+        args = [u'open -R "{path}"']
+
+    # Normalize the pathname for windows
+    path = os.path.normpath(path)
+
+    for i, a in enumerate(args):
+        if isinstance(a, basestring) and '{path}' in a:
+            args[i] = a.format(path=path)
+
+    logger.info("Call: '%s' with arguments: %s", cmd.__name__, args)
+    cmd(*args)
 
 
 def testSplitPath():
