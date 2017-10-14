@@ -24,106 +24,163 @@ import studioqt
 logger = logging.getLogger(__name__)
 
 
-class MenuBarWidget(QtWidgets.QFrame):
-
-    ICON_COLOR = QtGui.QColor(255, 255, 255)
-
-    SPACING = 4
+class MenuBarWidget(QtWidgets.QToolBar):
 
     DEFAULT_EXPANDED_HEIGHT = 36
     DEFAULT_COLLAPSED_HEIGHT = 10
 
     def __init__(self, parent=None):
-        QtWidgets.QFrame.__init__(self, parent)
+        QtWidgets.QToolBar.__init__(self, parent)
 
         self._dpi = 1
-        self._expanded = True
-        self._expandedHeight = self.DEFAULT_EXPANDED_HEIGHT
-        self._collapsedHeight = self.DEFAULT_COLLAPSED_HEIGHT
+        self._isExpanded = True
+        self._expandHeight = self.DEFAULT_EXPANDED_HEIGHT
+        self._collapseHeight = self.DEFAULT_COLLAPSED_HEIGHT
 
-        layout = QtWidgets.QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(self.SPACING)
-
-        self.setLayout(layout)
-
-        self._leftToolBar = QtWidgets.QToolBar(self)
-        self._rightToolBar = QtWidgets.QToolBar(self)
-
-        self._leftToolBar.layout().setSpacing(self.SPACING)
-        self._rightToolBar.layout().setSpacing(self.SPACING)
-
-        self.layout().addWidget(self._leftToolBar)
-        self.layout().addWidget(self._rightToolBar)
-
-    def addAction(self, name, icon=None, tip=None, callback=None, side="Right"):
-        """
-        Add a button/action to menu bar widget.
-
-        :type name: str
-        :type icon: QtWidget.QIcon
-        :param tip: str
-        :param side: str
-        :param callback: func
-        :rtype: QtWidget.QAction
-        """
-
-        # The method below is needed to fix an issue with PySide2.
-        def _callback():
-            callback()
-
-        if side == "Left":
-            action = self.addLeftAction(name)
-        else:
-            action = self.addRightAction(name)
-
-        if icon:
-            action.setIcon(icon)
-
-        if tip:
-            action.setToolTip(tip)
-            action.setStatusTip(tip)
-
-        if callback:
-            action.triggered.connect(_callback)
-
-        return action
+        self.updateIconColor()
 
     def dpi(self):
+        """
+        Return the zoom multiplier.
+        
+        :rtype: float 
+        """
         return self._dpi
 
     def setDpi(self, dpi):
-        self._dpi = dpi
-        self.update()
+        """
+        Set the zoom multiplier.
 
-    def update(self):
-        self.refreshSize()
+        Used for high resolution devices.
+        
+        :type dpi: float 
+        :rtype: None 
+        """
+        self._dpi = dpi
+        self.refresh()
+
+    def refresh(self):
+        """
+        Refresh the current state of the widget.
+
+        :rtype: None 
+        """
         self.updateIconColor()
 
-    def refreshSize(self):
-        self.setChildrenHeight(self.height())
-
-        if self.isExpanded():
+    def mousePressEvent(self, *args):
+        if not self.isExpanded():
             self.expand()
-        else:
-            self.collapse()
+
+    def isExpanded(self):
+        """
+        Return True if the menuBarWidget is expanded.
+        
+        :rtype: bool 
+        """
+        return self._isExpanded
+
+    def expandHeight(self):
+        """
+        Return the height of widget when expanded.
+        
+        :rtype: int 
+        """
+        return int(self._expandHeight * self.dpi())
+
+    def collapseHeight(self):
+        """
+        Return the height of widget when collapsed.
+
+        :rtype: int 
+        """
+        return int(self._collapseHeight * self.dpi())
+
+    def setFixedHeight(self, value):
+        """
+        Overriding this method to also set the height for all child widgets.
+
+        :type value: bool
+        :rtype: None 
+        """
+        self.setChildrenHeight(value)
+        QtWidgets.QToolBar.setFixedHeight(self, value)
+
+    def setChildrenHidden(self, value):
+        """
+        Set all child widgets to hidden.
+
+        :type value: bool
+        :rtype: None 
+        """
+        for w in self.widgets():
+            w.setHidden(value)
+
+    def setChildrenHeight(self, height):
+        """
+        Set the height of all the child widgets to the given height.
+        
+        :type height: int
+        :rtype: None 
+        """
+        for w in self.widgets():
+            w.setFixedHeight(height)
+
+    def expand(self):
+        """
+        Expand the MenuBar to the expandHeight. 
+        
+        :rtype: None
+        """
+        self._isExpanded = True
+        height = self.expandHeight()
+        self.setFixedHeight(height)
+        self.setChildrenHidden(False)
+        self.setIconSize(QtCore.QSize(height, height))
+        self.updateIconColor()
+
+    def collapse(self):
+        """
+        Collapse the MenuBar to the collapseHeight. 
+
+        :rtype: None
+        """
+        self._isExpanded = False
+        height = self.collapseHeight()
+        self.setFixedHeight(height)
+        self.setChildrenHeight(0)
+        self.setChildrenHidden(True)
+        self.setIconSize(QtCore.QSize(0, 0))
+        self.updateIconColor()
 
     def updateIconColor(self):
+        """
+        Update the icon colors to the current foregroundRole.
+
+        :rtype: None
+        """
         color = self.palette().color(self.foregroundRole())
         color = studioqt.Color.fromColor(color)
         self.setIconColor(color)
 
-    def addLeftAction(self, text):
-        action = QtWidgets.QAction(text, self._leftToolBar)
-        self._leftToolBar.addAction(action)
-        return action
+    def setIconColor(self, color):
+        """
+        Set the icon colors to the current foregroundRole.
 
-    def addRightAction(self, text):
-        action = QtWidgets.QAction(text, self._rightToolBar)
-        self._rightToolBar.addAction(action)
-        return action
+        :type color: QtGui.QColor
+        :rtype: None
+        """
+        for action in self.actions():
+            icon = action.icon()
+            icon = studioqt.Icon(icon)
+            icon.setColor(color)
+            action.setIcon(icon)
 
     def widgets(self):
+        """
+        Return all the widget that are a child of the MenuBarWidget.
+        
+        :rtype: list[QtWidgets.QWidget] 
+        """
         widgets = []
 
         for i in range(0, self.layout().count()):
@@ -133,113 +190,58 @@ class MenuBarWidget(QtWidgets.QFrame):
 
         return widgets
 
-    def findAction(self, text):
-
-        action1 = self._findAction(self._leftToolBar, text)
-        action2 = self._findAction(self._rightToolBar, text)
-
-        return action1 or action2
-
-    def _findAction(self, toolBar, text):
-
-        for child in toolBar.children():
-            if isinstance(child, QtWidgets.QAction):
-                if child.text() == text:
-                    return child
-
-    def findToolButton(self, text):
-
-        button1 = self._findToolButton(self._leftToolBar, text)
-        button2 = self._findToolButton(self._rightToolBar, text)
-
-        button = button1 or button2
-
-        return button
-
-    def _findToolButton(self, toolBar, text):
-
-        for child in toolBar.children():
-            if isinstance(child, QtWidgets.QAction):
-                if child.text() == text:
-                    return toolBar.widgetForAction(child)
-
     def actions(self):
+        """
+        Return all the actions that are a child of the MenuBarWidget.
+
+        :rtype: list[QtWidgets.QAction] 
+        """
         actions = []
 
-        children = self._leftToolBar.children()
-        children.extend(self._rightToolBar.children())
-
-        for child in children:
+        for child in self.children():
             if isinstance(child, QtWidgets.QAction):
                 actions.append(child)
 
         return actions
 
-    def isExpanded(self):
-        return self._expanded
+    def findAction(self, text):
+        """
+        Find the action with the given text.
 
-    def setExpandedHeight(self, height):
-        self._expandedHeight = height
-        self.setChildrenHeight(height)
+        :rtype: QtWidgets.QAction or None
+        """
+        for child in self.children():
+            if isinstance(child, QtWidgets.QAction):
+                if child.text() == text:
+                    return child
 
-    def expandedHeight(self):
-        return int(self._expandedHeight * self.dpi())
+    def findToolButton(self, text):
+        """
+        Find the QToolButton with the given text.
 
-    def expand(self):
-        self._expanded = True
-        height = self.expandedHeight()
-        self.setFixedHeight(height)
-        self.setChildrenHeight(height)
-        self.updateIconColor()
+        :rtype: QtWidgets.QToolButton or None
+        """
+        for child in self.children():
+            if isinstance(child, QtWidgets.QAction):
+                if child.text() == text:
+                    return self.widgetForAction(child)
 
-    def collapse(self):
-        self._expanded = False
-        height = self.collapsedHeight()
-        self.setFixedHeight(height)
-        self.setChildrenHeight(0)
-        self.updateIconColor()
+    def insertAction(self, before, action):
+        """
+        Overriding this method to support the before argument as string.
+        
+        :type before: QtWidgets.QAction or str
+        :type action: QtWidgets.QAction 
+        :rtype: QtWidgets.QAction 
+        """
+        action.setParent(self)
 
-    def collapsedHeight(self):
-        return int(self._collapsedHeight * self.dpi())
+        if isinstance(before, basestring):
+            before = self.findAction(before)
 
-    def setIconColor(self, color):
-        for action in self.actions():
-            icon = action.icon()
-            icon = studioqt.Icon(icon)
-            icon.setColor(color)
-            action.setIcon(icon)
+        action = QtWidgets.QToolBar.insertAction(self, before, action)
 
-    def setChildrenHidden(self, value):
-        for w in self.widgets():
-            w.setHidden(value)
-
-    def setChildrenHeight(self, height):
-
-        for w in self.widgets():
-            w.setFixedHeight(height)
-
-        padding = self.SPACING * self.dpi()
-
-        width = height + (padding * 2)
-        height = height - padding
-
-        if width < 0:
-            width = 0
-
-        if height < 0:
-            height = 0
-
-        self._leftToolBar.setFixedHeight(height)
-        self._leftToolBar.setIconSize(QtCore.QSize(width, height))
-
-        self._rightToolBar.setFixedHeight(height)
-        self._rightToolBar.setIconSize(QtCore.QSize(width, height))
-
-    def resizeEvent(self, *args, **kwargs):
-        self.refreshSize()
-
-    def mousePressEvent(self, *args, **kwargs):
-        self.expand()
+        return action
 
 
 def showExample():
@@ -251,31 +253,37 @@ def showExample():
 
     with studioqt.app():
 
-        def triggered():
-            print "Triggered"
+        menuBarWidget = MenuBarWidget(None)
 
-        def triggered2():
-            print "Triggered2"
+        def setIconColor():
+            menuBarWidget.setIconColor(QtGui.QColor(255, 255, 0))
 
-        widget = studioqt.MenuBarWidget()
+        def collapse():
+            menuBarWidget.collapse()
+
+        menuBarWidget.show()
+
+        action = menuBarWidget.addAction("Collapse")
+        action.triggered.connect(collapse)
+
+        w = QtWidgets.QLineEdit()
+        menuBarWidget.addWidget(w)
 
         icon = studioqt.resource.icon("add")
-        action = widget.addLeftAction("New Item")
-        action.setIcon(icon)
-        action.triggered.connect(triggered)
+        menuBarWidget.addAction(icon, "Plus")
+        menuBarWidget.setStyleSheet("""
+background-color: rgb(0,200,100);
+spacing:5px;
+        """)
 
-        lineedit = QtWidgets.QLineEdit()
-        widget.layout().insertWidget(1, lineedit)
-        widget.setExpandedHeight(50)
+        menuBarWidget.setChildrenHeight(50)
 
-        icon = studioqt.resource.icon("settings")
-        action = widget.addRightAction("Settings")
-        action.setIcon(icon)
-        action.triggered.connect(triggered2)
+        action = QtWidgets.QAction("Yellow", None)
+        action.triggered.connect(setIconColor)
+        menuBarWidget.insertAction("Plus", action)
+        menuBarWidget.setGeometry(400, 400, 400, 100)
 
-        widget.show()
-
-        return widget
+        menuBarWidget.expand()
 
 
 if __name__ == "__main__":

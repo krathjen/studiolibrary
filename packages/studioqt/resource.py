@@ -52,10 +52,13 @@ class Resource(object):
 
     def __init__(self, *args):
         """"""
-        dirname = None
+        dirname = ""
 
         if args:
             dirname = os.path.join(*args)
+
+        if os.path.isfile(dirname):
+            dirname = os.path.dirname(dirname)
 
         self._dirname = dirname or self.DEFAULT_DIRNAME
 

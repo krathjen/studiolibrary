@@ -148,9 +148,55 @@ class Database(QtCore.QObject):
         """
         return studiolibrary.normPath(path)
 
+    def find(self, keys=None):
+        """
+        Return all the data for the given keys.
+
+        :type keys: list[str]
+        :rtype: dict
+        """
+        data = self.readJson()
+
+        if keys:
+            keys = self.normPaths(keys)
+            results = {key: data[key] for key in keys if key in data}
+        else:
+            results = data
+
+        return results
+
+    def dataFromColumn(self, column, keys=None, sort=True, split=""):
+        """
+        Return the data in the given column for the given keys.
+
+        :type column: str
+        :type keys: list[str]
+        :type sort: bool
+        :type split: str
+        :rtype: list[str]
+        """
+        data = self.find(keys)
+        results = []
+
+        for item in data.values():
+
+            text = item.get(column)
+
+            if text and split:
+                results.extend(text.split(split))
+            elif text:
+                results.append(text)
+
+        results = list(set(results))
+
+        if sort:
+            results = sorted(results)
+
+        return results
+
     def readJson(self):
         """
-        Return the data from the database as a valid dict object.
+        Return the data from the database.
 
         :rtype: dict
         """
@@ -205,7 +251,6 @@ class Database(QtCore.QObject):
         :rtype: None
         """
         data_ = self.readJson()
-
         keys = self.normPaths(keys)
 
         for key in keys:
@@ -215,6 +260,25 @@ class Database(QtCore.QObject):
                 data_[key] = data
 
         self.saveJson(data_)
+
+    def updateItems(self, items, data):
+        """
+        Update the given items in the database with the given data.
+        
+        :type items: list[studiolibrary.LibraryItem]
+        :type data: dict
+        
+        :rtype: None
+        """
+        keys = [item.id() for item in items]
+
+        self.updateMultiple(keys, data)
+
+        # Update the item data
+        for item in items:
+            for column in data:
+                item.setText(column, data[column])
+                item.updateData()
 
     def delete(self, key):
         """
