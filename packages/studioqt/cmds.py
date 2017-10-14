@@ -11,16 +11,11 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import ctypes
 import os
 import sys
-import json
 import inspect
 import logging
-import platform
 import contextlib
-
-import studioqt
 
 from studioqt import QtCore
 from studioqt import QtUiTools
@@ -32,12 +27,8 @@ __all__ = [
     "fadeIn",
     "fadeOut",
     "loadUi",
-    "saveJson",
-    "readJson",
-    "showInFolder",
     "isAltModifier",
     "isControlModifier",
-    "currentScreenGeometry",
     "InvokeRepeatingThread",
 ]
 
@@ -232,124 +223,3 @@ def fadeOut(widget, duration=200, onFinished=None):
         animation.finished.connect(onFinished)
 
     return animation
-
-
-def currentScreenGeometry():
-    """
-    Return the geometry of the screen with the current cursor.
-
-    :rtype: QtCore.QRect
-    """
-    pos = QtWidgets.QApplication.desktop().cursor().pos()
-    screen = QtWidgets.QApplication.desktop().screenNumber(pos)
-    return QtWidgets.QApplication.desktop().screenGeometry(screen)
-
-
-def system():
-    """
-    :rtype: str
-    """
-    return platform.system().lower()
-
-
-def isMac():
-    """
-    :rtype: bool
-    """
-    return system().startswith("mac") or system().startswith("os") \
-        or system().startswith("darwin")
-
-
-def isWindows():
-    """
-    :rtype: bool
-    """
-    return system().startswith("win")
-
-
-def isLinux():
-    """
-    :rtype: bool
-    """
-    return system().startswith("lin")
-
-
-def showInFolder(path):
-    """
-    Show the given path in the system file explorer.
-
-    :type path: unicode
-    :rtype: None
-    """
-    cmd = os.system
-    args = []
-
-    if studioqt.SHOW_IN_FOLDER_CMD:
-        args = [unicode(studioqt.SHOW_IN_FOLDER_CMD)]
-
-    elif isLinux():
-        args = [u'konqueror "{path}"&']
-
-    elif isWindows():
-        # os.system() nither subprocess.call() can't pass command with non ascii symbols,
-        # use ShellExecuteW directly
-        args = [None, u'open', u'explorer.exe', u'/n,/select, "{path}"', None, 1]
-        cmd = ctypes.windll.shell32.ShellExecuteW
-
-    elif isMac():
-        args = [u'open -R "{path}"']
-
-    # Normalize the pathname for windows
-    path = os.path.normpath(path)
-
-    for i, a in enumerate(args):
-        if isinstance(a, basestring) and '{path}' in a:
-            args[i] = a.format(path=path)
-
-    logger.info("Call: '%s' with arguments: %s", cmd.__name__, args)
-    cmd(*args)
-
-
-def saveJson(path, data):
-    """
-    Write a python dict to a json file.
-
-    :type path: str
-    :type data: dict
-    :rtype: None
-    """
-    dirname = os.path.dirname(path)
-
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-
-    with open(path, "w") as f:
-        data = json.dumps(data, indent=4)
-        f.write(data)
-
-
-def readJson(path):
-    """
-    Read a json file to a python dict.
-
-    :type path: str
-    :rtype: dict
-    """
-    path = os.path.abspath(path)
-    path = path.replace("\\", "/")
-
-    with open(path, "r") as f:
-        data = f.read()
-
-    relPath = os.path.dirname(path)
-    relPath2 = os.path.dirname(relPath)
-    relPath3 = os.path.dirname(relPath2)
-
-    data = data.replace('\".../', '"' + relPath3 + '/')
-    data = data.replace('\"../', '"' + relPath2 + '/')
-    data = data.replace('\"./', '"' + relPath + '/')
-
-    if data:
-        data = json.loads(data)
-
-    return data

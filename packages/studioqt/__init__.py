@@ -13,9 +13,7 @@
 
 from studioqt.vendor.Qt import QtGui, QtCore, QtWidgets, QtUiTools
 
-import os
-
-from studioqt.utils import *
+from studioqt.cmds import *
 from studioqt.icon import Icon
 from studioqt.menu import Menu
 from studioqt.theme import Theme, ThemesMenu
@@ -48,6 +46,3 @@ from studioqt.widgets.treewidget import TreeWidget
 # Custom qt actions
 from studioqt.actions.slideraction import SliderAction
 from studioqt.actions.separatoraction import SeparatorAction
-
-# Studio Qt Config Vars
-SHOW_IN_FOLDER_CMD = None
