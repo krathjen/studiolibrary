@@ -28,36 +28,36 @@ from datetime import datetime
 __all__ = [
     "user",
     "walk",
-    "isMaya",
     "isMac",
+    "isMaya",
     "isLinux",
     "isWindows",
-    "sendEvent",
-    "timeAgo",
     "read",
     "write",
     "saveJson",
     "readJson",
     "updateJson",
-    "listPaths",
-    "findPaths",
+    "relPath",
+    "absPath",
+    "normPath",
     "copyPath",
     "movePath",
     "movePaths",
-    "normPath",
+    "listPaths",
+    "findPaths",
     "splitPath",
+    "localPath",
     "removePath",
     "renamePath",
-    "relPath",
-    "formatRelPath",
-    "localPath",
     "formatPath",
+    "generateUniquePath",
+    "PathRenameError",
+    "timeAgo",
+    "sendEvent",
+    "showInFolder",
     "Direction",
     "stringToList",
     "listToString",
-    "showInFolder",
-    "generateUniquePath",
-    "PathRenameError",
     "registerItem",
     "itemClasses",
     "itemExtensions",
@@ -78,8 +78,8 @@ logger = logging.getLogger(__name__)
 _itemClasses = collections.OrderedDict()
 
 
-ANALYTICS_ENABLED = True
 ANALYTICS_ID = "UA-50172384-1"
+ANALYTICS_ENABLED = True
 
 SHOW_IN_FOLDER_CMD = None
 
@@ -248,14 +248,17 @@ def findItemsInFolders(folders, depth=3, **kwargs):
 
 def user():
     """
+    Return the current users name in lowercase.
+    
     :rtype: str
     """
-    import getpass
     return getpass.getuser().lower()
 
 
 def system():
     """
+    Return the current platform all in lowercase.
+    
     :rtype: str
     """
     return platform.system().lower()
@@ -263,6 +266,8 @@ def system():
 
 def isMaya():
     """
+    Return True if the current python session is in Maya.
+    
     :rtype: bool
     """
     try:
@@ -275,21 +280,28 @@ def isMaya():
 
 def isMac():
     """
+    Return True if the current OS is Mac.
+    
     :rtype: bool
     """
-    return system().startswith("mac") or system().startswith("os") \
-        or system().startswith("darwin")
+    return system().startswith("os") or \
+           system().startswith("mac") or \
+           system().startswith("darwin")
 
 
 def isWindows():
     """
+    Return True if the current OS is windows.
+    
     :rtype: bool
     """
     return system().startswith("win")
 
 
 def isLinux():
-    """
+    """    
+    Return True if the current OS is linux.
+    
     :rtype: bool
     """
     return system().startswith("lin")
@@ -297,7 +309,7 @@ def isLinux():
 
 def localPath(*args):
     """
-    Return the users local disc location.
+    Return the users preferred local location.
 
     :rtype: str
     """
@@ -472,7 +484,7 @@ def read(path):
         with open(path, "r") as f:
             data = f.read() or data
 
-    data = formatRelPath(data, path)
+    data = absPath(data, path)
 
     return data
 
@@ -571,20 +583,20 @@ def relPath(data, start):
     return data
 
 
-def formatRelPath(data, start):
+def absPath(data, start):
     """
-    Return a absolute version of all the paths in data from the start path.
+    Return an absolute version of all the paths in data using the start path.
     
     :type data: str 
     :type start: str
     :rtype: str 
     """
-    relPath = normPath(os.path.dirname(start))
-    relPath2 = normPath(os.path.dirname(relPath))
+    relPath1 = normPath(os.path.dirname(start))
+    relPath2 = normPath(os.path.dirname(relPath1))
     relPath3 = normPath(os.path.dirname(relPath2))
 
-    if not relPath.endswith("/"):
-        relPath = relPath + "/"
+    if not relPath1.endswith("/"):
+        relPath1 = relPath1 + "/"
 
     if not relPath2.endswith("/"):
         relPath2 = relPath2 + "/"
@@ -594,13 +606,23 @@ def formatRelPath(data, start):
 
     data = data.replace('../../../', relPath3)
     data = data.replace('../../', relPath2)
-    data = data.replace('../', relPath)
+    data = data.replace('../', relPath1)
 
     return data
 
 
 def generateUniquePath(path, attempts=1000):
     """
+    Generate a unique path on disc.
+    
+    Example:
+        # If the following files exist then the next unique path will be 3.
+        # C:/tmp/file.text
+        # C:/tmp/file (2).text
+        
+        print generateUniquePath("C:/tmp/file.text")
+        # C:/tmp/file (3).text
+    
     :type path:  str
     :type attempts: int
     :rtype: str
@@ -642,7 +664,6 @@ def splitPath(path):
     Split the given path into directory, basename and extension.
     
     Example:
-    
         print splitPath("P:/production/rigs/character/mario.ma
         
         # (u'P:/production/rigs/character', u'mario', u'.ma')
@@ -660,7 +681,6 @@ def listToString(data):
     Return a string from the given list.
     
     Example:
-    
         print listToString(['apple', 'pear', 'cherry'])
         
         # apple,pear,cherry
@@ -680,7 +700,6 @@ def stringToList(data):
     Return a string from the given list.
         
     Example:
-    
         print listToString('apple, pear, cherry')
         
         # ['apple', 'pear', 'cherry']
@@ -716,16 +735,12 @@ def findPaths(
     Return a list of file paths by walking the root path either up or down.
 
     Example:
-        path = r'C:\Users\Hovel\Dropbox\libraries\animation\Malcolm\anim'
+        path = r'P:\production\characters\Malcolm'
 
-        def matchSets(path):
+        def match(path):
             return path.endswith(".set")
 
-        for path in findPaths(path, match=matchSets, direction=Direction.Up, depth=5):
-            print path
-
-        for path in findPaths(path, match=lambda path: path.endswith(".anim"),
-                              direction=Direction.Down, depth=3):
+        for path in findPaths(path, match=match, depth=5):
             print path
 
     :type path: str
@@ -1001,12 +1016,10 @@ def testRelativePaths():
     """
 
     data_ = relPath(data, "P:/test/relative/file.database")
-    print data_
     msg = "Data does not match {} {}".format(expected, data_)
     assert data_ == expected, msg
 
-    data_ = formatRelPath(data_, "P:/test/relative/file.database")
-    print data_
+    data_ = absPath(data_, "P:/test/relative/file.database")
     msg = "Data does not match {} {}".format(data, data_)
     assert data_ == data, msg
 
@@ -1018,7 +1031,7 @@ def testRelativePaths():
     msg = 'Data does not match "{}" "{}"'.format(result, expected)
     assert result == expected, msg
 
-    result = formatRelPath(result, start)
+    result = absPath(result, start)
     msg = 'Data does not match "{}" "{}"'.format(result, path)
     assert result == path, msg
 
