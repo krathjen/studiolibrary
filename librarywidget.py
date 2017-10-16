@@ -89,8 +89,8 @@ class LibraryWidget(QtWidgets.QWidget):
     @classmethod
     def instance(
             cls,
-            name=None,
-            path=None,
+            name="",
+            path="",
             show=True,
             lock=False,
             superusers=None,
@@ -110,11 +110,6 @@ class LibraryWidget(QtWidgets.QWidget):
         
         :rtype: LibraryWidget
         """
-        path = path or ""
-
-        if path:
-            path = os.path.abspath(path)
-
         name = name or cls.DEFAULT_NAME
 
         libraryWidget = cls._instances.get(name)
@@ -139,8 +134,8 @@ class LibraryWidget(QtWidgets.QWidget):
     def __init__(
             self,
             parent=None,
-            name=None,
-            path=None,
+            name="",
+            path="",
     ):
         """
         Return the a new instance of the Library Widget.
@@ -441,7 +436,9 @@ class LibraryWidget(QtWidgets.QWidget):
         :type path: str
         :rtype: None
         """
+        path = os.path.abspath(path)
         path = studiolibrary.normPath(path)
+
         self.updateSettings({"path": path})
 
         databasePath = studiolibrary.formatPath(path, self.DATABASE_PATH)
@@ -2588,24 +2585,3 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: bool
         """
         return self._isDebug
-
-
-def testLibraryWidget():
-    """
-    Load two instances of the library widget for testing.
-
-    :rtype: None 
-    """
-    with studioqt.app():
-        path = u'C:/Users/Hovel/Dropbox/libraries/animation'
-        widget = LibraryWidget.instance(path=path)
-        widget.setLocked(True)
-        widget.show()
-
-        path = u'C:/Users/Hovel/Dropbox/libraries/animation/Character'
-        widget = LibraryWidget.instance("Local", path=path)
-        widget.show()
-
-
-if __name__ == "__main__":
-    testLibraryWidget()

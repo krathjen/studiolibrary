@@ -16,8 +16,8 @@ import studiolibrary
 
 def main(
         cls=None,
-        name=None,
-        path=None,
+        name="",
+        path="",
         show=True,
         lock=False,
         superusers=None,
@@ -28,8 +28,8 @@ def main(
     Convenience method for creating and loading a library widget instance.
 
     :type cls: studiolibrary.LibraryWidget.__class__ or None
-    :type name: str or None
-    :type path: str or None
+    :type name: str
+    :type path: str
     :type show: bool
     :type lock: bool
     :type superusers: list[str] or None
