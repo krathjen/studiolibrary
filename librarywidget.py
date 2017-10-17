@@ -472,7 +472,7 @@ class LibraryWidget(QtWidgets.QWidget):
         dialog.accepted.connect(self.showChangePathDialog)
 
     @studioqt.showArrowCursor
-    def showWelomeDialog(self):
+    def showWelcomeDialog(self):
         """
         Show a welcome dialog for setting a new root path.
 
@@ -480,7 +480,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         name = self.name()
 
-        title = "Welcolme"
+        title = "Welcome"
         title = title.format(studiolibrary.version(), name)
 
         text = "Before you get started please choose a folder " \
@@ -578,7 +578,7 @@ class LibraryWidget(QtWidgets.QWidget):
         path = self.path()
 
         if not path:
-            return self.showWelomeDialog()
+            return self.showWelcomeDialog()
         elif not os.path.exists(path):
             return self.showPathErrorDialog()
 
