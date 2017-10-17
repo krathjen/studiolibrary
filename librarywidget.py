@@ -442,7 +442,9 @@ class LibraryWidget(QtWidgets.QWidget):
         self.updateSettings({"path": path})
 
         databasePath = studiolibrary.formatPath(path, self.DATABASE_PATH)
-        self.setDatabasePath(databasePath)
+        database = studiolibrary.Database(databasePath)
+
+        self.setDatabase(database)
 
         self.refresh()
 
@@ -1231,22 +1233,14 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         return self._database
 
-    def databasePath(self):
-        """
-        Return the database location on disc.
-
-        :rtype: str
-        """
-        return self.database().path()
-
-    def setDatabasePath(self, path):
+    def setDatabase(self, database):
         """
         Set the database path for the catalog.
 
-        :type path: str
+        :type database: studiolibrary.Database
         :rtype: None
         """
-        self._database = studiolibrary.Database(path)
+        self._database = database
 
     def refreshItemData(self):
         """
