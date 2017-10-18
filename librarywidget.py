@@ -301,7 +301,6 @@ class LibraryWidget(QtWidgets.QWidget):
         folderWidget = self.foldersWidget()
         folderWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         folderWidget.itemDropped.connect(self._folderDropped)
-        folderWidget.itemRenamed.connect(self._folderRenamed)
         folderWidget.itemSelectionChanged.connect(self._folderSelectionChanged)
         folderWidget.customContextMenuRequested.connect(self.showFolderMenu)
 
@@ -311,21 +310,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         if path:
             self.setPath(path)
-
-    def _folderRenamed(self, src, dst):
-        """
-        Triggered when a folder has been renamed from the folder widget.
-
-        :type src: str
-        :type dst: str
-        :rtype: None
-        """
-        db = self.database()
-        db.renameFolder(src, dst)
-
-        self.refreshItemData()
-
-        self.folderRenamed.emit(src, dst)
 
     def _folderDropped(self, event):
         """
@@ -558,7 +542,7 @@ class LibraryWidget(QtWidgets.QWidget):
             self.updateWindowTitle()
 
     # -----------------------------------------------------------------
-    # Methods for the navigation widget
+    # Methods for the folders widget
     # -----------------------------------------------------------------
 
     def foldersWidget(self):
@@ -569,6 +553,84 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         return self._foldersWidget
 
+    def selectedFolderPath(self):
+        """
+        Return the selected folder items.
+
+        :rtype: str or None
+        """
+        return self.foldersWidget().selectedPath()
+
+    def selectedFolderPaths(self):
+        """
+        Return the selected folder items.
+
+        :rtype: list[str]
+        """
+        return self.foldersWidget().selectedPaths()
+
+    def selectFolderPath(self, path):
+        """
+        Select the given folder paths.
+
+        :type path: str
+        :rtype: None
+        """
+        self.selectFolderPaths([path])
+
+    def selectFolderPaths(self, paths):
+        """
+        Select the given folder paths.
+
+        :type paths: list[str]
+        :rtype: None
+        """
+        self.foldersWidget().selectPaths(paths)
+
+    def showInFolder(self):
+        """
+        Show the selected folder in the file explorer.
+
+        :rtype: None 
+        """
+        path = self.selectedFolderPath()
+        studiolibrary.showInFolder(path)
+
+    def createFolder(self, *args):
+        """
+        Create a new folder on disc at the given path.
+        
+        :type args: list[str]
+        :rtype: None 
+        """
+        path = os.path.join(*args)
+        path = studiolibrary.normPath(path)
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        self.refreshFolders()
+        self.selectFolderPath(path)
+
+    def renameFolder(self, src, dst):
+        """
+        Rename the given src path to the given dst path.
+
+        :type src: str 
+        :type dst: str 
+        :rtype: str 
+        """
+        dst = studiolibrary.renamePath(src, dst)
+
+        db = self.database()
+        db.renameFolder(src, dst)
+
+        self.refreshFolders()
+        self.selectFolderPath(dst)
+
+        return dst
+
+    @studioqt.showWaitCursor
     def refreshFolders(self):
         """
         Convenience method for updating the folders widget.
@@ -582,10 +644,9 @@ class LibraryWidget(QtWidgets.QWidget):
         elif not os.path.exists(path):
             return self.showPathErrorDialog()
 
-        self.createFolders()
+        self.updateFolders()
 
-    @studioqt.showWaitCursor
-    def createFolders(self):
+    def updateFolders(self):
         """
         Create the folders to be shown in the folders widget.
         
@@ -693,15 +754,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return menu
 
-    def showInFolder(self):
-        """
-        Show the selected folder in the file explorer.
-        
-        :rtype: None 
-        """
-        path = self.selectedFolderPath()
-        studiolibrary.showInFolder(path)
-
     def showRenameFolderDialog(self, parent=None):
         """
         Show the dialog for renaming the selected folder.
@@ -712,18 +764,16 @@ class LibraryWidget(QtWidgets.QWidget):
 
         path = self.selectedFolderPath()
 
-        if path:
-            name, button = studioqt.MessageBox.input(
-                parent,
-                "Rename Folder",
-                "Rename the selected folder to:",
-                inputText=os.path.basename(path),
-            )
+        name, button = studioqt.MessageBox.input(
+            parent,
+            "Rename Folder",
+            "Rename the selected folder to:",
+            inputText=os.path.basename(path),
+        )
+        name = name.strip()
 
-            if button == QtWidgets.QDialogButtonBox.Ok:
-                path = studiolibrary.renamePath(path, name)
-                self.refreshFolders()
-                self.selectFolderPath(path)
+        if name and button == QtWidgets.QDialogButtonBox.Ok:
+            self.renameFolder(path, name)
 
     def showCreateFolderDialog(self, parent=None):
         """
@@ -735,59 +785,15 @@ class LibraryWidget(QtWidgets.QWidget):
 
         path = self.selectedFolderPath() or self.path()
 
-        text = "Create a new folder with the name:"
-
         name, button = studioqt.MessageBox.input(
             parent,
             "Create a new folder",
-            text,
+            "Create a new folder with the name:",
         )
         name = name.strip()
 
         if name and button == QtWidgets.QDialogButtonBox.Ok:
-
-            if path:
-                path = os.path.join(path, name)
-
-            if not os.path.exists(path):
-                os.makedirs(path)
-
-            self.refreshFolders()
-            self.selectFolderPath(path)
-
-    def selectedFolderPath(self):
-        """
-        Return the selected folder items.
-
-        :rtype: str or None
-        """
-        return self.foldersWidget().selectedPath()
-
-    def selectedFolderPaths(self):
-        """
-        Return the selected folder items.
-
-        :rtype: list[str]
-        """
-        return self.foldersWidget().selectedPaths()
-
-    def selectFolderPath(self, path):
-        """
-        Select the given folder paths.
-
-        :type path: str
-        :rtype: None
-        """
-        self.selectFolderPaths([path])
-
-    def selectFolderPaths(self, folders):
-        """
-        Select the given folder paths.
-
-        :type folders: list[str]
-        :rtype: None
-        """
-        self.foldersWidget().selectPaths(folders)
+            self.createFolder(path, name)
 
     # -----------------------------------------------------------------
     # Methods for the items widget
