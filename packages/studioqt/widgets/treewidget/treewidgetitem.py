@@ -316,7 +316,8 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         self.setSelected(isSelected)
 
         isExpanded = settings.get("isExpanded", False)
-        self.setExpanded(isExpanded)
+        if self.childCount() > 0:
+            self.setExpanded(isExpanded)
 
         bold = settings.get("bold", False)
         if bold:
