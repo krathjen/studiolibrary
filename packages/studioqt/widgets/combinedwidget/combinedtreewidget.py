@@ -44,6 +44,7 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         self._hiddenColumns = {}
         self._validGroupByColumns = []
 
+        self.setAutoScroll(False)
         self.setMouseTracking(True)
         self.setSortingEnabled(True)
         self.setSelectionMode(QtWidgets.QListWidget.ExtendedSelection)
