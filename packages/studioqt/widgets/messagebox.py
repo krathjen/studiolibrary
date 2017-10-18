@@ -359,22 +359,25 @@ class MessageBox(QtWidgets.QDialog):
             self.setParent(self._frame)
 
         self._header = QtWidgets.QFrame(self)
+        self._header.setFixedHeight(46)
         self._header.setObjectName("messageBoxHeaderFrame")
         self._header.setStyleSheet("background-color: rgb(0,0,0,0);")
-        self._header.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self._header.setFixedHeight(46)
+        self._header.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                   QtWidgets.QSizePolicy.Fixed)
 
         self._icon = QtWidgets.QLabel(self._header)
-        self._icon.setAlignment(QtCore.Qt.AlignTop)
-        self._icon.setScaledContents(True)
+        self._icon.hide()
         self._icon.setFixedWidth(32)
         self._icon.setFixedHeight(32)
-        self._icon.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        self._icon.hide()
+        self._icon.setScaledContents(True)
+        self._icon.setAlignment(QtCore.Qt.AlignTop)
+        self._icon.setSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                 QtWidgets.QSizePolicy.Preferred)
 
         self._title = QtWidgets.QLabel(self._header)
         self._title.setObjectName("messageBoxHeaderLabel")
-        self._title.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self._title.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                  QtWidgets.QSizePolicy.Expanding)
 
         hlayout = QtWidgets.QHBoxLayout(self._header)
         hlayout.setContentsMargins(15, 7, 15, 10)
@@ -391,11 +394,12 @@ class MessageBox(QtWidgets.QDialog):
         self._body.setLayout(bodyLayout)
 
         self._message = QtWidgets.QLabel(self._body)
-        self._message.setMinimumHeight(15)
         self._message.setWordWrap(True)
+        self._message.setMinimumHeight(15)
         self._message.setAlignment(QtCore.Qt.AlignLeft)
         self._message.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
-        self._message.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self._message.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                    QtWidgets.QSizePolicy.Expanding)
 
         bodyLayout.addWidget(self._message)
         bodyLayout.setContentsMargins(15, 15, 15, 15)
@@ -484,14 +488,6 @@ class MessageBox(QtWidgets.QDialog):
             geometry.moveCenter(centerPoint)
             geometry.setY(geometry.y() - 50)
             self.move(geometry.topLeft())
-
-            if geometry.width() > frame.geometry().width():
-                width = frame.geometry().width()
-                self.setFixedWidth(width-50)
-
-            if geometry.height() > frame.geometry().height():
-                height = frame.geometry().height()
-                self.setFixedHeight(height-150)
 
     def fadeIn(self, duration=200):
         """
