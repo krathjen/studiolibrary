@@ -10,7 +10,7 @@ Studio Library is a free python script for managing poses and animation in Maya.
 ### What's changed?
 
 * Only supports Maya 2017 and Maya 2018
-* Items created before version 1.5.x (mid-2014) are no longer supported
+* Animation items created before version 1.5.x (mid-2014) are not supported
 * Creating and switching between libraries from the UI is no longer supported
 
 
