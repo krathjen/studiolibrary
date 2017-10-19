@@ -37,6 +37,7 @@ __all__ = [
     "saveJson",
     "readJson",
     "updateJson",
+    "replaceJson",
     "relPath",
     "absPath",
     "normPath",
@@ -51,7 +52,8 @@ __all__ = [
     "renamePath",
     "formatPath",
     "generateUniquePath",
-    "PathRenameError",
+    "MovePathError",
+    "RenamePathError",
     "timeAgo",
     "sendEvent",
     "showInFolder",
@@ -84,7 +86,36 @@ ANALYTICS_ENABLED = True
 SHOW_IN_FOLDER_CMD = None
 
 
-class PathRenameError(IOError):
+class PathError(IOError):
+    """
+    Path exception that supports unicode escape characters.
+    """
+    def __init__(self, msg):
+        """
+        Return the decoded message using 'unicode_escape'
+
+        :type: str or unicode 
+        """
+        msg = unicode(msg).encode('unicode_escape')
+        super(PathError, self).__init__(msg)
+        self._msg = msg
+
+    def __unicode__(self):
+        """
+        Return the decoded message using 'unicode_escape'
+        
+        :rtype: unicode 
+        """
+        msg = unicode(self._msg).decode('unicode_escape')
+        return msg
+
+
+class MovePathError(PathError):
+    """
+    """
+
+
+class RenamePathError(PathError):
     """
     """
 
@@ -378,7 +409,7 @@ def movePath(src, dst):
     dirname, name, extension = splitPath(src)
 
     if not os.path.exists(src):
-        raise IOError(u'No such file or directory: {0}'.format(src))
+        raise MovePathError(u'No such file or directory: {0}'.format(src))
 
     if os.path.isdir(src):
         dst = u'{0}/{1}{2}'.format(dst, name, extension)
@@ -446,22 +477,22 @@ def renamePath(src, dst, extension=None, force=False):
 
     if src == dst and not force:
         msg = u'The source path and destination path are the same: {0}'
-        raise PathRenameError(msg.format(src))
+        raise RenamePathError(msg.format(src))
 
     if os.path.exists(dst) and not force:
         msg = u'Cannot save over an existing path: "{0}"'
-        raise PathRenameError(msg.format(dst))
+        raise RenamePathError(msg.format(dst))
 
     if not os.path.exists(dirname):
         msg = u'The system cannot find the specified path: "{0}".'
-        raise PathRenameError(msg.format(dirname))
+        raise RenamePathError(msg.format(dirname))
 
     if not os.path.exists(os.path.dirname(dst)) and force:
         os.mkdir(os.path.dirname(dst))
 
     if not os.path.exists(src):
         msg = u'The system cannot find the specified path: "{0}"'
-        raise PathRenameError(msg.format(src))
+        raise RenamePathError(msg.format(src))
 
     os.rename(src, dst)
 
@@ -583,17 +614,34 @@ def readJson(path):
     :type path: str
     :rtype: dict
     """
-    logger.debug(u'Reading json file: {0}'.format(path))
-
     path = normPath(path)
 
-    data = read(path) or "{}"
+    logger.debug(u'Reading json file: {0}'.format(path))
 
-    try:
-        data = json.loads(data)
-    except Exception, e:
-        data = {}
-        logger.exception(e)
+    data = read(path) or "{}"
+    data = json.loads(data)
+
+    return data
+
+
+def replaceJson(path, old, new, count=-1):
+    """
+    Replace the old value with the new value in the given json path.
+    
+    :type path: str
+    :type old: str
+    :type new: str
+    
+    :rtype: dict
+    """
+    old = old.encode("unicode_escape")
+    new = new.encode("unicode_escape")
+
+    data = read(path)
+    data = data.replace(old, new, count)
+    data = json.loads(data)
+
+    saveJson(path, data)
 
     return data
 

@@ -581,6 +581,7 @@ class MessageBox(QtWidgets.QDialog):
         :type text: str
         :rtype: None 
         """
+        text = unicode(text)
         self._message.setText(text)
 
     def inputText(self):
