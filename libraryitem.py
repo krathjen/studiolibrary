@@ -147,6 +147,9 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type text: str
         :rtype: QMessageBox.StandardButton
         """
+        if self.libraryWidget():
+            self.libraryWidget().showErrorMessage(text)
+
         return studioqt.MessageBox.critical(self.libraryWidget(), title, text)
 
     def showExceptionDialog(self, title, error):

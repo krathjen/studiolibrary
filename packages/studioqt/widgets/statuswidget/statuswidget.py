@@ -19,7 +19,21 @@ import studioqt
 
 class StatusWidget(QtWidgets.QFrame):
 
-    DISPLAY_TIME = 15000
+    DEFAULT_DISPLAY_TIME = 10000  # Milliseconds, 15 secs
+
+    INFO_CSS = """"""
+
+    ERROR_CSS = """
+        color: rgb(240, 240, 240);
+        background-color: rgb(220, 40, 40);
+        selection-color: rgb(220, 40, 40);
+        selection-background-color: rgb(240, 240, 240);
+    """
+
+    WARNING_CSS = """
+        color: rgb(240, 240, 240);
+        background-color: rgb(240, 170, 0);
+    """
 
     def __init__(self, *args):
         QtWidgets.QFrame.__init__(self, *args)
@@ -27,12 +41,14 @@ class StatusWidget(QtWidgets.QFrame):
         self.setObjectName("statusWidget")
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
-        self._label = QtWidgets.QLabel("Hello :)", self)
-
-        policy = QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred
-        self._label.setSizePolicy(*policy)
-
+        self._blocking = False
         self._timer = QtCore.QTimer(self)
+
+        self._label = QtWidgets.QLabel("", self)
+        self._label.setCursor(QtCore.Qt.IBeamCursor)
+        self._label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        self._label.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                  QtWidgets.QSizePolicy.Preferred)
 
         self._button = QtWidgets.QPushButton(self)
         self._button.setMaximumSize(QtCore.QSize(17, 17))
@@ -51,49 +67,101 @@ class StatusWidget(QtWidgets.QFrame):
         QtCore.QObject.connect(
             self._timer,
             QtCore.SIGNAL("timeout()"),
-            self.clear
+            self.reset
         )
 
-    def setError(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource.icon("error")
-        self._button.setIcon(icon)
-        self._button.show()
+    def isBlocking(self):
+        """
+        Return true if the status widget is blocking, otherwise return false.
+        :rtype: bool 
+        """
+        return self._blocking
 
-        self._label.setStyleSheet("color: rgb(222, 0, 0);background-color: rgb(0, 0, 0, 0);")
-        self.setText(text, msec)
+    def showInfoMessage(self, message, msecs=None):
+        """
+        Set an info message to be displayed in the status widget.
+        
+        :type message: str
+        :type msecs: int
+        
+        :rtype: None 
+        """
+        if self.isBlocking():
+            return
 
-    def setWarning(self, text, msec=DISPLAY_TIME):
-        icon = studioqt.resource.icon("warning")
-
-        self._button.setIcon(icon)
-        self._button.show()
-
-        self._label.setStyleSheet("color: rgb(222, 180, 0);background-color: rgb(0, 0, 0, 0);")
-        self.setText(text, msec)
-
-    def setInfo(self, text, msec=DISPLAY_TIME):
         icon = studioqt.resource.icon("info")
+        self.setStyleSheet(self.INFO_CSS)
+        self.showMessage(message, icon, msecs)
 
-        self._button.setIcon(icon)
-        self._button.show()
+    def showErrorMessage(self, message, msecs=None):
+        """
+        Set an error to be displayed in the status widget.
 
-        self._label.setStyleSheet("background-color: rgb(0, 0, 0, 0);")
-        self.setText(text, msec)
+        :type message: str
+        :type msecs: int
+        
+        :rtype: None 
+        """
+        icon = studioqt.resource.icon("error")
+        self.setStyleSheet(self.ERROR_CSS)
+        self.showMessage(message, icon, msecs, blocking=True)
 
-    def setText(self, text, msec=DISPLAY_TIME):
-        if not text:
-            self.clear()
+    def showWarningMessage(self, message, msecs=None):
+        """
+        Set a warning to be displayed in the status widget.
+        
+        :type message: str
+        :type msecs: int
+        
+        :rtype: None 
+        """
+        if self.isBlocking():
+            return
+
+        icon = studioqt.resource.icon("warning")
+        self.setStyleSheet(self.WARNING_CSS)
+        self.showMessage(message, icon, msecs)
+
+    def showMessage(self, message, icon, msecs=None, blocking=False):
+        """
+        Set the given text to be displayed in the status widget.
+        
+        :type message: str
+        :type icon: icon
+        :type msecs: int
+        
+        :rtype: None 
+        """
+        msecs = msecs or self.DEFAULT_DISPLAY_TIME
+        message = unicode(message)
+
+        self._blocking = blocking
+
+        if icon:
+            self._button.setIcon(icon)
+            self._button.show()
         else:
-            self._label.setText(text)
+            self._button.hide()
+
+        if message:
+            self._label.setText(message)
             self._timer.stop()
-            self._timer.start(msec)
+            self._timer.start(msecs)
+        else:
+            self.reset()
 
         self.update()
 
-    def clear(self):
+    def reset(self):
+        """
+        Called when the current animation has finished.
+        
+        :rtype: None 
+        """
         self._timer.stop()
         self._button.hide()
         self._label.setText("")
-        self._label.setStyleSheet("")
         icon = studioqt.resource.icon("blank")
         self._button.setIcon(icon)
+        self.setStyleSheet("")
+        self._blocking = False
