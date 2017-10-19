@@ -498,15 +498,56 @@ def write(path, data):
     :rtype: None 
     """
     path = normPath(path)
-    dirname = os.path.dirname(path)
-
     data = relPath(data, path)
 
+    tmp = path + ".tmp"
+    bak = path + ".bak"
+
+    # Create the directory if it doesn't exists
+    dirname = os.path.dirname(path)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    with open(path, "w") as f:
-        f.write(data)
+    # Use the tmp file to check for concurrent writes
+    if os.path.exists(tmp):
+        msg = "The path is locked for writing and cannot be accessed {}"
+        msg = msg.format(tmp)
+        raise IOError(msg)
+
+    # Safely write the data to a tmp file and then rename to the given path
+    try:
+        # Create and write the new data
+        #  to the path.tmp file
+        with open(tmp, "w") as f:
+            f.write(data)
+            f.flush()
+
+        # Remove any existing path.bak files
+        if os.path.exists(bak):
+            os.remove(bak)
+
+        # Rename the existing path to path.bak
+        if os.path.exists(path):
+            os.rename(path, bak)
+
+        # Rename the tmp path to the given path
+        if os.path.exists(tmp):
+            os.rename(tmp, path)
+
+        # Clean up the bak file only if the given path exists
+        if os.path.exists(path) and os.path.exists(bak):
+            os.remove(bak)
+
+    except:
+        # Remove the tmp file if there are any issues
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+        # Restore the path from the current .bak file
+        if not os.path.exists(path) and os.path.exists(bak):
+            os.rename(bak, path)
+
+        raise
 
 
 def updateJson(path, data):
