@@ -620,13 +620,18 @@ class LibraryWidget(QtWidgets.QWidget):
         :type dst: str 
         :rtype: str 
         """
-        dst = studiolibrary.renamePath(src, dst)
+        try:
+            dst = studiolibrary.renamePath(src, dst)
 
-        db = self.database()
-        db.renameFolder(src, dst)
+            db = self.database()
+            db.renameFolder(src, dst)
 
-        self.refreshFolders()
-        self.selectFolderPath(dst)
+            self.refreshFolders()
+            self.selectFolderPath(dst)
+
+        except Exception, e:
+            self.showExceptionDialog("Rename Path Error", e)
+            raise
 
         return dst
 
@@ -1357,8 +1362,7 @@ class LibraryWidget(QtWidgets.QWidget):
                 movedItems.append(item)
 
         except Exception, e:
-            logger.exception(e)
-            self.showErrorDialog("Move Error", e)
+            self.showExceptionDialog("Move Error", e)
             raise
         finally:
             self.itemsWidget().addItems(movedItems)
@@ -2267,6 +2271,17 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self.setError(text)
         return studioqt.MessageBox.critical(self, title, text)
+
+    def showExceptionDialog(self, title, error):
+        """
+        A convenience method for showing an error dialog to the user.
+
+        :type title: str
+        :type error: Exception
+        :rtype: QMessageBox.StandardButton
+        """
+        logger.exception(error)
+        self.showErrorDialog(title, error)
 
     def showQuestionDialog(self, title, text):
         """

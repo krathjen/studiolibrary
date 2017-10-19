@@ -149,6 +149,17 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         """
         return studioqt.MessageBox.critical(self.libraryWidget(), title, text)
 
+    def showExceptionDialog(self, title, error):
+        """
+        Convenience method for showing a question dialog to the user.
+
+        :type title: str
+        :type error: Exception
+        :rtype: QMessageBox.StandardButton
+        """
+        logger.exception(error)
+        return self.showErrorDialog(title, error)
+
     def showQuestionDialog(self, title, text):
         """
         Convenience method for showing a question dialog to the user.
@@ -511,8 +522,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             try:
                 self.rename(name)
             except Exception, e:
-                logger.exception(e)
-                self.showErrorDialog("Rename Error", e)
+                self.showExceptionDialog("Rename Error", e)
+                raise
 
         return button
 
@@ -531,8 +542,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             try:
                 self.move(dst)
             except Exception, e:
-                logger.exception(e)
-                self.showErrorDialog("Move Error", e)
+                self.showExceptionDialog("Move Error", e)
+                raise
 
     def showDeleteDialog(self):
         """
@@ -549,8 +560,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             try:
                 self.delete()
             except Exception, e:
-                logger.exception(e)
-                self.showErrorDialog("Delete Error", e)
+                self.showExceptionDialog("Delete Error", e)
+                raise
 
     def showAlreadyExistsDialog(self):
         """
