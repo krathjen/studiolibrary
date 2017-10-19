@@ -148,23 +148,6 @@ class Database(QtCore.QObject):
         """
         return studiolibrary.normPath(path)
 
-    def searchReplace(self, old, new, count=-1):
-        """
-        Replace the old value with the new value in the database.
-
-        :type old: str
-        :type new: str
-        :type count: int
-
-        :rtype: None
-        """
-        path = self.path()
-
-        data = studiolibrary.read(path)
-        data = data.replace(old, new, count)
-
-        studiolibrary.write(path, data)
-
     def readJson(self):
         """
         Return the data from the database as a valid dict object.
@@ -190,6 +173,18 @@ class Database(QtCore.QObject):
         :rtype: dict
         """
         studiolibrary.updateJson(self.path(), data)
+
+    def replaceJson(self, old, new, count=-1):
+        """
+        Replace the old value with the new value in the database.json.
+
+        :type old: str
+        :type new: str
+        :type count: int
+
+        :rtype: dict
+        """
+        return studiolibrary.replaceJson(self.path(), old, new, count)
 
     def insert(self, key, data):
         """
@@ -258,7 +253,7 @@ class Database(QtCore.QObject):
         src = '"' + self.normPath(src) + '"'
         dst = '"' + self.normPath(dst) + '"'
 
-        self.searchReplace(src, dst)
+        self.replaceJson(src, dst)
 
     def renameFolder(self, src, dst):
         """
@@ -279,4 +274,4 @@ class Database(QtCore.QObject):
             dst += "/"
 
         # Replace all values that start with the src value with the dst value
-        self.searchReplace(src, dst)
+        self.replaceJson(src, dst)

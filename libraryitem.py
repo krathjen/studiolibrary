@@ -512,7 +512,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
                 self.rename(name)
             except Exception, e:
                 logger.exception(e)
-                self.showErrorDialog("Rename Error", str(e))
+                self.showErrorDialog("Rename Error", e)
 
         return button
 
@@ -532,7 +532,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
                 self.move(dst)
             except Exception, e:
                 logger.exception(e)
-                self.showErrorDialog("Move Error", str(e))
+                self.showErrorDialog("Move Error", e)
 
     def showDeleteDialog(self):
         """
@@ -550,13 +550,12 @@ class LibraryItem(studioqt.CombinedWidgetItem):
                 self.delete()
             except Exception, e:
                 logger.exception(e)
-                self.showErrorDialog("Delete Error", str(e))
+                self.showErrorDialog("Delete Error", e)
 
     def showAlreadyExistsDialog(self):
         """
         Show a warning dialog if the item already exists on save.
         
-        :type item: studiolibrary.LibraryItem
         :rtype: None
         """
         if not self.libraryWidget():

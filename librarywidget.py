@@ -1357,9 +1357,8 @@ class LibraryWidget(QtWidgets.QWidget):
                 movedItems.append(item)
 
         except Exception, e:
-            text = str(e)
-            logger.exception(text)
-            self.showErrorDialog("Error", text)
+            logger.exception(e)
+            self.showErrorDialog("Move Error", e)
             raise
         finally:
             self.itemsWidget().addItems(movedItems)
