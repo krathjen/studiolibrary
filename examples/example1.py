@@ -20,7 +20,7 @@ class ImageItem(studiolibrary.LibraryItem):
         text = "Loaded: {path}".format(path=self.path())
 
         print text
-        self.libraryWidget().setInfo(text)
+        self.libraryWidget().showInfoMessage(text)
         self.libraryWidget().showInfoDialog("Loaded", text)
 
     def doubleClicked(self):

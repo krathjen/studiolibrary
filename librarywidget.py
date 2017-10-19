@@ -1520,7 +1520,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         msg = "Found {0} item{1} in {2:.3f} seconds."
         msg = msg.format(self._itemsVisibleCount, plural, t)
-        self.statusWidget().setInfo(msg)
+        self.statusWidget().showInfoMessage(msg)
 
     def itemsVisibleCount(self):
         """
@@ -1573,7 +1573,7 @@ class LibraryWidget(QtWidgets.QWidget):
             try:
                 item.showPreviewWidget(self)
             except Exception, msg:
-                self.setError(msg)
+                self.showErrorMessage(msg)
                 self.clearPreviewWidget()
                 raise
         else:
@@ -1872,7 +1872,7 @@ class LibraryWidget(QtWidgets.QWidget):
                 self.searchWidget().setFocus()
 
         if isinstance(event, QtGui.QStatusTipEvent):
-            self.statusWidget().setInfo(event.tip())
+            self.statusWidget().showInfoMessage(event.tip())
 
         return QtWidgets.QWidget.event(self, event)
 
@@ -2200,7 +2200,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         except Exception, e:
             logger.exception(e.message)
-            self.setError(e.message)
+            self.showErrorMessage(e.message)
             raise
 
         finally:
@@ -2220,33 +2220,33 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self.itemsWidget().setToast(text, duration)
 
-    def setInfo(self, text):
+    def showInfoMessage(self, text):
         """
         A convenience method for showing an info message to the user.
 
         :type text: str
         :rtype: None
         """
-        self.statusWidget().setInfo(text)
+        self.statusWidget().showInfoMessage(text)
 
-    def setError(self, text):
+    def showErrorMessage(self, text):
         """
         A convenience method for showing an error message to the user.
 
         :type text: str
         :rtype: None
         """
-        self.statusWidget().setError(unicode(text))
+        self.statusWidget().showErrorMessage(text)
         self.setStatusBarWidgetVisible(True)
 
-    def setWarning(self, text):
+    def showWarningMessage(self, text):
         """
         A convenience method for showing a warning message to the user.
 
         :type text: str
         :rtype: None
         """
-        self.statusWidget().setWarning(text)
+        self.statusWidget().showWarningMessage(text)
         self.setStatusBarWidgetVisible(True)
 
     def showInfoDialog(self, title, text):
@@ -2269,7 +2269,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :type text: str
         :rtype: QMessageBox.StandardButton
         """
-        self.setError(text)
+        self.showErrorMessage(text)
         return studioqt.MessageBox.critical(self, title, text)
 
     def showExceptionDialog(self, title, error):
@@ -2334,7 +2334,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         msg = "Displayed {0} item{1} in {2:.3f} seconds. {3}"
         msg = msg.format(itemCount, plural, elapsedTime, hiddenText)
-        self.statusWidget().setInfo(msg)
+        self.statusWidget().showInfoMessage(msg)
 
         logger.debug(msg)
 
