@@ -675,7 +675,6 @@ class MessageBox(QtWidgets.QDialog):
         else:
             return False
 
-    @studioqt.showArrowCursor
     def exec_(self):
         """
         Shows the dialog as a modal dialog
@@ -719,6 +718,13 @@ def testMessageBox():
 
         buttons = QtWidgets.QDialogButtonBox.Ok | \
                   QtWidgets.QDialogButtonBox.Cancel
+
+        print studioqt.MessageBox.input(
+            None,
+            "Rename",
+            "Rename the selected item?",
+            inputText="face.anim",
+        )
 
         result = MessageBox.question(
             None,
