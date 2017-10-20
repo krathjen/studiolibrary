@@ -521,8 +521,7 @@ class Animation(mutils.Pose):
         path,
         time=None,
         sampleBy=1,
-        fileType=None,
-        description=None,
+        fileType="",
         bakeConnected=True
     ):
         """
@@ -531,8 +530,7 @@ class Animation(mutils.Pose):
         :type path: str
         :type time: (int, int) or None
         :type sampleBy: int
-        :type fileType: str or None
-        :type description: str
+        :type fileType: str
         :type bakeConnected: bool
         
         :rtype: None
@@ -626,7 +624,7 @@ class Animation(mutils.Pose):
 
             mayaPath = os.path.join(path, fileName)
             posePath = os.path.join(path, "pose.json")
-            mutils.Pose.save(self, posePath, description=description)
+            mutils.Pose.save(self, posePath)
 
             if validAnimCurves:
                 maya.cmds.select(validAnimCurves)
