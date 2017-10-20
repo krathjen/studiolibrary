@@ -54,12 +54,12 @@ class SetsItem(baseitem.BaseItem):
         """
         self.selectContent(namespaces=namespaces)
 
-    def save(self, objects, path=None, iconPath=None, **kwargs):
+    def save(self, objects, path="", iconPath="", **kwargs):
         """
         Save all the given object data to the given path on disc.
 
-        :type path: path
-        :type objects: list
+        :type objects: list[str]
+        :type path: str
         :type iconPath: str
         """
         if path and not path.endswith(".set"):

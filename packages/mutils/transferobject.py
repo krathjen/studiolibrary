@@ -318,12 +318,12 @@ class TransferObject(object):
         pass
 
     @mutils.showWaitCursor
-    def save(self, path, description=""):
+    def save(self, path):
         """
         Save the current metadata and object data to the given path.
         
-        :type description: str
         :type path: str
+        :rtype: None
         """
         logger.info("Saving pose: %s" % path)
 
@@ -333,7 +333,6 @@ class TransferObject(object):
         self.setMetadata("user", user)
         self.setMetadata("ctime", ctime)
         self.setMetadata("version", "1.0.0")
-        self.setMetadata("description", description)
         self.setMetadata("mayaVersion", maya.cmds.about(v=True))
         self.setMetadata("mayaSceneFile", maya.cmds.file(q=True, sn=True))
 

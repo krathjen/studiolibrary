@@ -402,8 +402,8 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         Load the data from the transfer object.
 
-        :type namespaces: list[str]
-        :type objects: list[str]
+        :type namespaces: list[str] or None
+        :type objects: list[str] or None
         :rtype: None
         """
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
@@ -415,20 +415,20 @@ class BaseItem(studiolibrary.LibraryItem):
     def save(
             self,
             objects,
-            path=None,
-            iconPath=None,
+            path="",
+            iconPath="",
             contents=None,
-            description=None,
+            description="",
             **kwargs
     ):
         """
         Save the data to the transfer path on disc.
 
-        :type objects: list
-        :type path: path or None
-        :type iconPath: str or None
+        :type objects: list[str]
+        :type path: str
+        :type iconPath: str
         :type contents: list[str] or None
-        :type description: str or None
+        :type description: str
 
         :rtype: None
         """
@@ -438,7 +438,8 @@ class BaseItem(studiolibrary.LibraryItem):
         tempPath = tempDir.path() + "/" + self.transferBasename()
 
         t = self.transferClass().fromObjects(objects)
-        t.save(tempPath, description=description, **kwargs)
+        t.setMetadata("description", description)
+        t.save(tempPath, **kwargs)
 
         contents = contents or list()
         if iconPath:

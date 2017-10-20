@@ -246,25 +246,25 @@ class AnimItem(baseitem.BaseItem):
     def save(
         self,
         objects,
-        path=None,
+        path="",
         contents=None,
-        iconPath=None,
-        fileType=None,
+        iconPath="",
+        fileType="",
         startFrame=None,
         endFrame=None,
         bakeConnected=False,
-        description=None,
+        description="",
     ):
         """
-        :type path: path
-        :type objects: list or None
+        :type path: str
+        :type objects: list[str] or None
         :type contents: list[str] or None
-        :type iconPath: str or None
+        :type iconPath: str
         :type startFrame: int or None
         :type endFrame: int or None
-        :type fileType: str or None
+        :type fileType: str
         :type bakeConnected: bool
-        :type description: str or None
+        :type description: str
 
         :rtype: None
         """
@@ -277,13 +277,12 @@ class AnimItem(baseitem.BaseItem):
         tempPath = tempDir.path() + "/transfer.anim"
 
         t = self.transferClass().fromObjects(objects)
-
+        t.setMetadata("description", description)
         t.save(
             tempPath,
             fileType=fileType,
             time=[startFrame, endFrame],
             bakeConnected=bakeConnected,
-            description=description
         )
 
         if iconPath:

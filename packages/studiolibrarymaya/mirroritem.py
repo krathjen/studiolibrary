@@ -127,16 +127,20 @@ class MirrorItem(baseitem.BaseItem):
             objects,
             leftSide,
             rightSide,
-            path=None,
-            iconPath=None,
-            description=None,
+            path="",
+            iconPath="",
+            description="",
             **kwargs):
         """
         Save the given objects to the location of the current mirror table.
 
-        :type path: str
         :type objects: list[str]
+        :type leftSide: str
+        :type rightSide: str
+        :type path: str
         :type iconPath: str
+        :type description: str
+
         :rtype: None
         """
         if path and not path.endswith(".mirror"):
@@ -153,7 +157,8 @@ class MirrorItem(baseitem.BaseItem):
             rightSide=rightSide
         )
 
-        t.save(tempPath, description=description)
+        t.setMetadata("description", description)
+        t.save(tempPath)
 
         studiolibrary.LibraryItem.save(
             self,
