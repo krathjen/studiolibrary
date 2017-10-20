@@ -83,12 +83,9 @@ class TransferObject(object):
         :rtype: dict
         """
         with open(path, "r") as f:
-            # data = json.loads(data)
-            # We don't use json.loads for performance reasons in python 2.6.
-            data = f.read()
-            data = data.replace(": false", ": False")
-            data = data.replace(": true", ": True")
-            data = eval(data, {})
+            data = f.read() or "{}"
+
+        data = json.loads(data)
 
         return data
 
@@ -163,12 +160,16 @@ class TransferObject(object):
 
     def mtime(self):
         """
+        Return the modification datetime of self.path().
+        
         :rtype: float
         """
         return os.path.getmtime(self.path())
 
     def ctime(self):
         """
+        Return the creation datetime of self.path().
+        
         :rtype: float
         """
         return os.path.getctime(self.path())
@@ -261,6 +262,8 @@ class TransferObject(object):
 
     def setMetadata(self, key, value):
         """
+        Set the given key and value in the metadata.
+        
         :type key: str
         :type value: int | str | float | dict
         """
@@ -268,7 +271,9 @@ class TransferObject(object):
 
     def updateMetadata(self, metadata):
         """
-        :type metadata: str
+        Update the given key and value in the metadata.
+        
+        :type metadata: dict
         """
         self.data()["metadata"].update(metadata)
 
@@ -313,35 +318,36 @@ class TransferObject(object):
         pass
 
     @mutils.showWaitCursor
-    def save(self, path, description=None):
+    def save(self, path, description=""):
         """
-        Save the current data to the given path.
+        Save the current metadata and object data to the given path.
         
-        :type description: str | None
+        :type description: str
         :type path: str
         """
         logger.info("Saving pose: %s" % path)
 
+        user = getpass.getuser()
         ctime = str(time.time()).split(".")[0]
 
+        self.setMetadata("user", user)
         self.setMetadata("ctime", ctime)
         self.setMetadata("version", "1.0.0")
-        self.setMetadata("user", getpass.getuser())
+        self.setMetadata("description", description)
         self.setMetadata("mayaVersion", maya.cmds.about(v=True))
         self.setMetadata("mayaSceneFile", maya.cmds.file(q=True, sn=True))
 
-        if description:
-            self.setMetadata("description", description)
-
+        # Move the metadata information to the top of the file
         metadata = {"metadata": self.metadata()}
         data = self.dump(metadata)[:-1] + ","
 
+        # Move the objects information to after the metadata
         objects = {"objects": self.objects()}
         data += self.dump(objects)[1:]
 
+        # Create the given directory if it doesn't exist
         dirname = os.path.dirname(path)
         if not os.path.exists(dirname):
-            logger.debug("Creating dirname: " + dirname)
             os.makedirs(dirname)
 
         with open(path, "w") as f:
