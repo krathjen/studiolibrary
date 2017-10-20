@@ -15,7 +15,7 @@ import os
 import sys
 
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 __encoding__ = sys.getfilesystemencoding()
 
 _resource = None
