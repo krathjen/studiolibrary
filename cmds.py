@@ -88,12 +88,10 @@ SHOW_IN_FOLDER_CMD = None
 
 class PathError(IOError):
     """
-    Path exception that supports unicode escape characters.
+    Exception that supports unicode escape characters.
     """
     def __init__(self, msg):
         """
-        Return the decoded message using 'unicode_escape'
-
         :type: str or unicode 
         """
         msg = unicode(msg).encode('unicode_escape')
@@ -279,7 +277,7 @@ def findItemsInFolders(folders, depth=3, **kwargs):
 
 def user():
     """
-    Return the current users name in lowercase.
+    Return the current user name in lowercase.
     
     :rtype: str
     """
@@ -288,7 +286,7 @@ def user():
 
 def system():
     """
-    Return the current platform all in lowercase.
+    Return the current platform in lowercase.
     
     :rtype: str
     """
@@ -340,7 +338,7 @@ def isLinux():
 
 def localPath(*args):
     """
-    Return the users preferred local location.
+    Return the users preferred disc location.
 
     :rtype: str
     """
@@ -360,7 +358,7 @@ def formatPath(src, dst, labels=None):
 
     :type src: str
     :type dst: str
-    :type labels: dict
+    :type labels: dict or None
     :rtype: str
     """
     dirname, name, extension = splitPath(src)
@@ -421,7 +419,7 @@ def movePath(src, dst):
 
 def movePaths(srcPaths, dst):
     """
-    Move the given src paths to the specified dst path.
+    Move the given src paths to the given dst path.
 
     :type srcPaths: list[str]
     :type dst: str
@@ -454,7 +452,7 @@ def removePath(path):
 
 def renamePath(src, dst, extension=None, force=False):
     """
-    Rename the given src path to given destination path.
+    Rename the given source path to the given destination path.
 
     :type src: str
     :type dst: str
@@ -503,7 +501,7 @@ def renamePath(src, dst, extension=None, force=False):
 
 def read(path):
     """
-    Return the contents of the given path
+    Return the contents of the given file.
     
     :type path: str 
     :rtype: str 
@@ -522,7 +520,7 @@ def read(path):
 
 def write(path, data):
     """
-    Write the given data to the given path location on disc.
+    Write the given data to the given file on disc.
 
     :type path: str 
     :type data: str 
@@ -596,7 +594,7 @@ def updateJson(path, data):
 
 def saveJson(path, data):
     """
-    Write a python dict to a json file.
+    Serialize the data to a JSON string and write it to the given path.
 
     :type path: str
     :type data: dict
@@ -609,7 +607,7 @@ def saveJson(path, data):
 
 def readJson(path):
     """
-    Read a json file to a python dict.
+    Read the given JSON file and deserialize to a Python object.
 
     :type path: str
     :rtype: dict
@@ -626,12 +624,11 @@ def readJson(path):
 
 def replaceJson(path, old, new, count=-1):
     """
-    Replace the old value with the new value in the given json path.
+    Replace the old value with the new value in the given json file.
     
     :type path: str
     :type old: str
     :type new: str
-    
     :rtype: dict
     """
     old = old.encode("unicode_escape")
@@ -740,10 +737,10 @@ def generateUniquePath(path, attempts=1000):
 
 def normPath(path):
     """
-    Return a normalized path with forward slashes
+    Return a normalized path containing only forward slashes.
     
     :type path: str
-    :rtype: str 
+    :rtype: str or unicode 
     """
     return unicode(path.replace("\\", "/"))
 
@@ -786,7 +783,7 @@ def listToString(data):
 
 def stringToList(data):
     """
-    Return a string from the given list.
+    Return a list from the given string.
         
     Example:
         print listToString('apple, pear, cherry')
@@ -804,7 +801,7 @@ def stringToList(data):
 
 def listPaths(path):
     """
-    Return the list of paths that are in the given directory.
+    Return a list of paths that are in the given directory.
     
     :type path: str
     :rtype: collections.Iterable[str]
@@ -833,7 +830,7 @@ def findPaths(
             print path
 
     :type path: str
-    :type match: func
+    :type match: func or None
     :type depth: int
     :type direction: Direction
     :rtype: collections.Iterable[str]
@@ -889,8 +886,10 @@ def walkup(path, match=None, depth=3, sep="/"):
 
 def walk(path, match=None, depth=3):
     """
+    Return the files by walking down the given directory.
+    
     :type path: str
-    :type match: func
+    :type match: func or None
     :type depth: int
     :rtype: collections.Iterable[str]
     """
