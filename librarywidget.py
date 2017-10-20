@@ -54,8 +54,10 @@ class LibraryWidget(QtWidgets.QWidget):
     SETTINGS_PATH = os.path.join(HOME_PATH, "StudioLibrary", "LibraryWidget.json")
 
     TRASH_ENABLED = True
-    RECURSIVE_SEARCH_ENABLED = False
     DEFAULT_GROUP_BY_COLUMNS = ["Category", "Modified", "Type"]
+
+    RECURSIVE_SEARCH_DEPTH = 3
+    RECURSIVE_SEARCH_ENABLED = False
 
     INVALID_FOLDER_NAMES = ['.', '.studiolibrary', ".mayaswatches"]
 
@@ -131,20 +133,13 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return libraryWidget
 
-    def __init__(
-            self,
-            parent=None,
-            name="",
-            path="",
-    ):
+    def __init__(self, parent=None, name="", path=""):
         """
         Return the a new instance of the Library Widget.
 
         :type parent: QtWidgets.QWidget
         :type name: str
         :type path: str
-        
-        :rtype: LibraryWidget
         """
         QtWidgets.QWidget.__init__(self, parent)
 
@@ -897,34 +892,35 @@ class LibraryWidget(QtWidgets.QWidget):
 
         paths = self.itemsWidget().selectedPaths()
 
-        self.clearItems()
-        items = self.createItems()
-        self.setItems(items, sortEnabled=False)
+        self.updateItems()
 
         self.itemsWidget().selectPaths(paths)
 
         elapsedTime = time.time() - elapsedTime
         self.setLoadedMessage(elapsedTime)
 
-    def createItems(self):
+    def updateItems(self):
         """
-        Return a new instance of the items to be shown in the items widget.
+        Update the items to be shown in the items widget.
 
         :rtype: list[studiolibrary.LibraryItem]
         """
         paths = self.foldersWidget().selectedPaths()
 
+        self.clearItems()
+
         depth = 1
         if self.isRecursiveSearchEnabled():
-            depth = 3
+            depth = self.RECURSIVE_SEARCH_DEPTH
 
-        items = studiolibrary.findItemsInFolders(
+        items = list(studiolibrary.findItemsInFolders(
             paths,
             depth,
             libraryWidget=self,
+            )
         )
 
-        return list(items)
+        self.setItems(items, sortEnabled=False)
 
     def createItemsFromUrls(self, urls):
         """
@@ -1451,24 +1447,21 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for search
     # -----------------------------------------------------------------------
 
-    def filterItems(self, items):
+    def itemsVisibleCount(self):
         """
-        Filter the given items using the search filter.
+        Return the number of items visible.
 
-        :rtype: list[studiolibrary.LibraryItem]
+        :rtype:  int
         """
-        searchFilter = self.searchWidget().searchFilter()
+        return self._itemsVisibleCount
 
-        column = self.itemsWidget().treeWidget().columnFromLabel(
-            "Search Order")
+    def itemsHiddenCount(self):
+        """
+        Return the number of items hidden.
 
-        for item in items:
-            if searchFilter.match(item.searchText()):
-                item.setText(column, str(searchFilter.matches()))
-                yield item
-
-        if self.itemsWidget().sortColumn() == column:
-            self.itemsWidget().refreshSortBy()
+        :rtype:  int
+        """
+        return self._itemsHiddenCount
 
     def setSearchText(self, text):
         """
@@ -1493,14 +1486,68 @@ class LibraryWidget(QtWidgets.QWidget):
 
         items = self.items()
 
-        validItems = list(self.filterItems(items))
-        invalidItems = list(set(items) - set(validItems))
+        self.filterItems(items)
 
-        self._itemsVisibleCount = len(validItems)
-        self._itemsHiddenCount = len(invalidItems)
+        t = time.time() - t
 
-        self.itemsWidget().setItemsHidden(validItems, False)
-        self.itemsWidget().setItemsHidden(invalidItems, True)
+        plural = ""
+        if self._itemsVisibleCount > 1:
+            plural = "s"
+
+        msg = "Found {0} item{1} in {2:.3f} seconds."
+        msg = msg.format(self._itemsVisibleCount, plural, t)
+        self.statusWidget().showInfoMessage(msg)
+
+    def updateSearch(self):
+        """
+        Update the current items with the search filter.
+        
+        :rtype: None 
+        """
+        items = self.items()
+        self.filterItems(items)
+
+    def filterItems(self, items):
+        """
+        Filter the given items using the search filter.
+
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        searchFilter = self.searchWidget().searchFilter()
+
+        column = self.itemsWidget().treeWidget().columnFromLabel(
+            "Search Order")
+
+        validItems = []
+        for item in items:
+            if searchFilter.match(item.searchText()):
+                item.setText(column, str(searchFilter.matches()))
+                validItems.append(item)
+
+        if self.itemsWidget().sortColumn() == column:
+            self.itemsWidget().refreshSortBy()
+
+        self.showItems(validItems, hideOthers=True)
+
+    def showItems(self, items, hideOthers=True):
+        """
+        Only show the given items in the items widget.
+        
+        :type items: list[studiolibrary.LibraryItem]
+        :type hideOthers: bool
+        :rtype: None 
+        """
+        items_ = self.items()
+
+        hiddenItems = list(set(items_) - set(items))
+
+        self._itemsVisibleCount = len(items)
+        self._itemsHiddenCount = len(hiddenItems)
+
+        self.itemsWidget().setItemsHidden(items, False)
+
+        if hideOthers:
+            self.itemsWidget().setItemsHidden(hiddenItems, True)
 
         item = self.itemsWidget().selectedItem()
 
@@ -1510,33 +1557,7 @@ class LibraryWidget(QtWidgets.QWidget):
         if item:
             self.itemsWidget().scrollToItem(item)
 
-        t = time.time() - t
-
-        plural = ""
-        if self._itemsVisibleCount > 1:
-            plural = "s"
-
         self.itemsWidget().treeWidget().refreshGroupBy()
-
-        msg = "Found {0} item{1} in {2:.3f} seconds."
-        msg = msg.format(self._itemsVisibleCount, plural, t)
-        self.statusWidget().showInfoMessage(msg)
-
-    def itemsVisibleCount(self):
-        """
-        Return the number of items visible.
-
-        :rtype:  int
-        """
-        return self._itemsVisibleCount
-
-    def itemsHiddenCount(self):
-        """
-        Return the number of items hidden.
-
-        :rtype:  int
-        """
-        return self._itemsHiddenCount
 
     # -----------------------------------------------------------------------
     # Support for custom preview widgets
