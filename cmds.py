@@ -80,9 +80,9 @@ logger = logging.getLogger(__name__)
 _itemClasses = collections.OrderedDict()
 
 
+IGNORE_PATHS = [".studiolibrary", ".studioLibrary"]
 ANALYTICS_ID = "UA-50172384-1"
 ANALYTICS_ENABLED = True
-
 SHOW_IN_FOLDER_CMD = None
 
 
@@ -109,23 +109,11 @@ class PathError(IOError):
 
 
 class MovePathError(PathError):
-    """
-    """
+    """"""
 
 
 class RenamePathError(PathError):
-    """
-    """
-
-
-class StudioLibraryError(Exception):
     """"""
-    pass
-
-
-class StudioLibraryValidateError(StudioLibraryError):
-    """"""
-    pass
 
 
 class Direction:
@@ -184,13 +172,8 @@ def itemFromPath(path, **kwargs):
     :type path: str
     :rtype: studiolibrary.LibraryItem or None
     """
-    invalidNames = [
-        ".studiolibrary",
-        ".studioLibrary",
-    ]
-
-    for invalidName in invalidNames:
-        if invalidName in path:
+    for ignore in IGNORE_PATHS:
+        if ignore in path:
             return None
 
     for cls in itemClasses():
@@ -221,13 +204,7 @@ def itemsFromUrls(urls, **kwargs):
     :rtype: list[studiolibrary.LibraryItem]
     """
     items = []
-    for url in urls:
-        path = url.toLocalFile()
-
-        # Fixes a bug when dragging from windows explorer on windows 10
-        if isWindows():
-            if path.startswith("/"):
-                path = path[1:]
+    for path in pathsFromUrls(urls):
 
         item = itemFromPath(path, **kwargs)
 
@@ -239,6 +216,24 @@ def itemsFromUrls(urls, **kwargs):
             logger.warning(msg)
 
     return items
+
+
+def pathsFromUrls(urls):
+    """
+    Return the local file paths from the given QUrls
+
+    :type urls: list[QtGui.QUrl]
+    :rtype: collections.Iterable[str]
+    """
+    for url in urls:
+        path = url.toLocalFile()
+
+        # Fixes a bug when dragging from windows explorer on windows 10
+        if isWindows():
+            if path.startswith("/"):
+                path = path[1:]
+
+        yield path
 
 
 def findItems(path, direction=Direction.Down, depth=3, **kwargs):
@@ -629,6 +624,7 @@ def replaceJson(path, old, new, count=-1):
     :type path: str
     :type old: str
     :type new: str
+    :type count: int
     :rtype: dict
     """
     old = old.encode("unicode_escape")
