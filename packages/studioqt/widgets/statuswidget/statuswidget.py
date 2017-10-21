@@ -133,7 +133,7 @@ class StatusWidget(QtWidgets.QFrame):
         :rtype: None 
         """
         msecs = msecs or self.DEFAULT_DISPLAY_TIME
-        message = unicode(message)
+        message = unicode(message).decode("unicode_escape")
 
         self._blocking = blocking
 
