@@ -16,11 +16,10 @@ import sys
 
 
 __version__ = "2.1.1"
-__encoding__ = sys.getfilesystemencoding()
-
 _resource = None
 
-PATH = unicode(os.path.abspath(__file__), __encoding__)
+
+PATH = os.path.abspath(__file__)
 DIRNAME = os.path.dirname(PATH)
 PACKAGES_PATH = os.path.join(DIRNAME, "packages")
 RESOURCE_PATH = os.path.join(DIRNAME, "resource")
@@ -60,6 +59,15 @@ from studiolibrary.main import main
 app = studioqt.app
 
 
+def version():
+    """
+    Return the current version of the Studio Library
+
+    :rtype: str
+    """
+    return __version__
+
+
 def resource():
     """
     Return a resource object for getting content from the resource folder.
@@ -74,38 +82,7 @@ def resource():
     return _resource
 
 
-def version():
-    """
-    Return the current version of the Studio Library
-
-    :rtype: str
-    """
-    return __version__
-
-
-def loadFromCommand():
-    """
-    Triggered when the Studio Library is loaded from the command line.
-
-    :rtype: None
-    """
-    from optparse import OptionParser
-
-    parser = OptionParser()
-    parser.add_option("-r", "--root", dest="root",
-                      help="", metavar="ROOT")
-    parser.add_option("-n", "--name", dest="name",
-                      help="", metavar="NAME")
-    parser.add_option("-v", "--version", dest="version",
-                      help="", metavar="VERSION")
-    (options, args) = parser.parse_args()
-
-    name = options.name
-    main(name=name)
-
-
-from studiolibrary import config
-
-
-if __name__ == "__main__":
-    loadFromCommand()
+try:
+    from studiolibrary import config
+except ImportError, e:
+    print "Warning: Studio Library cannot find a config file"
