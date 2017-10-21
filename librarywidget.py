@@ -895,7 +895,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self.itemsWidget().selectPaths(paths)
 
         elapsedTime = time.time() - elapsedTime
-        self.setLoadedMessage(elapsedTime)
+        self.showRefreshMessage(elapsedTime)
 
     def updateItems(self):
         """
@@ -2173,24 +2173,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return False
 
-    def showTrashSelectedFoldersDialog(self):
-        """
-        Show the move to trash dialog for the selected items.
-        
-        :rtype: None
-        """
-        item = self.foldersWidget().selectedItem()
-
-        if item:
-            title = "Move to trash?"
-            text = "Are you sure you want to move the selected " \
-                   "folder/s to the trash?"
-
-            result = self.showQuestionDialog(title, text)
-
-            if result == QtWidgets.QMessageBox.Yes:
-                self.moveFolderToTrash(item)
-
     def moveFolderToTrash(self, folder):
         """
         Move the given folder item to the trash path.
@@ -2203,24 +2185,28 @@ class LibraryWidget(QtWidgets.QWidget):
         studiolibrary.movePath(folder.path(), trashPath)
         self.refresh()
 
-    def showTrashSelectedItemsDialog(self):
+    def moveItemsToTrash(self, items):
         """
-        Show the "move to trash" dialog for the selected items.
+        Move the given items to trash path.
 
-        :rtype: QtWidgets.QMessageBox.Button
+        :items items: list[studiolibrary.LibraryItem]
+        :rtype: None
         """
-        items = self.selectedItems()
+        trashPath = self.trashPath()
 
-        text = "Are you sure you want to move " \
-               "the selected item/s to the trash?"
+        self.createTrashFolder()
 
-        button = self.showTrashItemsDialog(
-            items=items,
-            title="Move to trash?",
-            text=text,
-        )
+        try:
+            for item in items:
+                item.move(trashPath)
 
-        return button
+        except Exception, e:
+            logger.exception(e.message)
+            self.showErrorMessage(e.message)
+            raise
+
+        finally:
+            self.refresh()
 
     def showTrashItemsDialog(self, items, title, text):
         """
@@ -2242,28 +2228,42 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return result
 
-    def moveItemsToTrash(self, items):
+    def showTrashSelectedItemsDialog(self):
         """
-        Move the given items to trash path.
+        Show the "move to trash" dialog for the selected items.
+
+        :rtype: QtWidgets.QMessageBox.Button
+        """
+        items = self.selectedItems()
+
+        text = "Are you sure you want to move " \
+               "the selected item/s to the trash?"
+
+        button = self.showTrashItemsDialog(
+            items=items,
+            title="Move to trash?",
+            text=text,
+        )
+
+        return button
+
+    def showTrashSelectedFoldersDialog(self):
+        """
+        Show the move to trash dialog for the selected items.
         
-        :items items: list[studiolibrary.LibraryItem]
         :rtype: None
         """
-        trashPath = self.trashPath()
+        item = self.foldersWidget().selectedItem()
 
-        self.createTrashFolder()
+        if item:
+            title = "Move to trash?"
+            text = "Are you sure you want to move the selected " \
+                   "folder/s to the trash?"
 
-        try:
-            for item in items:
-                item.move(trashPath)
+            result = self.showQuestionDialog(title, text)
 
-        except Exception, e:
-            logger.exception(e.message)
-            self.showErrorMessage(e.message)
-            raise
-
-        finally:
-            self.refresh()
+            if result == QtWidgets.QMessageBox.Yes:
+                self.moveFolderToTrash(item)
 
     # -----------------------------------------------------------------------
     # Support for message boxes
@@ -2307,6 +2307,36 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self.statusWidget().showWarningMessage(text)
         self.setStatusBarWidgetVisible(True)
+
+    def showRefreshMessage(self, elapsedTime):
+        """
+        Show how long the current refresh took with the given elapsedTime.
+
+        :type elapsedTime: time.time
+        :rtype None
+        """
+        itemCount = len(self._itemsWidget.items())
+        hiddenCount = self.itemsHiddenCount()
+
+        plural = ""
+        if itemCount > 1:
+            plural = "s"
+
+        hiddenText = ""
+        if hiddenCount > 0:
+
+            hiddenPlural = ""
+            if hiddenCount > 1:
+                hiddenPlural = "s"
+
+            hiddenText = "{0} item{1} hidden."
+            hiddenText = hiddenText.format(hiddenCount, hiddenPlural)
+
+        msg = "Displayed {0} item{1} in {2:.3f} seconds. {3}"
+        msg = msg.format(itemCount, plural, elapsedTime, hiddenText)
+        self.statusWidget().showInfoMessage(msg)
+
+        logger.debug(msg)
 
     def showInfoDialog(self, title, text):
         """
@@ -2369,33 +2399,6 @@ class LibraryWidget(QtWidgets.QWidget):
             title += " (Locked)"
 
         self.setWindowTitle(title)
-
-    def setLoadedMessage(self, elapsedTime):
-        """
-        :type elapsedTime: time.time
-        """
-        itemCount = len(self._itemsWidget.items())
-        hiddenCount = self.itemsHiddenCount()
-
-        plural = ""
-        if itemCount > 1:
-            plural = "s"
-
-        hiddenText = ""
-        if hiddenCount > 0:
-
-            hiddenPlural = ""
-            if hiddenCount > 1:
-                hiddenPlural = "s"
-
-            hiddenText = "{0} item{1} hidden."
-            hiddenText = hiddenText.format(hiddenCount, hiddenPlural)
-
-        msg = "Displayed {0} item{1} in {2:.3f} seconds. {3}"
-        msg = msg.format(itemCount, plural, elapsedTime, hiddenText)
-        self.statusWidget().showInfoMessage(msg)
-
-        logger.debug(msg)
 
     # -----------------------------------------------------------------------
     # Support for locking via regex
