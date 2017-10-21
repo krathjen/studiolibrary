@@ -396,7 +396,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: str
         """
-        return self.readSettings().get("path", "")
+        return self._path
 
     def setPath(self, path):
         """
@@ -408,7 +408,7 @@ class LibraryWidget(QtWidgets.QWidget):
         path = os.path.abspath(path)
         path = studiolibrary.normPath(path)
 
-        self.updateSettings({"path": path})
+        self._path = path
 
         databasePath = studiolibrary.formatPath(path, self.DATABASE_PATH)
         database = studiolibrary.Database(databasePath)
@@ -1741,6 +1741,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         try:
             self.setRefreshEnabled(False)
+            self.itemsWidget().setToastEnabled(False)
 
             defaultGeometry = [200, 100, 860, 680]
             x, y, width, height = settings.get("geometry", defaultGeometry)
@@ -1766,11 +1767,10 @@ class LibraryWidget(QtWidgets.QWidget):
                 theme.setSettings(themeSettings)
                 self.setTheme(theme)
 
-            self.itemsWidget().setToastEnabled(False)
-
-            path = settings.get("path")
-            if path and os.path.exists(path):
-                self.setPath(path)
+            if not self.path():
+                path = settings.get("path")
+                if path and os.path.exists(path):
+                    self.setPath(path)
 
             dpi = settings.get("dpi", 1.0)
             self.setDpi(dpi)
