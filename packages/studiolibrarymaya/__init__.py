@@ -20,6 +20,8 @@ import studiolibrary
 import mutils
 import studioqt
 
+from studiolibrarymaya.main import main
+
 
 __encoding__ = sys.getfilesystemencoding()
 
@@ -108,20 +110,12 @@ def resource():
     return _resource
 
 
-def setup():
+def registerItems():
     """
-    Called by the studiolibrary config file to register the items.
-
-    :rtype: None
+    The following items are registered on import at the bottom of each file.
+    
+    :rtype: None 
     """
-    try:
-        import studiolibrarymaya.mayalibrarywidget
-        # Enable the Maya closed event
-        enableMayaClosedEvent()
-    except ImportError, e:
-        logging.exception(e)
-
-    # The following items are registered on import.
     from studiolibrarymaya import animitem
     from studiolibrarymaya import poseitem
     from studiolibrarymaya import mirroritem
@@ -131,6 +125,8 @@ def setup():
 def enableMayaClosedEvent():
     """
     Create a Maya script job to trigger on the event "quitApplication".
+
+    Enable the Maya closed event to save the library settings on close
 
     :rtype: None
     """
