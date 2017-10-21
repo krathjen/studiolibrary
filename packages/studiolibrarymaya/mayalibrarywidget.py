@@ -9,19 +9,25 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import uuid
 import studiolibrary
 
 import maya.cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 
-# @note workspace control could exists if module was reloaded
-_workspaceControl = 'studiolibraryWorkspaceControl'
-if maya.cmds.workspaceControl(_workspaceControl, exists=True):
-    maya.cmds.deleteUI(_workspaceControl)
-
-
 class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
+
+    def setObjectName(self, name):
+        """
+        Overriding to ensure the widget has a unique name for Maya.
+        
+        :type name: str
+        :rtype: None 
+        """
+        name = '{0}_{1}'.format(name, uuid.uuid4())
+
+        studiolibrary.LibraryWidget.setObjectName(self, name)
 
     def tabWidget(self):
         """
