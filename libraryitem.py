@@ -139,6 +139,16 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if path:
             self.setPath(path)
 
+    def showToastMessage(self, text):
+        """
+        A convenience method for showing the toast widget with the given text.
+
+        :type text: str
+        :rtype: None
+        """
+        if self.libraryWidget():
+            self.libraryWidget().showToastMessage(text)
+
     def showErrorDialog(self, title, text):
         """
         Convenience method for showing an error dialog to the user.
