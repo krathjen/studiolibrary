@@ -1631,7 +1631,7 @@ class LibraryWidget(QtWidgets.QWidget):
             try:
                 item.showPreviewWidget(self)
             except Exception, e:
-                self.showExceptionDialog(e)
+                self.showErrorMessage(e)
                 self.clearPreviewWidget()
                 raise
         else:
@@ -2004,7 +2004,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._splitter.setHandleWidth(2 * dpi)
 
-        self.itemsWidget().setToast("DPI: {0}".format(int(dpi * 100)))
+        self.showToastMessage("DPI: {0}".format(int(dpi * 100)))
 
         self.reloadStyleSheet()
 
@@ -2269,7 +2269,7 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for message boxes
     # -----------------------------------------------------------------------
 
-    def setToast(self, text, duration=500):
+    def showToastMessage(self, text, duration=500):
         """
         A convenience method for showing the toast widget with the given text.
 
@@ -2277,7 +2277,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :type duration: int
         :rtype: None
         """
-        self.itemsWidget().setToast(text, duration)
+        self.itemsWidget().showToastMessage(text, duration)
 
     def showInfoMessage(self, text):
         """

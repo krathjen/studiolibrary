@@ -167,7 +167,7 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         return self._toastEnabled
 
-    def setToast(self, text, duration=None):
+    def showToastMessage(self, text, duration=None):
         """
         Show a toast with the given text for the given duration.
 
@@ -830,7 +830,7 @@ class CombinedWidget(QtWidgets.QWidget):
             self._padding = value + 1
         self.repaint()
 
-        self.setToast("Border: " + str(value))
+        self.showToastMessage("Border: " + str(value))
 
     def spacing(self):
         """
@@ -850,7 +850,7 @@ class CombinedWidget(QtWidgets.QWidget):
         self._listView.setSpacing(spacing)
         self.scrollToSelectedItem()
 
-        self.setToast("Spacing: " + str(spacing))
+        self.showToastMessage("Spacing: " + str(spacing))
 
     def iconSize(self):
         """
@@ -1065,7 +1065,7 @@ class CombinedWidget(QtWidgets.QWidget):
         self.scrollToSelectedItem()
 
         msg = "Size: {0}%".format(value)
-        self.setToast(msg)
+        self.showToastMessage(msg)
 
     def wheelEvent(self, event):
         """

@@ -289,8 +289,8 @@ class PoseItem(baseitem.BaseItem):
         # without blending.
         self.setBlendValue(blend, load=False)
 
-        if showBlendMessage and self.libraryWidget():
-            self.libraryWidget().setToast("Blend: {0}%".format(blend))
+        if showBlendMessage:
+            self.showToastMessage("Blend: {0}%".format(blend))
 
         try:
             baseitem.BaseItem.load(
