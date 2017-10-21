@@ -120,6 +120,3 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
         """
         if self.tabWidget():
             self.tabWidget().setStyleSheet("border:0px;")
-
-
-studiolibrary.LIBRARY_WIDGET_CLASS = MayaLibraryWidget

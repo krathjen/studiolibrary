@@ -16,9 +16,9 @@ import studiolibrary
 
 def main(*args, **kwargs):
     """
-    Convenience method for creating/showing a library widget instance.
+    Convenience method for creating/showing a MayaLibraryWidget instance.
 
-    return studiolibrary.LibraryWidget.instance(
+    return studiolibrarymaya.MayaLibraryWidget.instance(
         name="",
         path="",
         show=True,
@@ -28,13 +28,20 @@ def main(*args, **kwargs):
         unlockRegExp=None
     )
 
-    :rtype: studiolibrary.LibraryWidget
+    :rtype: studiolibrarymaya.MayaLibraryWidget
     """
+    import studiolibrarymaya
+
+    studiolibrarymaya.registerItems()
+    studiolibrarymaya.enableMayaClosedEvent()
+
     if studiolibrary.isMaya():
-        import studiolibrarymaya
-        libraryWidget = studiolibrarymaya.main(*args, **kwargs)
+        import studiolibrarymaya.mayalibrarywidget
+        cls = studiolibrarymaya.mayalibrarywidget.MayaLibraryWidget
     else:
-        libraryWidget = studiolibrary.LibraryWidget.instance(*args, **kwargs)
+        cls = studiolibrary.LibraryWidget
+
+    libraryWidget = cls.instance(*args, **kwargs)
 
     return libraryWidget
 
@@ -43,4 +50,4 @@ if __name__ == "__main__":
 
     # Run the Studio Library in a QApplication instance
     with studiolibrary.app():
-        studiolibrary.main()
+        main()

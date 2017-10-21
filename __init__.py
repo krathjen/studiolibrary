@@ -80,9 +80,3 @@ def resource():
         _resource = studioqt.Resource(RESOURCE_PATH)
 
     return _resource
-
-
-try:
-    from studiolibrary import config
-except ImportError, e:
-    print "Warning: Studio Library cannot find a config file"
