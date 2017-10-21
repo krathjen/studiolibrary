@@ -430,6 +430,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if self.libraryWidget():
             self.libraryWidget().refreshItems()
             self.libraryWidget().selectPath(path)
+            self.libraryWidget().scrollToSelectedItem()
 
         self.saved.emit(self)
         logger.debug(u'Item Saved: {0}'.format(self.path()))

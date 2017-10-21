@@ -59,7 +59,7 @@ class LibraryWidget(QtWidgets.QWidget):
     RECURSIVE_SEARCH_DEPTH = 3
     RECURSIVE_SEARCH_ENABLED = False
 
-    INVALID_FOLDER_NAMES = ['.', '.studiolibrary', ".mayaswatches"]
+    IGNORE_FOLDERS = [".", ".studiolibrary", ".mayaswatches"]
 
     # Still in development
     DPI_ENABLED = False
@@ -289,13 +289,14 @@ class LibraryWidget(QtWidgets.QWidget):
         itemsWidget = self.itemsWidget()
         itemsWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         itemsWidget.itemMoved.connect(self._itemMoved)
+        itemsWidget.itemDropped.connect(self._itemDropped)
         itemsWidget.itemSelectionChanged.connect(self._itemSelectionChanged)
         itemsWidget.customContextMenuRequested.connect(self.showItemsContextMenu)
         itemsWidget.treeWidget().setValidGroupByColumns(self.DEFAULT_GROUP_BY_COLUMNS)
 
         folderWidget = self.foldersWidget()
         folderWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        folderWidget.itemDropped.connect(self._folderDropped)
+        folderWidget.itemDropped.connect(self._itemDropped)
         folderWidget.itemSelectionChanged.connect(self._folderSelectionChanged)
         folderWidget.customContextMenuRequested.connect(self.showFolderMenu)
 
@@ -306,45 +307,22 @@ class LibraryWidget(QtWidgets.QWidget):
         if path:
             self.setPath(path)
 
-    def _folderDropped(self, event):
+    def _searchChanged(self):
         """
-        Triggered when an item has been dropped on the folder widget.
-
-        :type event: QtCore.QEvent
-        :rtype: None
-        """
-        mimeData = event.mimeData()
-
-        if mimeData.hasUrls():
-            folder = self.foldersWidget().selectedItem()
-            items = self.createItemsFromUrls(mimeData.urls())
-
-            for item in items:
-
-                # Check if the item is moving to another folder.
-                if folder.path() != item.dirname():
-                    self.showMoveItemsDialog(items, folder=folder)
-                    break
-
-    def _folderSelectionChanged(self):
-        """
-        Triggered when an item is selected or deselected.
+        Triggered when the search text has changed.
 
         :rtype: None
         """
-        path = self.selectedFolderPath()
-        self.refreshItems()
-        self.emitFolderSelectionChanged(path)
+        self.refreshSearch()
 
-    def emitFolderSelectionChanged(self, path):
+    def _itemMoved(self, item):
         """
-        Trigger the folderSelectionChanged signal.
-        
-        :type path: str or None 
-        :rtype: None 
+        Triggered when an item has been moved and dropped.
+
+        :type item: studiolibrary.LibraryItem
+        :rtype: None
         """
-        self.folderSelectionChanged.emit(path)
-        self.globalSignal.folderSelectionChanged.emit(self, path)
+        self.saveCustomOrder()
 
     def _itemSelectionChanged(self):
         """
@@ -357,22 +335,34 @@ class LibraryWidget(QtWidgets.QWidget):
         self.setPreviewWidgetFromItem(item)
         self.itemSelectionChanged.emit(item)
 
-    def _itemMoved(self, item):
+    def _itemDropped(self, event):
         """
-        Triggered when an item has been moved.
+        Triggered when an item has been dropped.
 
-        :type item: studiolibrary.LibraryItem
+        :type event: QtCore.QEvent
         :rtype: None
         """
-        self.saveCustomOrder()
+        mimeData = event.mimeData()
 
-    def _searchChanged(self):
+        if mimeData.hasUrls():
+            urls = mimeData.urls()
+            paths = self.selectedFolderPaths()
+            items = self.createItemsFromUrls(urls)
+
+            if self.isMoveItemsEnabled():
+                self.showMoveItemsDialog(items, dst=paths[0])
+
+    def _folderSelectionChanged(self):
         """
-        Triggered when the search widget text has changed.
+        Triggered when an item is selected or deselected.
 
         :rtype: None
         """
-        self.refreshSearch()
+        path = self.selectedFolderPath()
+        self.refreshItems()
+
+        self.folderSelectionChanged.emit(path)
+        self.globalSignal.folderSelectionChanged.emit(self, path)
 
     def statusWidget(self):
         """
@@ -692,8 +682,8 @@ class LibraryWidget(QtWidgets.QWidget):
             if cls.isValidPath(path):
                 return False
 
-        for name in self.INVALID_FOLDER_NAMES:
-            if name.lower() in path.lower():
+        for ignore in self.IGNORE_FOLDERS:
+            if ignore.lower() in path.lower():
                 return False
 
         return True
@@ -832,6 +822,14 @@ class LibraryWidget(QtWidgets.QWidget):
         if self.selectedItems() != selection:
             self._itemSelectionChanged()
 
+    def scrollToSelectedItem(self):
+        """
+        Scroll the item widget to the selected item.
+
+        :rtype: None
+        """
+        self.itemsWidget().scrollToSelectedItem()
+
     def selectItems(self, items):
         """
         Select the given items.
@@ -928,13 +926,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        items = studiolibrary.itemsFromUrls(
-            urls,
-            database=self.database(),
-            libraryWidget=self,
-        )
-
-        return items
+        return studiolibrary.itemsFromUrls(urls, libraryWidget=self)
 
     # -----------------------------------------------------------------
     # Support for custom context menus
@@ -1305,6 +1297,33 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for moving items with drag and drop
     # -------------------------------------------------------------------
 
+    def isCustomOrderEnabled(self):
+        """
+        Return True if sorting by "Custom Order" is enabled.
+
+        :rtype: bool 
+        """
+        sortColumn = self.itemsWidget().sortColumn()
+        customOrderColumn = self.itemsWidget().columnFromLabel("Custom Order")
+
+        return sortColumn == customOrderColumn
+
+    def isMoveItemsEnabled(self):
+        """
+        Return True if moving items via drag and drop is enabled.
+
+        :rtype: bool 
+        """
+        paths = self.selectedFolderPaths()
+
+        if len(paths) != 1:
+            return False
+
+        if self.selectedItems() and self.isCustomOrderEnabled():
+            return False
+
+        return True
+
     def createMoveItemsDialog(self):
         """
         Create and return a dialog for moving items.
@@ -1322,18 +1341,21 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return dialog
 
-    def showMoveItemsDialog(self, items, folder):
+    def showMoveItemsDialog(self, items, dst):
         """
         Show the move items dialog for the given items.
         
         :type items: list[studiolibrary.LibraryItem]
-        :type folder: studiolibrary.Folder
+        :type dst: str
         :rtype: None
         """
         Copy = 0
-        Move = 1
         Cancel = 2
-        movedItems = []
+
+        # Check if the items are moving to another folder.
+        for item in items:
+            if item.dirname() == dst:
+                return
 
         dialog = self.createMoveItemsDialog()
         action = dialog.exec_()
@@ -1342,17 +1364,31 @@ class LibraryWidget(QtWidgets.QWidget):
         if action == Cancel:
             return
 
+        copy = action == Copy
+
+        self.moveItems(items, dst, copy=copy)
+
+    def moveItems(self, items, dst, copy=False):
+        """
+        Move the given items to the destination folder path.
+        
+        :type items: list[studiolibrary.LibraryItem]
+        :type dst: str
+        :type copy: bool
+        :rtype: None 
+        """
         self.itemsWidget().clearSelection()
+
+        movedItems = []
 
         try:
             for item in items:
 
-                path = folder.path() + "/" + item.name()
+                path = dst + "/" + item.name()
 
-                if action == Copy:
+                if copy:
                     item.copy(path)
-
-                elif action == Move:
+                else:
                     item.rename(path)
 
                 movedItems.append(item)
@@ -1363,6 +1399,7 @@ class LibraryWidget(QtWidgets.QWidget):
         finally:
             self.itemsWidget().addItems(movedItems)
             self.selectItems(movedItems)
+            self.scrollToSelectedItem()
 
     # -----------------------------------------------------------------------
     # Support for search
@@ -1593,8 +1630,8 @@ class LibraryWidget(QtWidgets.QWidget):
         if item:
             try:
                 item.showPreviewWidget(self)
-            except Exception, msg:
-                self.showErrorMessage(msg)
+            except Exception, e:
+                self.showExceptionDialog(e)
                 self.clearPreviewWidget()
                 raise
         else:
@@ -1700,8 +1737,9 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :type settings: dict
         """
+        isRefreshEnabled = self.isRefreshEnabled()
+
         try:
-            isRefreshEnabled = self.isRefreshEnabled()
             self.setRefreshEnabled(False)
 
             defaultGeometry = [200, 100, 860, 680]
