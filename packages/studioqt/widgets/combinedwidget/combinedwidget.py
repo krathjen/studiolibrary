@@ -227,6 +227,14 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         self.treeWidget().groupByColumn(*args)
 
+    def columnFromLabel(self, *args):
+        """
+        Reimplemented for convenience.
+        
+        :return: int 
+        """
+        return self.treeWidget().columnFromLabel(*args)
+
     def setColumnHidden(self, column, hidden):
         """
         Reimplemented for convenience.
