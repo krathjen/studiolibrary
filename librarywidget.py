@@ -82,7 +82,7 @@ class LibraryWidget(QtWidgets.QWidget):
     @classmethod
     def instances(cls):
         """
-        Return all the library instances that have been initialised.
+        Return all the LibraryWidget instances that have been initialised.
 
         :rtype: list[LibraryWidget]
         """
@@ -100,7 +100,7 @@ class LibraryWidget(QtWidgets.QWidget):
             unlockRegExp=None,
     ):
         """
-        Return the library widget for the given path.
+        Return the library widget for the given name.
 
         :type name: str
         :type path: str
@@ -135,9 +135,9 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None, name="", path=""):
         """
-        Return the a new instance of the Library Widget.
+        Create a new instance of the Library Widget.
 
-        :type parent: QtWidgets.QWidget
+        :type parent: QtWidgets.QWidget or None
         :type name: str
         :type path: str
         """
@@ -317,7 +317,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def _itemMoved(self, item):
         """
-        Triggered when an item has been moved and dropped.
+        Triggered when the custom order has changed.
 
         :type item: studiolibrary.LibraryItem
         :rtype: None
@@ -337,7 +337,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def _itemDropped(self, event):
         """
-        Triggered when an item has been dropped.
+        Triggered when items are dropped on the items widget or folders widget.
 
         :type event: QtCore.QEvent
         :rtype: None
@@ -354,7 +354,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def _folderSelectionChanged(self):
         """
-        Triggered when an item is selected or deselected.
+        Triggered when a folder is selected or deselected.
 
         :rtype: None
         """
@@ -366,18 +366,24 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def statusWidget(self):
         """
-        :rtype: StatusWidget
+        Return the status widget.
+        
+        :rtype: studioqt.StatusWidget
         """
         return self._statusWidget
 
     def searchWidget(self):
         """
-        :rtype: SearchWidget
+        Return the search widget.
+        
+        :rtype: studioqt.SearchWidget
         """
         return self._searchWidget
 
     def menuBarWidget(self):
         """
+        Return the menu bar widget.
+        
         :rtype: MenuBarWidget
         """
         return self._menuBarWidget
@@ -420,7 +426,7 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showArrowCursor
     def showPathErrorDialog(self):
         """
-        Show a dialog if the current root path doesn't exist.
+        Called when the current root path doesn't exist on refresh.
 
         :rtype: None
         """
@@ -443,7 +449,7 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showArrowCursor
     def showWelcomeDialog(self):
         """
-        Show a welcome dialog for setting a new root path.
+        Called when there is no root path set for the library.
 
         :rtype: None
         """
@@ -463,7 +469,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def showChangePathDialog(self):
         """
-        Show a path browser for changing the root path.
+        Show a file browser dialog for changing the root path.
 
         :rtype: None
         """
@@ -473,7 +479,7 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showArrowCursor
     def _showChangePathDialog(self):
         """
-        Open the file dialog for setting a new path.
+        Open the file dialog for setting a new root path.
 
         :rtype: str
         """
@@ -501,7 +507,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def isRefreshEnabled(self):
         """
-        Return True if the UI can be refreshed.
+        Return True if the LibraryWidget can be refreshed.
         
         :rtype: bool 
         """
@@ -509,7 +515,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def setRefreshEnabled(self, enable):
         """
-        Set if the UI can be refreshed.
+        If enable is False, all updates will be ignored.
 
         :rtype: bool 
         """
@@ -532,7 +538,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def foldersWidget(self):
         """
-        Return the folders widget class object.
+        Return the folders widget.
         
         :rtype: studioqt.TreeWidget
         """
@@ -623,7 +629,7 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showWaitCursor
     def refreshFolders(self):
         """
-        Convenience method for updating the folders widget.
+        Refresh the state of the folders widget.
         
         :rtype: None 
         """
@@ -638,7 +644,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def updateFolders(self):
         """
-        Create the folders to be shown in the folders widget.
+        Update the folders to be shown in the folders widget.
         
         :rtype: None 
         """
@@ -690,7 +696,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def createFolderMenu(self):
         """
-        Return the folder menu for editing the selected folders.
+        Return the folder menu for the selected folders.
 
         :rtype: QtWidgets.QMenu
         """
@@ -715,7 +721,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def createFolderEditMenu(self, parent):
         """
-        Create a new menu for editing folders.
+        Create the menu for editing the folders.
         
         :type parent: QtWidgets.QMenu
         :rtype: QtWidgets.QMenu
@@ -882,7 +888,7 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showWaitCursor
     def refreshItems(self):
         """
-        Update the items for the library widget.
+        Refresh the items for the library widget.
 
         :rtype: list[studiolibrary.LibraryItem]
         """
@@ -1407,30 +1413,40 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def isPreviewWidgetVisible(self):
         """
+        Return True if the PreviewWidget is visible, otherwise return False.
+        
         :rtype: bool
         """
         return self._previewWidgetVisible
 
     def isFoldersWidgetVisible(self):
         """
+        Return True if the FoldersWidget is visible, otherwise return False.
+        
         :rtype: bool
         """
         return self._foldersWidgetVisible
 
     def isStatusBarWidgetVisible(self):
         """
+        Return True if the StatusWidget is visible, otherwise return False.
+
         :rtype: bool
         """
         return self._statusBarWidgetVisible
 
     def isMenuBarWidgetVisible(self):
         """
+        Return True if the MenuBarWidget is visible, otherwise return False.
+        
         :rtype: bool
         """
         return self.menuBarWidget().isExpanded()
 
     def setPreviewWidgetVisible(self, value):
         """
+        If the value is True then show the PreviewWidget, otherwise hide.
+
         :type value: bool
         """
         value = bool(value)
@@ -1445,6 +1461,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def setFoldersWidgetVisible(self, value):
         """
+        If the value is True then show the FoldersWidget, otherwise hide.
+        
         :type value: bool
         """
         value = bool(value)
@@ -1459,6 +1477,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def setMenuBarWidgetVisible(self, value):
         """
+        If the value is True then show the tMenuBarWidget, otherwise hide.
+
         :type value: bool
         """
         value = bool(value)
@@ -1470,6 +1490,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def setStatusBarWidgetVisible(self, value):
         """
+        If the value is True then show the StatusBarWidget, otherwise hide.
+        
         :type value: bool
         """
         value = bool(value)
@@ -1824,15 +1846,15 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def saveSettings(self, settings=None):
         """
-        Save the settings dictionary to a local json location.
+        Save the settings to the self.settingsPath() as a json format.
 
         :type settings: dict or None
         :rtype: None
         """
         settings = settings or self.settings()
 
-        path = self.settingsPath()
         key = self.name()
+        path = self.settingsPath()
 
         data = studiolibrary.readJson(path)
         data[key] = settings
@@ -1843,7 +1865,7 @@ class LibraryWidget(QtWidgets.QWidget):
     @studioqt.showWaitCursor
     def loadSettings(self):
         """
-        Read the settings dict from the local json location.
+        Load the settings
 
         :rtype: None
         """
@@ -1853,7 +1875,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def readSettings(self):
         """
-        Read the settings data.
+        Read the settings from the self.settingsPath().
 
         :rtype: dict
         """
@@ -2027,7 +2049,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def setTheme(self, theme):
         """
-        Set the theme for the catalog widget.
+        Set the theme.
 
         :type theme: studioqt.Theme
         :rtype: None
@@ -2037,7 +2059,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def theme(self):
         """
-        Return the current theme for the catalog widget.
+        Return the current theme.
 
         :rtype: studioqt.Theme
         """
