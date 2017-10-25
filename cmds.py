@@ -66,6 +66,8 @@ __all__ = [
     "itemFromPath",
     "itemsFromPaths",
     "itemsFromUrls",
+    "itemClassFromPath",
+    "isValidItemPath",
     "findItems",
     "findItemsInFolders",
     "ANALYTICS_ID",
@@ -172,15 +174,11 @@ def itemFromPath(path, **kwargs):
     :type path: str
     :rtype: studiolibrary.LibraryItem or None
     """
-    for ignore in IGNORE_PATHS:
-        if ignore in path:
-            return None
-
-    for cls in itemClasses():
-        if cls.isValidPath(path):
-            return cls(path, **kwargs)
-
-    return None
+    cls = itemClassFromPath(path)
+    if cls:
+        return cls(path, **kwargs)
+    else:
+        return None
 
 
 def itemsFromPaths(paths, **kwargs):
@@ -236,6 +234,34 @@ def pathsFromUrls(urls):
         yield path
 
 
+def isValidItemPath(path):
+    """
+    Return True if the given path is supported by a registered items.
+
+    :type path: str
+    :rtype: bool 
+    """
+    return itemClassFromPath(path) is not None
+
+
+def itemClassFromPath(path):
+    """
+    Return the registered LibraryItemClass that supports the given path.
+
+    :type path: str
+    :rtype: studiolibrary.LibraryItem.__class__ or None
+    """
+    for ignore in IGNORE_PATHS:
+        if ignore in path:
+            return None
+
+    for cls in itemClasses():
+        if cls.isValidPath(path):
+            return cls
+
+    return None
+
+
 def findItems(path, direction=Direction.Down, depth=3, **kwargs):
     """
     Find and create new item instances by walking the given path.
@@ -248,7 +274,7 @@ def findItems(path, direction=Direction.Down, depth=3, **kwargs):
     """
     paths = findPaths(
         path,
-        match=itemFromPath,
+        match=isValidItemPath,
         direction=direction,
         depth=depth
     )
