@@ -58,7 +58,7 @@ class LibraryWidget(QtWidgets.QWidget):
     RECURSIVE_SEARCH_DEPTH = 3
     RECURSIVE_SEARCH_ENABLED = False
 
-    IGNORE_FOLDERS = [".", ".studiolibrary", ".mayaswatches"]
+    IGNORE_FOLDERS = ["/.", ".studiolibrary", ".mayaswatches"]
 
     # Still in development
     DPI_ENABLED = False
@@ -648,6 +648,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         root = self.path()
+        ignore = self.isInvalidFolderPath
         trashPath = self.trashPath()
 
         paths = {
@@ -658,7 +659,7 @@ class LibraryWidget(QtWidgets.QWidget):
             }
         }
 
-        for p in studiolibrary.findPaths(root, match=self.isValidFolderPath):
+        for p in studiolibrary.findPaths(root, ignore=ignore):
             paths[p] = {}
 
             if trashPath == p:
@@ -673,6 +674,15 @@ class LibraryWidget(QtWidgets.QWidget):
         folder = self.foldersWidget().itemFromPath(root)
         folder.setExpanded(True)
 
+    def isInvalidFolderPath(self, path):
+        """
+        Return True if the given path is an invalid folder path.
+
+        :type path: str
+        :rtype: bool 
+        """
+        return not self.isValidFolderPath(path)
+
     def isValidFolderPath(self, path):
         """
         Return True if the given path is a valid folder.
@@ -683,9 +693,11 @@ class LibraryWidget(QtWidgets.QWidget):
         if not self.isTrashFolderVisible() and self.isPathInTrash(path):
             return False
 
-        for cls in studiolibrary.itemClasses():
-            if cls.isValidPath(path):
-                return False
+        if os.path.isfile(path):
+            return False
+
+        if studiolibrary.isValidItemPath(path):
+            return False
 
         for ignore in self.IGNORE_FOLDERS:
             if ignore.lower() in path.lower():
