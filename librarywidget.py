@@ -413,6 +413,10 @@ class LibraryWidget(QtWidgets.QWidget):
         path = os.path.abspath(path)
         path = studiolibrary.normPath(path)
 
+        if path == self.path():
+            logger.debug("The root path is already set.")
+            return
+
         self._path = path
 
         databasePath = studiolibrary.formatPath(self.DATABASE_PATH, path=path)
