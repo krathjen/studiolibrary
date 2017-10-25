@@ -836,7 +836,8 @@ def findPaths(
         path,
         match=None,
         direction=Direction.Down,
-        depth=3
+        depth=3,
+        **kwargs
 ):
     """
     Return a list of file paths by walking the root path either up or down.
@@ -863,7 +864,7 @@ def findPaths(
         paths = listPaths(path)
 
     elif direction == Direction.Down:
-        paths = walk(path, match=match, depth=depth)
+        paths = walk(path, match=match, depth=depth, **kwargs)
 
     elif direction == Direction.Up:
         paths = walkup(path, match=match, depth=depth)
@@ -905,12 +906,13 @@ def walkup(path, match=None, depth=3, sep="/"):
                         yield normPath(path)
 
 
-def walk(path, match=None, depth=3):
+def walk(path, match=None, ignore=None, depth=3, **kwargs):
     """
     Return the files by walking down the given directory.
     
     :type path: str
     :type match: func or None
+    :type ignore: func or None
     :type depth: int
     :rtype: collections.Iterable[str]
     """
@@ -922,14 +924,32 @@ def walk(path, match=None, depth=3):
     assert os.path.isdir(path)
     startDepth = path.count(os.path.sep)
 
-    for root, dirs, files in os.walk(path):
+    for root, dirs, files in os.walk(path, **kwargs):
+
         files.extend(dirs)
 
         for filename in files:
+            remove = False
+
+            # Normalise the path for consistent matching
             path = os.path.join(root, filename)
             path = normPath(path)
-            if match is None or match(path):
+
+            # Stop walking the current dir if the ignore func returns True
+            if ignore and ignore(path):
+                remove = True
+
+            # Yield and stop walking the current dir if a match has been found
+            elif match and match(path):
+                remove = True
                 yield path
+
+            # Yield all paths if no match or ignore has been set
+            else:
+                yield path
+
+            if remove and filename in dirs:
+                dirs.remove(filename)
 
         currentDepth = root.count(os.path.sep)
         if (currentDepth - startDepth) >= maxDepth:
