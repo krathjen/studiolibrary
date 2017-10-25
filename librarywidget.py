@@ -1542,9 +1542,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         t = time.time()
 
-        items = self.items()
-
-        self.filterItems(items)
+        self.updateSearch()
 
         t = time.time() - t
 
@@ -1558,7 +1556,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def updateSearch(self):
         """
-        Update the current items with the search filter.
+        Update the items with the search filter.
         
         :rtype: None 
         """
