@@ -48,10 +48,9 @@ class LibraryWidget(QtWidgets.QWidget):
     _instances = {}
 
     DEFAULT_NAME = "Default"
-    HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
 
     DATABASE_PATH = "{path}/.studiolibrary/database.json"
-    SETTINGS_PATH = os.path.join(HOME_PATH, "StudioLibrary", "LibraryWidget.json")
+    SETTINGS_PATH = "{local}/StudioLibrary/LibraryWidget.json"
 
     TRASH_ENABLED = True
     DEFAULT_GROUP_BY_COLUMNS = ["Category", "Modified", "Type"]
@@ -416,7 +415,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._path = path
 
-        databasePath = studiolibrary.formatPath(path, self.DATABASE_PATH)
+        databasePath = studiolibrary.formatPath(self.DATABASE_PATH, path=path)
         database = studiolibrary.Database(databasePath)
 
         self.setDatabase(database)
@@ -1714,7 +1713,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: str
         """
-        return self.SETTINGS_PATH
+        return studiolibrary.formatPath(self.SETTINGS_PATH)
 
     def settings(self):
         """

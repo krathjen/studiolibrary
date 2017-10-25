@@ -343,35 +343,34 @@ def localPath(*args):
     return path
 
 
-def formatPath(src, dst, labels=None):
+def formatPath(formatString, path="", **kwargs):
     """
     Resolve the given destination path.
 
     Example:
-        print formatPath("C:/hello/world.json", "{dirname}/meta.json")
+        print formatPath("{dirname}/meta.json", path="C:/hello/world.json")
         # "C:/hello/meta.json"
 
-    :type src: str
-    :type dst: str
-    :type labels: dict or None
+    :type formatString: str
+    :type path: str
+    :type kwargs: dict
     :rtype: str
     """
-    dirname, name, extension = splitPath(src)
+    dirname, name, extension = splitPath(path)
 
-    home = os.getenv('APPDATA') or os.getenv('HOME')
+    local = os.getenv('APPDATA') or os.getenv('HOME')
 
-    labels_ = {
-        "home": home,
+    labels = {
         "name": name,
-        "path": src,
+        "path": path,
+        "local": local,
         "dirname": dirname,
         "extension": extension,
     }
 
-    if labels:
-        labels_.update(labels)
+    kwargs.update(labels)
 
-    return unicode(dst).format(**labels_)
+    return unicode(formatString).format(**kwargs)
 
 
 def copyPath(src, dst):
@@ -1063,11 +1062,10 @@ def showInFolder(path):
 
 def testSplitPath():
     """
-    Small test for the split path method.
+    Test he splitPath command.
     
     :rtype: None 
     """
-
     path = "P:/production/rigs/character/mario.ma"
 
     result = splitPath(path)
@@ -1077,9 +1075,24 @@ def testSplitPath():
     assert expected == result, msg
 
 
+def testFormatPath():
+    """
+    Test the formatPath command.
+
+    :rtype: None 
+    """
+    formatString = "{dirname}/vesions/{name}{extension}"
+
+    result = formatPath(formatString, path="P:/production/rigs/database.json")
+    expected = "P:/production/rigs/vesions/database.json"
+
+    msg = "Data does not match {} {}".format(expected, result)
+    assert expected == result, msg
+
+
 def testRelativePaths():
     """
-    A simple test for resolving relative paths.
+    Test absolute and relative paths.
     
     :rtype: None 
     """
@@ -1122,4 +1135,5 @@ def testRelativePaths():
 
 if __name__ == "__main__":
     testSplitPath()
+    testFormatPath()
     testRelativePaths()
