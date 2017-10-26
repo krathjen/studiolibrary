@@ -522,7 +522,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
             self.database().renamePath(src, dst)
 
         if self.libraryWidget():
-            self.libraryWidget().refreshItems()
+            self.libraryWidget().refreshSelection()
 
         self.renamed.emit(src, dst)
 

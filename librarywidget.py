@@ -843,14 +843,6 @@ class LibraryWidget(QtWidgets.QWidget):
         if self.selectedItems() != selection:
             self._itemSelectionChanged()
 
-    def scrollToSelectedItem(self):
-        """
-        Scroll the item widget to the selected item.
-
-        :rtype: None
-        """
-        self.itemsWidget().scrollToSelectedItem()
-
     def selectItems(self, items):
         """
         Select the given items.
@@ -860,6 +852,24 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         paths = [item.path() for item in items]
         self.selectPaths(paths)
+
+    def scrollToSelectedItem(self):
+        """
+        Scroll the item widget to the selected item.
+
+        :rtype: None
+        """
+        self.itemsWidget().scrollToSelectedItem()
+
+    def refreshSelection(self):
+        """
+        Refresh the current item selection.
+
+        :rtype: None
+        """
+        items = self.selectedItems()
+        self.itemsWidget().clearSelection()
+        self.selectItems(items)
 
     def selectedItems(self):
         """
