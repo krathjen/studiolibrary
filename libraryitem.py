@@ -521,6 +521,9 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if self.database():
             self.database().renamePath(src, dst)
 
+        if self.libraryWidget():
+            self.libraryWidget().refreshItems()
+
         self.renamed.emit(src, dst)
 
     def showRenameDialog(self, parent=None):
