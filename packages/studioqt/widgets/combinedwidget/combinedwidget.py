@@ -655,41 +655,35 @@ class CombinedWidget(QtWidgets.QWidget):
     # Support for saving the current item order.
     # ------------------------------------------------------------------------
 
-    def itemData(self, columnLabels, indexByColumn="Path"):
+    def itemData(self, columnLabels):
         """
-        Return the column data for all the current items. 
+        Return all column data for the given column labels.
 
         :type columnLabels: list[str]
-        :type indexByColumn: str
-
         :rtype: dict
                 
         """
-        column1 = self.treeWidget().columnFromLabel(indexByColumn)
-
-        itemData = {}
+        data = {}
 
         for item in self.items():
-            key = item.data(column1, QtCore.Qt.EditRole)
+            key = item.id()
 
             for columnLabel in columnLabels:
                 column = self.treeWidget().columnFromLabel(columnLabel)
                 value = item.data(column, QtCore.Qt.EditRole)
 
-                itemData.setdefault(key, {})
-                itemData[key].setdefault(columnLabel, value)
+                data.setdefault(key, {})
+                data[key].setdefault(columnLabel, value)
 
-        return itemData
+        return data
 
-    def setItemData(self, data, indexByColumn="Path"):
+    def setItemData(self, data):
         """
         Set the item data for all the current items.
 
         :type data: dict
-        :type indexByColumn: str
+        :rtype: None
         """
-        # column1 = self.treeWidget().columnFromLabel(indexByColumn)
-
         for item in self.items():
             key = item.id()
 
@@ -702,6 +696,8 @@ class CombinedWidget(QtWidgets.QWidget):
                         item.setText(column, value)
 
                 item.updateData()
+
+        self.refreshSortBy()
 
     def updateColumns(self):
         """

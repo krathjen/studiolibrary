@@ -1326,8 +1326,6 @@ class LibraryWidget(QtWidgets.QWidget):
             except Exception, msg:
                 logger.exception(msg)
 
-            self.itemsWidget().refreshSortBy()
-
     def saveItemData(self, columns):
         """
         Save the given column data for the current items.
