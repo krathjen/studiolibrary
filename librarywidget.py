@@ -885,6 +885,33 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         return self.itemsWidget().items()
 
+    def addItem(self, item, select=False):
+        """
+        Add the given item to the itemsWidget.
+
+        :type item: studiolibrary.LibraryItem
+        :type select: bool
+
+        :rtype: None
+        """
+        self.addItems([item], select=select)
+
+    def addItems(self, items, select=False):
+        """
+        Add the given items to the itemsWidget.
+
+        :type items: list[studiolibrary.LibraryItem]
+        :type select: bool
+        
+        :rtype: None
+        """
+        self.itemsWidget().addItems(items)
+        self.refreshItemData()
+
+        if select:
+            self.selectItems(items)
+            self.scrollToSelectedItem()
+
     def setItems(self, items, sortEnabled=False):
         """
         Set the items for the library widget.
@@ -1418,9 +1445,7 @@ class LibraryWidget(QtWidgets.QWidget):
             self.showExceptionDialog("Move Error", e)
             raise
         finally:
-            self.itemsWidget().addItems(movedItems)
-            self.selectItems(movedItems)
-            self.scrollToSelectedItem()
+            self.addItems(movedItems, select=True)
 
     # -----------------------------------------------------------------------
     # Support for search
