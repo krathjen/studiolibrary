@@ -11,43 +11,57 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 """
-#
 # mirrortable.py
+
 import mutils
 
 # Example 1:
-# Create mirror table from objects
+# Create a MirrorTable instance from the given objects
 mt = mutils.MirrorTable.fromObjects(objects, "_l_", "_r_", MirrorPlane.YZ)
 
 # Example 2:
-# Create mirror table from selected objects
+# Create a MirrorTable instance from the selected objects
 objects = maya.cmds.ls(selection=True)
 mt = mutils.MirrorTable.fromObjects(objects, "_l_", "_r_", MirrorPlane.YZ)
 
 # Example 3:
-# Save to file
-path = "/tmp/test.mt"
+# Save the MirrorTable to the given JSON path
+path = "/tmp/mirrortable.json"
 mt.save(path)
 
 # Example 4:
-# Load from file
-path = "/tmp/test.mt"
+# Create a MirrorTable instance from the given JSON path
+path = "/tmp/mirrortable.json"
 mt = mutils.MirrorTable.fromPath(path)
 
-# load to objects from file
+# Example 5:
+# Mirror all the objects from file
 mt.load()
 
-# load to selected objects
+# Example 6:
+# Mirror only the selected objects
 objects = maya.cmds.ls(selection=True) or []
 mt.load(objects=objects)
 
-# loat to namespaces
+# Example 7:
+# Mirror all objects from file to the given namespaces
 mt.load(namespaces=["character1", "character2"])
 
-# load to specified objects
-mt.load(objects=["Character1:Hand_L", "Character1:Finger_L"])
-mt.leftToRight()
-mt.rightToLeft()
+# Example 8:
+# Mirror only the given objects
+mt.load(objects=["character1:Hand_L", "character1:Finger_L"])
+
+# Example 9:
+# Mirror all objects from left to right
+mt.load(option=mutils.MirrorOption.LeftToRight)
+
+# Example 10:
+# Mirror all objects from right to left
+mt.load(option=mutils.MirrorOption.RightToLeft)
+
+# Example 11:
+# Mirror only the current pose
+mt.load(animation=False)
 """
 
 import re
@@ -79,8 +93,8 @@ class MirrorPlane:
 
 class MirrorOption:
     Swap = 0
-    RightToLeft = 1
-    LeftToRight = 2
+    LeftToRight = 1
+    RightToLeft = 2
 
 
 class MirrorTable(mutils.SelectionSet):
@@ -774,10 +788,10 @@ class MirrorTable(mutils.SelectionSet):
         if option == MirrorOption.Swap:
             return True
 
-        elif option == MirrorOption.RightToLeft and self.isLeftSide(obj):
+        elif option == MirrorOption.LeftToRight and self.isLeftSide(obj):
             return False
 
-        elif option == MirrorOption.LeftToRight and self.isRightSide(obj):
+        elif option == MirrorOption.RightToLeft and self.isRightSide(obj):
             return False
 
         else:
