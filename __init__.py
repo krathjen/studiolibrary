@@ -15,8 +15,7 @@ import os
 import sys
 
 
-
-__version__ = "2.2.1" + " - DEVELOP "
+__version__ = "2.2.2"
 
 _resource = None
 
