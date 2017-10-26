@@ -133,7 +133,6 @@ class StatusWidget(QtWidgets.QFrame):
         :rtype: None 
         """
         msecs = msecs or self.DEFAULT_DISPLAY_TIME
-        message = unicode(message).decode("unicode_escape")
 
         self._blocking = blocking
 
@@ -144,7 +143,7 @@ class StatusWidget(QtWidgets.QFrame):
             self._button.hide()
 
         if message:
-            self._label.setText(message)
+            self._label.setText(unicode(message))
             self._timer.stop()
             self._timer.start(msecs)
         else:
