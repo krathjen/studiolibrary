@@ -218,7 +218,7 @@ class Database(QtCore.QObject):
         :type data: dict
         :rtype: dict
         """
-        studiolibrary.updateJson(self.path(), data)
+        return studiolibrary.updateJson(self.path(), data)
 
     def replaceJson(self, old, new, count=-1):
         """

@@ -34,6 +34,7 @@ __all__ = [
     "isWindows",
     "read",
     "write",
+    "update",
     "saveJson",
     "readJson",
     "updateJson",
@@ -599,6 +600,22 @@ def write(path, data):
         raise
 
 
+def update(data, other):
+    """
+    Update the value of a nested dictionary of varying depth.
+    
+    :type data: dict
+    :type other: dict
+    :rtype: dict 
+    """
+    for key, value in other.iteritems():
+        if isinstance(value, collections.Mapping):
+            data[key] = update(data.get(key, {}), value)
+        else:
+            data[key] = value
+    return data
+
+
 def updateJson(path, data):
     """
     Update a json file with the given data.
@@ -608,7 +625,7 @@ def updateJson(path, data):
     :rtype: None
     """
     data_ = readJson(path)
-    data_.update(data)
+    data_ = update(data_, data)
     saveJson(path, data_)
 
 
@@ -1106,6 +1123,55 @@ def showInFolder(path):
     cmd(*args)
 
 
+def testUpdate():
+    """
+    Test the update dictionary command
+    :rtype: None 
+    """
+    testData1 = {
+        "../../images/beach.jpg": {
+            "Custom Order": "00001"
+        },
+        "../../images/sky.jpg": {
+            "Custom Order": "00019",
+            "Other": {"Paths": "../../images/bird2.mb"}
+        }
+    }
+
+    testData2 = {
+        "../../images/sky.jpg": {
+            "Labels": ["head", "face"],
+        },
+    }
+
+    expected = {
+        "../../images/beach.jpg": {
+            "Custom Order": "00001"
+        },
+        "../../images/sky.jpg": {
+            "Custom Order": "00019",
+            "Labels": ["head", "face"],
+            "Other": {"Paths": "../../images/bird2.mb"}
+        }
+    }
+
+    # Test updating/inserting a value in a dictionary.
+    result = update(testData1, testData2)
+
+    msg = "Data does not match {} {}".format(expected, result)
+    assert expected == result, msg
+
+    # Test the update command with an empty dictionary.
+    testData2 = {
+        "../../images/sky.jpg": {},
+    }
+
+    result = update(testData1, testData2)
+
+    msg = "Data does not match {} {}".format(expected, result)
+    assert expected == result, msg
+
+
 def testSplitPath():
     """
     Test he splitPath command.
@@ -1180,6 +1246,7 @@ def testRelativePaths():
 
 
 if __name__ == "__main__":
+    testUpdate()
     testSplitPath()
     testFormatPath()
     testRelativePaths()
