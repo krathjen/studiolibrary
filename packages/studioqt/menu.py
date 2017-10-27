@@ -40,25 +40,43 @@ class Menu(QtWidgets.QMenu):
             if action and action.text().lower() == text.lower():
                 return action
 
-    def insertMenuBefore(self, text, menu):
+    def insertAction(self, before, *args):
         """
-        Add the given menu before the action with the given text.
+        Add support for finding the before action by the given string.
+
+        :type before: str  or QtWidget.QAction
+        :type args: list
+
+        :rtype: QtWidgets.QAction
+        """
+        if isinstance(before, basestring):
+            before = self.findAction(before)
+
+        return QtWidgets.QMenu.insertAction(self, before, *args)
+
+    def insertMenu(self, before, menu):
+        """
+        Add support for finding the before action by the given string.
         
-        :type text: str
+        :type before: str  or QtWidget.QAction
         :type menu: QtWidgets.QMenu
         
         :rtype: QtWidgets.QAction
         """
-        action = self.findAction(text)
-        self.insertMenu(action, menu)
+        if isinstance(before, basestring):
+            before = self.findAction(before)
 
-    def insertSeparatorBefore(self, text):
+        QtWidgets.QMenu.insertMenu(self, before, menu)
+
+    def insertSeparator(self, before):
         """
-        Add separator before the action with the given text.
+        Add support for finding the before action by the given string.
         
-        :type text: str
+        :type before: str or QtWidget.QAction
 
         :rtype: QtWidgets.QAction
         """
-        action = self.findAction(text)
-        return self.insertSeparator(action)
+        if isinstance(before, basestring):
+            before = self.findAction(before)
+
+        return QtWidgets.QMenu.insertSeparator(self, before)
