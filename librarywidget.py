@@ -344,11 +344,15 @@ class LibraryWidget(QtWidgets.QWidget):
 
         if mimeData.hasUrls():
             urls = mimeData.urls()
-            paths = self.selectedFolderPaths()
+            path = self.selectedFolderPath()
             items = self.createItemsFromUrls(urls)
 
             if self.isMoveItemsEnabled():
-                self.showMoveItemsDialog(items, dst=paths[0])
+                self.showMoveItemsDialog(items, dst=path)
+
+            elif not self.isCustomOrderEnabled():
+                msg = 'Please sort by "Custom Order" to reorder items!'
+                self.showInfoMessage(msg)
 
     def _folderSelectionChanged(self):
         """
@@ -1385,7 +1389,7 @@ class LibraryWidget(QtWidgets.QWidget):
         if len(paths) != 1:
             return False
 
-        if self.selectedItems() and self.isCustomOrderEnabled():
+        if self.selectedItems():
             return False
 
         return True
