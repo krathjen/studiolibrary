@@ -27,9 +27,6 @@ RESOURCE_PATH = os.path.join(DIRNAME, "resource")
 HELP_URL = "http://www.studiolibrary.com"
 
 
-LIBRARY_WIDGET_CLASS = None
-
-
 def setup(path):
     """
     Setup the packages that have been decoupled from the Studio Library.
