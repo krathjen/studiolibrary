@@ -672,7 +672,7 @@ def replaceJson(path, old, new, count=-1):
     old = old.encode("unicode_escape")
     new = new.encode("unicode_escape")
 
-    data = read(path)
+    data = read(path) or "{}"
     data = data.replace(old, new, count)
     data = json.loads(data)
 
