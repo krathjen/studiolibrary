@@ -327,6 +327,9 @@ class Database(QtCore.QObject):
         :type dst: str
         :rtype: None
         """
+        # Replace all values that match exactly the given src path
+        self.renamePath(src, dst)
+
         dst = '"' + self.normPath(dst)
         src = '"' + self.normPath(src)
 
