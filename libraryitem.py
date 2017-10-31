@@ -44,7 +44,6 @@ class LibraryItemSignals(QtCore.QObject):
     saved = QtCore.Signal(object)
     saving = QtCore.Signal(object)
     loaded = QtCore.Signal(object)
-    renamed = QtCore.Signal(str, str)
 
 
 class LibraryItem(studioqt.CombinedWidgetItem):
@@ -65,7 +64,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     saved = _libraryItemSignals.saved
     saving = _libraryItemSignals.saving
     loaded = _libraryItemSignals.loaded
-    renamed = _libraryItemSignals.renamed
 
     @classmethod
     def createAction(cls, menu, libraryWidget):
@@ -395,6 +393,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if not path:
             raise ItemError('Cannot set an empty item path.')
 
+        self.resetImageSequence()
+
         path = studiolibrary.normPath(path)
 
         dirname, basename, extension = studiolibrary.splitPath(path)
@@ -462,6 +462,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :rtype: None
         """
         path = self.path()
+
         studiolibrary.removePath(path)
 
         if self.database():
@@ -478,8 +479,12 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :rtype: None
         """
         src = self.path()
+
         path = studiolibrary.copyPath(src, dst)
         self.setPath(path)
+
+        if self.database():
+            self.database().insert(dst, {})
 
     def move(self, dst):
         """
@@ -496,8 +501,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if self.database():
             self.database().renamePath(src, dst)
 
-        self.renamed.emit(src, dst)
-
     def rename(self, dst, extension=None, force=True):
         """
         Rename the current path to given destination path.
@@ -507,8 +510,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type extension: bool or None
         :rtype: None
         """
-        self.resetImageSequence()
-
         src = self.path()
 
         extension = extension or self.extension()
@@ -523,8 +524,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         if self.libraryWidget():
             self.libraryWidget().refreshSelection()
-
-        self.renamed.emit(src, dst)
 
     def showRenameDialog(self, parent=None):
         """
