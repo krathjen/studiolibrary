@@ -606,7 +606,10 @@ class LibraryWidget(QtWidgets.QWidget):
         if not os.path.exists(path):
             os.makedirs(path)
 
-        self.refreshFolders()
+        db = self.database()
+        db.insert(path, {})
+
+        self.refresh()
         self.selectFolderPath(path)
 
         return path
