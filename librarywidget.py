@@ -598,7 +598,7 @@ class LibraryWidget(QtWidgets.QWidget):
         Create a new folder on disc at the given path.
         
         :type args: list[str]
-        :rtype: None 
+        :rtype: str 
         """
         path = os.path.join(*args)
         path = studiolibrary.normPath(path)
@@ -608,6 +608,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.refreshFolders()
         self.selectFolderPath(path)
+
+        return path
 
     def renameFolder(self, src, dst):
         """
@@ -623,7 +625,7 @@ class LibraryWidget(QtWidgets.QWidget):
             db = self.database()
             db.renameFolder(src, dst)
 
-            self.refreshFolders()
+            self.refresh()
             self.selectFolderPath(dst)
 
         except Exception, e:
