@@ -93,9 +93,13 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         self.setColumnSettings(columnSettings)
 
         sortOrder = settings.get("sortOrder", 0)
-        sortColumn = settings.get("sortColumn", 0)
+        sortColumn = settings.get("sortColumn")
         groupOrder = settings.get("groupOrder", 0)
-        groupColumn = settings.get("groupColumn", None)
+        groupColumn = settings.get("groupColumn")
+
+        self.addHeaderLabel(sortColumn)
+        self.addHeaderLabel(groupColumn)
+
         self.sortByColumn(sortColumn, sortOrder, groupColumn, groupOrder)
 
         return settings
@@ -305,7 +309,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         :type column: int
         :rtype: str
         """
-        return self.headerItem().text(column)
+        if column is not None:
+            return self.headerItem().text(column)
 
     def setHeaderLabels(self, *args):
         """
@@ -317,8 +322,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         columnSettings = self.columnSettings()
 
         QtWidgets.QTreeWidget.setHeaderLabels(self, *args)
-        self.updateHeaderLabels()
 
+        self.updateHeaderLabels()
         self.updateColumnHidden()
         self.updateData()
 
@@ -332,8 +337,9 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         :rtype: None
         """
         labels = self.headerLabels()
-        labels.append(label)
-        self.setHeaderLabels(labels)
+        if label not in labels:
+            labels.append(label)
+            self.setHeaderLabels(labels)
 
     def headerLabels(self):
         """
@@ -685,6 +691,31 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
     # Support for sorting items.
     # ----------------------------------------------------------------------
 
+    def sortBySettings(self):
+        """
+        Return the current "sortBy" settings as a dictionary. 
+        
+        
+        :rtype: dict 
+        """
+        settings = {
+            "sortOrder": self.sortOrder(),
+            "sortColumn": self.labelFromColumn(self.sortColumn()),
+            "groupOrder": self.groupOrder(),
+            "groupColumn": self.labelFromColumn(self.groupColumn()),
+        }
+
+        return settings
+
+    def setSortBySettings(self, settings):
+        """
+        Set the "sortBy" by settings using the given dictionary. 
+
+        :type settings: dict
+        :rtype: None 
+        """
+        self.sortByColumn(**settings)
+
     def sortColumnLabel(self):
         """
         Return the current sort column label.
@@ -700,9 +731,8 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
 
         :rtype: None
         """
-        sortOrder = self.sortOrder()
-        sortColumn = self.sortColumn()
-        self.sortByColumn(sortColumn, sortOrder)
+        settings = self.sortBySettings()
+        self.sortByColumn(**settings)
 
     def sortOrderToInt(self, sortOrder):
         """
@@ -737,32 +767,32 @@ class CombinedTreeWidget(CombinedItemViewMixin, QtWidgets.QTreeWidget):
         sortOrder = self.header().sortIndicatorOrder()
         return self.sortOrderToInt(sortOrder)
 
-    def sortByColumn(self, column, sortOrder, groupColumn=False, groupOrder=False):
+    def sortByColumn(self, sortColumn, sortOrder, groupColumn=False, groupOrder=False):
         """
         Sort by the given column.
 
-        :type column: int
+        :type sortColumn: int
         :type sortOrder: int
         :type groupColumn: bool
         :type groupOrder: bool
 
         :rtype: None
         """
-        if isinstance(column, basestring):
-            column = self.columnFromLabel(column)
+        if isinstance(sortColumn, basestring):
+            sortColumn = self.columnFromLabel(sortColumn)
 
         if isinstance(groupColumn, basestring):
             groupColumn = self.columnFromLabel(groupColumn)
 
-        self._sortColumn = column
+        self._sortColumn = sortColumn
         self.setSortingEnabled(True)
 
-        sortColumnLabel = self.labelFromColumn(column)
+        sortColumnLabel = self.labelFromColumn(sortColumn)
         if sortColumnLabel == "Custom Order":
             sortOrder = QtCore.Qt.AscendingOrder
 
         sortOrder = self.intToSortOrder(sortOrder)
-        QtWidgets.QTreeWidget.sortByColumn(self, column, sortOrder)
+        QtWidgets.QTreeWidget.sortByColumn(self, sortColumn, sortOrder)
 
         if groupOrder is False:
             groupOrder = self.groupOrder()
