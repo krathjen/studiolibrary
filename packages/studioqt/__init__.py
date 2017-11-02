@@ -21,7 +21,6 @@ from studioqt.color import Color
 from studioqt.pixmap import Pixmap
 from studioqt.resource import Resource, RESOURCE_DIRNAME
 from studioqt.stylesheet import StyleSheet
-from studioqt.contextmenu import ContextMenu
 
 from studioqt.decorators import showWaitCursor
 from studioqt.decorators import showArrowCursor
