@@ -109,14 +109,15 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
     def __init__(
         self,
-        path=None,
+        path="",
         database=None,
         libraryWidget=None,
     ):
         """
         The LibraryItem class provides an item for use with the LibraryWidget.
 
-        :type path: str or None
+        :type path: str
+        :type database: studiolibrary.Database or None 
         :type libraryWidget: studiolibrary.LibraryWidget or None
         """
         studioqt.CombinedWidgetItem.__init__(self)
@@ -443,7 +444,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         studiolibrary.movePaths(contents, path)
 
         if self.database():
-            self.database().insert(path, {})
+            self.database().addPath(path)
 
         if self.libraryWidget():
             self.libraryWidget().addItem(self, select=True)
@@ -466,7 +467,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         studiolibrary.removePath(path)
 
         if self.database():
-            self.database().delete(path)
+            self.database().removePath(path)
 
         if self.libraryWidget():
             self.libraryWidget().refresh()
@@ -484,7 +485,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self.setPath(path)
 
         if self.database():
-            self.database().insert(dst, {})
+            self.database().addPath(path)
 
     def move(self, dst):
         """

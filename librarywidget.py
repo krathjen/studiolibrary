@@ -607,7 +607,7 @@ class LibraryWidget(QtWidgets.QWidget):
             os.makedirs(path)
 
         db = self.database()
-        db.insert(path, {})
+        db.addPath(path)
 
         self.refresh()
         self.selectFolderPath(path)
@@ -626,7 +626,7 @@ class LibraryWidget(QtWidgets.QWidget):
             dst = studiolibrary.renamePath(src, dst)
 
             db = self.database()
-            db.renameFolder(src, dst)
+            db.renamePath(src, dst)
 
             self.refresh()
             self.selectFolderPath(dst)
@@ -1327,6 +1327,20 @@ class LibraryWidget(QtWidgets.QWidget):
         self.loadItemData()
         self.refreshSearch()
 
+    def readItemData(self):
+        """
+        Read and return all the item data from the database.
+
+        :rtype: dict
+        """
+        data = {}
+        db = self.database()
+
+        if db:
+            data = db.read()
+
+        return data
+
     def loadItemData(self):
         """
         Load the item data to the current items.
@@ -1335,15 +1349,12 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         logger.debug("Loading item data")
 
-        db = self.database()
+        data = self.readItemData()
 
-        if db:
-            data = db.readJson()
-
-            try:
-                self.itemsWidget().setItemData(data)
-            except Exception, msg:
-                logger.exception(msg)
+        try:
+            self.itemsWidget().setItemData(data)
+        except Exception, msg:
+            logger.exception(msg)
 
     def saveItemData(self, columns):
         """
