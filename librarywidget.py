@@ -58,7 +58,7 @@ class LibraryWidget(QtWidgets.QWidget):
     RECURSIVE_SEARCH_DEPTH = 3
     RECURSIVE_SEARCH_ENABLED = False
 
-    IGNORE_FOLDERS = ["/.", ".studiolibrary", ".mayaswatches"]
+    IGNORE_PATHS = studiolibrary.IGNORE_PATHS
 
     # Still in development
     DPI_ENABLED = False
@@ -712,7 +712,7 @@ class LibraryWidget(QtWidgets.QWidget):
         if studiolibrary.isValidItemPath(path):
             return False
 
-        for ignore in self.IGNORE_FOLDERS:
+        for ignore in self.IGNORE_PATHS:
             if ignore.lower() in path.lower():
                 return False
 
