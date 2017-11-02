@@ -2260,6 +2260,16 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return False
 
+    def moveItemsToTrash(self, items):
+        """
+        Move the given items to trash path.
+
+        :items items: list[studiolibrary.LibraryItem]
+        :rtype: None
+        """
+        self.createTrashFolder()
+        self.moveItems(items, dst=self.trashPath())
+
     def moveFolderToTrash(self, folder):
         """
         Move the given folder item to the trash path.
@@ -2268,32 +2278,12 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.foldersWidget().clearSelection()
-        trashPath = self.trashPath()
-        studiolibrary.movePath(folder.path(), trashPath)
-        self.refresh()
-
-    def moveItemsToTrash(self, items):
-        """
-        Move the given items to trash path.
-
-        :items items: list[studiolibrary.LibraryItem]
-        :rtype: None
-        """
-        trashPath = self.trashPath()
-
         self.createTrashFolder()
 
-        try:
-            for item in items:
-                item.move(trashPath)
+        src = folder.path()
+        dst = os.path.join(self.trashPath(), os.path.basename(src))
 
-        except Exception, e:
-            logger.exception(e.message)
-            self.showErrorMessage(e.message)
-            raise
-
-        finally:
-            self.refresh()
+        self.renameFolder(src, dst=dst)
 
     def showTrashItemsDialog(self, items, title, text):
         """
