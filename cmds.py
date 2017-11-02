@@ -71,6 +71,7 @@ __all__ = [
     "isValidItemPath",
     "findItems",
     "findItemsInFolders",
+    "IGNORE_PATHS",
     "ANALYTICS_ID",
     "ANALYTICS_ENABLED",
     "SHOW_IN_FOLDER_CMD",
@@ -83,7 +84,7 @@ logger = logging.getLogger(__name__)
 _itemClasses = collections.OrderedDict()
 
 
-IGNORE_PATHS = [".studiolibrary", ".studioLibrary"]
+IGNORE_PATHS = ["/."]  # Ignore all paths the start with a "."
 ANALYTICS_ID = "UA-50172384-1"
 ANALYTICS_ENABLED = True
 SHOW_IN_FOLDER_CMD = None
