@@ -1266,7 +1266,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :type items: list[studiolibrary.LibraryItem]
         :rtype: studiolibrary.ContextMenu
         """
-        menu = studioqt.ContextMenu(self)
+        menu = studioqt.Menu(self)
 
         item = None
 
@@ -1278,7 +1278,7 @@ class LibraryWidget(QtWidgets.QWidget):
             menu.addMenu(self.createNewMenu())
 
             if item:
-                editMenu = studioqt.ContextMenu(menu)
+                editMenu = studioqt.Menu(menu)
                 editMenu.setTitle("Edit")
                 menu.addMenu(editMenu)
 
