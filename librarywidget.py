@@ -961,7 +961,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        paths = self.foldersWidget().selectedPaths()
+        paths = self.selectedFolderPaths()
 
         self.clearItems()
 
