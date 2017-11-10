@@ -2626,12 +2626,12 @@ class LibraryWidget(QtWidgets.QWidget):
                 self.setLocked(False)
 
         else:
-            folders = self.selectedFolders()
+            folders = self.selectedFolderPaths()
 
             # Lock the selected folders that match the reLocked regx
             if not reLocked.match(""):
                 for folder in folders:
-                    if reLocked.search(folder.path()):
+                    if reLocked.search(folder):
                         self.setLocked(True)
                         return
 
@@ -2640,7 +2640,7 @@ class LibraryWidget(QtWidgets.QWidget):
             # Unlock the selected folders that match the reUnlocked regx
             if not reUnlocked.match(""):
                 for folder in folders:
-                    if reUnlocked.search(folder.path()):
+                    if reUnlocked.search(folder):
                         self.setLocked(False)
                         return
 
