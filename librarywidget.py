@@ -794,7 +794,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
                 action = QtWidgets.QAction("Move to Trash", menu)
                 action.setEnabled(not self.isTrashSelected())
-                action.triggered.connect(self.showTrashSelectedFoldersDialog)
+                action.triggered.connect(self.showMoveFoldersToTrashDialog)
                 menu.addAction(action)
 
         return menu
@@ -1321,7 +1321,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
                     action = QtWidgets.QAction("Move to Trash", editMenu)
                     action.setEnabled(not self.isTrashSelected())
-                    action.triggered.connect(self.showTrashSelectedItemsDialog)
+                    action.triggered.connect(self.showMoveItemsToTrashDialog)
                     editMenu.addAction(action)
 
         menu.addSeparator()
@@ -1515,7 +1515,8 @@ class LibraryWidget(QtWidgets.QWidget):
             self.showExceptionDialog("Move Error", e)
             raise
         finally:
-            self.addItems(movedItems, select=True)
+            self.refreshItems()
+            self.selectItems(movedItems)
 
     # -----------------------------------------------------------------------
     # Support for search
@@ -2371,48 +2372,27 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.renameFolder(src, dst=dst)
 
-    def showTrashItemsDialog(self, items, title, text):
+    def showMoveItemsToTrashDialog(self):
         """
-        Show the "move to trash" dialog.
+        Show the "Move to trash" dialog for the selected items.
 
-        :type items: list[studiolibrary.LibraryItem]
-        :type title: str
-        :type text: str
-
-        :rtype: QtWidgets.QMessageBox.Button
+        :rtype: None
         """
-        result = None
+        items = self.selectedItems()
 
         if items:
+            title = "Move to trash?"
+            text = "Are you sure you want to move the selected" \
+                   "item/s to the trash?"
+
             result = self.showQuestionDialog(title, text)
 
             if result == QtWidgets.QMessageBox.Yes:
                 self.moveItemsToTrash(items)
 
-        return result
-
-    def showTrashSelectedItemsDialog(self):
+    def showMoveFoldersToTrashDialog(self):
         """
-        Show the "move to trash" dialog for the selected items.
-
-        :rtype: QtWidgets.QMessageBox.Button
-        """
-        items = self.selectedItems()
-
-        text = "Are you sure you want to move " \
-               "the selected item/s to the trash?"
-
-        button = self.showTrashItemsDialog(
-            items=items,
-            title="Move to trash?",
-            text=text,
-        )
-
-        return button
-
-    def showTrashSelectedFoldersDialog(self):
-        """
-        Show the move to trash dialog for the selected items.
+        Show the "Move to trash" dialog for the selected folders.
         
         :rtype: None
         """
