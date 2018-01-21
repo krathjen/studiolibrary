@@ -147,7 +147,7 @@ def itemClasses():
 
 def itemExtensions():
     """
-    Register the given item class to the given extension.
+    Return all the registered item extensions.
 
     :rtype: list[str]
     """
@@ -161,7 +161,7 @@ def itemExtensions():
 
 def clearItemClasses():
     """
-    Remove all registered item class.
+    Remove all registered item classes.
 
     :rtype: None
     """
@@ -238,7 +238,7 @@ def pathsFromUrls(urls):
 
 def isValidItemPath(path):
     """
-    Return True if the given path is supported by a registered items.
+    Return True if the given path is supported by a registered item.
 
     :type path: str
     :rtype: bool 
@@ -248,7 +248,7 @@ def isValidItemPath(path):
 
 def itemClassFromPath(path):
     """
-    Return the registered LibraryItemClass that supports the given path.
+    Return the registered LibraryItem class that supports the given path.
 
     :type path: str
     :rtype: studiolibrary.LibraryItem.__class__ or None
@@ -373,7 +373,7 @@ def localPath(*args):
 
 def formatPath(formatString, path="", **kwargs):
     """
-    Resolve the given destination path.
+    Resolve the given string with the given path and kwargs.
 
     Example:
         print formatPath("{dirname}/meta.json", path="C:/hello/world.json")
