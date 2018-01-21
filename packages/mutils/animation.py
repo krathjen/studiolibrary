@@ -481,7 +481,7 @@ class Animation(mutils.Pose):
         Clean up all imported nodes, as well as the namespace.
         Should be called in a finally block.
         """
-        nodes = maya.cmds.ls(Animation.IMPORT_NAMESPACE + ":*") or []
+        nodes = maya.cmds.ls(Animation.IMPORT_NAMESPACE + ":*", r=True) or []
         if nodes:
             maya.cmds.delete(nodes)
 
