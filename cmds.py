@@ -41,6 +41,7 @@ __all__ = [
     "replaceJson",
     "relPath",
     "absPath",
+    "realPath",
     "normPath",
     "copyPath",
     "movePath",
@@ -736,42 +737,16 @@ def absPath(data, start):
     return data
 
 
-def generateUniquePath(path, attempts=1000):
+def realPath(path):
     """
-    Generate a unique path on disc.
+    Return the given path eliminating any symbolic link.
     
-    Example:
-        # If the following files exist then the next unique path will be 3.
-        # C:/tmp/file.text
-        # C:/tmp/file (2).text
-        
-        print generateUniquePath("C:/tmp/file.text")
-        # C:/tmp/file (3).text
-    
-    :type path:  str
-    :type attempts: int
-    :rtype: str
+    :type path: str 
+    :rtype: str 
     """
-    attempt = 1  # We start at one so that the first unique name is actually 2.
-    dirname, name, extension = splitPath(path)
-    path_ = u'{dirname}/{name} ({number}){extension}'
-
-    while os.path.exists(path):
-        attempt += 1
-
-        path = path_.format(
-            name=name,
-            number=attempt,
-            dirname=dirname,
-            extension=extension
-        )
-
-        if attempt >= attempts:
-            msg = u'Cannot generate unique name for path {path}'
-            msg = msg.format(path=path)
-            raise ValueError(msg)
-
-    return path
+    path = os.path.realpath(path)
+    path = os.path.expanduser(path)
+    return normPath(path)
 
 
 def normPath(path):
@@ -848,6 +823,44 @@ def listPaths(path):
     for name in os.listdir(path):
         value = path + "/" + name
         yield value
+
+
+def generateUniquePath(path, attempts=1000):
+    """
+    Generate a unique path on disc.
+
+    Example:
+        # If the following files exist then the next unique path will be 3.
+        # C:/tmp/file.text
+        # C:/tmp/file (2).text
+
+        print generateUniquePath("C:/tmp/file.text")
+        # C:/tmp/file (3).text
+
+    :type path:  str
+    :type attempts: int
+    :rtype: str
+    """
+    attempt = 1  # We start at one so that the first unique name is actually 2.
+    dirname, name, extension = splitPath(path)
+    path_ = u'{dirname}/{name} ({number}){extension}'
+
+    while os.path.exists(path):
+        attempt += 1
+
+        path = path_.format(
+            name=name,
+            number=attempt,
+            dirname=dirname,
+            extension=extension
+        )
+
+        if attempt >= attempts:
+            msg = u'Cannot generate unique name for path {path}'
+            msg = msg.format(path=path)
+            raise ValueError(msg)
+
+    return path
 
 
 def findPaths(

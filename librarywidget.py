@@ -413,8 +413,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :type path: str
         :rtype: None
         """
-        path = os.path.abspath(path)
-        path = studiolibrary.normPath(path)
+        path = studiolibrary.realPath(path)
 
         if path == self.path():
             logger.debug("The root path is already set.")
@@ -494,8 +493,7 @@ class LibraryWidget(QtWidgets.QWidget):
         directory = path
 
         if not directory:
-            from os.path import expanduser
-            directory = expanduser("~")
+            directory = os.path.expanduser("~")
 
         dialog = QtWidgets.QFileDialog(None, QtCore.Qt.WindowStaysOnTopHint)
 
