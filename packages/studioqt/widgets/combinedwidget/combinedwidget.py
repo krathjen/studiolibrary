@@ -137,23 +137,6 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         self.itemDoubleClicked.emit(item)
 
-    def resizeEvent(self, event):
-        """
-        Reimplemented to update the toast widget when the widget resizes.
-
-        :type event: QtCore.QEvent
-        :rtype: None
-        """
-        self.udpateToastWidget()
-
-    def udpateToastWidget(self):
-        """
-        Update the toast widget position.
-
-        :rtype: None
-        """
-        self._toastWidget.alignTo(self)
-
     def setToastEnabled(self, enabled):
         """
         :type enabled: bool
@@ -167,7 +150,7 @@ class CombinedWidget(QtWidgets.QWidget):
         """
         return self._toastEnabled
 
-    def showToastMessage(self, text, duration=None):
+    def showToastMessage(self, text, duration=500):
         """
         Show a toast with the given text for the given duration.
 
@@ -176,8 +159,9 @@ class CombinedWidget(QtWidgets.QWidget):
         :rtype: None
         """
         if self.toastEnabled():
-            self._toastWidget.setText(text, duration)
-            self.udpateToastWidget()
+            self._toastWidget.setDuration(duration)
+            self._toastWidget.setText(text)
+            self._toastWidget.show()
 
     def sortOrder(self):
         """
