@@ -198,6 +198,8 @@ def fadeIn(widget, duration=200, onFinished=None):
     if onFinished:
         animation.finished.connect(onFinished)
 
+    widget._fadeIn_ = animation
+
     return animation
 
 
@@ -221,5 +223,7 @@ def fadeOut(widget, duration=200, onFinished=None):
 
     if onFinished:
         animation.finished.connect(onFinished)
+
+    widget._fadeOut_ = animation
 
     return animation
