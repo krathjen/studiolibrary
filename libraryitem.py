@@ -601,13 +601,11 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         text = 'Would you like to move the existing item "{}" to the trash?'
         text = text.format(self.name())
 
-        button = self.libraryWidget().showTrashItemsDialog(
-            [self],
-            title=title,
-            text=text
-        )
+        button = self.libraryWidget().showQuestionDialog(title, text)
 
-        if button == QtWidgets.QMessageBox.Cancel:
+        if button == QtWidgets.QMessageBox.Yes:
+            self.libraryWidget().moveItemsToTrash([studiolibrary.LibraryItem(path)])
+        elif button == QtWidgets.QMessageBox.Cancel:
             raise ItemSaveError("Saving was canceled.")
         elif button != QtWidgets.QMessageBox.Yes:
             raise ItemSaveError("You cannot save over an existing item.")
