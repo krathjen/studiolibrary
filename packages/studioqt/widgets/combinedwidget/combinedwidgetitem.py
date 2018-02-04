@@ -670,6 +670,14 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         pass
 
+    def dropEvent(self, event):
+        """
+        Reimplement in a subclass to receive drop events for the item.
+
+        :type event: QtWidgets.QDropEvent
+        :rtype: None
+        """
+
     def mouseLeaveEvent(self, event):
         """
         Reimplement in a subclass to receive mouse leave events for the item.

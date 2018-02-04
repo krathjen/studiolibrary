@@ -291,10 +291,9 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: list[str]
         """
-        paths = list(studiolibrary.findPaths(
+        paths = list(studiolibrary.walkup(
                 self.path(),
                 match=lambda path: path.endswith(".mirror"),
-                direction=studiolibrary.Direction.Up,
                 depth=10,
             )
         )
