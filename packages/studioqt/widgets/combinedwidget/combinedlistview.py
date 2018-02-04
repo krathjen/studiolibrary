@@ -86,8 +86,8 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         :rtype: None
         """
         item = self.itemFromIndex(index)
-        item.doubleClicked()
         self.setItemsSelected([item], True)
+        item.doubleClicked()
         self.itemDoubleClicked.emit(item)
 
     def treeWidget(self):
@@ -499,6 +499,9 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
             else:
                 msg = "You can only re-order items when sorting by custom order."
                 logger.info(msg)
+
+        if item:
+            item.dropEvent(event)
 
         self.itemDropped.emit(event)
 

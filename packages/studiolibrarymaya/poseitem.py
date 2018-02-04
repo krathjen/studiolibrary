@@ -448,6 +448,7 @@ iconPath = studiolibrarymaya.resource().get("icons", "pose.png")
 
 PoseItem.Extensions = [".pose"]
 PoseItem.MenuName = "Pose"
+PoseItem.MenuOrder = 4
 PoseItem.MenuIconPath = iconPath
 PoseItem.TypeIconPath = iconPath
 PoseItem.CreateWidgetClass = PoseCreateWidget

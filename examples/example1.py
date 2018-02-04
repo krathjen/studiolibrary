@@ -19,7 +19,7 @@ class ImageItem(studiolibrary.LibraryItem):
         """ Trigged when the user double clicks or clicks the load button."""
         text = "Loaded: {path}".format(path=self.path())
 
-        print text
+        print(text)
         self.libraryWidget().showInfoMessage(text)
         self.libraryWidget().showInfoDialog("Loaded", text)
 

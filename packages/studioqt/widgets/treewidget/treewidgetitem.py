@@ -51,7 +51,7 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         Return the icon path to be shown when expanded.
         
-        :rtype: path 
+        :rtype: str 
         """
         return self._expandedIconPath or studioqt.resource.get("icons", "folder_open")
 
@@ -59,7 +59,7 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         Return the icon path to be shown when collapsed.
 
-        :rtype: path 
+        :rtype: str 
         """
         return self._collapsedIconPath or studioqt.resource.get("icons", "folder")
 
@@ -106,7 +106,7 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         Set the icon color.
         
-        :type color: QtGui.QColor
+        :type color: QtGui.QColor or str
         :rtype: None 
         """
         if isinstance(color, QtGui.QColor):
@@ -213,7 +213,7 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         Set the foreground color to the given color
         
-        :type color: QtGui.QColor
+        :type color: QtGui.QColor or str
         :rtype: None 
         """
         if isinstance(color, QtGui.QColor):
@@ -247,11 +247,11 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
 
         isSelected = self.isSelected()
         if isSelected:
-            settings["isSelected"] = isSelected
+            settings["selected"] = isSelected
 
         isExpanded = self.isExpanded()
         if isExpanded:
-            settings["isExpanded"] = isExpanded
+            settings["expanded"] = isExpanded
 
         iconPath = self.iconPath()
         if iconPath != self.defaultIconPath():
@@ -300,22 +300,22 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :type settings: dict 
         """
-        text = settings.get("text", None)
+        text = settings.get("text")
         if text:
             self.setText(0, text)
 
-        iconPath = settings.get("iconPath", None)
+        iconPath = settings.get("iconPath")
         if iconPath:
             self.setIconPath(iconPath)
 
-        iconColor = settings.get("iconColor", None)
+        iconColor = settings.get("iconColor")
         if iconColor:
             self.setIconColor(iconColor)
 
-        isSelected = settings.get("isSelected", False)
+        isSelected = settings.get("selected", False)
         self.setSelected(isSelected)
 
-        isExpanded = settings.get("isExpanded", False)
+        isExpanded = settings.get("expanded", False)
         if self.childCount() > 0:
             self.setExpanded(isExpanded)
 
@@ -323,6 +323,6 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         if bold:
             self.setBold(bold)
 
-        textColor = settings.get("textColor", None)
+        textColor = settings.get("textColor")
         if textColor:
             self.setTextColor(textColor)
