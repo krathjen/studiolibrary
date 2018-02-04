@@ -18,7 +18,6 @@ from functools import partial
 from studioqt import QtGui
 from studioqt import QtWidgets
 
-
 import studiolibrary
 import studiolibrarymaya
 
@@ -118,10 +117,9 @@ class SetsMenu(QtWidgets.QMenu):
         """
         path = self.item().path()
 
-        paths = studiolibrary.findPaths(
+        paths = studiolibrary.walkup(
             path,
             match=lambda path: path.endswith(".set"),
-            direction=studiolibrary.Direction.Up,
             depth=10,
         )
 
