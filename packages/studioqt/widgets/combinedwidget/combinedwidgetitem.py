@@ -239,7 +239,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
     def setName(self, text):
         """
         Set the name that is shown under the icon and in the Name column.
-        
+
         :type text: str
         :rtype: None 
         """
@@ -276,9 +276,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type column: int or str
         :rtype: str
         """
-        # if isinstance(column, int):
-        #     column = self.treeWidget().labelFromColumn(column)
-
         if isinstance(column, basestring):
             text = self._sortText.get(column)
             if not text:
@@ -331,7 +328,15 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             text = self._text.get(label, "")
 
             if not text:
-                text = QtWidgets.QTreeWidgetItem.data(self, column, QtCore.Qt.DisplayRole)
+                text = QtWidgets.QTreeWidgetItem.data(
+                    self, column,
+                    QtCore.Qt.DisplayRole
+                )
+
+            if text:
+                text = str(text)
+            else:
+                text = ""
 
         return text
 
@@ -464,7 +469,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             for column in range(self.columnCount()):
                 text = self.data(column, QtCore.Qt.DisplayRole)
                 if text:
-                    searchText.append(text)
+                    searchText.append(str(text))
             self._searchText = " ".join(searchText)
 
         return self._searchText
@@ -510,7 +515,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
             w = self.stretchToWidget().width()
             h = size.height()
-            return QtCore.QSize(w-20, h)
+            return QtCore.QSize(w - 20, h)
 
         if self._size:
             return self._size
@@ -818,7 +823,12 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type index: QtCore.QModelIndex
         :rtype: None
         """
-        QtWidgets.QTreeWidget.drawRow(self.treeWidget(), painter, option, index)
+        QtWidgets.QTreeWidget.drawRow(
+            self.treeWidget(),
+            painter,
+            option,
+            index
+        )
 
     def paint(self, painter, option, index):
         """
@@ -997,7 +1007,10 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type column: int
         :rtype: QtWidgets.QFont
         """
-        font = self._fonts.get(column, QtWidgets.QTreeWidgetItem.font(self, column))
+        default = QtWidgets.QTreeWidgetItem.font(self, column)
+
+        font = self._fonts.get(column, default)
+
         font.setPixelSize(self.fontSize() * self.dpi())
         return font
 
@@ -1036,8 +1049,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def _paintText(self, painter, option, column):
 
-        text = self.displayText(column)
-
         if self.combinedWidget().isIconView():
             text = self.name()
         else:
@@ -1074,7 +1085,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         # # Check if the current text fits within the rect.
         if textWidth > visualRect.width() - padding:
-            text = metrics.elidedText(text, QtCore.Qt.ElideRight, visualRect.width())
+            visualWidth = visualRect.width()
+            text = metrics.elidedText(text, QtCore.Qt.ElideRight, visualWidth)
             align = QtCore.Qt.AlignLeft
 
         if self.combinedWidget().isIconView():
