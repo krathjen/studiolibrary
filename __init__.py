@@ -27,6 +27,29 @@ RESOURCE_PATH = os.path.join(DIRNAME, "resource")
 HELP_URL = "http://www.studiolibrary.com"
 
 
+def version():
+    """
+    Return the current version of the Studio Library
+
+    :rtype: str
+    """
+    return __version__
+
+
+def resource():
+    """
+    Return a resource object for getting content from the resource folder.
+
+    :rtype: studioqt.Resource
+    """
+    global _resource
+
+    if not _resource:
+        _resource = studioqt.Resource(RESOURCE_PATH)
+
+    return _resource
+
+
 def setup(path):
     """
     Setup the packages that have been decoupled from the Studio Library.
@@ -49,32 +72,9 @@ from studiolibrary.cmds import *
 from studiolibrary.database import Database
 from studiolibrary.libraryitem import LibraryItem
 from studiolibrary.librarywidget import LibraryWidget
-
 from studiolibrary.main import main
 
+import studiolibrary.folderitem
 
 # Wrapping the following functions for convenience
 app = studioqt.app
-
-
-def version():
-    """
-    Return the current version of the Studio Library
-
-    :rtype: str
-    """
-    return __version__
-
-
-def resource():
-    """
-    Return a resource object for getting content from the resource folder.
-
-    :rtype: studioqt.Resource
-    """
-    global _resource
-
-    if not _resource:
-        _resource = studioqt.Resource(RESOURCE_PATH)
-
-    return _resource

@@ -48,16 +48,21 @@ class LibraryItemSignals(QtCore.QObject):
 
 class LibraryItem(studioqt.CombinedWidgetItem):
 
-    ENABLE_DELETE = False
+    EnableDelete = False
+    EnableNestedItems = False
 
     Extensions = []
 
-    MenuName = "Library Item"
+    MenuName = ""
+    MenuOrder = 10
     MenuIconPath = ""
+    ThumbnailPath = studioqt.resource.get("icons", "thumbnail.png")
 
+    RegisterOrder = 10
     TypeIconPath = ""
     CreateWidgetClass = None
     PreviewWidgetClass = None
+    DisplayInFolderView = False
 
     _libraryItemSignals = LibraryItemSignals()
 
@@ -74,7 +79,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type libraryWidget: studiolibrary.LibraryWidget
         :rtype: QtCore.QAction
         """
-        if cls.CreateWidgetClass:
+        if cls.MenuName:
 
             icon = QtGui.QIcon(cls.MenuIconPath)
             callback = partial(cls.showCreateWidget, libraryWidget)
@@ -97,8 +102,20 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     @classmethod
     def isValidPath(cls, path):
         """
-        Return True if the given path location is supported by the item.
+        This method has been deprecated. 
         
+        Please use LibraryItem.match(cls, path)
+        
+        :type path: str
+        :rtype: bool 
+        """
+        return cls.match(path)
+
+    @classmethod
+    def match(cls, path):
+        """
+        Return True if the given path location is supported by the item.
+
         :type path: str
         :rtype: bool 
         """
@@ -204,7 +221,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         :rtype: str
         """
-        return studioqt.resource.get("icons", "thumbnail.png")
+        return self.ThumbnailPath
 
     def showPreviewWidget(self, libraryWidget):
         """
@@ -239,7 +256,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type items: list[LibraryItem]
         :rtype: None
         """
-        if self.ENABLE_DELETE:
+        if self.EnableDelete:
             action = QtWidgets.QAction("Delete", menu)
             action.triggered.connect(self.showDeleteDialog)
             menu.addAction(action)
@@ -382,7 +399,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         :rtype: str
         """
-        return self.text("Path")
+        return self._path
 
     def setPath(self, path):
         """
@@ -397,6 +414,18 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         self.resetImageSequence()
 
         path = studiolibrary.normPath(path)
+
+        self._path = path
+
+        self.updateData()
+
+    def updateData(self):
+        """
+        Update the data when the item is created or when a new path is set.
+        
+        :rtype: None 
+        """
+        path = self.path()
 
         dirname, basename, extension = studiolibrary.splitPath(path)
 
@@ -544,8 +573,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if button == QtWidgets.QDialogButtonBox.Ok:
             try:
                 self.rename(name)
-            except Exception, e:
-                self.showExceptionDialog("Rename Error", e)
+            except Exception as error:
+                self.showExceptionDialog("Rename Error", error)
                 raise
 
         return button
@@ -564,8 +593,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if dst:
             try:
                 self.move(dst)
-            except Exception, e:
-                self.showExceptionDialog("Move Error", e)
+            except Exception as error:
+                self.showExceptionDialog("Move Error", error)
                 raise
 
     def showDeleteDialog(self):
@@ -582,8 +611,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         if button == QtWidgets.QDialogButtonBox.Yes:
             try:
                 self.delete()
-            except Exception, e:
-                self.showExceptionDialog("Delete Error", e)
+            except Exception as error:
+                self.showExceptionDialog("Delete Error", error)
                 raise
 
     def showAlreadyExistsDialog(self):

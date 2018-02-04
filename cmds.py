@@ -27,7 +27,6 @@ from datetime import datetime
 
 __all__ = [
     "user",
-    "walk",
     "isMac",
     "isMaya",
     "isLinux",
@@ -47,29 +46,25 @@ __all__ = [
     "movePath",
     "movePaths",
     "listPaths",
-    "findPaths",
     "splitPath",
     "localPath",
     "removePath",
     "renamePath",
     "formatPath",
+    "walkup",
     "generateUniquePath",
     "MovePathError",
     "RenamePathError",
     "timeAgo",
     "sendEvent",
     "showInFolder",
-    "Direction",
     "stringToList",
     "listToString",
     "registerItem",
-    "itemClasses",
-    "itemExtensions",
+    "registeredItems",
     "itemFromPath",
     "itemsFromPaths",
     "itemsFromUrls",
-    "itemClassFromPath",
-    "isValidItemPath",
     "findItems",
     "findItemsInFolders",
     "IGNORE_PATHS",
@@ -121,11 +116,6 @@ class RenamePathError(PathError):
     """"""
 
 
-class Direction:
-    Up = "up"
-    Down = "down"
-
-
 def registerItem(cls):
     """
     Register the given item class to the given extension.
@@ -137,30 +127,19 @@ def registerItem(cls):
     _itemClasses[cls.__name__] = cls
 
 
-def itemClasses():
+def registeredItems():
     """
     Return all registered library item classes.
 
     :rtype: list[studiolibrary.LibraryItem]
     """
-    return _itemClasses.values()
+    def key(cls):
+        return cls.RegisterOrder
+
+    return sorted(_itemClasses.values(), key=key)
 
 
-def itemExtensions():
-    """
-    Return all the registered item extensions.
-
-    :rtype: list[str]
-    """
-    extensions = []
-
-    for cls in itemClasses():
-        extensions.extend(cls.Extensions)
-
-    return extensions
-
-
-def clearItemClasses():
+def clearRegisteredItems():
     """
     Remove all registered item classes.
 
@@ -177,11 +156,15 @@ def itemFromPath(path, **kwargs):
     :type path: str
     :rtype: studiolibrary.LibraryItem or None
     """
-    cls = itemClassFromPath(path)
-    if cls:
-        return cls(path, **kwargs)
-    else:
-        return None
+    path = normPath(path)
+
+    for ignore in IGNORE_PATHS:
+        if ignore in path:
+            return None
+
+    for cls in registeredItems():
+        if cls.match(path):
+            return cls(path, **kwargs)
 
 
 def itemsFromPaths(paths, **kwargs):
@@ -237,52 +220,49 @@ def pathsFromUrls(urls):
         yield path
 
 
-def isValidItemPath(path):
+def findItems(path, depth=3, **kwargs):
     """
-    Return True if the given path is supported by a registered item.
+    Find and create items by walking the given path.
 
     :type path: str
-    :rtype: bool 
-    """
-    return itemClassFromPath(path) is not None
-
-
-def itemClassFromPath(path):
-    """
-    Return the registered LibraryItem class that supports the given path.
-
-    :type path: str
-    :rtype: studiolibrary.LibraryItem.__class__ or None
-    """
-    for ignore in IGNORE_PATHS:
-        if ignore in path:
-            return None
-
-    for cls in itemClasses():
-        if cls.isValidPath(path):
-            return cls
-
-    return None
-
-
-def findItems(path, direction=Direction.Down, depth=3, **kwargs):
-    """
-    Find and create new item instances by walking the given path.
-
-    :type path: str
-    :type direction: studiolibrary.Direction or str
     :type depth: int
 
     :rtype: collections.Iterable[studiolibrary.LibraryItem]
     """
-    paths = findPaths(
-        path,
-        match=isValidItemPath,
-        direction=direction,
-        depth=depth
-    )
+    path = normPath(path)
 
-    return itemsFromPaths(paths, **kwargs)
+    maxDepth = depth
+    startDepth = path.count(os.path.sep)
+
+    for root, dirs, files in os.walk(path):
+
+        files.extend(dirs)
+
+        for filename in files:
+            remove = False
+
+            # Normalise the path for consistent matching
+            path = os.path.join(root, filename)
+            item = itemFromPath(path, **kwargs)
+
+            if item:
+                # Yield the item that matches/supports the current path
+                yield item
+
+                # Stop walking the dir if the item doesn't support nested items
+                if not item.EnableNestedItems:
+                    remove = True
+
+            if remove and filename in dirs:
+                dirs.remove(filename)
+
+        if depth == 1:
+            break
+
+        # Stop walking the directory if the maximum depth has been reached
+        currentDepth = root.count(os.path.sep)
+        if (currentDepth - startDepth) >= maxDepth:
+            del dirs[:]
 
 
 def findItemsInFolders(folders, depth=3, **kwargs):
@@ -533,7 +513,7 @@ def read(path):
     path = normPath(path)
 
     if os.path.isfile(path):
-        with open(path, "r") as f:
+        with open(path) as f:
             data = f.read() or data
 
     data = absPath(data, path)
@@ -610,7 +590,7 @@ def update(data, other):
     :type other: dict
     :rtype: dict 
     """
-    for key, value in other.iteritems():
+    for key, value in other.items():
         if isinstance(value, collections.Mapping):
             data[key] = update(data.get(key, {}), value)
         else:
@@ -722,13 +702,13 @@ def absPath(data, start):
     relPath3 = normPath(os.path.dirname(relPath2))
 
     if not relPath1.endswith("/"):
-        relPath1 = relPath1 + "/"
+        relPath1 += "/"
 
     if not relPath2.endswith("/"):
-        relPath2 = relPath2 + "/"
+        relPath2 += "/"
 
     if not relPath3.endswith("/"):
-        relPath3 = relPath3 + "/"
+        relPath3 += "/"
 
     data = data.replace('../../../', relPath3)
     data = data.replace('../../', relPath2)
@@ -756,7 +736,8 @@ def normPath(path):
     :type path: str
     :rtype: str or unicode 
     """
-    return unicode(path.replace("\\", "/"))
+    path = unicode(path.replace("\\", "/"))
+    return path.rstrip("/")
 
 
 def splitPath(path):
@@ -863,49 +844,6 @@ def generateUniquePath(path, attempts=1000):
     return path
 
 
-def findPaths(
-        path,
-        match=None,
-        direction=Direction.Down,
-        depth=3,
-        **kwargs
-):
-    """
-    Return a list of file paths by walking the root path either up or down.
-
-    Example:
-        path = r'P:\production\characters\Malcolm'
-
-        def match(path):
-            return path.endswith(".set")
-
-        for path in findPaths(path, match=match, depth=5):
-            print path
-
-    :type path: str
-    :type match: func or None
-    :type depth: int
-    :type direction: Direction
-    :rtype: collections.Iterable[str]
-    """
-    if os.path.isfile(path):
-        path = os.path.dirname(path)
-
-    if depth <= 1 and direction == Direction.Down:
-        paths = listPaths(path)
-
-    elif direction == Direction.Down:
-        paths = walk(path, match=match, depth=depth, **kwargs)
-
-    elif direction == Direction.Up:
-        paths = walkup(path, match=match, depth=depth)
-
-    else:
-        raise Exception("Direction not supported {0}".format(direction))
-
-    return paths
-
-
 def walkup(path, match=None, depth=3, sep="/"):
     """
     :type path: str
@@ -935,56 +873,6 @@ def walkup(path, match=None, depth=3, sep="/"):
                     path = os.path.join(folder, filename)
                     if match is None or match(path):
                         yield normPath(path)
-
-
-def walk(path, match=None, ignore=None, depth=3, **kwargs):
-    """
-    Return the files by walking down the given directory.
-    
-    :type path: str
-    :type match: func or None
-    :type ignore: func or None
-    :type depth: int
-    :rtype: collections.Iterable[str]
-    """
-    path = path.rstrip(os.path.sep)
-    path = os.path.realpath(path)
-
-    maxDepth = depth
-
-    assert os.path.isdir(path)
-    startDepth = path.count(os.path.sep)
-
-    for root, dirs, files in os.walk(path, **kwargs):
-
-        files.extend(dirs)
-
-        for filename in files:
-            remove = False
-
-            # Normalise the path for consistent matching
-            path = os.path.join(root, filename)
-            path = normPath(path)
-
-            # Stop walking the current dir if the ignore func returns True
-            if ignore and ignore(path):
-                remove = True
-
-            # Yield and stop walking the current dir if a match has been found
-            elif match and match(path):
-                remove = True
-                yield path
-
-            # Yield all paths if no match or ignore has been set
-            else:
-                yield path
-
-            if remove and filename in dirs:
-                dirs.remove(filename)
-
-        currentDepth = root.count(os.path.sep)
-        if (currentDepth - startDepth) >= maxDepth:
-            del dirs[:]
 
 
 def timeAgo(timeStamp):
