@@ -334,7 +334,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
                 )
 
             if text:
-                text = str(text)
+                text = unicode(text)
             else:
                 text = ""
 
@@ -469,7 +469,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             for column in range(self.columnCount()):
                 text = self.data(column, QtCore.Qt.DisplayRole)
                 if text:
-                    searchText.append(str(text))
+                    searchText.append(unicode(text))
             self._searchText = " ".join(searchText)
 
         return self._searchText
