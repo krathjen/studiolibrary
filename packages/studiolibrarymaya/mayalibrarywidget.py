@@ -10,10 +10,15 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import uuid
+import logging
+
 import studiolibrary
 
 import maya.cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+
+
+logger = logging.getLogger(__name__)
 
 
 class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
@@ -65,7 +70,13 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
         """
         name = self.workspaceControlName()
         if name:
-            return maya.cmds.workspaceControl(name, q=True, floating=True)
+            try:
+                return maya.cmds.workspaceControl(name, q=True, floating=True)
+            except AttributeError:
+                msg = 'The "maya.cmds.workspaceControl" ' \
+                      'command is not supported!'
+
+                logger.warning(msg)
 
         return True
 
