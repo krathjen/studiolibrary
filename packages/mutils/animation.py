@@ -596,6 +596,10 @@ class Animation(mutils.Pose):
                         fullname = ("%s.%s" % (transform, attr))
                         dstCurve, = maya.cmds.listConnections(fullname, destination=False) or [None]
 
+                        # Filter to only animCurves since you can have proxy attributes
+                        if not maya.cmds.nodeType(dstCurve).startswith("animCurve"):
+                            continue
+
                         if dstCurve:
                             dstCurve = maya.cmds.rename(dstCurve, "CURVE")
                             srcCurve = mutils.animCurve("%s.%s" % (name, attr))
