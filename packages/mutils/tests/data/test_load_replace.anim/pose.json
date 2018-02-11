@@ -1,15 +1,15 @@
 {
   "metadata": {
-    "mayaSceneFile": "C:/Users/hovel/Dropbox/git/mutils/src/mutils/tests/data/test_anim.ma", 
+    "mayaSceneFile": "C:/Users/hovel/Dropbox/git/site-packages/studiolibrary/packages/mutils/tests/data/test_anim.ma", 
     "angularUnit": "deg", 
-    "ctime": "1470728827", 
+    "ctime": "1518341546", 
     "endFrame": 10, 
     "linearUnit": "cm", 
     "version": "1.0.0", 
     "user": "Hovel", 
     "startFrame": 1, 
     "timeUnit": "film", 
-    "mayaVersion": "2016"
+    "mayaVersion": "2017"
   }
 ,
   "objects": {
@@ -23,52 +23,40 @@
           "type": "long", 
           "value": 5
         }, 
-        "testEnum": {
-          "curve": "CURVE2", 
-          "type": "enum", 
-          "value": 1
+        "testProxy": {
+          "type": "double", 
+          "value": 1.0
         }, 
-        "translateX": {
-          "curve": "CURVE7", 
-          "type": "doubleLinear", 
-          "value": 0.0
+        "scaleY": {
+          "type": "double", 
+          "value": 4.66
+        }, 
+        "testLimit": {
+          "type": "double", 
+          "value": 10.0
         }, 
         "testConnect": {
           "type": "double", 
           "value": 8.0
         }, 
-        "translateZ": {
-          "curve": "CURVE9", 
-          "type": "doubleLinear", 
-          "value": -12.0
-        }, 
-        "testVectorX": {
-          "curve": "CURVE13", 
-          "type": "double", 
-          "value": 0.2
-        }, 
-        "testAnimated": {
-          "curve": "CURVE12", 
-          "type": "double", 
-          "value": 0.0
+        "testEnum": {
+          "curve": "CURVE2", 
+          "type": "enum", 
+          "value": 1
         }, 
         "scaleX": {
           "curve": "CURVE3", 
           "type": "double", 
           "value": 0.25
         }, 
-        "scaleY": {
-          "type": "double", 
-          "value": 4.66
+        "testString": {
+          "type": "string", 
+          "value": "Hello world"
         }, 
         "scaleZ": {
           "curve": "CURVE4", 
           "type": "double", 
           "value": 0.5
-        }, 
-        "testString": {
-          "type": "string", 
-          "value": "Hello world"
         }, 
         "rotateX": {
           "curve": "CURVE5", 
@@ -84,22 +72,27 @@
           "type": "doubleAngle", 
           "value": 90.0
         }, 
-        "testVectorY": {
-          "curve": "CURVE14", 
-          "type": "double", 
-          "value": 1.4
-        }, 
         "testStatic": {
           "type": "double", 
           "value": 0.0
         }, 
+        "translateX": {
+          "curve": "CURVE7", 
+          "type": "doubleLinear", 
+          "value": 0.0
+        }, 
+        "translateY": {
+          "curve": "CURVE8", 
+          "type": "doubleLinear", 
+          "value": 8.0
+        }, 
+        "translateZ": {
+          "curve": "CURVE9", 
+          "type": "doubleLinear", 
+          "value": -12.0
+        }, 
         "visibility": {
           "curve": "CURVE10", 
-          "type": "bool", 
-          "value": true
-        }, 
-        "testBoolean": {
-          "curve": "CURVE16", 
           "type": "bool", 
           "value": true
         }, 
@@ -108,15 +101,30 @@
           "type": "double", 
           "value": 0.666
         }, 
+        "testAnimated": {
+          "curve": "CURVE12", 
+          "type": "double", 
+          "value": 0.0
+        }, 
+        "testVectorX": {
+          "curve": "CURVE13", 
+          "type": "double", 
+          "value": 0.2
+        }, 
+        "testVectorY": {
+          "curve": "CURVE14", 
+          "type": "double", 
+          "value": 1.4
+        }, 
         "testVectorZ": {
           "curve": "CURVE15", 
           "type": "double", 
           "value": 2.6
         }, 
-        "translateY": {
-          "curve": "CURVE8", 
-          "type": "doubleLinear", 
-          "value": 8.0
+        "testBoolean": {
+          "curve": "CURVE16", 
+          "type": "bool", 
+          "value": true
         }
       }
     }, 
