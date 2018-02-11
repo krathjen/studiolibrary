@@ -1,16 +1,10 @@
 {
   "metadata": {
-    "angularUnit": "deg", 
-    "description": "test shot", 
-    "user": "testuser", 
-    "startTime": 1, 
-    "mayaSceneFile": "/norman/work/krathjen/git/sandbox/site-packages/mutils/tests/data/test_pose.ma", 
-    "timeUnit": "film", 
-    "cTime": 646464451, 
-    "mayaVersion": "2013 Service Pack 2P12 x64", 
-    "linearUnit": "cm", 
+    "mayaSceneFile": "C:/Users/hovel/Dropbox/git/site-packages/studiolibrary/packages/mutils/tests/data/test_non_unique_names.ma", 
     "version": "1.0.0", 
-    "endTime": 48
+    "user": "Hovel", 
+    "mayaVersion": "2017", 
+    "ctime": "1518341544"
   }
 ,
   "objects": {
@@ -19,13 +13,53 @@
     }, 
     "srcSphere:sphere": {
       "attrs": {
-        "rotateX": {
-          "type": "doubleAngle", 
-          "value": 45.0
+        "testInteger": {
+          "type": "long", 
+          "value": 5
+        }, 
+        "testProxy": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "scaleY": {
+          "type": "double", 
+          "value": 4.66
+        }, 
+        "testLimit": {
+          "type": "double", 
+          "value": 10.0
+        }, 
+        "testConnect": {
+          "type": "double", 
+          "value": 8.0
         }, 
         "testEnum": {
           "type": "enum", 
           "value": 1
+        }, 
+        "scaleX": {
+          "type": "double", 
+          "value": 0.25
+        }, 
+        "testString": {
+          "type": "string", 
+          "value": "Hello world"
+        }, 
+        "scaleZ": {
+          "type": "double", 
+          "value": 0.5
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 45.0
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 50.0
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 90.0
         }, 
         "translateX": {
           "type": "doubleLinear", 
@@ -39,65 +73,33 @@
           "type": "doubleLinear", 
           "value": -12.0
         }, 
-        "rotateY": {
-          "type": "doubleAngle", 
-          "value": 25.0
+        "visibility": {
+          "type": "bool", 
+          "value": true
         }, 
         "testFloat": {
           "type": "double", 
-          "value": 0.66600000000000004
+          "value": 0.666
         }, 
         "testAnimated": {
           "type": "double", 
           "value": 0.0
         }, 
-        "scaleX": {
-          "type": "double", 
-          "value": 0.25
-        }, 
-        "scaleY": {
-          "type": "double", 
-          "value": 1.5
-        }, 
-        "visibility": {
-          "type": "bool", 
-          "value": true
-        }, 
-        "testString": {
-          "type": "string", 
-          "value": "Hello world"
-        }, 
         "testVectorX": {
           "type": "double", 
-          "value": 0.20000000000000001
+          "value": 0.2
         }, 
         "testVectorY": {
           "type": "double", 
-          "value": 1.3999999999999999
-        }, 
-        "rotateZ": {
-          "type": "doubleAngle", 
-          "value": 90.0
+          "value": 1.4
         }, 
         "testVectorZ": {
           "type": "double", 
-          "value": 2.6000000000000001
-        }, 
-        "scaleZ": {
-          "type": "double", 
-          "value": 0.5
-        }, 
-        "testInteger": {
-          "type": "long", 
-          "value": 5
+          "value": 2.6
         }, 
         "testBoolean": {
           "type": "bool", 
           "value": true
-        }, 
-        "testConnect": {
-          "type": "double", 
-          "value": 8.0
         }
       }
     }, 
@@ -109,7 +111,7 @@
         }, 
         "translateY": {
           "type": "doubleLinear", 
-          "value": 0.0
+          "value": 5.0
         }, 
         "translateZ": {
           "type": "doubleLinear", 
