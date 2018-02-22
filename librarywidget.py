@@ -1486,13 +1486,14 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.moveItems(items, dst, copy=copy)
 
-    def moveItems(self, items, dst, copy=False):
+    def moveItems(self, items, dst, copy=False, force=False):
         """
         Move the given items to the destination folder path.
         
         :type items: list[studiolibrary.LibraryItem]
         :type dst: str
         :type copy: bool
+        :type force: bool
         :rtype: None 
         """
         self.itemsWidget().clearSelection()
@@ -1503,6 +1504,9 @@ class LibraryWidget(QtWidgets.QWidget):
             for item in items:
 
                 path = dst + "/" + item.name()
+
+                if force:
+                    path = studiolibrary.generateUniquePath(path)
 
                 if copy:
                     item.copy(path)
@@ -2355,7 +2359,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.createTrashFolder()
-        self.moveItems(items, dst=self.trashPath())
+        self.moveItems(items, dst=self.trashPath(), force=True)
 
     def moveFolderToTrash(self, folder):
         """
@@ -2369,6 +2373,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         src = folder.path()
         dst = os.path.join(self.trashPath(), os.path.basename(src))
+        dst = studiolibrary.generateUniquePath(dst)
 
         self.renameFolder(src, dst=dst)
 
