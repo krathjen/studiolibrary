@@ -646,7 +646,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         for item in studiolibrary.findItems(rootPath):
 
-            if item.DisplayInFolderView:
+            if self.isValidInFolderView(item):
 
                 path = item.path()
                 paths[path] = {}
@@ -658,6 +658,18 @@ class LibraryWidget(QtWidgets.QWidget):
                     }
 
         self.foldersWidget().setPaths(paths, root=rootPath)
+
+    def isValidInFolderView(self, item):
+        """
+        Return True if the given item should be shown in the folder view.
+        
+        :type item: studiolibrary.LibraryItem
+        :rtype: bool 
+        """
+        if not self.isTrashFolderVisible() and self.isPathInTrash(item.path()):
+            return False
+
+        return item.DisplayInFolderView
 
     def createFolderContextMenu(self):
         """
