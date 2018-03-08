@@ -1,13 +1,16 @@
-## Studio Library
-
-Studio Library is a free python script for managing poses and animation in Maya.
-
-* www.studiolibrary.com
-
-* https://github.com/krathjen/studiolibrary
+<p align="center">
+  <h1 align="center">Studio Library</h1>
+  <h4 align="center">Animation and pose manager for Maya</h4>
+  <br>
+</p>
 
 
-### Features
+## Description :
+
+A Free tool written in python for managing poses and animation in Maya.
+
+
+## Features :
 
 * Save poses and animation
 * Mirror poses and animation
@@ -17,51 +20,60 @@ Studio Library is a free python script for managing poses and animation in Maya.
 * Insert, merge and replace animation
 * Supports Windows, Linux and OSX
 * Supports Maya 2016, 2017 and 2018
+* It's **opensource** and FREE for everyone! 🎉  🎆
 
 
-### Contributing
+## Contributing :
 
-Whether it's reporting bugs, discussing ideas or committing code: Contributions to Studio Library are welcome!
+Contributions to Studio Library are always welcome! Whether it's reporting bugs, feature requests, discussing ideas or committing code.
+
+We follow below guides for...
 
 * [Commit messages style](https://github.com/erlang/otp/wiki/Writing-good-commit-messages)
 
-* Please follow the same workflow as "[GitHub Forking Workflow](https://gist.github.com/Chaser324/ce0505fbed06b947d962)".
+* [GitHub Forking Workflow](https://gist.github.com/Chaser324/ce0505fbed06b947d962)
 
-* Please follow the same coding style as the "[Python Qt Style Guidelines](http://bitesofcode.blogspot.co.uk/2011/10/pyqt-coding-style-guidelines.html)".
-
-
-### How to install?
-
-1. Download and unzip the *studiolibrary.zip* file
-
-#### OSX
-2. Use SHIFT+G in the finder and copy the *studiolibrary* folder to
-
-*~/Library/Preferences/Autodesk/maya/scripts*
-
-#### Linux
-2. Open the file manager and copy the *studiolibrary* folder to
-
-*~/maya/scripts*
-
-#### Windows
-2. Open the file explorer and copy the *studiolibrary* folder to
-
-*C:/Users/USERNAME/Documents/maya/scripts*
+* [Python Qt Style Guidelines](http://bitesofcode.blogspot.co.uk/2011/10/pyqt-coding-style-guidelines.html)
 
 
-### How to run?
+## Downloading :
 
-3. Start Maya and run the following code in the **Python** script editor.
+Download and unzip the *studiolibrary.zip* file from [github releases](https://github.com/krathjen/studiolibrary/releases) or [website](http://www.studiolibrary.com/download).
+
+
+## Intallation :
+
+### OSX
+Use SHIFT+G in the finder and copy the *studiolibrary* folder to *~/Library/Preferences/Autodesk/maya/scripts*.
+
+### Linux
+Open the file manager and copy the *studiolibrary* folder to *~/maya/scripts*.
+
+### Windows
+Open the file explorer and copy the *studiolibrary* folder to *C:/Users/USERNAME/Documents/maya/scripts*.
+
+
+## Setup : 
+
+Start Maya and run the following code in the **Python** script editor.
 
 ```python
 import studiolibrary
 studiolibrary.main()
 ```
 
+## Documentation : 
 
-### Having Issues?
+Find the latest documentation [here](https://drive.google.com/open?id=1v3A1YWEdJml_Qb7i8ITOrljqZaBISHYZCKUR9NJxGr8).
 
-Please send an email with the error message and a detailed step by step process of how you got the error.
+## Tutorials : 
 
-Comments, suggestions and bug reports are welcome. [Contact](http://www.studiolibrary.com/contact)
+How to use
+
+* [poses](https://www.youtube.com/watch?v=lpaWrT7VXfM)
+* [selection sets](https://www.youtube.com/watch?v=xejWubal_j8)
+* [mirror tables](https://www.youtube.com/watch?v=kCv0XleJfjU&t=3s)
+
+## Issues :
+
+Feel free to raise an issue with the error message and a detailed step by step process of how you got the error in [github issues](https://github.com/krathjen/studiolibrary/issues/new) or contact [krathjen](http://www.studiolibrary.com/contact).
