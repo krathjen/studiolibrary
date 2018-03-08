@@ -16,6 +16,7 @@ import os
 import time
 import copy
 import logging
+from functools import partial
 
 from studioqt import QtGui
 from studioqt import QtCore
@@ -683,7 +684,7 @@ class LibraryWidget(QtWidgets.QWidget):
         items = []
 
         if path:
-            item = studiolibrary.itemFromPath(path)
+            item = studiolibrary.itemFromPath(path, libraryWidget=self)
 
             if item:
                 items = [item]
@@ -1164,9 +1165,11 @@ class LibraryWidget(QtWidgets.QWidget):
                 if self.trashEnabled():
                     editMenu.addSeparator()
 
+                    callback = partial(self.showMoveItemsToTrashDialog, [item])
+
                     action = QtWidgets.QAction("Move to Trash", editMenu)
                     action.setEnabled(not self.isTrashSelected())
-                    action.triggered.connect(self.showMoveItemsToTrashDialog)
+                    action.triggered.connect(callback)
                     editMenu.addAction(action)
 
         menu.addSeparator()
@@ -2206,13 +2209,14 @@ class LibraryWidget(QtWidgets.QWidget):
         self.createTrashFolder()
         self.moveItems(items, dst=self.trashPath(), force=True)
 
-    def showMoveItemsToTrashDialog(self):
+    def showMoveItemsToTrashDialog(self, items=None):
         """
         Show the "Move to trash" dialog for the selected items.
 
+        :type items: list[studiolibrary.LibraryItem] or None
         :rtype: None
         """
-        items = self.selectedItems()
+        items = items or self.selectedItems()
 
         if items:
             title = "Move to trash?"
