@@ -22,10 +22,10 @@ import studioqt
 logger = logging.getLogger(__name__)
 
 
-class CombinedItemViewMixin(object):
+class ItemViewMixin(object):
 
     """
-    The CombinedItemViewMixin class is a mixin for any widgets that
+    The ItemViewMixin class is a mixin for any widgets that
     inherit from the QAbstractItemView class. This class should be used
     for similar methods between views.
     """
@@ -50,11 +50,14 @@ class CombinedItemViewMixin(object):
                 self._currentItem = None
                 self._currentSelection = None
 
-    def combinedWidget(self):
+    def itemModel(self):
+        return self.parent().itemModel()
+
+    def itemsWidget(self):
         """
         Return True if a control modifier is currently active.
 
-        :rtype: studioqt.CombinedWidget
+        :rtype: studioqt.ItemsWidget
         """
         return self.parent()
 
@@ -211,7 +214,7 @@ class CombinedItemViewMixin(object):
         """
         Triggered on user key press events for the current viewport.
 
-        :type item: CombinedWidgetItem
+        :type item: studioqt.Item
         :type event: QtCore.QKeyEvent
         :rtype: None
         """

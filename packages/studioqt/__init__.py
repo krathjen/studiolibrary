@@ -36,9 +36,10 @@ from studioqt.widgets.menubarwidget import MenuBarWidget
 from studioqt.widgets.searchwidget import SearchWidget
 from studioqt.widgets.searchwidget import SearchFilter
 
-from studioqt.widgets.combinedwidget.combinedwidget import CombinedWidget
-from studioqt.widgets.combinedwidget.combinedwidgetitem import CombinedWidgetItem
-from studioqt.widgets.combinedwidget.combinedwidgetitemgroup import CombinedWidgetItemGroup
+from studioqt.widgets.itemswidget.item import Item
+from studioqt.widgets.itemswidget.itemgroup import ItemGroup
+from studioqt.widgets.itemswidget.itemmodel import ItemModel
+from studioqt.widgets.itemswidget.itemswidget import ItemsWidget
 
 from studioqt.widgets.treewidget import TreeWidget
 

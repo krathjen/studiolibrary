@@ -30,9 +30,7 @@ class GlobalSignals(QtCore.QObject):
 
 
 class IconThread(QtCore.QThread):
-    """
-    A convenience class for loading an icon in a thread.
-    """
+    """A convenience class for loading an icon in a thread."""
 
     triggered = QtCore.Signal(object)
 
@@ -48,15 +46,16 @@ class IconThread(QtCore.QThread):
         :rtype: None 
         """
         if self._path:
-            image = QtGui.QImage(str(self._path))
+            image = QtGui.QImage(unicode(self._path))
             self.triggered.emit(image)
 
 
-class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
-    """
-    Combined Widget items are used to hold rows of information for a
-    combined widget.
-    """
+class Item(QtWidgets.QTreeWidgetItem):
+    """The Item is used to hold rows of information for an item view."""
+
+    SortRole = "SortRole"
+    DataRole = "DataRole"
+
     MAX_ICON_SIZE = 256
 
     DEFAULT_FONT_SIZE = 13
@@ -75,17 +74,16 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self._path = None
         self._size = None
         self._rect = None
-        self.textColumnOrder = []
+        self._textColumnOrder = []
 
         self._data = {}
-        self._sortText = {}
-        self._displayText = {}
 
         self._icon = {}
         self._fonts = {}
-        self._pixmap = {}
         self._thread = None
+        self._pixmap = {}
         self._pixmapRect = None
+        self._pixmapScaled = None
 
         self._iconPath = ""
         self._thumbnailIcon = None
@@ -93,9 +91,12 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self._underMouse = False
         self._searchText = None
         self._infoWidget = None
+
+        self._groupItem = None
         self._groupColumn = 0
+
         self._mimeText = None
-        self._combinedWidget = None
+        self._itemsWidget = None
         self._stretchToWidget = None
 
         self._dragEnabled = True
@@ -122,13 +123,17 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         self.stop()
 
-    def toJson(self):
-        """
-        Return a dict of the current item text.
+    def setItemModel(self, itemModel):
+        self._itemModel = itemModel
 
-        :rtype: dict
-        """
-        return self._data
+    def itemModel(self):
+        return self._itemModel
+
+    def columnFromLabel(self, label):
+        return self.treeWidget().columnFromLabel(label)
+
+    def labelFromColumn(self, column):
+        return self.treeWidget().labelFromColumn(column)
 
     def mimeText(self):
         """
@@ -156,7 +161,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         QtWidgets.QTreeWidgetItem.setHidden(self, value)
         row = self.treeWidget().indexFromItem(self).row()
-        self.combinedWidget().listView().setRowHidden(row, value)
+        self.itemsWidget().listView().setRowHidden(row, value)
 
     def setDragEnabled(self, value):
         """
@@ -202,6 +207,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             self._pixmap[column] = None
             QtWidgets.QTreeWidgetItem.setIcon(self, column, icon)
 
+        self.updateIcon()
+
     def setData(self, column, role, value):
         """
         Reimplemented to set the search text to dirty.
@@ -214,27 +221,97 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :rtype: None
         """
         self._searchText = None
-        QtWidgets.QTreeWidgetItem.setData(self, column, role, value)
 
-    def data(self, column, role, **kwargs):
+        if role == self.SortRole:
+
+            if isinstance(column, int):
+                column = self.labelFromColumn(column)
+
+            self._data.setdefault(column, {})
+            self._data[column]["sortValue"] = value
+
+        elif role == QtCore.Qt.DisplayRole:
+
+            if isinstance(column, int):
+                column = self.labelFromColumn(column)
+
+            self._data.setdefault(column, {})
+            self._data[column]["displayValue"] = value
+
+        elif role == self.DataRole:
+
+            if isinstance(column, int):
+                column = self.labelFromColumn(column)
+
+            self._data.setdefault(column, {})
+            self._data[column]["value"] = value
+
+        else:
+            QtWidgets.QTreeWidgetItem.setData(self, column, role, value)
+
+    def data(self, column, role):
         """
         Reimplemented to add support for setting the sort data.
 
-        :type column: int
+        :type column: int or str
         :type role: int
-        :type kwargs: dict
         :rtype: object
         """
-        if role == QtCore.Qt.DisplayRole:
+        if role == self.SortRole:
 
-            text = self.sortText(column)
-            if not text:
-                text = QtWidgets.QTreeWidgetItem.data(self, column, role)
+            if isinstance(column, int):
+                column = self.labelFromColumn(column)
+
+            value = self._data.get(column, {}).get("sortValue")
+            if not value:
+                value = self._data.get(column, {}).get("value", "")
+
+        elif role == QtCore.Qt.DisplayRole:
+
+            if isinstance(column, int):
+                column = self.labelFromColumn(column)
+
+            value = self._data.get(column, {}).get("displayValue")
+            if not value:
+                value = self._data.get(column, {}).get("value", "")
+
+        elif role == self.DataRole:
+
+            if isinstance(column, int):
+                column = self.labelFromColumn(column)
+
+            value = self._data.get(column, {}).get("value") or ""
 
         else:
-            text = QtWidgets.QTreeWidgetItem.data(self, column, role)
+            value = QtWidgets.QTreeWidgetItem.data(self, column, role)
 
-        return text
+        return value
+
+    def setItemData(self, data):
+        """
+        Set the given dictionary as the data for the item.
+
+        :type data: dict
+        :rtype: None
+        """
+        for column in data:
+
+            self._data.setdefault(column, {})
+
+            columnData = data.get(column, {})
+
+            if isinstance(columnData, dict):
+                self._data[column].update(columnData)
+            else:
+                self._data[column]["value"] = columnData
+
+    def itemData(self):
+        """
+        Return the item data for this item.
+
+        :rtype: dict
+        """
+        return self._data
 
     def setName(self, text):
         """
@@ -243,8 +320,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type text: str
         :rtype: None 
         """
-        self.setText("Icon", text)
-        self.setText("Name", text)
+        self.setText("icon", text)
+        self.setText("name", text)
 
     def name(self):
         """
@@ -252,93 +329,64 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: str
         """
-        return self.text("Name")
+        return self.text("name")
 
-    def setText(self, column, value, alignment=None):
+    def setText(self, label, value):
         """
         Set the text to be displayed for the given column.
 
-        :type column: int or str
+        :type label: int or str
         :type value: str
         :rtype: None
         """
-        self.textColumnOrder.append(column)
+        self.setData(label, self.DataRole, unicode(value))
 
-        if isinstance(column, basestring):
-            self._data[column] = value
-        else:
-            QtWidgets.QTreeWidgetItem.setText(self, column, unicode(value))
-
-    def text(self, column):
+    def text(self, label):
         """
         Return the text for the given column.
 
-        :type column: int or str
+        :type label: int or str
         :rtype: str
         """
-        if isinstance(column, basestring):
-            text = self._sortText.get(column)
-            if not text:
-                text = self._data.get(column, "")
-        else:
-            text = QtWidgets.QTreeWidgetItem.text(self, column)
+        return self.data(label, self.DataRole)
 
-        return text
-
-    def setSortText(self, column, value):
+    def setSortText(self, label, value):
         """
         Set the sort data for the given column.
 
-        :type column: int
+        :type label: str
         :int value: str
         :rtype: None
         """
-        self._sortText[column] = value
+        self.setData(label, self.SortRole, unicode(value))
 
-    def sortText(self, column):
+    def sortText(self, label):
         """
         Return the sort data for the given column.
 
-        :type column: int
+        :type label: str
         :rtype: str
         """
+        return self.data(label, self.SortRole)
 
-        if isinstance(column, int):
-            column = self.treeWidget().labelFromColumn(column)
-
-        text = self._sortText.get(column, None)
-        if not text:
-            text = self._data.get(column, "")
-
-        return text
-
-    def displayText(self, column):
+    def setDisplayText(self, label, value):
         """
-        Return the data to be displayed for the given column.
+        Set the sort data for the given column.
 
-        :type column: int
+        :type label: str
+        :int value: str
+        :rtype: None
+        """
+        self.setData(label, QtCore.Qt.DisplayRole, unicode(value))
+
+    def displayText(self, label):
+        """
+        Return the sort data for the given column.
+
+        :type label: str
         :rtype: str
         """
-        if isinstance(column, basestring):
-            text = self._data.get(column, "")
-
-        else:
-            # Check the text before the display role data
-            label = self.treeWidget().labelFromColumn(column)
-            text = self._data.get(label, "")
-
-            if not text:
-                text = QtWidgets.QTreeWidgetItem.data(
-                    self, column,
-                    QtCore.Qt.DisplayRole
-                )
-
-            if text:
-                text = unicode(text)
-            else:
-                text = ""
-
-        return text
+        return self.data(label, QtCore.Qt.DisplayRole)
 
     def update(self):
         """
@@ -356,28 +404,9 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :rtype: None 
         """
         self._pixmap = {}
+        self._pixmapRect = None
+        self._pixmapScaled = None
         self._thumbnailIcon = None
-
-    def updateData(self):
-        """
-        Update the text data to the corresponding column.
-
-        :rtype: None
-        """
-        treeWidget = self.treeWidget()
-
-        for label in self._data:
-            column = treeWidget.columnFromLabel(label)
-
-            if column < 0:
-                treeWidget.addHeaderLabel(label)
-
-            text = self._data[label]
-            self.setText(column, text)
-
-        for label in self._icon:
-            column = treeWidget.columnFromLabel(label)
-            self.setIcon(column, self._icon[label])
 
     def dpi(self):
         """
@@ -385,8 +414,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: int
         """
-        if self.combinedWidget():
-            return self.combinedWidget().dpi()
+        if self.itemsWidget():
+            return self.itemsWidget().dpi()
         else:
             return 1
 
@@ -426,18 +455,24 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         pass
 
-    def combinedWidget(self):
-        """
-        Returns the combined widget that contains the item.
+    def setGroupItem(self, groupItem):
+        self._groupItem = groupItem
 
-        :rtype: CombinedWidget
+    def groupItem(self):
+        return self._groupItem
+
+    def itemsWidget(self):
         """
-        combinedWidget = None
+        Returns the items widget that contains the items.
+
+        :rtype: ItemsWidget
+        """
+        itemsWidget = None
 
         if self.treeWidget():
-            combinedWidget = self.treeWidget().parent()
+            itemsWidget = self.treeWidget().parent()
 
-        return combinedWidget
+        return itemsWidget
 
     def url(self):
         """
@@ -506,7 +541,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             if self._size:
                 size = self._size
             else:
-                size = self.combinedWidget().iconSize()
+                size = self.itemsWidget().iconSize()
 
             w = self.stretchToWidget().width()
             h = size.height()
@@ -515,7 +550,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         if self._size:
             return self._size
         else:
-            iconSize = self.combinedWidget().iconSize()
+            iconSize = self.itemsWidget().iconSize()
 
             if self.isTextVisible():
                 w = iconSize.width()
@@ -554,7 +589,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         icon = QtGui.QIcon(pixmap)
 
         self._thumbnailIcon = icon
-        self.combinedWidget().update()
+        self.itemsWidget().update()
 
     def thumbnailIcon(self):
         """
@@ -617,7 +652,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: int
         """
-        return self.combinedWidget().padding()
+        return self.itemsWidget().padding()
 
     def textHeight(self):
         """
@@ -625,7 +660,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: int
         """
-        return self.combinedWidget().itemTextHeight()
+        return self.itemsWidget().itemTextHeight()
 
     def isTextVisible(self):
         """
@@ -633,7 +668,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: bool
         """
-        return self.combinedWidget().isItemTextVisible()
+        return self.itemsWidget().isItemTextVisible()
 
     def textAlignment(self, column):
         """
@@ -642,7 +677,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :type column: int
         :rtype: QtCore.Qt.AlignmentFlag
         """
-        if self.combinedWidget().isIconView():
+        if self.itemsWidget().isIconView():
             return QtCore.Qt.AlignCenter
         else:
             return QtWidgets.QTreeWidgetItem.textAlignment(self, column)
@@ -755,8 +790,8 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         # This will be changed to use the palette soon.
         # Note: There were problems with older versions of Qt's palette (Maya 2014).
         # Eg:
-        # return self.combinedWidget().palette().color(self.combinedWidget().foregroundRole())
-        return self.combinedWidget().textColor()
+        # return self.itemsWidget().palette().color(self.itemsWidget().foregroundRole())
+        return self.itemsWidget().textColor()
 
     def textSelectedColor(self):
         """
@@ -764,7 +799,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: QtWidgets.QtColor
         """
-        return self.combinedWidget().textSelectedColor()
+        return self.itemsWidget().textSelectedColor()
 
     def backgroundColor(self):
         """
@@ -772,7 +807,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: QtWidgets.QtColor
         """
-        return self.combinedWidget().backgroundColor()
+        return self.itemsWidget().backgroundColor()
 
     def backgroundHoverColor(self):
         """
@@ -780,7 +815,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: QtWidgets.QtColor
         """
-        return self.combinedWidget().backgroundHoverColor()
+        return self.itemsWidget().backgroundHoverColor()
 
     def backgroundSelectedColor(self):
         """
@@ -788,7 +823,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: QtWidgets.QtColor
         """
-        return self.combinedWidget().backgroundSelectedColor()
+        return self.itemsWidget().backgroundSelectedColor()
 
     def rect(self):
         """
@@ -899,7 +934,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         width = rect.width()
         height = rect.height()
 
-        if self.isTextVisible() and self.combinedWidget().isIconView():
+        if self.isTextVisible() and self.itemsWidget().isIconView():
             height -= self.textHeight()
 
         width -= padding
@@ -918,6 +953,37 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         rect.translate(x, y)
         return rect
 
+    def scalePixmap(self, pixmap, rect):
+        """
+        Scale the given pixmap to the give rect size.
+        
+        This method will cache the scaled pixmap if called with the same size.
+
+        :type pixmap: QtGui.QPixmap
+        :type rect: QtCore.QRect
+        :rtype: QtGui.QPixmap
+        """
+        rectChanged = True
+
+        if self._pixmapRect:
+            widthChanged = self._pixmapRect.width() != rect.width()
+            heightChanged = self._pixmapRect.height() != rect.height()
+
+            rectChanged = widthChanged or heightChanged
+
+        if not self._pixmapScaled or rectChanged:
+
+            self._pixmapScaled = pixmap.scaled(
+                rect.width(),
+                rect.height(),
+                QtCore.Qt.KeepAspectRatio,
+                QtCore.Qt.SmoothTransformation,
+            )
+
+            self._pixmapRect = rect
+
+        return self._pixmapScaled
+
     def paintIcon(self, painter, option, index, align=None):
         """
         Draw the icon for the item.
@@ -933,13 +999,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             return
 
         rect = self.iconRect(option)
-
-        pixmap = pixmap.scaled(
-            rect.width(),
-            rect.height(),
-            QtCore.Qt.KeepAspectRatio,
-            QtCore.Qt.SmoothTransformation,
-        )
+        pixmap = self.scalePixmap(pixmap, rect)
 
         pixmapRect = QtCore.QRect(rect)
         pixmapRect.setWidth(pixmap.width())
@@ -1037,13 +1097,13 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         column = index.column()
 
-        if column == 0 and self.combinedWidget().isTableView():
+        if column == 0 and self.itemsWidget().isTableView():
             return
 
         self._paintText(painter, option, column)
 
     def textWidth(self, column):
-        text = self.displayText(column)
+        text = self.text(column)
 
         font = self.font(column)
         metrics = QtGui.QFontMetricsF(font)
@@ -1052,7 +1112,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def _paintText(self, painter, option, column):
 
-        if self.combinedWidget().isIconView():
+        if self.itemsWidget().isIconView():
             text = self.name()
         else:
             text = self.displayText(column)
@@ -1092,7 +1152,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             text = metrics.elidedText(text, QtCore.Qt.ElideRight, visualWidth)
             align = QtCore.Qt.AlignLeft
 
-        if self.combinedWidget().isIconView():
+        if self.itemsWidget().isIconView():
             align = align | QtCore.Qt.AlignBottom
         else:
             align = align | QtCore.Qt.AlignVCenter
@@ -1135,7 +1195,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             value = math.ceil(value) + self.blendPreviousValue()
             try:
                 self.setBlendValue(value)
-            except Exception as msg:
+            except Exception:
                 self.stopBlending()
 
     def startBlendingEvent(self, event):

@@ -12,37 +12,36 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 from studioqt import QtWidgets
-from studioqt import QtCore
 
 import studioqt
 
 
-class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
+class ItemDelegate(QtWidgets.QStyledItemDelegate):
 
     def __init__(self):
         """
-        This class is used to display data for the items in a CombinedWidget.
+        This class is used to display data for the items in a ItemsWidget.
         """
         QtWidgets.QStyledItemDelegate.__init__(self)
 
-        self._combinedWidget = None
+        self._itemsWidget = None
 
-    def combinedWidget(self):
+    def itemsWidget(self):
         """
-        Return the CombinedWidget that contains the item delegate.
+        Return the ItemsWidget that contains the item delegate.
 
-        :rtype: studioqt.CombinedWidget
+        :rtype: studioqt.ItemsWidget
         """
-        return self._combinedWidget
+        return self._itemsWidget
 
-    def setCombinedWidget(self, combinedWidget):
+    def setItemsWidget(self, itemsWidget):
         """
-        Set the CombinedWidget for the delegate.
+        Set the ItemsWidget for the delegate.
 
-        :type combinedWidget: studioqt.CombinedWidget
+        :type itemsWidget: studioqt.ItemsWidget
         :rtype: None
         """
-        self._combinedWidget = combinedWidget
+        self._itemsWidget = itemsWidget
 
     def sizeHint(self, option, index):
         """
@@ -53,7 +52,7 @@ class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
         :rtype: QtCore.QSize
         """
         # This will be called for each row.
-        item = self.combinedWidget().itemFromIndex(index)
+        item = self.itemsWidget().itemFromIndex(index)
         return item.sizeHint(0)
 
     def paint(self, painter, option, index):
@@ -65,5 +64,5 @@ class CombinedItemDelegate(QtWidgets.QStyledItemDelegate):
         :type index: QtCore.QModelIndex
         :rtype: None
         """
-        item = self.combinedWidget().itemFromIndex(index)
+        item = self.itemsWidget().itemFromIndex(index)
         item.paint(painter, option, index)

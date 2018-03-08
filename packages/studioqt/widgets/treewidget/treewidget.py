@@ -421,9 +421,9 @@ class TreeWidget(QtWidgets.QTreeWidget):
         self.clear()
         self.addPaths(paths, root=root, split=split)
 
-        self.blockSignals(False)
-
         self.setSettings(settings)
+
+        self.blockSignals(False)
 
     def addPaths(self, paths, root="", split=None):
         """

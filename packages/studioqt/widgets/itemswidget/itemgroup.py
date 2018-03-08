@@ -18,12 +18,12 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 
-class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
+class ItemGroup(studioqt.Item):
 
     DEFAULT_FONT_SIZE = 24
 
     def __init__(self, *args):
-        studioqt.CombinedWidgetItem.__init__(self, *args)
+        studioqt.Item.__init__(self, *args)
 
         self._children = []
 
@@ -38,7 +38,7 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         """
         Set the children for the group.
 
-        :type children: list[CombinedWidgetItem]
+        :type children: list[Item]
         :rtype: None
         """
         self._children = children
@@ -47,7 +47,7 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         """
         Return the children for the group.
 
-        :rtype: list[CombinedWidgetItem]
+        :rtype: list[Item]
         """
         return self._children
 
@@ -87,7 +87,7 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
 
         :rtype: QtCore.QSize
         """
-        width = self.combinedWidget().width() - 20
+        width = self.itemsWidget().width() - 20
         return QtCore.QSize(width, 40 * self.dpi())
 
     def visualRect(self, option):
@@ -116,7 +116,7 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
 
         :rtype: QtWidgets.QtColor
         """
-        return self.combinedWidget().textColor()
+        return self.itemsWidget().textColor()
 
     def backgroundColor(self):
         """
@@ -180,7 +180,7 @@ class CombinedWidgetItemGroup(studioqt.CombinedWidgetItem):
         :type index: QtCore.QModelIndex
         :rtype: None
         """
-        studioqt.CombinedWidgetItem.paintBackground(self, painter, option, index)
+        studioqt.Item.paintBackground(self, painter, option, index)
 
         painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
         visualRect = self.visualRect(option)

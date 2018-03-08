@@ -46,7 +46,7 @@ class LibraryItemSignals(QtCore.QObject):
     loaded = QtCore.Signal(object)
 
 
-class LibraryItem(studioqt.CombinedWidgetItem):
+class LibraryItem(studioqt.Item):
 
     EnableDelete = False
     EnableNestedItems = False
@@ -73,7 +73,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     @classmethod
     def createAction(cls, menu, libraryWidget):
         """
-        Return the action to be displayed when the user clicks the "plus" icon.
+        Return the action to be displayed when the user 
+        ks the "plus" icon.
 
         :type menu: QtWidgets.QMenu
         :type libraryWidget: studiolibrary.LibraryWidget
@@ -127,30 +128,29 @@ class LibraryItem(studioqt.CombinedWidgetItem):
     def __init__(
             self,
             path="",
-            database=None,
+            libraryModel=None,
             libraryWidget=None,
     ):
         """
         The LibraryItem class provides an item for use with the LibraryWidget.
 
         :type path: str
-        :type database: studiolibrary.Database or None 
+        :type libraryModel: studiolibrary.LibraryModel or None 
         :type libraryWidget: studiolibrary.LibraryWidget or None
         """
-        studioqt.CombinedWidgetItem.__init__(self)
+        studioqt.Item.__init__(self)
 
         self._path = ""
-        self._library = None
         self._iconPath = None
-        self._database = None
         self._typePixmap = None
+        self._libraryModel = None
         self._libraryWidget = None
 
         if libraryWidget:
             self.setLibraryWidget(libraryWidget)
 
-        if database:
-            self.setDatabase(database)
+        if libraryModel:
+            self.setLibraryModel(libraryModel)
 
         if path:
             self.setPath(path)
@@ -289,14 +289,6 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         path = self.path()
         studiolibrary.showInFolder(path)
 
-    def name(self):
-        """
-        Return the name of the item.
-
-        :rtype: str
-        """
-        return self.text("Name")
-
     def url(self):
         """Used by the mime data when dragging/dropping the item."""
         return QtCore.QUrl("file:///" + self.path())
@@ -339,36 +331,40 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         return None
 
-    def libraryWidget(self):
-        """
-        :rtype: studiolibrary.LibraryWidget or None
-        """
-        return self._libraryWidget
-
     def setLibraryWidget(self, libraryWidget):
         """
+        Set the library widget containing the item.
+        
         :rtype: studiolibrary.LibraryWidget or None
         """
         self._libraryWidget = libraryWidget
 
-    def setDatabase(self, database):
+    def libraryWidget(self):
         """
-        Set the database for the item.
-
-        :type database: studiolibrary.Database
+        Return the library widget containing the item.
+        
+        :rtype: studiolibrary.LibraryWidget or None
         """
-        self._database = database
+        return self._libraryWidget
 
-    def database(self):
+    def setLibraryModel(self, libraryModel):
         """
-        Return the database for the item.
+        Set the library model for the item.
 
-        :rtype: studiolibrary.Database or None
+        :type libraryModel: studiolibrary.LibraryModel
         """
-        if not self._database and self.libraryWidget():
-            return self.libraryWidget().database()
+        self._libraryModel = libraryModel
 
-        return self._database
+    def libraryModel(self):
+        """
+        Return the library model for the item.
+
+        :rtype: studiolibrary.LibraryModel or None
+        """
+        if not self._libraryModel and self.libraryWidget():
+            return self.libraryWidget().libraryModel()
+
+        return self._libraryModel
 
     def setIconPath(self, path):
         """
@@ -417,9 +413,9 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         self._path = path
 
-        self.updateData()
+        self.updatePathData()
 
-    def updateData(self):
+    def updatePathData(self):
         """
         Update the data when the item is created or when a new path is set.
         
@@ -431,19 +427,23 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         name = os.path.basename(path)
         category = os.path.basename(dirname)
-
-        self.setName(name)
-        self.setText("Path", path)
-        self.setText("Category", category)
+        modified = ""
+        timeAgo = ""
 
         if os.path.exists(path):
             modified = os.path.getmtime(path)
             timeAgo = studiolibrary.timeAgo(modified)
 
-            self.setText("Modified", timeAgo)
-            self.setSortText("Modified", str(modified))
+        itemData = {
+            "name": name,
+            "path": path,
+            "type": extension,
+            "category": category,
+            "modified": modified
+        }
 
-        self.setText("Type", extension)
+        self.setItemData(itemData)
+        self.setDisplayText("modified", timeAgo)
 
     def load(self):
         """Reimplement this method for loading any item data."""
@@ -472,11 +472,10 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
         studiolibrary.movePaths(contents, path)
 
-        if self.database():
-            self.database().addPath(path)
+        self.libraryModel().addItems([self])
 
         if self.libraryWidget():
-            self.libraryWidget().addItem(self, select=True)
+            self.libraryWidget().selectItems([self])
 
         self.saved.emit(self)
         logger.debug(u'Item Saved: {0}'.format(self.path()))
@@ -487,19 +486,11 @@ class LibraryItem(studioqt.CombinedWidgetItem):
 
     def delete(self):
         """
-        Delete the item from disc and the database.
+        Delete the item from disc and the library model.
 
         :rtype: None
         """
-        path = self.path()
-
-        studiolibrary.removePath(path)
-
-        if self.database():
-            self.database().removePath(path)
-
-        if self.libraryWidget():
-            self.libraryWidget().refresh()
+        self.libraryModel().removeItems([self])
 
     def copy(self, dst):
         """
@@ -508,13 +499,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type dst: str
         :rtype: None
         """
-        src = self.path()
-
-        path = studiolibrary.copyPath(src, dst)
-        self.setPath(path)
-
-        if self.database():
-            self.database().addPath(path)
+        self.libraryModel().copyItems([self], dst)
 
     def move(self, dst):
         """
@@ -523,37 +508,21 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type dst: str
         :rtype: None
         """
-        src = self.path()
+        self.libraryModel().renameItems([self], dst)
 
-        dst = studiolibrary.movePath(src, dst)
-        self.setPath(dst)
-
-        if self.database():
-            self.database().renamePath(src, dst)
-
-    def rename(self, dst, extension=None, force=True):
+    def rename(self, dst, extension=None):
         """
         Rename the current path to given destination path.
 
         :type dst: str
-        :type force: bool
         :type extension: bool or None
         :rtype: None
         """
-        src = self.path()
-
         extension = extension or self.extension()
         if dst and extension not in dst:
             dst += extension
 
-        dst = studiolibrary.renamePath(src, dst)
-        self.setPath(dst)
-
-        if self.database():
-            self.database().renamePath(src, dst)
-
-        if self.libraryWidget():
-            self.libraryWidget().refreshSelection()
+        self.libraryModel().renameItems([self], dst)
 
     def showRenameDialog(self, parent=None):
         """
@@ -636,7 +605,8 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         button = self.libraryWidget().showQuestionDialog(title, text, buttons)
 
         if button == QtWidgets.QMessageBox.Yes:
-            item = studiolibrary.LibraryItem(path)
+            libraryModel = self.libraryModel()
+            item = studiolibrary.LibraryItem(path, libraryModel=libraryModel)
             self.libraryWidget().moveItemsToTrash([item])
             self.setPath(path)
         else:
@@ -698,7 +668,7 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         :type option: QtWidgets.QStyleOptionViewItem
         :rtype: None
         """
-        studioqt.CombinedWidgetItem.paint(self, painter, option, index)
+        studioqt.Item.paint(self, painter, option, index)
 
         painter.save()
         try:

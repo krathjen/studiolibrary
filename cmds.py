@@ -26,6 +26,13 @@ import collections
 
 from datetime import datetime
 
+# Use the built-in version of scandir/walk if possible,
+# otherwise use the scandir module version
+try:
+    from scandir import walk
+except ImportError:
+    from os import walk
+
 
 __all__ = [
     "user",
@@ -44,6 +51,7 @@ __all__ = [
     "absPath",
     "realPath",
     "normPath",
+    "normPaths",
     "copyPath",
     "movePath",
     "movePaths",
@@ -53,6 +61,7 @@ __all__ = [
     "removePath",
     "renamePath",
     "formatPath",
+    "renamePathInFile",
     "walkup",
     "generateUniquePath",
     "MovePathError",
@@ -236,7 +245,7 @@ def findItems(path, depth=3, **kwargs):
     maxDepth = depth
     startDepth = path.count(os.path.sep)
 
-    for root, dirs, files in os.walk(path):
+    for root, dirs, files in walk(path):
 
         files.extend(dirs)
 
@@ -396,6 +405,22 @@ def copyPath(src, dst):
     :type dst: str
     :rtype: str
     """
+    dirname = os.path.dirname(src)
+
+    if "/" not in dst:
+        dst = os.path.join(dirname, dst)
+
+    src = normPath(src)
+    dst = normPath(dst)
+
+    if src == dst:
+        msg = u'The source path and destination path are the same: {0}'
+        raise IOError(msg.format(src))
+
+    if os.path.exists(dst):
+        msg = u'Cannot copy over an existing path: "{0}"'
+        raise IOError(msg.format(dst))
+
     if os.path.isfile(src):
         shutil.copy(src, dst)
     else:
@@ -630,6 +655,8 @@ def saveJson(path, data):
     :rtype: None
     """
     path = normPath(path)
+
+    data = collections.OrderedDict(sorted(data.items(), key=lambda t: t[0]))
     data = json.dumps(data, indent=4)
     write(path, data)
 
@@ -671,6 +698,38 @@ def replaceJson(path, old, new, count=-1):
     saveJson(path, data)
 
     return data
+
+
+def renamePathInFile(path, src, dst):
+    """
+    Rename the given src path to the given dst path.
+
+    :type path: str
+    :type src: str
+    :type dst: str
+    :rtype: None
+    """
+    src = normPath(src)
+    dst = normPath(dst)
+
+    src1 = '"' + src + '"'
+    dst2 = '"' + dst + '"'
+
+    # Replace paths that match exactly the given src and dst strings
+    replaceJson(path, src1, dst2)
+
+    src2 = '"' + src
+    dst2 = '"' + dst
+
+    # Add a slash as a suffix for better directory matching
+    if not src2.endswith("/"):
+        src2 += "/"
+
+    if not dst2.endswith("/"):
+        dst2 += "/"
+
+    # Replace all paths that start with the src path with the dst path
+    replaceJson(path, src2, dst2)
 
 
 def relPath(data, start):
@@ -748,6 +807,16 @@ def normPath(path):
     """
     path = unicode(path.replace("\\", "/"))
     return path.rstrip("/")
+
+
+def normPaths(paths):
+    """
+    Normalize all the given paths to a consistent format.
+
+    :type paths: list[str]
+    :rtype: list[str]
+    """
+    return [normPath(path) for path in paths]
 
 
 def splitPath(path):

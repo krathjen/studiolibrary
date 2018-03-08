@@ -20,13 +20,13 @@ from studioqt import QtWidgets
 
 import studioqt
 
-from .combineditemviewmixin import CombinedItemViewMixin
+from .itemviewmixin import ItemViewMixin
 
 
 logger = logging.getLogger(__name__)
 
 
-class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
+class ListView(ItemViewMixin, QtWidgets.QListView):
 
     itemMoved = QtCore.Signal(object)
     itemDropped = QtCore.Signal(object)
@@ -37,7 +37,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
 
     def __init__(self, *args):
         QtWidgets.QListView.__init__(self, *args)
-        CombinedItemViewMixin.__init__(self)
+        ItemViewMixin.__init__(self)
 
         self._treeWidget = None
         self._rubberBand = None
@@ -214,7 +214,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         """
         Set the selected state for the given items.
 
-        :type items: list[studioqt.CombinedWidgetItem]
+        :type items: list[studioqt.WidgetItem]
         :type value: bool
         :rtype: None
         """
@@ -227,12 +227,16 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         """
         Move the given items to the position of the destination row.
 
-        :type items: list[studioqt.CombinedWidgetItem]
-        :type itemAt: studioqt.CombinedWidgetItem
+        :type items: list[studioqt.Item]
+        :type itemAt: studioqt.Item
         :rtype: None
         """
+        scrollValue = self.verticalScrollBar().value()
+
         self.treeWidget().moveItems(items, itemAt)
         self.itemMoved.emit(items[-1])
+
+        self.verticalScrollBar().setValue(scrollValue)
 
     # ---------------------------------------------------------------------
     # Support for a custom colored rubber band.
@@ -305,10 +309,10 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         if not item:
             self.clearSelection()
 
-        CombinedItemViewMixin.mousePressEvent(self, event)
+        ItemViewMixin.mousePressEvent(self, event)
         if event.isAccepted():
             QtWidgets.QListView.mousePressEvent(self, event)
-            self.combinedWidget().treeWidget().setItemSelected(item, True)
+            self.itemsWidget().treeWidget().setItemSelected(item, True)
 
         self.endDrag()
         self._dragStartPos = event.pos()
@@ -334,7 +338,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
             if isLeftButton and self.rubberBand().isHidden() and self.selectedItems():
                 self.startDrag(event)
             else:
-                CombinedItemViewMixin.mouseMoveEvent(self, event)
+                ItemViewMixin.mouseMoveEvent(self, event)
                 QtWidgets.QListView.mouseMoveEvent(self, event)
 
             if isLeftButton:
@@ -350,7 +354,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         item = self.itemAt(event.pos())
         items = self.selectedItems()
 
-        CombinedItemViewMixin.mouseReleaseEvent(self, event)
+        ItemViewMixin.mouseReleaseEvent(self, event)
 
         if item not in items:
             if event.button() != QtCore.Qt.MidButton:
@@ -405,7 +409,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return items from the given url objects.
 
         :type urls: list[QtCore.QUrl]
-        :rtype: list[studioqt.CombinedWidgetItem]
+        :rtype: list[studioqt.Item]
         """
         items = []
         for url in urls:
@@ -419,7 +423,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return the item from the given url object.
 
         :type url: QtCore.QUrl
-        :rtype: studioqt.CombinedWidgetItem
+        :rtype: studioqt.Item
         """
         return self.itemFromPath(url.path())
 
@@ -428,7 +432,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return the items from the given paths.
 
         :type paths: list[str]
-        :rtype: list[studioqt.CombinedWidgetItem]
+        :rtype: list[studioqt.Item]
         """
         items = []
         for path in paths:
@@ -442,7 +446,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         Return the item from the given path.
 
         :type path: str
-        :rtype: studioqt.ListWidgetItem
+        :rtype: studioqt.Item
         """
         for item in self.items():
             path_ = item.url().path()
@@ -470,7 +474,7 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
 
     def mimeData(self, items):
         """
-        :type items: list[studioqt.ListWidgetItem]
+        :type items: list[studioqt.Item]
         :rtype: QtCore.QMimeData
         """
         mimeData = QtCore.QMimeData()
@@ -594,8 +598,8 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
         """
         Show the drag pixmap for the given item.
 
-        :type item: combinedwidgetitem.CombinedWidgetItem
-        :type items: list[combinedwidgetitem.CombinedWidgetItem]
+        :type item: studioqt.Item
+        :type items: list[studioqt.Item]
         
         :rtype: QtGui.QPixmap
         """
@@ -616,13 +620,13 @@ class CombinedListView(CombinedItemViewMixin, QtWidgets.QListView):
             painter.setRenderHint(QtGui.QPainter.Antialiasing)
 
             painter.setPen(QtCore.Qt.NoPen)
-            painter.setBrush(self.combinedWidget().backgroundSelectedColor())
+            painter.setBrush(self.itemsWidget().backgroundSelectedColor())
             painter.drawEllipse(cRect.center(), float(cWidth / 2),
                                 float(cWidth / 2))
 
             font = QtGui.QFont('Serif', 12, QtGui.QFont.Light)
             painter.setFont(font)
-            painter.setPen(self.combinedWidget().textSelectedColor())
+            painter.setPen(self.itemsWidget().textSelectedColor())
             painter.drawText(cRect, QtCore.Qt.AlignCenter, str(cText))
 
         return pixmap

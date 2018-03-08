@@ -55,6 +55,7 @@ class LibraryWidget(QtWidgets.QWidget):
     DEFAULT_SETTINGS = {
         "paneSizes": [160, 280, 180],
         "geometry": [-1, -1, 860, 720],
+        "trashFolderVisible": False,
         "foldersWidgetVisible": True,
         "previewWidgetVisible": True,
         "menuBarWidgetVisible": True,
@@ -79,13 +80,11 @@ class LibraryWidget(QtWidgets.QWidget):
             }
         }
 
-    DATABASE_PATH = "{path}/.studiolibrary/database.json"
     SETTINGS_PATH = "{local}/StudioLibrary/LibraryWidget.json"
 
     TRASH_ENABLED = True
-    DEFAULT_GROUP_BY_COLUMNS = ["Category", "Modified", "Type"]
 
-    RECURSIVE_SEARCH_DEPTH = 3
+    RECURSIVE_SEARCH_DEPTH = 4
     RECURSIVE_SEARCH_ENABLED = False
 
     # Still in development
@@ -180,14 +179,15 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._dpi = 1.0
         self._path = ""
+        self._items = []
         self._name = name or self.DEFAULT_NAME
         self._theme = None
-        self._database = None
         self._isDebug = False
         self._isLocked = False
         self._isLoaded = False
         self._previewWidget = None
         self._currentItem = None
+        self._libraryModel = None
         self._refreshEnabled = False
 
         self._superusers = None
@@ -212,7 +212,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self._foldersFrame = FoldersFrame(self)
         self._previewFrame = PreviewFrame(self)
 
-        self._itemsWidget = studioqt.CombinedWidget(self)
+        self._itemsWidget = studioqt.ItemsWidget(self)
 
         tip = "Search all current items."
         self._searchWidget = studioqt.SearchWidget(self)
@@ -257,6 +257,11 @@ class LibraryWidget(QtWidgets.QWidget):
         tip = "Choose to show/hide both the preview and navigation pane. " \
               "Click + CTRL will hide the menu bar as well."
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
+
+        name = "Sync items"
+        icon = studioqt.resource.icon("sync")
+        tip = "Sync with the filesystem"
+        self.addMenuBarAction(name, icon, tip, callback=self.sync)
 
         name = "Settings"
         icon = studioqt.resource.icon("settings")
@@ -319,7 +324,6 @@ class LibraryWidget(QtWidgets.QWidget):
         itemsWidget.itemDropped.connect(self._itemDropped)
         itemsWidget.itemSelectionChanged.connect(self._itemSelectionChanged)
         itemsWidget.customContextMenuRequested.connect(self.showItemsContextMenu)
-        itemsWidget.treeWidget().setValidGroupByColumns(self.DEFAULT_GROUP_BY_COLUMNS)
 
         folderWidget = self.foldersWidget()
         folderWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -340,7 +344,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        self.refreshSearch()
+        self.refreshItems()
 
     def _itemMoved(self, item):
         """
@@ -394,6 +398,38 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
+
+    def createLibraryModel(self):
+        """
+        Create a new library model instance.
+        
+        :rtype: studiolibrary.LibraryModel 
+        """
+        path = self.path()
+
+        libraryModel = studiolibrary.LibraryModel(path)
+        libraryModel.dataChanged.connect(self.refresh)
+
+        self.itemsWidget().setItemModel(libraryModel)
+
+        return libraryModel
+
+    def libraryModel(self):
+        """
+        Return the library model object.
+
+        :rtype: studiolibrary.LibraryModel
+        """
+        return self._libraryModel
+
+    def setLibraryModel(self, libraryModel):
+        """
+        Set the library model.
+
+        :type libraryModel: studiolibrary.LibraryModel
+        :rtype: None
+        """
+        self._libraryModel = libraryModel
 
     def statusWidget(self):
         """
@@ -450,10 +486,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._path = path
 
-        databasePath = studiolibrary.formatPath(self.DATABASE_PATH, path=path)
-        database = studiolibrary.Database(databasePath)
-
-        self.setDatabase(database)
+        libraryModel = self.createLibraryModel()
+        self.setLibraryModel(libraryModel)
 
         self.refresh()
 
@@ -554,6 +588,23 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self._refreshEnabled = enable
 
+    @studioqt.showWaitCursor
+    def sync(self):
+        """
+        Sync any data that might be out of date with the model. 
+        
+        :rtype: None 
+        """
+        elapsedTime = time.time()
+        self.libraryModel().sync()
+        self.showToastMessage("Synced")
+        elapsedTime = time.time() - elapsedTime
+
+        msg = "Synced items in {0:.3f} seconds."
+        msg = msg.format(elapsedTime)
+
+        self.statusWidget().showInfoMessage(msg)
+
     def refresh(self):
         """
         Refresh all folders and items.
@@ -561,10 +612,14 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         if self.isRefreshEnabled():
-            self.refreshFolders()
-            self.refreshItems()
-            self.updateWindowTitle()
-            self.showToastMessage("Refreshed", duration=1000)
+            self.update()
+
+    def update(self):
+        """Update the library widget and the data. """
+        self.refreshFolders()
+        self.refreshItems()
+        self.updateWindowTitle()
+        self.showToastMessage("Refreshed")
 
     # -----------------------------------------------------------------
     # Methods for the folders widget
@@ -635,7 +690,6 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         rootPath = self.path()
-        trashPath = self.trashPath()
 
         paths = {
             rootPath: {
@@ -646,32 +700,16 @@ class LibraryWidget(QtWidgets.QWidget):
             }
         }
 
-        for item in studiolibrary.findItems(rootPath):
+        model = self.libraryModel()
+        depth = self.RECURSIVE_SEARCH_DEPTH
 
-            if self.isValidInFolderView(item):
-
+        for item in model.createItems(libraryWidget=self, depth=depth):
+            if item.DisplayInFolderView:
                 path = item.path()
                 paths[path] = {}
 
-                if trashPath == path:
-                    iconPath = studioqt.resource.get("icons", "delete.png")
-                    paths[path] = {
-                        "iconPath": iconPath
-                    }
-
         self.foldersWidget().setPaths(paths, root=rootPath)
-
-    def isValidInFolderView(self, item):
-        """
-        Return True if the given item should be shown in the folder view.
-        
-        :type item: studiolibrary.LibraryItem
-        :rtype: bool 
-        """
-        if not self.isTrashFolderVisible() and self.isPathInTrash(item.path()):
-            return False
-
-        return item.DisplayInFolderView
+        self.updateTrashFolder()
 
     def createFolderContextMenu(self):
         """
@@ -701,7 +739,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Return the widget the contains all the items.
 
-        :rtype: studioqt.CombinedWidget
+        :rtype: studioqt.ItemsWidget
         """
         return self._itemsWidget
 
@@ -780,7 +818,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        return self.itemsWidget().items()
+        return self._items
 
     def addItem(self, item, select=False):
         """
@@ -803,7 +841,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.itemsWidget().addItems(items)
-        self.refreshItemData()
+        self._items.extend(items)
 
         if select:
             self.selectItems(items)
@@ -815,13 +853,11 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
+        self._items = items
+
         selectedItems = self.selectedItems()
 
-        data = self.readItemData()
-
-        self.itemsWidget().setItems(items, data=data, sortEnabled=True)
-
-        self.refreshSearch()
+        self.itemsWidget().setItems(items, sort=True)
 
         if selectedItems:
             self.selectItems(selectedItems)
@@ -833,16 +869,14 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        elapsedTime = time.time()
+        if self.isRefreshEnabled():
 
-        paths = self.itemsWidget().selectedPaths()
+            elapsedTime = time.time()
 
-        self.updateItems()
+            self.updateItems()
 
-        self.itemsWidget().selectPaths(paths)
-
-        elapsedTime = time.time() - elapsedTime
-        self.showRefreshMessage(elapsedTime)
+            elapsedTime = time.time() - elapsedTime
+            self.showRefreshMessage(elapsedTime)
 
     def updateItems(self):
         """
@@ -850,22 +884,59 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        paths = self.selectedFolderPaths()
+        depth = self.RECURSIVE_SEARCH_DEPTH
+        items = self.libraryModel().createItems(libraryWidget=self, depth=depth)
 
-        self.clearItems()
+        # Filter the items using the folders widget
+        items = self.folderWidgetFilter(items)
 
-        depth = 1
-        if self.isRecursiveSearchEnabled():
-            depth = self.RECURSIVE_SEARCH_DEPTH
-
-        items = list(studiolibrary.findItemsInFolders(
-            paths,
-            depth,
-            libraryWidget=self,
-            )
-        )
+        # Filter the items using the search widget
+        items = self.searchWidgetFilter(items)
 
         self.setItems(items)
+
+    def folderWidgetFilter(self, items):
+        """
+        Filter the given items using the folders widget.
+        
+        :type items: list[studiolibrary.LibraryItem]
+        :rtype: list[studiolibrary.LibraryItem] 
+        """
+        isRecursive = self.isRecursiveSearchEnabled()
+        selectedPaths = self.selectedFolderPaths()
+
+        # Filter the items using the folders widget
+        validItems = []
+        for item in items:
+            if isinstance(item, studioqt.ItemGroup):
+                continue
+
+            for path in selectedPaths:
+                if isRecursive:
+                    path += "/"
+                    if item.path().startswith(path):
+                        validItems.append(item)
+                else:
+                    if path == os.path.dirname(item.path()):
+                        validItems.append(item)
+
+        return validItems
+
+    def searchWidgetFilter(self, items):
+        """
+        Filter the given items using the search widget.
+        
+        :type items: list[studiolibrary.LibraryItem]
+        :rtype: list[studiolibrary.LibraryItem] 
+        """
+        # Filter the items using the search widget
+        validItems = []
+        searchFilter = self.searchWidget().searchFilter()
+        for item in items:
+            if searchFilter.match(item.searchText()):
+                validItems.append(item)
+
+        return validItems
 
     def createItemsFromUrls(self, urls):
         """
@@ -981,8 +1052,9 @@ class LibraryWidget(QtWidgets.QWidget):
         menu = studioqt.Menu("", self)
         menu.setTitle("Settings")
 
-        action = menu.addAction("Refresh")
-        action.triggered.connect(self.refresh)
+        action = menu.addAction("Sync")
+        action.triggered.connect(self.sync)
+
         menu.addSeparator()
 
         if self.DPI_ENABLED:
@@ -1178,87 +1250,13 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return menu
 
-    # -------------------------------------------------------------------
-    # Support for reading and writing to the item database
-    # -------------------------------------------------------------------
-
-    def database(self):
-        """
-        Return the database object.
-
-        :rtype: studiolibrary.Database
-        """
-        return self._database
-
-    def setDatabase(self, database):
-        """
-        Set the database path for the catalog.
-
-        :type database: studiolibrary.Database
-        :rtype: None
-        """
-        self._database = database
-
-    def refreshItemData(self):
-        """
-        Update the current items with the data from the database.
-        
-        :rtype: None 
-        """
-        self.loadItemData()
-        self.refreshSearch()
-
-    def readItemData(self):
-        """
-        Read and return all the item data from the database.
-
-        :rtype: dict
-        """
-        data = {}
-        db = self.database()
-
-        if db:
-            data = db.read()
-
-        return data
-
-    def loadItemData(self):
-        """
-        Load the item data to the current items.
-
-        :rtype: None
-        """
-        logger.debug("Loading item data")
-
-        data = self.readItemData()
-
-        try:
-            self.itemsWidget().setItemData(data)
-        except Exception as error:
-            logger.exception(error)
-
-    def saveItemData(self, columns):
-        """
-        Save the given column data for the current items.
-
-        :rtype: None
-        """
-        logger.debug("Saving item data")
-
-        data = self.itemsWidget().itemData(columns)
-
-        db = self.database()
-        db.update(data)
-
-        self.refreshItemData()
-
     def saveCustomOrder(self):
         """
         Convenience method for saving the custom order.
 
         :rtype:  None
         """
-        self.saveItemData(["Custom Order"])
+        self.libraryModel().saveItemData(self.items())
 
     # -------------------------------------------------------------------
     # Support for moving items with drag and drop
@@ -1350,6 +1348,8 @@ class LibraryWidget(QtWidgets.QWidget):
         movedItems = []
 
         try:
+            self.libraryModel().blockSignals(True)
+
             for item in items:
 
                 path = dst + "/" + item.name()
@@ -1368,6 +1368,8 @@ class LibraryWidget(QtWidgets.QWidget):
             self.showExceptionDialog("Move Error", error)
             raise
         finally:
+            self.libraryModel().blockSignals(False)
+
             self.refresh()
             self.selectItems(movedItems)
 
@@ -1494,61 +1496,6 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.searchWidget().setText(text)
-
-    def refreshSearch(self):
-        """
-        Refresh the search results.
-
-        :rtype: None
-        """
-        if not self.isRefreshEnabled():
-            logger.debug('Refresh search is disabled!')
-            return
-
-        t = time.time()
-
-        self.updateSearch()
-
-        t = time.time() - t
-
-        plural = ""
-        if self._itemsVisibleCount > 1:
-            plural = "s"
-
-        msg = "Found {0} item{1} in {2:.3f} seconds."
-        msg = msg.format(self._itemsVisibleCount, plural, t)
-        self.statusWidget().showInfoMessage(msg)
-
-    def updateSearch(self):
-        """
-        Update the items with the search filter.
-        
-        :rtype: None 
-        """
-        items = self.items()
-        self.filterItems(items)
-
-    def filterItems(self, items):
-        """
-        Filter the given items using the search filter.
-
-        :rtype: list[studiolibrary.LibraryItem]
-        """
-        searchFilter = self.searchWidget().searchFilter()
-
-        column = self.itemsWidget().treeWidget().columnFromLabel(
-            "Search Order")
-
-        validItems = []
-        for item in items:
-            if searchFilter.match(item.searchText()):
-                item.setText(column, str(searchFilter.matches()))
-                validItems.append(item)
-
-        if self.itemsWidget().sortColumn() == column:
-            self.itemsWidget().refreshSortBy()
-
-        self.showItems(validItems, hideOthers=True)
 
     def showItems(self, items, hideOthers=True):
         """
@@ -1733,6 +1680,7 @@ class LibraryWidget(QtWidgets.QWidget):
         if self.theme():
             settings['theme'] = self.theme().settings()
 
+        settings["trashFolderVisible"] = self.isTrashFolderVisible()
         settings["foldersWidgetVisible"] = self.isFoldersWidgetVisible()
         settings["previewWidgetVisible"] = self.isPreviewWidgetVisible()
         settings["menuBarWidgetVisible"] = self.isMenuBarWidgetVisible()
@@ -1809,15 +1757,18 @@ class LibraryWidget(QtWidgets.QWidget):
 
         finally:
             self.reloadStyleSheet()
-
             self.setRefreshEnabled(isRefreshEnabled)
             self.refresh()
 
-        foldersWidgetSettings = settings.get('foldersWidget', {})
-        self.foldersWidget().setSettings(foldersWidgetSettings)
+        value = settings.get('trashFolderVisible')
+        if value is not None:
+            self.setTrashFolderVisible(value)
 
-        itemsWidgetSettings = settings.get('itemsWidget', {})
-        self.itemsWidget().setSettings(itemsWidgetSettings)
+        value = settings.get('foldersWidget', {})
+        self.foldersWidget().setSettings(value)
+
+        value = settings.get('itemsWidget', {})
+        self.itemsWidget().setSettings(value)
 
         self.itemsWidget().setToastEnabled(True)
 
@@ -1927,9 +1878,12 @@ class LibraryWidget(QtWidgets.QWidget):
         if height:
             geometry.setHeight(height)
 
-        pos = QtWidgets.QApplication.desktop().cursor().pos()
-        screen = QtWidgets.QApplication.desktop().screenNumber(pos)
-        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        desktop = QtWidgets.QApplication.desktop()
+
+        pos = desktop.cursor().pos()
+        screen = desktop.screenNumber(pos)
+        centerPoint = desktop.screenGeometry(screen).center()
+
         geometry.moveCenter(centerPoint)
         self.window().setGeometry(geometry)
 
@@ -2181,7 +2135,20 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self._isTrashFolderVisible = visible
-        self.refreshFolders()
+        self.updateTrashFolder()
+
+    def updateTrashFolder(self):
+        """
+        Update the state of the trash folder.
+        
+        :rtype: None 
+        """
+        iconPath = studioqt.resource.get("icons", "delete.png")
+
+        for item in self.foldersWidget().items():
+            if self.trashPath() == item.path():
+                item.setIconPath(iconPath)
+                item.setHidden(not self.isTrashFolderVisible())
 
     def isTrashSelected(self):
         """
@@ -2234,7 +2201,7 @@ class LibraryWidget(QtWidgets.QWidget):
     # Support for message boxes
     # -----------------------------------------------------------------------
 
-    def showToastMessage(self, text, duration=500):
+    def showToastMessage(self, text, duration=1000):
         """
         A convenience method for showing the toast widget with the given text.
 
@@ -2280,25 +2247,14 @@ class LibraryWidget(QtWidgets.QWidget):
         :type elapsedTime: time.time
         :rtype None
         """
-        itemCount = len(self._itemsWidget.items())
-        hiddenCount = self.itemsHiddenCount()
+        itemCount = len(self.items())
 
         plural = ""
         if itemCount > 1:
             plural = "s"
 
-        hiddenText = ""
-        if hiddenCount > 0:
-
-            hiddenPlural = ""
-            if hiddenCount > 1:
-                hiddenPlural = "s"
-
-            hiddenText = "{0} item{1} hidden."
-            hiddenText = hiddenText.format(hiddenCount, hiddenPlural)
-
-        msg = "Displayed {0} item{1} in {2:.3f} seconds. {3}"
-        msg = msg.format(itemCount, plural, elapsedTime, hiddenText)
+        msg = "Displayed {0} item{1} in {2:.3f} seconds."
+        msg = msg.format(itemCount, plural, elapsedTime)
         self.statusWidget().showInfoMessage(msg)
 
         logger.debug(msg)
