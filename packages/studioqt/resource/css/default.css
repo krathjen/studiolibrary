@@ -406,7 +406,7 @@ QMenu::item {
 }
 
 QMenu::item:disabled {
-	color: FOREGROUND_COLOR;
+	color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 50);
 }
 
 QMenu::item:selected {
