@@ -1,4 +1,5 @@
 <p align="center">
+  <img src='./resource/icons/icon_white_on_blue.png' />
   <h1 align="center">Studio Library</h1>
   <h4 align="center">Animation and pose manager for Maya</h4>
   <br>
