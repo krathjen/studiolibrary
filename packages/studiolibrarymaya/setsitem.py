@@ -11,7 +11,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import mutils
 
 import studiolibrary
@@ -54,18 +53,37 @@ class SetsItem(baseitem.BaseItem):
         """
         self.selectContent(namespaces=namespaces)
 
-    def save(self, objects, path="", iconPath="", **kwargs):
+    def save(
+            self,
+            objects,
+            path="",
+            iconPath="",
+            metadata=None,
+            **kwargs):
         """
         Save all the given object data to the given path on disc.
 
         :type objects: list[str]
         :type path: str
         :type iconPath: str
+        :type metadata: None or dict
         """
         if path and not path.endswith(".set"):
             path += ".set"
 
-        super(SetsItem, self).save(objects, path=path, iconPath=iconPath, **kwargs)
+        # Remove and create a new temp directory
+        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
+
+        # Save the selection set to the temp location
+        mutils.saveSelectionSet(
+            tempPath,
+            objects,
+            metadata=metadata
+        )
+
+        # Move the selection set to the given path using the base class
+        contents = [tempPath, iconPath]
+        super(SetsItem, self).save(path, contents=contents, **kwargs)
 
 
 class SetsCreateWidget(basecreatewidget.BaseCreateWidget):

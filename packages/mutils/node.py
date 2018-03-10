@@ -134,9 +134,9 @@ class Node(object):
 
     def setNamespace(self, namespace):
         """
-        Sets the namespace for a node.
+        Sets the namespace for a current node in Maya.
 
-        setNamespace("character", "|group|control")
+        node.setNamespace("character", "|group|control")
         result: |character:group|character:control
 
         setNamespace("", "|character:group|character:control")
@@ -144,20 +144,33 @@ class Node(object):
 
         :type namespace: str
         """
-        if namespace == self.namespace():
-            return
+        newName = self.name()
+        oldName = self.name()
 
-        if self.namespace() and namespace:
-            self._name = self.name().replace(self.namespace() + ":", namespace + ":")
+        newNamespace = namespace
+        oldNamespace = self.namespace()
 
-        elif self.namespace() and not namespace:
-            self._name = self.name().replace(self.namespace() + ":", "")
+        # Ignore any further processing if the namespace is the same.
+        if newNamespace == oldNamespace:
+            return self.name()
 
-        elif not self.namespace() and namespace:
-            self._name = self.name().replace("|", "|" + namespace + ":")
-            if namespace and not self.name().startswith("|"):
-                self._name = namespace + ":" + self.name()
+        # Replace the current namespace with the specified one
+        if oldNamespace and newNamespace:
+            newName = oldName.replace(oldNamespace + ":", newNamespace + ":")
+
+        # Remove existing namespace
+        elif oldNamespace and not newNamespace:
+            newName = oldName.replace(oldNamespace + ":", "")
+
+        # Set namespace if the current namespace doesn't exists
+        elif not oldNamespace and newNamespace:
+            newName = oldName.replace("|", "|" + newNamespace + ":")
+            if newNamespace and not newName.startswith("|"):
+                newName = newNamespace + ":" + newName
+
+        self._name = newName
 
         self._shortname = None
         self._namespace = None
+
         return self.name()

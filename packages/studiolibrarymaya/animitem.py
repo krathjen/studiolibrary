@@ -62,8 +62,8 @@ try:
     import mutils.gui
     import maya.cmds
     PasteOption = mutils.PasteOption
-except ImportError, e:
-    print e
+except ImportError as error:
+    print(error)
 
 
 __all__ = [
@@ -253,7 +253,7 @@ class AnimItem(baseitem.BaseItem):
         startFrame=None,
         endFrame=None,
         bakeConnected=False,
-        description="",
+        metadata=None,
     ):
         """
         :type path: str
@@ -264,7 +264,7 @@ class AnimItem(baseitem.BaseItem):
         :type endFrame: int or None
         :type fileType: str
         :type bakeConnected: bool
-        :type description: str
+        :type metadata: None or dict
 
         :rtype: None
         """
@@ -273,12 +273,14 @@ class AnimItem(baseitem.BaseItem):
 
         contents = contents or list()
 
+        # Remove and create a new temp directory
         tempDir = mutils.TempDir("Transfer", clean=True)
         tempPath = tempDir.path() + "/transfer.anim"
 
-        t = self.transferClass().fromObjects(objects)
-        t.setMetadata("description", description)
-        t.save(
+        # Save the animation to the temp location
+        anim = self.transferClass().fromObjects(objects)
+        anim.updateMetadata(metadata)
+        anim.save(
             tempPath,
             fileType=fileType,
             time=[startFrame, endFrame],
@@ -290,7 +292,8 @@ class AnimItem(baseitem.BaseItem):
 
         contents.extend(t.paths())
 
-        studiolibrary.LibraryItem.save(self, path=path, contents=contents)
+        # Move the animation data to the given path using the base class
+        super(AnimItem, self).save(path, contents=contents, **kwargs)
 
 
 class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -568,12 +571,12 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
             msg = "Please choose a start frame and an end frame."
             raise ValidateAnimError(msg)
 
-    def save(self, objects, path, iconPath, description):
+    def save(self, objects, path, iconPath, metadata):
         """
         :type objects: list[str]
         :type path: str
         :type iconPath: str
-        :type description: str
+        :type metadata: None or dict
         :rtype: None
         """
         contents = None
@@ -597,8 +600,8 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
             fileType=fileType,
             endFrame=endFrame,
             startFrame=startFrame,
-            description=description,
-            bakeConnected=bakeConnected
+            bakeConnected=bakeConnected,
+            metadata=metadata
         )
 
 

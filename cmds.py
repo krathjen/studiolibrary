@@ -437,6 +437,10 @@ def movePaths(srcPaths, dst):
         os.makedirs(dst)
 
     for src in srcPaths or []:
+
+        if not src:
+            continue
+
         basename = os.path.basename(src)
 
         dst_ = os.path.join(dst, basename)

@@ -11,9 +11,9 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from tempdir import TempDir
+from tempdir import TempDir, createTempPath
 
-from utils import *
+from cmds import *
 from decorators import *
 
 import playblast
@@ -27,7 +27,7 @@ from attribute import Attribute
 
 from transferobject import TransferObject
 
-from selectionset import SelectionSet
-from pose import Pose
+from selectionset import SelectionSet, saveSelectionSet
+from pose import Pose, savePose, loadPose
 from animation import Animation, PasteOption, saveAnim, loadAnims
-from mirrortable import MirrorTable, MirrorOption
+from mirrortable import MirrorTable, MirrorOption, saveMirrorTable

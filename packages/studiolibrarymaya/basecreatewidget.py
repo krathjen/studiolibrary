@@ -23,8 +23,8 @@ try:
     import mutils
     import mutils.gui
     import maya.cmds
-except ImportError, e:
-    print e
+except ImportError as error:
+    print(error)
 
 __all__ = [
     "BaseCreateWidget",
@@ -405,28 +405,30 @@ class BaseCreateWidget(QtWidgets.QWidget):
                     return
 
             path += "/" + name
-            description = self.description()
+
+            iconPath = self.iconPath()
+            metadata = {"description": self.description()}
 
             self.save(
                 objects,
                 path=path,
-                iconPath=self.iconPath(),
-                description=description,
+                iconPath=iconPath,
+                metadata=metadata,
             )
 
-        except Exception, e:
+        except Exception as e:
             title = "Error while saving"
             studioqt.MessageBox.critical(self.libraryWidget(), title, str(e))
             raise
 
-    def save(self, objects, path, iconPath, description):
+    def save(self, objects, path, iconPath, metadata):
         """
         Save the item with the given objects to the given disc location path.
 
         :type objects: list[str]
         :type path: str
         :type iconPath: str
-        :type description: str
+        :type metadata: None or dict
 
         :rtype: None
         """
@@ -435,6 +437,6 @@ class BaseCreateWidget(QtWidgets.QWidget):
             objects,
             path=path,
             iconPath=iconPath,
-            description=description,
+            metadata=metadata,
         )
         self.close()

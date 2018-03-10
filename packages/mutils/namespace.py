@@ -20,47 +20,10 @@ except ImportError:
 
 
 __all__ = [
-    "setNamespace",
     "getFromDagPath",
     "getFromDagPaths",
     "getFromSelection",
 ]
-
-
-def setNamespace(dagPath, namespace):
-    """
-    Return the given dagPath with the given namespace.
-
-    setNamespace("|group|control", "character")
-    result: |character:group|character:control
-
-    setNamespace("|character:group|character:control", "")
-    result: |group|control
-
-    :type namespace: str
-    """
-    result = dagPath
-    currentNamespace = getFromDagPath(dagPath)
-
-    # Ignore any further processing if the namespace is the same.
-    if namespace == currentNamespace:
-        pass
-
-    # Replace the current namespace with the specified one
-    elif currentNamespace and namespace:
-        result = dagPath.replace(currentNamespace + ":", namespace + ":")
-
-    # Remove existing namespace
-    elif currentNamespace and not namespace:
-        result = dagPath.replace(currentNamespace + ":", "")
-
-    # Set namespace if a current namespace doesn't exists
-    elif not currentNamespace and namespace:
-        result = dagPath.replace("|", "|" + namespace + ":")
-        if namespace and not result.startswith("|"):
-            result = namespace + ":" + result
-
-    return result
 
 
 def getFromDagPaths(dagPaths):

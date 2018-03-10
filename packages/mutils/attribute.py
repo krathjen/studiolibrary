@@ -95,10 +95,6 @@ class Attribute(object):
             msg = "Cannot initialise attribute instance without a given attr."
             raise AttributeError(msg)
 
-        # For now this is on by default, however in a future update
-        # this will be off by default.
-        self._cache = cache
-
         try:
             self._name = name.encode('ascii')
             self._attr = attr.encode('ascii')
@@ -108,6 +104,7 @@ class Attribute(object):
 
         self._type = type
         self._value = value
+        self._cache = cache
         self._fullname = None
 
     def __str__(self):
@@ -222,7 +219,7 @@ class Attribute(object):
         """
         try:
             return self.listConnections(destination=False, **kwargs)[0]
-        except IndexError, e:
+        except IndexError:
             return None
 
     def fullname(self):
@@ -285,9 +282,9 @@ class Attribute(object):
             else:
                 _value = (value - self.value()) * (blend/100.00)
                 value = self.value() + _value
-        except TypeError, e:
+        except TypeError as error:
             msg = 'Cannot BLEND attribute {0}: Error: {1}'
-            msg = msg.format(self.fullname(), e)
+            msg = msg.format(self.fullname(), error)
             logger.debug(msg)
 
         try:
@@ -297,17 +294,17 @@ class Attribute(object):
                 maya.cmds.setAttr(self.fullname(), *value, type=self.type())
             else:
                 maya.cmds.setAttr(self.fullname(), value, clamp=clamp)
-        except (ValueError, RuntimeError), e:
+        except (ValueError, RuntimeError) as error:
             msg = "Cannot SET attribute {0}: Error: {1}"
-            msg = msg.format(self.fullname(), e)
+            msg = msg.format(self.fullname(), error)
             logger.debug(msg)
 
         try:
             if key:
                 self.setKeyframe(value=value)
-        except TypeError, e:
+        except TypeError as error:
             msg = 'Cannot KEY attribute {0}: Error: {1}'
-            msg = msg.format(self.fullname(), e)
+            msg = msg.format(self.fullname(), error)
             logger.debug(msg)
 
     def setKeyframe(self, value, respectKeyable=True, **kwargs):
@@ -381,9 +378,9 @@ class Attribute(object):
             # Set the tangent for the next keyframe to flat
             nextFrame = maya.cmds.findKeyframe(self.fullname(), time=(endTime, endTime), which='next')
             maya.cmds.keyTangent(self.fullname(), time=(nextFrame, nextFrame), itt='flat')
-        except TypeError, e:
+        except TypeError as error:
             msg = "Cannot insert static key frame for attribute {0}: Error: {1}"
-            msg = msg.format(self.fullname(), e)
+            msg = msg.format(self.fullname(), error)
             logger.debug(msg)
 
     def setAnimCurve(self, curve, time, option, source=None, connect=False):

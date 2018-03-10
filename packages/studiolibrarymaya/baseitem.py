@@ -22,8 +22,8 @@ try:
     import mutils
     import mutils.gui
     import maya.cmds
-except ImportError, e:
-    print e
+except ImportError as error:
+    print(error)
 
 
 __all__ = [
@@ -248,8 +248,8 @@ class BaseItem(studiolibrary.LibraryItem):
 
         try:
             self.transferObject().select(namespaces=namespaces, **kwargs)
-        except Exception, e:
-            self.showErrorDialog("Item Error", str(e))
+        except Exception as error:
+            self.showErrorDialog("Item Error", str(error))
             raise
 
     def mirrorTable(self):
@@ -383,9 +383,9 @@ class BaseItem(studiolibrary.LibraryItem):
 
         try:
             namespaces = mutils.namespace.getFromSelection() or namespaces
-        except NameError, e:
+        except NameError as error:
             # Catch any errors when running this command outside of Maya
-            logger.exception(e)
+            logger.exception(error)
 
         return namespaces
 
@@ -410,41 +410,3 @@ class BaseItem(studiolibrary.LibraryItem):
         self.transferObject().load(objects=objects, namespaces=namespaces, **kwargs)
 
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
-
-    def save(
-            self,
-            objects,
-            path="",
-            iconPath="",
-            contents=None,
-            description="",
-            **kwargs
-    ):
-        """
-        Save the data to the transfer path on disc.
-
-        :type objects: list[str]
-        :type path: str
-        :type iconPath: str
-        :type contents: list[str] or None
-        :type description: str
-
-        :rtype: None
-        """
-        logger.info(u'Saving: {0}'.format(path))
-
-        tempDir = mutils.TempDir("Transfer", clean=True)
-        tempPath = tempDir.path() + "/" + self.transferBasename()
-
-        t = self.transferClass().fromObjects(objects)
-        t.setMetadata("description", description)
-        t.save(tempPath, **kwargs)
-
-        contents = contents or list()
-        if iconPath:
-            contents.append(iconPath)
-        contents.append(tempPath)
-
-        studiolibrary.LibraryItem.save(self, path=path, contents=contents)
-
-        logger.info(u'Saved: {0}'.format(path))

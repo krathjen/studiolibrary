@@ -25,14 +25,35 @@ except Exception:
 logger = logging.getLogger(__name__)
 
 
+def saveSelectionSet(path, objects, metadata=None):
+    """
+    Convenience function for saving a selection set to the given disc location.
+    
+    :type path: str
+    :type objects: list[str]
+    :type metadata: dict or None
+    :type args: list
+    :type kwargs: dict
+    :rtype: SelectionSet 
+    """
+    selectionSet = SelectionSet.fromObjects(objects)
+
+    if metadata:
+        selectionSet.updateMetadata(metadata)
+
+    selectionSet.save(path)
+
+    return selectionSet
+
+
 class SelectionSet(mutils.TransferObject):
 
     def load(self, objects=None, namespaces=None, **kwargs):
         """
         Load/Select the transfer objects to the given objects or namespaces.
         
-        :type objects:
-        :type namespaces: list[str]
+        :type objects: list[str] or None
+        :type namespaces: list[str] or None
         :type kwargs:
         """
         validNodes = []
@@ -58,12 +79,12 @@ class SelectionSet(mutils.TransferObject):
                 try:
                     dstNode = dstNode.toShortName()
 
-                except mutils.NoObjectFoundError, msg:
-                    logger.debug(msg)
+                except mutils.NoObjectFoundError as error:
+                    logger.debug(error)
                     continue
 
-                except mutils.MoreThanOneObjectFoundError, msg:
-                    logger.debug(msg)
+                except mutils.MoreThanOneObjectFoundError as error:
+                    logger.debug(error)
 
                 validNodes.append(dstNode.name())
 

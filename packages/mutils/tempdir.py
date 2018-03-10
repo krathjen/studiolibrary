@@ -17,7 +17,11 @@ import getpass
 import tempfile
 
 
-__all__ = ["TempDir"]
+__all__ = ["TempDir", "createTempDir"]
+
+
+def createTempPath(name="mutils"):
+    return TempDir(name, clean=True).path()
 
 
 class TempDir(object):

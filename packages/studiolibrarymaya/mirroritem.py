@@ -38,7 +38,6 @@ item = mirroritem.MirrorItem(path)
 item.load(objects=objects, namespaces=namespaces, animation=True, time=None)
 """
 
-import os
 import logging
 
 from studioqt import QtCore
@@ -54,8 +53,8 @@ from studiolibrarymaya import basepreviewwidget
 
 try:
     import maya.cmds
-except ImportError, e:
-    print e
+except ImportError as error:
+    print(error)
 
 
 __all__ = [
@@ -97,8 +96,8 @@ class MirrorItem(baseitem.BaseItem):
                 animation=mirrorAnimation,
                 namespaces=namespaces,
             )
-        except Exception, e:
-            self.showErrorDialog("Item Error", str(e))
+        except Exception as error:
+            self.showErrorDialog("Item Error", str(error))
             raise
 
     @mutils.showWaitCursor
@@ -129,7 +128,7 @@ class MirrorItem(baseitem.BaseItem):
             rightSide,
             path="",
             iconPath="",
-            description="",
+            metadata=None,
             **kwargs):
         """
         Save the given objects to the location of the current mirror table.
@@ -139,33 +138,28 @@ class MirrorItem(baseitem.BaseItem):
         :type rightSide: str
         :type path: str
         :type iconPath: str
-        :type description: str
-
-        :rtype: None
+        :type metadata: None or dict
         """
         if path and not path.endswith(".mirror"):
             path += ".mirror"
 
         logger.info("Saving: %s" % self.transferPath())
 
-        tempDir = mutils.TempDir("Transfer", makedirs=True)
-        tempPath = os.path.join(tempDir.path(), self.transferBasename())
+        # Remove and create a new temp directory
+        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
 
-        t = self.transferClass().fromObjects(
+        # Save the mirror table to the temp location
+        mutils.saveMirrorTable(
+            tempPath,
             objects,
+            metadata=metadata,
             leftSide=leftSide,
-            rightSide=rightSide
+            rightSide=rightSide,
         )
 
-        t.setMetadata("description", description)
-        t.save(tempPath)
-
-        studiolibrary.LibraryItem.save(
-            self,
-            path=path,
-            contents=[tempPath, iconPath],
-            **kwargs
-        )
+        # Move the mirror table to the given path using the base class
+        contents = [tempPath, iconPath]
+        super(MirrorItem, self).save(path, contents=contents, **kwargs)
 
 
 class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -222,14 +216,14 @@ class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
 
         super(MirrorCreateWidget, self).selectionChanged()
 
-    def save(self, objects, path, iconPath, description):
+    def save(self, objects, path, iconPath, metadata):
         """
         Called by the base class when the user clicks the save button.
 
         :type objects: list[str]
         :type path: str
         :type iconPath: str
-        :type description: str
+        :type metadata: None or dict
         :rtype: None
         """
         iconPath = self.iconPath()
@@ -240,9 +234,9 @@ class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
             path=path,
             objects=objects,
             iconPath=iconPath,
+            metadata=metadata,
             leftSide=leftSide,
             rightSide=rightSide,
-            description=description,
         )
 
 

@@ -75,7 +75,15 @@ except ImportError:
     traceback.print_exc()
 
 
-__all__ = ["MirrorTable", "MirrorPlane", "MirrorOption", "Axis"]
+__all__ = [
+    "MirrorTable",
+    "MirrorPlane",
+    "MirrorOption",
+    "saveMirrorTable",
+    "Axis",
+]
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -97,7 +105,28 @@ class MirrorOption:
     RightToLeft = 2
 
 
-class MirrorTable(mutils.SelectionSet):
+def saveMirrorTable(path, objects, metadata=None, *args, **kwargs):
+    """
+    Convenience function for saving a mirror table to the given disc location.
+    
+    :type path: str
+    :type objects: list[str]
+    :type metadata: dict or None
+    :type args: list
+    :type kwargs: dict
+    :rtype: MirrorTable 
+    """
+    mirrorTable = MirrorTable.fromObjects(objects, *args, **kwargs)
+
+    if metadata:
+        mirrorTable.updateMetadata(metadata)
+
+    mirrorTable.save(path)
+
+    return mirrorTable
+
+
+class MirrorTable(mutils.TransferObject):
 
     @classmethod
     @mutils.restoreSelection
@@ -520,6 +549,17 @@ class MirrorTable(mutils.SelectionSet):
 
         return result
 
+    def select(self, objects=None, namespaces=None, **kwargs):
+        """
+        Select the objects contained in file.
+        
+        :type objects: list[str] or None
+        :type namespaces: list[str] or None
+        :rtype: None
+        """
+        selectionSet = mutils.SelectionSet.fromPath(self.path())
+        selectionSet.load(objects=objects, namespaces=namespaces, **kwargs)
+
     def leftSide(self):
         """
         :rtype: str | None
@@ -574,16 +614,12 @@ class MirrorTable(mutils.SelectionSet):
         self,
         objects=None,
         namespaces=None,
-        callback=None
     ):
         """
         :type objects: list[str]
         :type namespaces: list[str]
-        :type selection: bool
-        :type callback: func
         :rtype: list[str]
         """
-        results = {}
         srcObjects = self.objects().keys()
 
         matches = mutils.matchNames(
@@ -593,11 +629,9 @@ class MirrorTable(mutils.SelectionSet):
         )
 
         for srcNode, dstNode in matches:
-            dstObj = dstNode.name()
+            dstName = dstNode.name()
             mirrorAxis = self.mirrorAxis(srcNode.name())
-            callback(srcNode.name(), dstObj, mirrorAxis)
-
-        return results
+            yield srcNode.name(), dstName, mirrorAxis
 
     def rightToLeft(self):
         """

@@ -24,8 +24,8 @@ try:
     import mutils
     import mutils.gui
     import maya.cmds
-except ImportError, e:
-    print e
+except ImportError as error:
+    print(error)
 
 
 __all__ = [
@@ -68,8 +68,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
             self.selectionChanged()
             self.setScriptJobEnabled(True)
             self.updateNamespaceEdit()
-        except NameError, msg:
-            logger.exception(msg)
+        except NameError as error:
+            logger.exception(error)
 
         path = self.item().thumbnailPath()
         if os.path.exists(path):
@@ -466,7 +466,6 @@ class BasePreviewWidget(QtWidgets.QWidget):
         """
         try:
             self.item().load()
-        except Exception, e:
-            title = "Error while loading"
-            self.item().showErrorDialog(title, str(e))
+        except Exception as error:
+            self.item().showErrorDialog("Error while loading", str(error))
             raise

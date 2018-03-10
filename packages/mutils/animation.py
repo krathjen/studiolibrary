@@ -194,8 +194,8 @@ def findFirstLastKeyframes(curves, time=None):
         # first and last frame
         try:
             result = clampRange(time, result)
-        except OutOfBoundsError, e:
-            logger.warning(e)
+        except OutOfBoundsError as error:
+            logger.warning(error)
             
     return result
 
@@ -367,8 +367,19 @@ class Animation(mutils.Pose):
             self.setMetadata("timeUnit", timeUnit)
             self.setMetadata("linearUnit", linearUnit)
             self.setMetadata("angularUnit", angularUnit)
-        except NameError, msg:
+        except NameError as msg:
             logger.exception(msg)
+
+    def select(self, objects=None, namespaces=None, **kwargs):
+        """
+        Select the objects contained in the animation.
+        
+        :type objects: list[str] or None
+        :type namespaces: list[str] or None
+        :rtype: None
+        """
+        selectionSet = mutils.SelectionSet.fromPath(self.poseJsonPath())
+        selectionSet.load(objects=objects, namespaces=namespaces, **kwargs)
 
     def startFrame(self):
         """
@@ -546,7 +557,8 @@ class Animation(mutils.Pose):
         # Check selected animation layers
         gSelectedAnimLayers = maya.mel.eval('$gSelectedAnimLayers=$gSelectedAnimLayers')
         if len(gSelectedAnimLayers) > 1:
-            msg = "More than one animation layer is selected! Please select only one animation layer for export!"
+            msg = "More than one animation layer is selected! " \
+                  "Please select only one animation layer for export!"
             raise AnimationTransferError(msg)
 
         # Check frame range
@@ -559,16 +571,17 @@ class Animation(mutils.Pose):
             raise AnimationTransferError(msg)
 
         # Check if animation exists
-        if mutils.getDurationFromNodes(nodes=objects or []) <= 0:
-            msg = "No animation was found on the specified object/s! Please create a pose instead!"
+        if mutils.getDurationFromNodes(objects or []) <= 0:
+            msg = "No animation was found on the specified object/s! " \
+                  "Please create a pose instead!"
             raise AnimationTransferError(msg)
 
         self.setMetadata("endFrame", end)
         self.setMetadata("startFrame", start)
 
         end += 1
-        dstCurves = []
-        validAnimCurves = []
+        validCurves = []
+        deleteObjects = []
 
         msg = "Animation.save(path={0}, time={1}, bakeConnections={2}, sampleBy={3})"
         msg = msg.format(path, str(time), str(bakeConnected), str(sampleBy))
@@ -584,8 +597,8 @@ class Animation(mutils.Pose):
 
                     # Might return more than one object when duplicating shapes or blendshapes
                     transform, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
+                    deleteObjects.append(transform)
 
-                    dstCurves.append(transform)
                     mutils.disconnectAll(transform)
                     maya.cmds.pasteKey(transform)
 
@@ -593,17 +606,18 @@ class Animation(mutils.Pose):
                     attrs = list(set(attrs) - set(['translate', 'rotate', 'scale']))
 
                     for attr in attrs:
-                        fullname = ("%s.%s" % (transform, attr))
-                        dstCurve, = maya.cmds.listConnections(fullname, destination=False) or [None]
+                        dstAttr = mutils.Attribute(transform, attr)
+                        dstCurve = dstAttr.animCurve()
 
                         if dstCurve:
-                            # Filter to only animCurves since you can have proxy attributes
-                            if not maya.cmds.nodeType(dstCurve).startswith("animCurve"):
-                                continue
 
                             dstCurve = maya.cmds.rename(dstCurve, "CURVE")
-                            srcCurve = mutils.animCurve("%s.%s" % (name, attr))
-                            if srcCurve and "animCurve" in maya.cmds.nodeType(srcCurve):
+                            deleteObjects.append(dstCurve)
+
+                            srcAttr = mutils.Attribute(name, attr)
+                            srcCurve = srcAttr.animCurve()
+
+                            if srcCurve:
                                 preInfinity = maya.cmds.getAttr(srcCurve + ".preInfinity")
                                 postInfinity = maya.cmds.getAttr(srcCurve + ".postInfinity")
                                 curveColor = maya.cmds.getAttr(srcCurve + ".curveColor")
@@ -614,13 +628,11 @@ class Animation(mutils.Pose):
                                 maya.cmds.setAttr(dstCurve + ".curveColor", *curveColor[0])
                                 maya.cmds.setAttr(dstCurve + ".useCurveColor", useCurveColor)
 
-                            dstCurves.append(dstCurve)
-
                             if maya.cmds.keyframe(dstCurve, query=True, time=(start, end), keyframeCount=True):
                                 self.setAnimCurve(name, attr, dstCurve)
                                 maya.cmds.cutKey(dstCurve, time=(MIN_TIME_LIMIT, start - 1))
                                 maya.cmds.cutKey(dstCurve, time=(end + 1, MAX_TIME_LIMIT))
-                                validAnimCurves.append(dstCurve)
+                                validCurves.append(dstCurve)
 
             fileName = "animation.ma"
             if fileType == "mayaBinary":
@@ -630,8 +642,8 @@ class Animation(mutils.Pose):
             posePath = os.path.join(path, "pose.json")
             mutils.Pose.save(self, posePath)
 
-            if validAnimCurves:
-                maya.cmds.select(validAnimCurves)
+            if validCurves:
+                maya.cmds.select(validCurves)
                 logger.info("Saving animation: %s" % mayaPath)
                 maya.cmds.file(mayaPath, force=True, options='v=0', type=fileType, uiConfiguration=False, exportSelected=True)
                 self.cleanMayaFile(mayaPath)
@@ -641,8 +653,8 @@ class Animation(mutils.Pose):
                 # HACK! Undo all baked connections. :)
                 maya.cmds.undoInfo(closeChunk=True)
                 maya.cmds.undo()
-            elif dstCurves:
-                maya.cmds.delete(dstCurves)
+            elif deleteObjects:
+                maya.cmds.delete(deleteObjects)
 
         self.setPath(path)
 

@@ -36,10 +36,7 @@ item = poseitem.PoseItem(path)
 item.load(objects=objects, namespaces=namespaces, key=True, mirror=False)
 """
 
-import os
 import logging
-
-import studioqt
 
 from studioqt import QtCore
 
@@ -53,8 +50,8 @@ from studiolibrarymaya import basepreviewwidget
 try:
     import mutils
     import maya.cmds
-except ImportError, e:
-    print e
+except ImportError as error:
+    print(error)
 
 
 __all__ = [
@@ -68,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 
 class PoseItemSignals(QtCore.QObject):
-    """"""
+    """Signals need to be attached to a QObject"""
     mirrorChanged = QtCore.Signal(bool)
 
 
@@ -89,7 +86,6 @@ class PoseItem(baseitem.BaseItem):
 
         self._options = None
         self._isLoading = False
-        self._autoKeyFrame = None
 
         self.setBlendingEnabled(True)
         self.setTransferClass(mutils.Pose)
@@ -97,12 +93,16 @@ class PoseItem(baseitem.BaseItem):
 
     def isLoading(self):
         """
+        Return True if the item is loading.
+        
         :rtype: bool
         """
         return self._isLoading
 
     def toggleMirror(self):
         """
+        Toggle the mirror setting.
+        
         :rtype: None
         """
         mirror = self.isMirrorEnabled()
@@ -111,31 +111,43 @@ class PoseItem(baseitem.BaseItem):
 
     def isMirrorEnabled(self):
         """
+        Return True if the mirror setting is enabled.
+        
         :rtype: bool
         """
         return self.settings().get("mirrorEnabled")
 
     def setMirrorEnabled(self, value):
         """
+        Set the user mirror setting.
+        
         :type value: bool
         """
+        logger.info("Set mirror enabled: %s", value)
         self.settings()["mirrorEnabled"] = value
         self.mirrorChanged.emit(bool(value))
 
     def isKeyEnabled(self):
         """
+        Return True if the pose should be keyed after loading.
+        
         :rtype: bool
         """
         return self.settings().get("keyEnabled")
 
     def setKeyEnabled(self, value):
         """
+        if enabled, key the objects after the pose item has been loaded.
+        
         :type value: bool
         """
+        logger.info("Set key enabled: %s", value)
         self.settings()["keyEnabled"] = value
 
     def keyPressEvent(self, event):
         """
+        Called when a key press event for the item is triggered.
+        
         :type event: QtGui.QEvent
         """
         super(PoseItem, self).keyPressEvent(event)
@@ -146,12 +158,10 @@ class PoseItem(baseitem.BaseItem):
                 self.toggleMirror()
 
                 blend = self.blendValue()
-                mirror = self.isMirrorEnabled()
 
                 if self.isBlending():
                     self.loadFromSettings(
                         blend=blend,
-                        mirror=mirror,
                         batchMode=True,
                         showBlendMessage=True
                     )
@@ -159,7 +169,6 @@ class PoseItem(baseitem.BaseItem):
                     self.loadFromSettings(
                         blend=blend,
                         refresh=True,
-                        mirror=mirror,
                         batchMode=False,
                     )
 
@@ -203,6 +212,7 @@ class PoseItem(baseitem.BaseItem):
         This method is called from the base class to set the blend amount.
 
         :type value: float
+        :type load: bool
         :rtype: None
         """
         super(PoseItem, self).setBlendValue(value)
@@ -217,14 +227,13 @@ class PoseItem(baseitem.BaseItem):
     def loadFromSettings(
         self,
         blend=100.0,
-        mirror=None,
         refresh=True,
         batchMode=False,
         clearSelection=True,
         showBlendMessage=False,
     ):
         """
-        Load this item with the current user settings from disc.
+        Load the pose item with the current user settings from disc.
 
         :type blend: float
         :type refresh: bool
@@ -235,13 +244,9 @@ class PoseItem(baseitem.BaseItem):
         if self._options is None:
             self._options = dict()
             self._options["key"] = self.isKeyEnabled()
-            self._options['mirror'] = self.isMirrorEnabled()
             self._options['namespaces'] = self.namespaces()
             self._options['mirrorTable'] = self.mirrorTable()
             self._options['objects'] = maya.cmds.ls(selection=True) or []
-
-        if mirror is not None:
-            self._options['mirror'] = mirror
 
         try:
             self.load(
@@ -252,8 +257,8 @@ class PoseItem(baseitem.BaseItem):
                 showBlendMessage=showBlendMessage,
                 **self._options
             )
-        except Exception, e:
-            self.showErrorDialog("Item Error", str(e))
+        except Exception as error:
+            self.showErrorDialog("Item Error", str(error))
             raise
 
     def load(
@@ -261,7 +266,7 @@ class PoseItem(baseitem.BaseItem):
         objects=None,
         namespaces=None,
         blend=100.0,
-        key=None,
+        key=False,
         attrs=None,
         mirror=None,
         refresh=True,
@@ -271,30 +276,33 @@ class PoseItem(baseitem.BaseItem):
         showBlendMessage=False,
     ):
         """
+        Load the pose item to the given objects or namespaces.
+        
         :type objects: list[str]
         :type blend: float
-        :type key: bool | None
+        :type key: bool
         :type namespaces: list[str] | None
-        :type refresh: bool | None
-        :type mirror: bool | None
+        :type refresh: bool
+        :type mirror: bool or None
         :type batchMode: bool
         :type showBlendMessage: bool
+        :type clearSelection: bool
         :type mirrorTable: mutils.MirrorTable
         """
         logger.debug(u'Loading: {0}'.format(self.path()))
 
-        mirror = mirror or self.isMirrorEnabled()
+        # The mirror option can change during blending, so we always get
+        # the value instead of caching it. This might make blending slower.
+        if mirror is None:
+            mirror = self.isMirrorEnabled()
 
-        # Update the blend value in case this method is called
-        # without blending.
         self.setBlendValue(blend, load=False)
 
         if showBlendMessage:
             self.showToastMessage("Blend: {0}%".format(blend))
 
         try:
-            baseitem.BaseItem.load(
-                self,
+            self.transferObject().load(
                 objects=objects,
                 namespaces=namespaces,
                 key=key,
@@ -306,6 +314,7 @@ class PoseItem(baseitem.BaseItem):
                 mirrorTable=mirrorTable,
                 clearSelection=clearSelection,
             )
+
         except Exception:
             self.stopBlending()
             raise
@@ -316,18 +325,35 @@ class PoseItem(baseitem.BaseItem):
 
         logger.debug(u'Loaded: {0}'.format(self.path()))
 
-    def save(self, objects, path="", iconPath="", **kwargs):
+    def save(self, objects, path="", iconPath="", metadata=None, **kwargs):
         """
         Save all the given object data to the given path on disc.
 
         :type objects: list[str]
         :type path: str
         :type iconPath: str
+        :type metadata: None or dict
         """
         if path and not path.endswith(".pose"):
             path += ".pose"
 
-        super(PoseItem, self).save(objects, path=path, iconPath=iconPath, **kwargs)
+        logger.info(u'Saving: {0}'.format(path))
+
+        # Remove and create a new temp directory
+        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
+
+        # Save the pose to the temp location
+        mutils.savePose(
+            tempPath,
+            objects,
+            metadata=metadata
+        )
+
+        # Move the mirror table to the given path using the base class
+        contents = [tempPath, iconPath]
+        super(PoseItem, self).save(path, contents=contents, **kwargs)
+
+        logger.info(u'Saved: {0}'.format(path))
 
 
 class PoseCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -346,10 +372,10 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
         """
         super(PosePreviewWidget, self).__init__(*args, **kwargs)
 
-        self.connect(self.ui.keyCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
-        self.connect(self.ui.mirrorCheckBox, QtCore.SIGNAL("clicked()"), self.saveSettings)
-        self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderMoved(int)"), self.sliderMoved)
-        self.connect(self.ui.blendSlider, QtCore.SIGNAL("sliderReleased()"), self.sliderReleased)
+        self.ui.keyCheckBox.clicked.connect(self.saveSettings)
+        self.ui.mirrorCheckBox.clicked.connect(self.saveSettings)
+        self.ui.blendSlider.sliderMoved.connect(self.sliderMoved)
+        self.ui.blendSlider.sliderReleased.connect(self.sliderReleased)
 
         self.item().blendChanged.connect(self.updateSlider)
         self.item().mirrorChanged.connect(self.updateMirror)
