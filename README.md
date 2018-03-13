@@ -1,8 +1,6 @@
 
 # ![logo](./resource/icons/icon_white_on_blue.png) Studio Library
 
-## Description :
-
 A Free tool written in python for managing poses and animation in Maya.
 
 
