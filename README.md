@@ -1,5 +1,5 @@
 
-# ![logo](./resource/icons/icon_white_on_blue.png) Studio Library
+# ![logo](./resource/icons/icon_black_on_white.png) Studio Library
 
 A Free tool written in python for managing poses and animation in Maya.
 
@@ -21,7 +21,7 @@ A Free tool written in python for managing poses and animation in Maya.
 
 Contributions to Studio Library are always welcome! Whether it's reporting bugs, feature requests, discussing ideas or committing code.
 
-We follow below guides for...
+We follow the below guides for...
 
 * [Commit messages style](https://github.com/erlang/otp/wiki/Writing-good-commit-messages)
 
