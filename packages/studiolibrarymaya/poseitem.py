@@ -281,7 +281,7 @@ class PoseItem(baseitem.BaseItem):
         :type showBlendMessage: bool
         :type mirrorTable: mutils.MirrorTable
         """
-        logger.info(u'Loading: {0}'.format(self.path()))
+        logger.debug(u'Loading: {0}'.format(self.path()))
 
         mirror = mirror or self.isMirrorEnabled()
 
@@ -314,7 +314,7 @@ class PoseItem(baseitem.BaseItem):
             if not batchMode:
                 self.stopBlending()
 
-        logger.info(u'Loaded: {0}'.format(self.path()))
+        logger.debug(u'Loaded: {0}'.format(self.path()))
 
     def save(self, objects, path="", iconPath="", **kwargs):
         """
