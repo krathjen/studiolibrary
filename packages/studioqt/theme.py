@@ -65,7 +65,7 @@ THEME_PRESETS = [
     {
         "name": "Dark",
         "accentColor": None,
-        "backgroundColor": "rgb(80, 80, 90)",
+        "backgroundColor": "rgb(60, 64, 79)",
     },
     {
         "name": "Light",

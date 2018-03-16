@@ -75,7 +75,7 @@ class LibraryWidget(QtWidgets.QWidget):
             },
         "theme": {
                 "accentColor": "rgb(0, 175, 240, 255)",
-                "backgroundColor": "rgb(60, 60, 80, 255)",
+                "backgroundColor": "rgb(60, 64, 79, 255)",
             }
         }
 
