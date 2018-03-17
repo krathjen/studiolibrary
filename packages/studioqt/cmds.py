@@ -17,6 +17,7 @@ import inspect
 import logging
 import contextlib
 
+import studioqt
 from studioqt import QtCore
 from studioqt import QtUiTools
 from studioqt import QtWidgets
@@ -65,7 +66,7 @@ def app():
     .. code-block:: python
         import studioqt
 
-        with studioqt():
+        with studioqt.app():
             widget = QWidget(None)
             widget.show()
 
@@ -76,6 +77,7 @@ def app():
     isAppRunning = bool(QtWidgets.QApplication.instance())
     if not isAppRunning:
         app_ = QtWidgets.QApplication(sys.argv)
+        installFonts()
 
     yield None
 
@@ -227,3 +229,27 @@ def fadeOut(widget, duration=200, onFinished=None):
     widget._fadeOut_ = animation
 
     return animation
+
+
+def installFonts(path=""):
+    """
+    Install all the fonts in the given directory path.
+    
+    :type path: str
+    """
+    path = path or studioqt.resource.get("fonts")
+
+    path = os.path.abspath(path)
+    fontDatabase = QtWidgets.QFontDatabase()
+
+    for filename in os.listdir(path):
+
+        if filename.endswith(".ttf"):
+
+            filename = os.path.join(path, filename)
+            result = fontDatabase.addApplicationFont(filename)
+
+            if result > 0:
+                logger.debug("Added font %s", filename)
+            else:
+                logger.debug("Cannot add font %s", filename)
