@@ -2336,7 +2336,7 @@ class LibraryWidget(QtWidgets.QWidget):
         logger.exception(error)
         self.showErrorDialog(title, error)
 
-    def showQuestionDialog(self, title, text):
+    def showQuestionDialog(self, title, text, buttons=None):
         """
         A convenience method for showing a question dialog to the user.
 
@@ -2344,7 +2344,8 @@ class LibraryWidget(QtWidgets.QWidget):
         :type text: str
         :rtype: QMessageBox.StandardButton
         """
-        buttons = QtWidgets.QMessageBox.Yes | \
+        buttons = buttons or \
+                  QtWidgets.QMessageBox.Yes | \
                   QtWidgets.QMessageBox.No | \
                   QtWidgets.QMessageBox.Cancel
 

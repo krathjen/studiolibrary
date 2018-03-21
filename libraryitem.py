@@ -125,10 +125,10 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         return False
 
     def __init__(
-        self,
-        path="",
-        database=None,
-        libraryWidget=None,
+            self,
+            path="",
+            database=None,
+            libraryWidget=None,
     ):
         """
         The LibraryItem class provides an item for use with the LibraryWidget.
@@ -630,16 +630,19 @@ class LibraryItem(studioqt.CombinedWidgetItem):
         text = 'Would you like to move the existing item "{}" to the trash?'
         text = text.format(self.name())
 
-        button = self.libraryWidget().showQuestionDialog(title, text)
+        buttons = QtWidgets.QMessageBox.Yes | \
+                  QtWidgets.QMessageBox.Cancel
+
+        button = self.libraryWidget().showQuestionDialog(title, text, buttons)
 
         if button == QtWidgets.QMessageBox.Yes:
-            self.libraryWidget().moveItemsToTrash([studiolibrary.LibraryItem(path)])
-        elif button == QtWidgets.QMessageBox.Cancel:
-            raise ItemSaveError("Saving was canceled.")
-        elif button != QtWidgets.QMessageBox.Yes:
+            item = studiolibrary.LibraryItem(path)
+            self.libraryWidget().moveItemsToTrash([item])
+            self.setPath(path)
+        else:
             raise ItemSaveError("You cannot save over an existing item.")
 
-        self.setPath(path)
+        return button
 
     # -----------------------------------------------------------------
     # Support for painting the type icon
