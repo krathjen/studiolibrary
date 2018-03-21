@@ -14,7 +14,6 @@ A Free tool written in python for managing poses and animation in Maya.
 * Insert, merge and replace animation
 * Supports Windows, Linux and OSX
 * Supports Maya 2016, 2017 and 2018
-* It's **opensource** and FREE for everyone! 🎉  🎆
 
 
 ## Contributing
@@ -67,6 +66,12 @@ How to use
 * [poses](https://www.youtube.com/watch?v=lpaWrT7VXfM)
 * [selection sets](https://www.youtube.com/watch?v=xejWubal_j8)
 * [mirror tables](https://www.youtube.com/watch?v=kCv0XleJfjU&t=3s)
+
+## License
+
+The Studio Library is free to use in production under the GNU Lesser General Public License v3.0.
+For more information please click [here](https://github.com/krathjen/studiolibrary/blob/master/LICENSE.md).
+
 
 ## Issues
 
