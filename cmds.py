@@ -16,6 +16,7 @@ import json
 import ctypes
 import shutil
 import urllib2
+import locale
 import logging
 import getpass
 import platform
@@ -368,6 +369,10 @@ def formatPath(formatString, path="", **kwargs):
     dirname, name, extension = splitPath(path)
 
     local = os.getenv('APPDATA') or os.getenv('HOME')
+    # Environemt variables return raw strings so we need to convert them to
+    # unicode using system encoding
+    if local:
+        local = local.decode(locale.getpreferredencoding())
 
     labels = {
         "name": name,

@@ -1870,7 +1870,7 @@ class LibraryWidget(QtWidgets.QWidget):
         path = self.settingsPath()
         data = {}
 
-        logger.debug("Reading settings {path}".format(path=path))
+        logger.debug(u"Reading settings {path}".format(path=path))
 
         try:
             data = studiolibrary.readJson(path)
