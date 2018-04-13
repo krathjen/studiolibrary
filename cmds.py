@@ -13,6 +13,7 @@
 
 import os
 import json
+import uuid
 import ctypes
 import shutil
 import urllib2
@@ -57,7 +58,7 @@ __all__ = [
     "MovePathError",
     "RenamePathError",
     "timeAgo",
-    "sendEvent",
+    "sendAnalytics",
     "showInFolder",
     "stringToList",
     "listToString",
@@ -941,12 +942,41 @@ def timeAgo(timeStamp):
     return str(v) + " years ago"
 
 
-def sendEvent(name, version="1.0.0", an="StudioLibrary", tid=None):
+def userUuid():
     """
-    Send a screen view event to google analytics.
+    Return a uuid4 for the user.
+    
+    This does not compromise privacy as it generates a random uuid4 string
+    for the current user.
+    
+    :rtype: str
+    """
+    path = os.path.join(localPath(), "settings.json")
+    data = readJson(path)
+    userUuid_ = data.get("userUuid")
+
+    if not userUuid_:
+        userUuid_ = str(uuid.uuid4())
+        data = {"userUuid": userUuid_}
+        updateJson(path, data)
+
+    return userUuid_
+
+
+def sendAnalytics(
+        name,
+        version="1.0.0",
+        an="StudioLibrary",
+        tid=None,
+):
+    """
+    Send an analytic event to google analytics.
+    
+    This is only used once and is not used to send any personal/user data.
 
     Example:
-        sendEvent("mainWindow")
+        # logs an event named "mainWindow"
+        sendAnalytics("mainWindow")
 
     :type name: str
     :type version: str
@@ -958,7 +988,7 @@ def sendEvent(name, version="1.0.0", an="StudioLibrary", tid=None):
         return
 
     tid = tid or ANALYTICS_ID
-    cid = getpass.getuser() + "-" + platform.node()
+    cid = userUuid()
 
     url = "http://www.google-analytics.com/collect?" \
           "v=1" \
