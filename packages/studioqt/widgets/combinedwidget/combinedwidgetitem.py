@@ -77,7 +77,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self._rect = None
         self.textColumnOrder = []
 
-        self._text = {}
+        self._data = {}
         self._sortText = {}
         self._displayText = {}
 
@@ -126,9 +126,9 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         Return a dict of the current item text.
 
-        :rtype: dict[]
+        :rtype: dict
         """
-        return self._text
+        return self._data
 
     def mimeText(self):
         """
@@ -175,20 +175,6 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         return self._dragEnabled
 
-    def setData(self, column, role, value):
-        """
-        Reimplemented to set the search text to dirty.
-
-        Set the value for the item's column and role to the given value.
-
-        :type column: int or str
-        :type role: int
-        :type value: QtCore.QVariant
-        :rtype: None
-        """
-        self._searchText = None
-        QtWidgets.QTreeWidgetItem.setData(self, column, role, value)
-
     def setIcon(self, column, icon, color=None):
         """
         Set the icon to be displayed in the given column.
@@ -215,6 +201,20 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         else:
             self._pixmap[column] = None
             QtWidgets.QTreeWidgetItem.setIcon(self, column, icon)
+
+    def setData(self, column, role, value):
+        """
+        Reimplemented to set the search text to dirty.
+
+        Set the value for the item's column and role to the given value.
+
+        :type column: int or str
+        :type role: int
+        :type value: QtCore.QVariant
+        :rtype: None
+        """
+        self._searchText = None
+        QtWidgets.QTreeWidgetItem.setData(self, column, role, value)
 
     def data(self, column, role, **kwargs):
         """
@@ -265,7 +265,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         self.textColumnOrder.append(column)
 
         if isinstance(column, basestring):
-            self._text[column] = value
+            self._data[column] = value
         else:
             QtWidgets.QTreeWidgetItem.setText(self, column, unicode(value))
 
@@ -279,7 +279,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         if isinstance(column, basestring):
             text = self._sortText.get(column)
             if not text:
-                text = self._text.get(column, "")
+                text = self._data.get(column, "")
         else:
             text = QtWidgets.QTreeWidgetItem.text(self, column)
 
@@ -308,7 +308,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
 
         text = self._sortText.get(column, None)
         if not text:
-            text = self._text.get(column, "")
+            text = self._data.get(column, "")
 
         return text
 
@@ -320,12 +320,12 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :rtype: str
         """
         if isinstance(column, basestring):
-            text = self._text.get(column, "")
+            text = self._data.get(column, "")
 
         else:
             # Check the text before the display role data
             label = self.treeWidget().labelFromColumn(column)
-            text = self._text.get(label, "")
+            text = self._data.get(label, "")
 
             if not text:
                 text = QtWidgets.QTreeWidgetItem.data(
@@ -366,13 +366,13 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         treeWidget = self.treeWidget()
 
-        for label in self._text:
+        for label in self._data:
             column = treeWidget.columnFromLabel(label)
 
             if column < 0:
                 treeWidget.addHeaderLabel(label)
 
-            text = self._text[label]
+            text = self._data[label]
             self.setText(column, text)
 
         for label in self._icon:
@@ -465,12 +465,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
         :rtype: str
         """
         if not self._searchText:
-            searchText = []
-            for column in range(self.columnCount()):
-                text = self.data(column, QtCore.Qt.DisplayRole)
-                if text:
-                    searchText.append(unicode(text))
-            self._searchText = " ".join(searchText)
+            self._searchText = unicode(self._data)
 
         return self._searchText
 
@@ -1140,7 +1135,7 @@ class CombinedWidgetItem(QtWidgets.QTreeWidgetItem):
             value = math.ceil(value) + self.blendPreviousValue()
             try:
                 self.setBlendValue(value)
-            except Exception, msg:
+            except Exception as msg:
                 self.stopBlending()
 
     def startBlendingEvent(self, event):
