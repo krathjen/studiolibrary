@@ -174,8 +174,8 @@ class AnimItem(baseitem.BaseItem):
                 sourceEnd=sourceEnd,
             )
 
-        except Exception, e:
-            self.showErrorDialog("Item Error", str(e))
+        except Exception as error:
+            self.showErrorDialog("Item Error", str(error))
             raise
 
     def load(
@@ -290,10 +290,10 @@ class AnimItem(baseitem.BaseItem):
         if iconPath:
             contents.append(iconPath)
 
-        contents.extend(t.paths())
+        contents.extend(anim.paths())
 
         # Move the animation data to the given path using the base class
-        super(AnimItem, self).save(path, contents=contents, **kwargs)
+        super(AnimItem, self).save(path, contents=contents)
 
 
 class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
@@ -312,8 +312,8 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
         try:
             start, end = mutils.currentFrameRange()
-        except NameError, e:
-            logger.exception(e)
+        except NameError as error:
+            logger.exception(error)
 
         self.createSequenceWidget()
 
@@ -558,7 +558,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
                 captured=self._thumbnailCaptured,
             )
 
-        except Exception, e:
+        except Exception as e:
             title = "Error while capturing thumbnail"
             QtWidgets.QMessageBox.critical(self.libraryWidget(), title, str(e))
             raise
