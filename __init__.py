@@ -13,10 +13,12 @@
 
 import os
 import sys
+import json
 
 
 __version__ = "2.4.0b7"
 
+_config = None
 _resource = None
 
 
@@ -25,6 +27,66 @@ DIRNAME = os.path.dirname(PATH)
 PACKAGES_PATH = os.path.join(DIRNAME, "packages")
 RESOURCE_PATH = os.path.join(DIRNAME, "resource")
 HELP_URL = "http://www.studiolibrary.com"
+
+
+class Config(dict):
+    """
+    A custom config parser for passing JSON files.
+    
+    We use this instead of the standard ConfigParser as the JSON format
+    can support list and dict types.
+    
+    This parser can also support comments using the following style "//"
+    """
+
+    @staticmethod
+    def paths():
+        """
+        Return all possible config paths.
+        
+        :rtype: list[str] 
+        """
+        cwd = os.path.dirname(__file__)
+        paths = [os.path.join(cwd, "config", "default.json")]
+
+        path = os.environ.get("STUDIO_LIBRARY_CONFIG_PATH")
+        path = path or os.path.join(cwd, "config", "config.json")
+
+        if os.path.exists(path):
+            paths.append(path)
+
+        return paths
+
+    def read(self):
+        """Read all paths and overwrite the keys with each successive file."""
+        self.clear()
+
+        for path in self.paths():
+            lines = []
+
+            with open(path) as f:
+                for line in f.readlines():
+                    if not line.strip().startswith('//'):
+                        lines.append(line)
+
+            data = '\n'.join(lines)
+            if data:
+                self.update(json.loads(data))
+
+
+def config():
+    """
+    Read the config data for the current environment.
+
+    :rtype: Config 
+    """
+    global _config
+
+    if not _config:
+        _config = Config()
+        _config.read()
+
+    return _config
 
 
 def version():

@@ -84,7 +84,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
     TRASH_ENABLED = True
 
-    RECURSIVE_SEARCH_DEPTH = 4
     RECURSIVE_SEARCH_ENABLED = False
 
     # Still in development
@@ -542,7 +541,10 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         path = self._showChangePathDialog()
-        self.setPath(path)
+        if path:
+            self.setPath(path)
+        else:
+            self.refresh()
 
     @studioqt.showArrowCursor
     def _showChangePathDialog(self):
@@ -617,9 +619,11 @@ class LibraryWidget(QtWidgets.QWidget):
     def update(self):
         """Update the library widget and the data. """
         self.refreshFolders()
-        self.refreshItems()
         self.updateWindowTitle()
-        self.showToastMessage("Refreshed")
+
+        if self.path():
+            self.refreshItems()
+            self.showToastMessage("Refreshed")
 
     # -----------------------------------------------------------------
     # Methods for the folders widget
@@ -683,6 +687,14 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.updateFolders()
 
+    def recursiveSearchDepth(self):
+        """
+        Return the recursive search depth.
+        
+        :rtype: int
+        """
+        return studiolibrary.config().get('recursiveSearchDepth')
+
     def updateFolders(self):
         """
         Update the folders to be shown in the folders widget.
@@ -701,7 +713,7 @@ class LibraryWidget(QtWidgets.QWidget):
         }
 
         model = self.libraryModel()
-        depth = self.RECURSIVE_SEARCH_DEPTH
+        depth = self.recursiveSearchDepth()
 
         for item in model.createItems(libraryWidget=self, depth=depth):
             if item.DisplayInFolderView:
@@ -884,7 +896,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        depth = self.RECURSIVE_SEARCH_DEPTH
+        depth = self.recursiveSearchDepth()
         items = self.libraryModel().createItems(libraryWidget=self, depth=depth)
 
         # Filter the items using the folders widget

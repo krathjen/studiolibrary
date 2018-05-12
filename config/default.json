@@ -1,0 +1,15 @@
+// This is the default config file and should not be changed.
+//
+// There are two ways to create a custom config.
+//
+// 1. You can create a config.json file in the same directory as the
+// default.json. This file will override any keys in the default.json file
+// and will be ignored by git.
+//
+// 2. The other way is to create an environment variable with the name
+// STUDIO_LIBRARY_CONFIG_PATH. The value of this variable should be the
+// full path to your config.json file.
+
+{
+"recursiveSearchDepth": 4
+}

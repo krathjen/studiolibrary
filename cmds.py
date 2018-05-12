@@ -88,6 +88,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+_config = None
 _itemClasses = collections.OrderedDict()
 
 
