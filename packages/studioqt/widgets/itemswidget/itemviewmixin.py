@@ -42,13 +42,10 @@ class ItemViewMixin(object):
 
         :rtype: None
         """
-        if self._currentItem:
-            try:
-                self._currentItem.text(0)
-            except RuntimeError:
-                self._hoverItem = None
-                self._currentItem = None
-                self._currentSelection = None
+        if self._currentItem and self._currentItem.treeWidget():
+            self._hoverItem = None
+            self._currentItem = None
+            self._currentSelection = None
 
     def itemModel(self):
         return self.parent().itemModel()
