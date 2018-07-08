@@ -18,7 +18,7 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 
-class ItemGroup(studioqt.Item):
+class GroupItem(studioqt.Item):
 
     DEFAULT_FONT_SIZE = 24
 

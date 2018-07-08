@@ -246,7 +246,7 @@ def findItems(path, depth=3, **kwargs):
     maxDepth = depth
     startDepth = path.count(os.path.sep)
 
-    for root, dirs, files in walk(path):
+    for root, dirs, files in walk(path, followlinks=True):
 
         files.extend(dirs)
 

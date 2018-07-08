@@ -17,10 +17,10 @@ from studioqt import QtWidgets
 
 import studioqt
 
-from treewidgetitem import TreeWidgetItem
+from sidebarwidgetitem import SidebarWidgetItem
 
 
-__all__ = ["TreeWidget"]
+__all__ = ["SidebarWidget"]
 
 logger = logging.getLogger(__name__)
 
@@ -64,14 +64,14 @@ def pathsToDict(paths, root="", split=None):
     return results
 
 
-class TreeWidget(QtWidgets.QTreeWidget):
+class SidebarWidget(QtWidgets.QTreeWidget):
 
     itemDropped = QtCore.Signal(object)
     itemRenamed = QtCore.Signal(str, str)
     itemSelectionChanged = QtCore.Signal()
 
     def __init__(self, *args):
-        super(TreeWidget, self).__init__(*args)
+        super(SidebarWidget, self).__init__(*args)
 
         self._dpi = 1
         self._items = []
@@ -324,7 +324,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
         """
         Return the last selected item
         
-        :rtype: TreeWidgetItem 
+        :rtype: SidebarWidgetItem 
         """
         path = self.selectedPath()
         return self.itemFromPath(path)
@@ -456,7 +456,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
 
             path = split.join([key])
 
-            item = TreeWidgetItem(self)
+            item = SidebarWidgetItem(self)
             item.setText(0, unicode(key))
             item.setPath(path)
 
@@ -466,7 +466,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
                     path = parent.path()
                     path = split.join([path, text])
 
-                    child = TreeWidgetItem()
+                    child = SidebarWidgetItem()
                     child.setText(0, unicode(text))
                     child.setPath(path)
 
@@ -489,7 +489,7 @@ class ExampleWindow(QtWidgets.QWidget):
 
         self._lineEdit = QtGui.QLineEdit()
         self._lineEdit.textChanged.connect(self.searchChanged)
-        self._treeWidget = TreeWidget(self)
+        self._treeWidget = SidebarWidget(self)
 
         self._slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self._slider.valueChanged.connect(self._valueChanged)

@@ -14,43 +14,74 @@ import logging
 
 import studiolibrary
 
-import studioqt
 from studioqt import QtCore
 
 
 __all__ = [
-    "LibraryModel",
+    "Library",
 ]
 
 logger = logging.getLogger(__name__)
 
 
-class LibraryModel(studioqt.ItemModel):
+class Library(QtCore.QObject):
 
-    ColumnLabels = ["icon", "name", "path", "type", "category", "modified"]
-    GroupByLabels = ["category", "modified", "type"]
+    ColumnLabels = [
+        "icon",
+        "name",
+        "path",
+        "type",
+        "category",
+        "folder",
+        # "modified"
+    ]
+
+    SortLabels = [
+        "name",
+        "path",
+        "type",
+        "category",
+        "folder",
+        # "modified"
+    ]
+
+    GroupLabels = [
+        "type",
+        "category",
+        # "modified",
+    ]
 
     DatabasePath = "{path}/.studiolibrary/database.json"
 
-    EnableWatcher = False
-    WatcherRepeatRate = 1  # in seconds
-
     dataChanged = QtCore.Signal()
-    fileChanged = QtCore.Signal()
 
     def __init__(self, path, *args):
-        studioqt.ItemModel.__init__(self, *args)
+        QtCore.QObject.__init__(self, *args)
 
         self._path = None
+        self._mtime = None
         self._data = {}
         self._items = []
-
-        self._mtime = None
-        self._watcher = None
+        self._currentItems = []
 
         self.setPath(path)
         self.setDirty(True)
-        self.setWatcherEnabled(self.EnableWatcher)
+
+    def currentItems(self):
+        """
+        The items that are displayed in the view.
+        
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        return self._currentItems
+
+    def recursiveDepth(self):
+        """
+        Return the recursive search depth.
+        
+        :rtype: int
+        """
+        return studiolibrary.config().get('recursiveSearchDepth')
 
     def path(self):
         """
@@ -76,57 +107,9 @@ class LibraryModel(studioqt.ItemModel):
         """
         return studiolibrary.formatPath(self.DatabasePath, path=self.path())
 
-    def setWatcherEnabled(self, enable, repeatRate=None):
-        """
-        Enable a watcher that will trigger the database changed signal.
-
-        :type enable: bool
-        :type repeatRate: int
-        :rtype: None
-        """
-        if enable:
-            self.startWatcher(repeatRate=repeatRate)
-        else:
-            self.stopWatcher()
-
-    def startWatcher(self, repeatRate=None):
-        """
-        Create and start a file system watcher for the current database. 
-
-        :type repeatRate: int
-        :rtype: None 
-        """
-        self.stopWatcher()
-
-        repeatRate = repeatRate or self.WatcherRepeatRate
-
-        self._watcher = studioqt.InvokeRepeatingThread(repeatRate)
-        self._watcher.triggered.connect(self._fileChanged)
-        self._watcher.start()
-
-    def stopWatcher(self):
-        """
-        Stop watching the current database for changes.
-        
-        :rtype: None 
-        """
-        if self._watcher:
-            self._watcher.terminate()
-            self._watcher = None
-
-    def _fileChanged(self):
-        """
-        Triggered when the watcher has reached it's repeat rate.
-
-        :rtype: None
-        """
-        if self.isDirty():
-            self.setDirty(False)
-            self.fileChanged.emit()
-
     def mtime(self):
         """
-        Return the time of last modification of db.
+        Return when the database was last modified.
 
         :rtype: float or None
         """
@@ -140,9 +123,9 @@ class LibraryModel(studioqt.ItemModel):
 
     def setDirty(self, value):
         """
-        Update the database object with the current timestamp of the db path.
+        Update the model object with the current database timestamp.
 
-        :rtype: None
+        :type: bool
         """
         if value:
             self._mtime = None
@@ -193,7 +176,11 @@ class LibraryModel(studioqt.ItemModel):
                 isDirty = True
                 del data[path]
 
-        items = studiolibrary.findItems(self.path())
+        depth = self.recursiveDepth()
+        items = studiolibrary.findItems(
+            self.path(),
+            depth=depth,
+        )
 
         for item in items:
             path = item.path()
@@ -204,6 +191,81 @@ class LibraryModel(studioqt.ItemModel):
         if isDirty:
             self.save(data)
             self.dataChanged.emit()
+
+    def findItems(self, queries, libraryWidget=None):
+        """
+        Get the items that match the given queries.
+        
+        Examples:
+            
+            queries = [
+                {
+                    'operator': 'or',
+                    'filters': [
+                        ('folder', 'is' '/library/proj/test'),
+                        ('folder', 'startswith', '/library/proj/test'),
+                    ]
+                },
+                {
+                    'operator': 'and',
+                    'filters': [
+                        ('path', 'contains' 'test'),
+                        ('path', 'contains', 'run'),
+                    ]
+                }
+            ]
+            
+            print(library.find(queries))
+            
+        :type queries: list[dict]
+        :type libraryWidget: studiolibrary.LibraryWIdget or None
+            
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        items = self.createItems(libraryWidget=libraryWidget)
+
+        self._currentItems = []
+
+        for item in items:
+
+            matches = []
+
+            for query in queries:
+
+                filters = query.get('filters')
+                operator = query.get('operator', 'and')
+
+                if not filters:
+                    continue
+
+                match = False
+
+                for key, cond, text in filters:
+
+                    text = text.lower()
+                    itemText = item.text(key).lower()
+
+                    if cond == 'contains':
+                        match = text in itemText
+
+                    elif cond == 'is':
+                        match = text == itemText
+
+                    elif cond == 'startswith':
+                        match = itemText.startswith(text)
+
+                    if operator == 'or' and match:
+                        break
+
+                    if operator == 'and' and not match:
+                        break
+
+                matches.append(match)
+
+            if all(matches):
+                self._currentItems.append(item)
+
+        return self._currentItems
 
     def addItem(self, item, data=None):
         """
@@ -228,60 +290,16 @@ class LibraryModel(studioqt.ItemModel):
         paths = [item.path() for item in items]
 
         isDirty = self.isDirty()
+
         self.addPaths(paths, data)
+
         self.setDirty(isDirty)
 
         self._items.extend(items)
 
         self.dataChanged.emit()
 
-    def copyItems(self, items, dst):
-        """
-        Copy the given items to the destination path and update the database.
-        
-        :type items: list[studiolibrary.LibraryItem]
-        :type dst: str
-        :rtype: None 
-        """
-        logger.info("Copy items to %s", dst)
-
-        for item in items:
-            path = self.copyPath(item.path(), dst)
-            item.setPath(path)
-
-        self.dataChanged.emit()
-
-    def renameItems(self, items, dst):
-        """
-        Rename the given items to the given name and update the database.
-        
-        :type items: list[studiolibrary.LibraryItem]
-        :type dst: str
-        :rtype: None 
-        """
-        logger.info("Rename items to %s", dst)
-
-        for item in items:
-            dst = self.renamePath(item.path(), dst)
-            item.setPath(dst)
-
-        self.dataChanged.emit()
-
-    def removeItems(self, items):
-        """
-        Remove the given items from disc and the database.
-        
-        :type items: list[studiolibrary.LibraryItem]
-        :rtype: None 
-        """
-        logger.info("Remove items %s", items)
-
-        paths = [item.path() for item in items]
-        self.removePaths(paths)
-
-        self.dataChanged.emit()
-
-    def createItems(self, *args, **kwargs):
+    def createItems(self, libraryWidget=None):
         """
         Create all the items for the model.
 
@@ -290,9 +308,14 @@ class LibraryModel(studioqt.ItemModel):
         # Check if the database has changed since the last read call
         if self.isDirty():
 
-            items = studiolibrary.findItems(self.path(), *args, **kwargs)
-            self._items = list(items)
+            paths = self.read().keys()
+            items = studiolibrary.itemsFromPaths(
+                paths,
+                library=self,
+                libraryWidget=libraryWidget
+            )
 
+            self._items = list(items)
             self.loadItemData(self._items)
 
         return self._items
@@ -363,25 +386,23 @@ class LibraryModel(studioqt.ItemModel):
 
     def copyPath(self, src, dst):
         """
-        Remove the given path from the database.
+        Copy the given source path to the given destination path.
 
         :type src: str
         :type dst: str
         :rtype: str
         """
-        path = studiolibrary.copyPath(src, dst)
-        self.addPaths([path])
-        return path
+        self.addPaths([dst])
+        return dst
 
-    def renamePath(self, src, name):
+    def renamePath(self, src, dst):
         """
-        Remove the given path from the database.
+        Rename the source path to the given name.
 
         :type src: str
-        :type name: str
+        :type dst: str
         :rtype: str
         """
-        dst = studiolibrary.renamePath(src, name)
         studiolibrary.renamePathInFile(self.databasePath(), src, dst)
         return dst
 
@@ -392,7 +413,6 @@ class LibraryModel(studioqt.ItemModel):
         :type path: str
         :rtype: None
         """
-        studiolibrary.removePath(path)
         self.removePaths([path])
 
     def removePaths(self, paths):

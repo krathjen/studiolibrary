@@ -21,7 +21,6 @@ import studioqt
 
 from .item import Item
 from .listview import ListView
-from .itemmodel import ItemModel
 from .treewidget import TreeWidget
 from .itemdelegate import ItemDelegate
 
@@ -65,8 +64,6 @@ class ItemsWidget(QtWidgets.QWidget):
         self._iconSize = QtCore.QSize(w, h)
         self._zoomAmount = self.DEFAULT_ZOOM_AMOUNT
         self._isItemTextVisible = True
-
-        self._itemModel = None
 
         self._treeWidget = TreeWidget(self)
 
@@ -137,13 +134,6 @@ class ItemsWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.itemDoubleClicked.emit(item)
-
-    def setItemModel(self, itemModel):
-        self._itemModel = itemModel
-        self.setColumnLabels(itemModel.ColumnLabels)
-
-    def itemModel(self):
-        return self._itemModel or ItemModel()
 
     def setToastEnabled(self, enabled):
         """
@@ -743,6 +733,25 @@ class ItemsWidget(QtWidgets.QWidget):
         sadd = s.add
         return [x for x in labels if x.strip() and not (x in s or sadd(x))]
 
+    def setGroupLabels(self, labels):
+        """
+        Set the columns that can be grouped.
+        
+        :type labels: list[str]
+        """
+        self.treeWidget().setGroupLabels(labels)
+
+    def setSortLabels(self, labels):
+        """
+        Set the column labels that can be sorted.
+        
+        :type labels: list[str]
+        """
+        if "Custom Order" not in labels:
+            labels.append("Custom Order")
+
+        self.treeWidget().setSortLabels(labels)
+
     def setColumnLabels(self, labels):
         """
         Set the columns for the widget.
@@ -755,13 +764,13 @@ class ItemsWidget(QtWidgets.QWidget):
         if "Custom Order" not in labels:
             labels.append("Custom Order")
 
-        if "Search Order" not in labels:
-            labels.append("Search Order")
+        # if "Search Order" not in labels:
+        #     labels.append("Search Order")
 
         self.treeWidget().setHeaderLabels(labels)
 
         self.setColumnHidden("Custom Order", True)
-        self.setColumnHidden("Search Order", True)
+        # self.setColumnHidden("Search Order", True)
 
     def items(self):
         """

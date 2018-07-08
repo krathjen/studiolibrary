@@ -36,7 +36,7 @@ class PreviewFrame(QtWidgets.QFrame):
     pass
 
 
-class FoldersFrame(QtWidgets.QFrame):
+class SidebarFrame(QtWidgets.QFrame):
     pass
 
 
@@ -56,7 +56,7 @@ class LibraryWidget(QtWidgets.QWidget):
         "paneSizes": [160, 280, 180],
         "geometry": [-1, -1, 860, 720],
         "trashFolderVisible": False,
-        "foldersWidgetVisible": True,
+        "sidebarWidgetVisible": True,
         "previewWidgetVisible": True,
         "menuBarWidgetVisible": True,
         "statusBarWidgetVisible": True,
@@ -186,7 +186,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self._isLoaded = False
         self._previewWidget = None
         self._currentItem = None
-        self._libraryModel = None
+        self._library = None
         self._refreshEnabled = False
 
         self._superusers = None
@@ -200,7 +200,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self._itemsVisibleCount = 0
 
         self._isTrashFolderVisible = False
-        self._foldersWidgetVisible = True
+        self._sidebarWidgetVisible = True
         self._previewWidgetVisible = True
         self._statusBarWidgetVisible = True
 
@@ -208,7 +208,7 @@ class LibraryWidget(QtWidgets.QWidget):
         # Create Widgets
         # --------------------------------------------------------------------
 
-        self._foldersFrame = FoldersFrame(self)
+        self._sidebarFrame = SidebarFrame(self)
         self._previewFrame = PreviewFrame(self)
 
         self._itemsWidget = studioqt.ItemsWidget(self)
@@ -220,7 +220,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._statusWidget = studioqt.StatusWidget(self)
         self._menuBarWidget = studioqt.MenuBarWidget()
-        self._foldersWidget = studioqt.TreeWidget(self)
+        self._sidebarWidget = studioqt.SidebarWidget(self)
 
         self.setMinimumWidth(5)
         self.setMinimumHeight(5)
@@ -283,8 +283,8 @@ class LibraryWidget(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 1, 0, 0)
 
-        self._foldersFrame.setLayout(layout)
-        self._foldersFrame.layout().addWidget(self._foldersWidget)
+        self._sidebarFrame.setLayout(layout)
+        self._sidebarFrame.layout().addWidget(self._sidebarWidget)
 
         self._splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal, self)
         self._splitter.setSizePolicy(QtWidgets.QSizePolicy.Ignored,
@@ -292,7 +292,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self._splitter.setHandleWidth(2)
         self._splitter.setChildrenCollapsible(False)
 
-        self._splitter.insertWidget(0, self._foldersFrame)
+        self._splitter.insertWidget(0, self._sidebarFrame)
         self._splitter.insertWidget(1, self._itemsWidget)
         self._splitter.insertWidget(2, self._previewFrame)
 
@@ -324,11 +324,11 @@ class LibraryWidget(QtWidgets.QWidget):
         itemsWidget.itemSelectionChanged.connect(self._itemSelectionChanged)
         itemsWidget.customContextMenuRequested.connect(self.showItemsContextMenu)
 
-        folderWidget = self.foldersWidget()
-        folderWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        folderWidget.itemDropped.connect(self._itemDropped)
-        folderWidget.itemSelectionChanged.connect(self._folderSelectionChanged)
-        folderWidget.customContextMenuRequested.connect(self.showFolderMenu)
+        sidebarWidget = self.sidebarWidget()
+        sidebarWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        sidebarWidget.itemDropped.connect(self._itemDropped)
+        sidebarWidget.itemSelectionChanged.connect(self._folderSelectionChanged)
+        sidebarWidget.customContextMenuRequested.connect(self.showFolderMenu)
 
         self.folderSelectionChanged.connect(self.updateLock)
 
@@ -367,7 +367,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def _itemDropped(self, event):
         """
-        Triggered when items are dropped on the items widget or folders widget.
+        Triggered when items are dropped on the items widget or sidebar widget.
 
         :type event: QtCore.QEvent
         :rtype: None
@@ -398,37 +398,38 @@ class LibraryWidget(QtWidgets.QWidget):
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
 
-    def createLibraryModel(self):
+    def createLibrary(self):
         """
         Create a new library model instance.
         
-        :rtype: studiolibrary.LibraryModel 
+        :rtype: studiolibrary.Library 
         """
         path = self.path()
 
-        libraryModel = studiolibrary.LibraryModel(path)
-        libraryModel.dataChanged.connect(self.refresh)
+        library = studiolibrary.Library(path)
+        library.dataChanged.connect(self.refresh)
 
-        self.itemsWidget().setItemModel(libraryModel)
+        return library
 
-        return libraryModel
-
-    def libraryModel(self):
+    def library(self):
         """
         Return the library model object.
 
-        :rtype: studiolibrary.LibraryModel
+        :rtype: studiolibrary.Library
         """
-        return self._libraryModel
+        return self._library
 
-    def setLibraryModel(self, libraryModel):
+    def setLibrary(self, library):
         """
         Set the library model.
 
-        :type libraryModel: studiolibrary.LibraryModel
+        :type library: studiolibrary.Library
         :rtype: None
         """
-        self._libraryModel = libraryModel
+        self._library = library
+        self.itemsWidget().setSortLabels(library.SortLabels)
+        self.itemsWidget().setGroupLabels(library.GroupLabels)
+        self.itemsWidget().setColumnLabels(library.ColumnLabels)
 
     def statusWidget(self):
         """
@@ -485,8 +486,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._path = path
 
-        libraryModel = self.createLibraryModel()
-        self.setLibraryModel(libraryModel)
+        library = self.createLibrary()
+        self.setLibrary(library)
 
         self.refresh()
 
@@ -598,7 +599,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         elapsedTime = time.time()
-        self.libraryModel().sync()
+        self.library().sync()
         self.showToastMessage("Synced")
         elapsedTime = time.time() - elapsedTime
 
@@ -609,7 +610,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def refresh(self):
         """
-        Refresh all folders and items.
+        Refresh all sidebar items and library items.
         
         :rtype: None 
         """
@@ -618,7 +619,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def update(self):
         """Update the library widget and the data. """
-        self.refreshFolders()
+        self.refreshSidebar()
         self.updateWindowTitle()
 
         if self.path():
@@ -626,16 +627,16 @@ class LibraryWidget(QtWidgets.QWidget):
             self.showToastMessage("Refreshed")
 
     # -----------------------------------------------------------------
-    # Methods for the folders widget
+    # Methods for the sidebar widget
     # -----------------------------------------------------------------
 
-    def foldersWidget(self):
+    def sidebarWidget(self):
         """
-        Return the folders widget.
+        Return the sidebar widget.
         
-        :rtype: studioqt.TreeWidget
+        :rtype: studioqt.SidebarWidget
         """
-        return self._foldersWidget
+        return self._sidebarWidget
 
     def selectedFolderPath(self):
         """
@@ -643,7 +644,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: str or None
         """
-        return self.foldersWidget().selectedPath()
+        return self.sidebarWidget().selectedPath()
 
     def selectedFolderPaths(self):
         """
@@ -651,7 +652,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[str]
         """
-        return self.foldersWidget().selectedPaths()
+        return self.sidebarWidget().selectedPaths()
 
     def selectFolderPath(self, path):
         """
@@ -669,12 +670,12 @@ class LibraryWidget(QtWidgets.QWidget):
         :type paths: list[str]
         :rtype: None
         """
-        self.foldersWidget().selectPaths(paths)
+        self.sidebarWidget().selectPaths(paths)
 
     @studioqt.showWaitCursor
-    def refreshFolders(self):
+    def refreshSidebar(self):
         """
-        Refresh the state of the folders widget.
+        Refresh the state of the sidebar widget.
         
         :rtype: None 
         """
@@ -685,17 +686,9 @@ class LibraryWidget(QtWidgets.QWidget):
         elif not os.path.exists(path):
             return self.showPathErrorDialog()
 
-        self.updateFolders()
+        self.updateSidebar()
 
-    def recursiveSearchDepth(self):
-        """
-        Return the recursive search depth.
-        
-        :rtype: int
-        """
-        return studiolibrary.config().get('recursiveSearchDepth')
-
-    def updateFolders(self):
+    def updateSidebar(self):
         """
         Update the folders to be shown in the folders widget.
         
@@ -712,15 +705,18 @@ class LibraryWidget(QtWidgets.QWidget):
             }
         }
 
-        model = self.libraryModel()
-        depth = self.recursiveSearchDepth()
+        queries = [{
+            'filters': [('type', 'is', 'Folder')]
+        }]
 
-        for item in model.createItems(libraryWidget=self, depth=depth):
-            if item.DisplayInFolderView:
+        items = self.library().findItems(queries, libraryWidget=self)
+
+        for item in items:
+            if item.DisplayInSidebar:
                 path = item.path()
                 paths[path] = {}
 
-        self.foldersWidget().setPaths(paths, root=rootPath)
+        self.sidebarWidget().setPaths(paths, root=rootPath)
         self.updateTrashFolder()
 
     def createFolderContextMenu(self):
@@ -896,43 +892,47 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        depth = self.recursiveSearchDepth()
-        items = self.libraryModel().createItems(libraryWidget=self, depth=depth)
+        # Create a query using the sidebar and search widgets
+        queries = self.sidebarQuery(), self.searchQuery()
 
-        # Filter the items using the folders widget
-        items = self.folderWidgetFilter(items)
-
-        # Filter the items using the search widget
-        items = self.searchWidgetFilter(items)
+        items = self.library().findItems(queries, libraryWidget=self)
 
         self.setItems(items)
 
-    def folderWidgetFilter(self, items):
+    def sidebarQuery(self):
         """
-        Filter the given items using the folders widget.
+        Get the query for the sidebar widget.
         
-        :type items: list[studiolibrary.LibraryItem]
-        :rtype: list[studiolibrary.LibraryItem] 
+        :rtype: dict
         """
         isRecursive = self.isRecursiveSearchEnabled()
         selectedPaths = self.selectedFolderPaths()
 
-        # Filter the items using the folders widget
-        validItems = []
-        for item in items:
-            if isinstance(item, studioqt.ItemGroup):
-                continue
+        filters = []
 
-            for path in selectedPaths:
-                if isRecursive:
-                    path += "/"
-                    if item.path().startswith(path):
-                        validItems.append(item)
-                else:
-                    if path == os.path.dirname(item.path()):
-                        validItems.append(item)
+        if isRecursive:
+            condition = 'startswith'
+        else:
+            condition = 'is'
 
-        return validItems
+        for path in selectedPaths:
+            filter_ = ('path', condition, path + '/')
+            filters.append(filter_)
+
+        return {'operator': 'or', 'filters': filters}
+
+    def searchQuery(self):
+        """
+        Get the query for the search widget.
+        
+        :rtype: dict 
+        """
+        filters = []
+
+        for text in self.searchWidget().text().split():
+            filters.append(('path', 'contains', text))
+
+        return {'operator': 'and', 'filters': filters}
 
     def searchWidgetFilter(self, items):
         """
@@ -1029,7 +1029,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def createNewItemMenu(self):
         """
-        Return the new menu for adding new folders and items.
+        Return the create new item menu for adding new folders and items.
 
         :rtype: QtWidgets.QMenu
         """
@@ -1095,7 +1095,7 @@ class LibraryWidget(QtWidgets.QWidget):
         action.triggered[bool].connect(self.setMenuBarWidgetVisible)
         menu.addAction(action)
 
-        action = QtWidgets.QAction("Show Folders", menu)
+        action = QtWidgets.QAction("Show Sidebar", menu)
         action.setCheckable(True)
         action.setChecked(self.isFoldersWidgetVisible())
         action.triggered[bool].connect(self.setFoldersWidgetVisible)
@@ -1268,7 +1268,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype:  None
         """
-        self.libraryModel().saveItemData(self.items())
+        self.library().saveItemData(self.items())
 
     # -------------------------------------------------------------------
     # Support for moving items with drag and drop
@@ -1360,7 +1360,7 @@ class LibraryWidget(QtWidgets.QWidget):
         movedItems = []
 
         try:
-            self.libraryModel().blockSignals(True)
+            self.library().blockSignals(True)
 
             for item in items:
 
@@ -1380,7 +1380,7 @@ class LibraryWidget(QtWidgets.QWidget):
             self.showExceptionDialog("Move Error", error)
             raise
         finally:
-            self.libraryModel().blockSignals(False)
+            self.library().blockSignals(False)
 
             self.refresh()
             self.selectItems(movedItems)
@@ -1403,7 +1403,7 @@ class LibraryWidget(QtWidgets.QWidget):
         
         :rtype: bool
         """
-        return self._foldersWidgetVisible
+        return self._sidebarWidgetVisible
 
     def isStatusBarWidgetVisible(self):
         """
@@ -1444,12 +1444,12 @@ class LibraryWidget(QtWidgets.QWidget):
         :type value: bool
         """
         value = bool(value)
-        self._foldersWidgetVisible = value
+        self._sidebarWidgetVisible = value
 
         if value:
-            self._foldersFrame.show()
+            self._sidebarFrame.show()
         else:
-            self._foldersFrame.hide()
+            self._sidebarFrame.hide()
 
         self.updateViewButton()
 
@@ -1693,7 +1693,7 @@ class LibraryWidget(QtWidgets.QWidget):
             settings['theme'] = self.theme().settings()
 
         settings["trashFolderVisible"] = self.isTrashFolderVisible()
-        settings["foldersWidgetVisible"] = self.isFoldersWidgetVisible()
+        settings["sidebarWidgetVisible"] = self.isFoldersWidgetVisible()
         settings["previewWidgetVisible"] = self.isPreviewWidgetVisible()
         settings["menuBarWidgetVisible"] = self.isMenuBarWidgetVisible()
         settings["statusBarWidgetVisible"] = self.isStatusBarWidgetVisible()
@@ -1702,7 +1702,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         settings['itemsWidget'] = self.itemsWidget().settings()
         settings['searchWidget'] = self.searchWidget().settings()
-        settings['foldersWidget'] = self.foldersWidget().settings()
+        settings['sidebarWidget'] = self.sidebarWidget().settings()
 
         settings["path"] = self.path()
 
@@ -1743,7 +1743,7 @@ class LibraryWidget(QtWidgets.QWidget):
             if sizes and len(sizes) == 3:
                 self.setSizes(sizes)
 
-            value = settings.get("foldersWidgetVisible")
+            value = settings.get("sidebarWidgetVisible")
             if value is not None:
                 self.setFoldersWidgetVisible(value)
 
@@ -1776,8 +1776,8 @@ class LibraryWidget(QtWidgets.QWidget):
         if value is not None:
             self.setTrashFolderVisible(value)
 
-        value = settings.get('foldersWidget', {})
-        self.foldersWidget().setSettings(value)
+        value = settings.get('sidebarWidget', {})
+        self.sidebarWidget().setSettings(value)
 
         value = settings.get('itemsWidget', {})
         self.itemsWidget().setSettings(value)
@@ -1981,7 +1981,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.itemsWidget().setDpi(dpi)
         self.menuBarWidget().setDpi(dpi)
-        self.foldersWidget().setDpi(dpi)
+        self.sidebarWidget().setDpi(dpi)
         self.statusWidget().setFixedHeight(20 * dpi)
 
         self._splitter.setHandleWidth(2 * dpi)
@@ -2073,7 +2073,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.searchWidget().update()
         self.menuBarWidget().update()
-        self.foldersWidget().update()
+        self.sidebarWidget().update()
 
     # -----------------------------------------------------------------------
     # Support for the Trash folder.
@@ -2157,7 +2157,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         iconPath = studioqt.resource.get("icons", "delete.png")
 
-        for item in self.foldersWidget().items():
+        for item in self.sidebarWidget().items():
             if self.trashPath() == item.path():
                 item.setIconPath(iconPath)
                 item.setHidden(not self.isTrashFolderVisible())
@@ -2311,6 +2311,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :type title: str
         :type text: str
+        :type buttons: list[QMessageBox.StandardButton] 
         :rtype: QMessageBox.StandardButton
         """
         buttons = buttons or \
@@ -2374,7 +2375,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self._isLocked = value
 
-        self.foldersWidget().setLocked(value)
+        self.sidebarWidget().setLocked(value)
         self.itemsWidget().setLocked(value)
 
         self.updateCreateItemButton()
@@ -2394,7 +2395,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Set the valid superusers for the library widget.
 
-        This will lock all folders unless you're a superuser.
+        This will lock all folders unless the current user is a superuser.
 
         :type superusers: list[str]
         :rtype: None
