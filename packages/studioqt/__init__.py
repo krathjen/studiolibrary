@@ -37,11 +37,10 @@ from studioqt.widgets.searchwidget import SearchWidget
 from studioqt.widgets.searchwidget import SearchFilter
 
 from studioqt.widgets.itemswidget.item import Item
-from studioqt.widgets.itemswidget.itemgroup import ItemGroup
-from studioqt.widgets.itemswidget.itemmodel import ItemModel
+from studioqt.widgets.itemswidget.groupitem import GroupItem
 from studioqt.widgets.itemswidget.itemswidget import ItemsWidget
 
-from studioqt.widgets.treewidget import TreeWidget
+from studioqt.widgets.sidebarwidget import SidebarWidget
 
 # Custom qt actions
 from studioqt.actions.slideraction import SliderAction

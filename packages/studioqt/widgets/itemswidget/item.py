@@ -123,17 +123,17 @@ class Item(QtWidgets.QTreeWidgetItem):
         """
         self.stop()
 
-    def setItemModel(self, itemModel):
-        self._itemModel = itemModel
-
-    def itemModel(self):
-        return self._itemModel
-
     def columnFromLabel(self, label):
-        return self.treeWidget().columnFromLabel(label)
+        if self.treeWidget():
+            return self.treeWidget().columnFromLabel(label)
+        else:
+            return None
 
     def labelFromColumn(self, column):
-        return self.treeWidget().labelFromColumn(column)
+        if self.treeWidget():
+            return self.treeWidget().labelFromColumn(column)
+        else:
+            return None
 
     def mimeText(self):
         """
@@ -386,7 +386,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type label: str
         :rtype: str
         """
-        return self.data(label, QtCore.Qt.DisplayRole)
+        return unicode(self.data(label, QtCore.Qt.DisplayRole))
 
     def update(self):
         """

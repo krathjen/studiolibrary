@@ -18,13 +18,13 @@ from studioqt import QtWidgets
 import studioqt
 
 
-__all__ = ["TreeWidgetItem"]
+__all__ = ["SidebarWidgetItem"]
 
 
 logger = logging.getLogger(__name__)
 
 
-class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
+class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def __init__(self, *args):
         QtWidgets.QTreeWidgetItem.__init__(self, *args)
@@ -139,7 +139,7 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         Return all item parents.
 
-        :rtype: list[TreeWidgetItem]
+        :rtype: list[SidebarWidgetItem]
         """
         parents = []
         parent = self.parent()

@@ -33,9 +33,11 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         QtWidgets.QTreeWidget.__init__(self, *args)
         ItemViewMixin.__init__(self)
 
+        self._sortLabels = []
+        self._groupLabels = []
+
         self._sortColumn = None
 
-        self._groupItems = []
         self._groupColumn = None
         self._sortOrder = QtCore.Qt.AscendingOrder
         self._groupOrder = QtCore.Qt.AscendingOrder
@@ -157,7 +159,6 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         """
         QtWidgets.QTreeWidget.clear(self, *args)
         self.cleanDirtyObjects()
-        self._groupItems = []
 
     def setItems(self, items):
         selectedItems = self.selectedItems()
@@ -204,7 +205,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         items_ = QtWidgets.QTreeWidget.selectedItems(self)
 
         for item in items_:
-            if not isinstance(item, studioqt.ItemGroup):
+            if not isinstance(item, studioqt.GroupItem):
                 items.append(item)
 
         return items
@@ -238,7 +239,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         items = []
 
         for item in self._items():
-            if not isinstance(item, studioqt.ItemGroup):
+            if not isinstance(item, studioqt.GroupItem):
                 items.append(item)
 
         return items
@@ -370,9 +371,6 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
         if "Search Order" not in labels:
             labels.append("Search Order")
-
-        # print labels
-        # self.treeWidget().setHeaderLabels(labels)
 
         self.setColumnHidden("Custom Order", True)
         self.setColumnHidden("Search Order", True)
@@ -830,17 +828,37 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         self._sortOrder = sortOrder
         self._sortColumn = sortColumn
 
-        items = self.items()
-        items = self.itemModel().sortItems(items, sortKey, sortOrder)
+        items = self._sortItems(sortKey, sortOrder)
+        items = self._groupItems(items, groupColumn, groupOrder)
 
-        self.groupByColumn(groupColumn, groupOrder, items)
+        self.setItems(items)
 
-    def groupByColumn(self, groupColumn, groupOrder, items):
+    def _sortItems(self, sortColumn, sortOrder):
+        """
+        Sort the items by the given sort key and sort order.
+
+        :type sortColumn: str
+        :type sortOrder: int or None
+        """
+        items = list(self.items())
+
+        isCustomOrder = sortColumn == "Custom Order"
+        if isCustomOrder and sortOrder != QtCore.Qt.AscendingOrder:
+            sortOrder = QtCore.Qt.AscendingOrder
+
+        reverse = sortOrder == QtCore.Qt.DescendingOrder
+
+        def _sortKey(item):
+            return unicode(item.sortText(sortColumn)).lower()
+
+        return sorted(items, key=_sortKey, reverse=reverse)
+
+    def _groupItems(self, items, groupColumn, groupOrder):
         """
         Group by the given column and order.
 
-        :type groupColumn: bool
-        :type groupOrder: bool
+        :type groupColumn: str
+        :type groupOrder: int
         :type items: list[Item]
         :rtype: None
         """
@@ -854,16 +872,73 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         self._groupColumn = groupColumn
 
         groupKey = self.labelFromColumn(groupColumn)
+        groupReverse = groupOrder == QtCore.Qt.DescendingOrder
 
-        new_items = items[:]
+        groups = {}
+        sortKeys = []
 
-        for item in items:
-            if isinstance(item, studioqt.ItemGroup):
-                new_items.remove(item)
+        if groupKey:
 
-        items = self.itemModel().groupItems(new_items, groupKey, groupOrder)
+            # Group the items into a dictionary
+            for item in items:
+                if isinstance(item, studioqt.GroupItem):
+                    continue
 
-        self.setItems(items)
+                groupText = item.displayText(groupKey)
+
+                if groupText not in groups:
+                    sortText = item.sortText(groupKey)
+
+                    groups[groupText] = []
+                    sortKeys.append((sortText, groupText))
+
+                groups[groupText].append(item)
+
+            # Sort the groups using the sort text and group text
+            sortKeys = sorted(sortKeys, reverse=groupReverse)
+
+            # Flatten the grouped items to a list of items
+            items = []
+            for sortText, groupText in sortKeys:
+
+                groupItem = self.createGroupItem(groupText)
+
+                items.append(groupItem)
+                items.extend(groups.get(groupText))
+
+        return items
+
+    def createGroupItem(self, text, children=None):
+        """
+        Create a new group item for the given text and children.
+
+        :type text: str
+        :type children: list[studioqt.Item]
+        
+        :rtype: studioqt.GroupItem
+        """
+        groupItem = studioqt.GroupItem()
+        groupItem.setName(text)
+        groupItem.setStretchToWidget(self.parent())
+        groupItem.setChildren(children)
+
+        return groupItem
+
+    def setSortLabels(self, labels):
+        """
+        Set the column labels that can be sorted.
+        
+        :type labels: list[str]
+        """
+        self._sortLabels = labels
+
+    def sortLabels(self):
+        """
+        get the column labels that can be sorted.
+        
+        :rtype: list[str] 
+        """
+        return self._sortLabels
 
     def createSortByMenu(self):
         """
@@ -880,7 +955,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         action = studioqt.SeparatorAction("Sort By", menu)
         menu.addAction(action)
 
-        sortByLabels = self._headerLabels
+        sortByLabels = self.sortLabels()
 
         for label in sortByLabels:
 
@@ -946,6 +1021,22 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
             label = self.labelFromColumn(column)
         return label
 
+    def setGroupLabels(self, labels):
+        """
+        Set the columns that can be grouped.
+        
+        :type labels: list[str]
+        """
+        self._groupLabels = labels
+
+    def groupLabels(self):
+        """
+        Get the columns that can be grouped.
+        
+        :rtype: list[str]
+        """
+        return self._groupLabels
+
     def createGroupByMenu(self):
         """
         Create a new instance of the group by menu.
@@ -966,7 +1057,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         callback = partial(self.setGroupColumn, None)
         action.triggered.connect(callback)
 
-        groupByLabels = self.itemModel().GroupByLabels
+        groupByLabels = self.groupLabels()
 
         currentGroupCollumn = self.groupColumn()
         if currentGroupCollumn is None:

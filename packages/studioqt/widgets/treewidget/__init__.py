@@ -1,1 +1,0 @@
-from .treewidget import TreeWidget

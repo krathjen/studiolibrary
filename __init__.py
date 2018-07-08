@@ -131,8 +131,8 @@ setup(PACKAGES_PATH)
 import studioqt
 
 from studiolibrary.cmds import *
+from studiolibrary.library import Library
 from studiolibrary.libraryitem import LibraryItem
-from studiolibrary.librarymodel import LibraryModel
 from studiolibrary.librarywidget import LibraryWidget
 from studiolibrary.main import main
 

@@ -96,7 +96,7 @@ def main():
     # Register the item class to be shown for the valid path extensions
     studiolibrary.registerItem(ImageItem)
 
-    studiolibrary.main()
+    studiolibrary.main(name="Example1", path="data")
 
 
 if __name__ == "__main__":
