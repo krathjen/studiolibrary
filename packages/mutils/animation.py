@@ -614,12 +614,22 @@ class Animation(mutils.Pose):
 
             for name in objects:
                 if maya.cmds.copyKey(name, time=(start, end), includeUpperBound=False, option="keys"):
-
-                    # Might return more than one object when duplicating shapes or blendshapes
-                    transform, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
+                    # Reconstruct node because duplicating also brings output connections that we
+                    # can not disconnect if destination is referenced and locked (rigs in locked
+                    # containers)
+                    transform = maya.cmds.createNode('transform', name='CURVE')
                     deleteObjects.append(transform)
 
-                    mutils.disconnectAll(transform)
+                    attrs = maya.cmds.listAttr(name, unlocked=True, keyable=True) or []
+                    attrs = list(set(attrs) - set(['translate', 'rotate', 'scale']))
+
+                    # reconstruct only dynamic attributes, look like we dont need default value or
+                    # range
+                    for attribute in set(attrs).intersection(maya.cmds.listAttr(
+                            name, userDefined=True) or []):
+                        maya.cmds.addAttr(transform, longName=attribute)
+                        maya.cmds.setAttr(transform + '.' + attribute, keyable=True)
+
                     maya.cmds.pasteKey(transform)
 
                     attrs = maya.cmds.listAttr(transform, unlocked=True, keyable=True) or []
