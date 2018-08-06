@@ -25,7 +25,8 @@ def main(*args, **kwargs):
         lock=False,
         superusers=None,
         lockRegExp=None,
-        unlockRegExp=None
+        unlockRegExp=None,
+        dockable=True
     )
 
     :rtype: studiolibrarymaya.MayaLibraryWidget

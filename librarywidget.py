@@ -123,6 +123,7 @@ class LibraryWidget(QtWidgets.QWidget):
             superusers=None,
             lockRegExp=None,
             unlockRegExp=None,
+            **kwargs
     ):
         """
         Return the library widget for the given name.
@@ -154,7 +155,7 @@ class LibraryWidget(QtWidgets.QWidget):
             libraryWidget.setPath(path)
 
         if show:
-            libraryWidget.show()
+            libraryWidget.show(**kwargs)
 
         return libraryWidget
 
@@ -1934,9 +1935,11 @@ class LibraryWidget(QtWidgets.QWidget):
         self.saveSettings()
         QtWidgets.QWidget.closeEvent(self, event)
 
-    def show(self):
+    def show(self, **kwargs):
         """
         Overriding this method to always raise_ the widget on show.
+
+        Developers can use the kwargs to set platform dependent show options used in subclasses.
 
         :rtype: None
         """
