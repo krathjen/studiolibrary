@@ -93,13 +93,16 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
         else:
             return studiolibrary.LibraryWidget.window(self)
 
-    def show(self):
+    def show(self, **kwargs):
         """
         Show the library widget as a dockable window.
 
+        Set dockable=False in kwargs if you want to show the widget as a floating window.
+
         :rtype: None
         """
-        MayaQWidgetDockableMixin.show(self, dockable=True)
+        dockable = kwargs.get('dockable', True)
+        MayaQWidgetDockableMixin.show(self, dockable=dockable)
         self.raise_()
         self.fixBorder()
 
