@@ -51,6 +51,30 @@ class OutOfBoundsError(AnimationTransferError):
     pass
 
 
+def validateAnimLayers():
+    """
+    Check if the selected animation layer can be exported.
+    
+    :raise: AnimationTransferError
+    """
+    animLayers = maya.mel.eval('$gSelectedAnimLayers=$gSelectedAnimLayers')
+
+    # Check if more than one animation layer has been selected.
+    if len(animLayers) > 1:
+        msg = "More than one animation layer is selected! " \
+              "Please select only one animation layer for export!"
+
+        raise AnimationTransferError(msg)
+
+    # Check if the selected animation layer is locked
+    if len(animLayers) == 1:
+        if maya.cmds.animLayer(animLayers[0], query=True, lock=True):
+            msg = "Cannot export an animation layer that is locked! " \
+                  "Please unlock the anim layer before exporting animation!"
+
+            raise AnimationTransferError(msg)
+
+
 def saveAnim(
     path,
     objects=None,
@@ -555,11 +579,7 @@ class Animation(mutils.Pose):
         start, end = time
 
         # Check selected animation layers
-        gSelectedAnimLayers = maya.mel.eval('$gSelectedAnimLayers=$gSelectedAnimLayers')
-        if len(gSelectedAnimLayers) > 1:
-            msg = "More than one animation layer is selected! " \
-                  "Please select only one animation layer for export!"
-            raise AnimationTransferError(msg)
+        validateAnimLayers()
 
         # Check frame range
         if start is None or end is None:
