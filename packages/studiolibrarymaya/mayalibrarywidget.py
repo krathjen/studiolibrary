@@ -40,7 +40,10 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
 
         :rtype: QtWidgets.QTabWidget or None
         """
-        return self.parent().parent().parent()
+        if self.isDockable():
+            return self.parent().parent().parent()
+        else:
+            return None
 
     def workspaceControlName(self):
         """
@@ -48,9 +51,8 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
         
         :rtype: str or None
         """
-        parent = self.parent()
-        if parent:
-            return parent.objectName()
+        if self.isDockable() and self.parent():
+            return self.parent().objectName()
         else:
             return None
 
