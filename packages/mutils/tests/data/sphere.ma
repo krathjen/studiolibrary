@@ -184,6 +184,10 @@ createNode poseInterpolatorManager -n "poseInterpolatorManager";
 createNode polyCube -n "polyCube1";
 	rename -uid "440FB0CB-44F5-D535-6B4E-6088139890E3";
 	setAttr ".cuv" 4;
+createNode objectSet -n "lockedSet";
+	rename -uid "452516C3-40E5-8508-BCB2-8A8F6B2C0F4C";
+	setAttr ".ihi" 0;
+	setAttr -l on ".dsm";
 createNode script -n "uiConfigurationScriptNode";
 	rename -uid "5F07C60B-437F-3FFF-82B2-9ABBA913F194";
 	setAttr ".b" -type "string" (
@@ -343,6 +347,7 @@ relationship "shadowLink" ":lightLinker1" ":initialShadingGroup.message" ":defau
 relationship "shadowLink" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
 connectAttr "layerManager.dli[0]" "defaultLayer.id";
 connectAttr "renderLayerManager.rlmi[0]" "defaultRenderLayer.rlid";
+connectAttr "sphere.iog" "lockedSet.dsm" -l on -na;
 connectAttr "defaultRenderLayer.msg" ":defaultRenderingList1.r" -na;
 connectAttr "sphereShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "pCubeShape1.iog" ":initialShadingGroup.dsm" -na;
