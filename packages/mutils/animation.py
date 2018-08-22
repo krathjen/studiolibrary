@@ -623,11 +623,32 @@ class Animation(mutils.Pose):
                     attrs = maya.cmds.listAttr(name, unlocked=True, keyable=True) or []
                     attrs = list(set(attrs) - set(['translate', 'rotate', 'scale']))
 
-                    # reconstruct only dynamic attributes, look like we dont need default value or
-                    # range
-                    for attribute in set(attrs).intersection(maya.cmds.listAttr(
-                            name, userDefined=True) or []):
-                        maya.cmds.addAttr(transform, longName=attribute)
+                    attrs = set(attrs).intersection(maya.cmds.listAttr(name, userDefined=True)
+                                                    or [])
+
+                    # didn't found way to determine if attribute is compound, assume that if it
+                    # have children it is compound otherwise we'll get a message in listener
+                    # when query numberOfChildren
+                    parents = dict((a, p) for a in attrs for p in [maya.cmds.addAttr(
+                        name + '.' + a, q=True, parent=True)] if p != a)
+
+                    for attribute in attrs:
+                        kwargs = dict(
+                            longName=attribute,
+                            attributeType=maya.cmds.addAttr(name + '.' + attribute, q=True,
+                                                            attributeType=True),
+                        )
+                        if attribute in parents.values():
+                            kwargs['numberOfChildren'] = maya.cmds.addAttr(
+                                name + '.' + attribute, q=True, numberOfChildren=True)
+                        if attribute in parents:
+                            kwargs['parent'] = parents[attribute]
+                        # look like we don't need default value or range
+                        maya.cmds.addAttr(transform, **kwargs)
+
+                    # make attributes visible in channel box in separate loop as compound
+                    # attributes are not actually created before last children created
+                    for attribute in attrs:
                         maya.cmds.setAttr(transform + '.' + attribute, keyable=True)
 
                     maya.cmds.pasteKey(transform)
