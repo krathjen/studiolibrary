@@ -121,7 +121,7 @@ class ItemsWidget(QtWidgets.QWidget):
         :type item: studioqt.ItemsWidget
         :rtype: None
         """
-        if isinstance(item, studioqt.ItemGroup):
+        if isinstance(item, studioqt.GroupItem):
             self.groupClicked.emit(item)
         else:
             self.itemClicked.emit(item)
