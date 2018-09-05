@@ -917,7 +917,7 @@ class LibraryWidget(QtWidgets.QWidget):
             condition = 'is'
 
         for path in selectedPaths:
-            filter_ = ('path', condition, path + '/')
+            filter_ = ('folder', condition, path)
             filters.append(filter_)
 
         return {'operator': 'or', 'filters': filters}
