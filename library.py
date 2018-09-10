@@ -160,20 +160,14 @@ class Library(QtCore.QObject):
         :rtype: None
         """
         studiolibrary.saveJson(self.databasePath(), data)
+        self.setDirty(True)
 
     def sync(self):
-        """
-        Sync the file system with the database. 
-        
-        :rtype: None 
-        """
+        """Sync the file system with the database."""
         data = self.read()
-
-        isDirty = False
 
         for path in data.keys():
             if not os.path.exists(path):
-                isDirty = True
                 del data[path]
 
         depth = self.recursiveDepth()
@@ -184,13 +178,18 @@ class Library(QtCore.QObject):
 
         for item in items:
             path = item.path()
-            if item.path() not in data:
-                isDirty = True
-                data[path] = {}
 
-        if isDirty:
-            self.save(data)
-            self.dataChanged.emit()
+            itemData = data.get(path, {})
+            itemData.update(item.itemData())
+
+            data[path] = itemData
+
+        self.save(data)
+        self.setDirty(True)
+
+        # Force the dataChanged signal to trigger so that the slots also
+        # update. It might be better to add a 'synced' signal instead.
+        self.dataChanged.emit()
 
     def findItems(self, queries, libraryWidget=None):
         """
@@ -240,19 +239,25 @@ class Library(QtCore.QObject):
 
                 match = False
 
-                for key, cond, text in filters:
+                for key, cond, value in filters:
 
-                    text = text.lower()
-                    itemText = item.text(key).lower()
+                    value = value.lower()
+                    itemValue = item.itemData().get(key)
 
-                    if cond == 'contains':
-                        match = text in itemText
+                    if itemValue:
+                        itemValue = itemValue.lower()
+
+                    if not itemValue:
+                        match = False
+
+                    elif cond == 'contains':
+                        match = value in itemValue
 
                     elif cond == 'is':
-                        match = text == itemText
+                        match = value == itemValue
 
                     elif cond == 'startswith':
-                        match = itemText.startswith(text)
+                        match = itemValue.startswith(value)
 
                     if operator == 'or' and match:
                         break
@@ -267,35 +272,41 @@ class Library(QtCore.QObject):
 
         return self._currentItems
 
-    def addItem(self, item, data=None):
+    def updateItem(self, item):
+        """
+        Update the given item in the database.    
+    
+        :type item: studiolibrary.LibraryItem
+        :rtype: None 
+        """
+        self.addItems([item])
+
+    def addItem(self, item):
         """
         Add the given item to the database.    
     
         :type item: studiolibrary.LibraryItem
-        :type data: dict or None
         :rtype: None 
         """
-        self.addItems([item], data)
+        self.addItems([item])
 
-    def addItems(self, items, data=None):
+    def addItems(self, items):
         """
         Add the given items to the database.
         
         :type items: list[studiolibrary.LibraryItem]
-        :type data: dict or None
-        :rtype: None 
         """
         logger.info("Add items %s", items)
 
-        paths = [item.path() for item in items]
+        data_ = self.read()
 
-        isDirty = self.isDirty()
+        for item in items:
+            path = item.path()
+            data = item.itemData()
+            data_.setdefault(path, {})
+            data_[path].update(data)
 
-        self.addPaths(paths, data)
-
-        self.setDirty(isDirty)
-
-        self._items.extend(items)
+        self.save(data_)
 
         self.dataChanged.emit()
 
@@ -320,23 +331,19 @@ class Library(QtCore.QObject):
 
         return self._items
 
-    def saveItemData(self, items, columns=None):
+    def saveItemData(self, items):
         """
         Save the item data to the database for the given items and columns.
 
-        :type columns: list[str]
         :type items: list[studiolibrary.LibraryItem]
         """
         data = {}
-        columns = columns or ["Custom Order"]
 
         for item in items:
             path = item.path()
-            data.setdefault(path, {})
+            itemData = item.itemData()
 
-            for column in columns:
-                value = item.text(column)
-                data[path].setdefault(column, value)
+            data.setdefault(path, itemData)
 
         studiolibrary.updateJson(self.databasePath(), data)
 
@@ -345,7 +352,6 @@ class Library(QtCore.QObject):
         Load the item data from the database to the given items.
 
         :type items: list[studiolibrary.LibraryItem]
-        :rtype: None
         """
         data = self.read()
 
@@ -404,6 +410,7 @@ class Library(QtCore.QObject):
         :rtype: str
         """
         studiolibrary.renamePathInFile(self.databasePath(), src, dst)
+        self.setDirty(True)
         return dst
 
     def removePath(self, path):

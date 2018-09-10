@@ -419,14 +419,14 @@ class LibraryItem(studioqt.Item):
 
         self._path = path
 
-        self.updatePathData()
+        self.updateItemData()
 
-    def updatePathData(self):
-        """
-        Update the data when the item is created or when a new path is set.
-        
-        :rtype: None 
-        """
+    def updateItemData(self):
+        itemData = self.createItemData()
+        self.setItemData(itemData)
+
+    def createItemData(self):
+
         path = self.path()
 
         dirname, basename, extension = studiolibrary.splitPath(path)
@@ -449,8 +449,12 @@ class LibraryItem(studioqt.Item):
             # "modified": modified
         }
 
-        self.setItemData(itemData)
-        # self.setDisplayText("modified", timeAgo)
+        return itemData
+
+    def saveItemData(self):
+        """Sync the item data to the database """
+        self.updateItemData()
+        self.library().updateItem(self)
 
     def load(self):
         """Reimplement this method for loading any item data."""
@@ -479,7 +483,7 @@ class LibraryItem(studioqt.Item):
 
         studiolibrary.movePaths(contents, path)
 
-        self.library().addItems([self])
+        self.saveItemData()
 
         if self.libraryWidget():
             self.libraryWidget().selectItems([self])
@@ -519,6 +523,9 @@ class LibraryItem(studioqt.Item):
 
         self.copied.emit(self, src, dst)
 
+        if self.libraryWidget():
+            self.libraryWidget().refresh()
+
     def move(self, dst):
         """
         Move the current item to the given destination.
@@ -541,14 +548,22 @@ class LibraryItem(studioqt.Item):
             dst += extension
 
         src = self.path()
+
+        # Rename the path on the filesystem
         dst = studiolibrary.renamePath(src, dst)
 
-        self.setPath(dst)
-
+        # Rename the path inside the library database
         if self.library():
             self.library().renamePath(src, dst)
 
+        # Update the data for the item
+        self.setPath(dst)
+        self.saveItemData()
+
         self.renamed.emit(self, src, dst)
+
+        if self.libraryWidget():
+            self.libraryWidget().refresh()
 
     def showRenameDialog(self, parent=None):
         """

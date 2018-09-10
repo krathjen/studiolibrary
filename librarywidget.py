@@ -1510,36 +1510,6 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self.searchWidget().setText(text)
 
-    def showItems(self, items, hideOthers=True):
-        """
-        Only show the given items in the items widget.
-        
-        :type items: list[studiolibrary.LibraryItem]
-        :type hideOthers: bool
-        :rtype: None 
-        """
-        items_ = self.items()
-
-        hiddenItems = list(set(items_) - set(items))
-
-        self._itemsVisibleCount = len(items)
-        self._itemsHiddenCount = len(hiddenItems)
-
-        self.itemsWidget().setItemsHidden(items, False)
-
-        if hideOthers:
-            self.itemsWidget().setItemsHidden(hiddenItems, True)
-
-        item = self.itemsWidget().selectedItem()
-
-        if not item or item.isHidden():
-            self.itemsWidget().clearSelection()
-
-        if item:
-            self.itemsWidget().scrollToItem(item)
-
-        self.itemsWidget().treeWidget().refreshGroupBy()
-
     # -----------------------------------------------------------------------
     # Support for custom preview widgets
     # -----------------------------------------------------------------------

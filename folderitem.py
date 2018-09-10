@@ -62,10 +62,13 @@ class FolderItem(studiolibrary.LibraryItem):
             item = cls(path, libraryWidget=libraryWidget)
             item.save()
 
-    def updatePathData(self):
+    def createItemData(self):
         """Overriding this method to force the item type to Folder"""
-        super(FolderItem, self).updatePathData()
-        self.setText("type", "Folder")
+        itemData = super(FolderItem, self).createItemData()
+
+        itemData['type'] = "Folder"
+
+        return itemData
 
     def doubleClicked(self):
         """Overriding this method to show the items contained in the folder."""

@@ -485,7 +485,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         :rtype: None
         """
         for item in items:
-            item.setText("Custom Order", str(row).zfill(padding))
+            item.itemData()["Custom Order"] = str(row).zfill(padding)
             row += 1
 
     def updateCustomOrder(self):
@@ -514,7 +514,11 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         :rtype: list[studioqt.Item]
         """
         items = self.items()
-        customOrder = sorted(items, key=lambda item: item.text("Custom Order"))
+
+        def sortKey(item):
+            return item.itemData().get("Custom Order", 0)
+
+        customOrder = sorted(items, key=sortKey)
 
         return customOrder
 

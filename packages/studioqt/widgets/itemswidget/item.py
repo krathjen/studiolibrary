@@ -77,6 +77,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         self._textColumnOrder = []
 
         self._data = {}
+        self._itemData = {}
 
         self._icon = {}
         self._fonts = {}
@@ -209,84 +210,6 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         self.updateIcon()
 
-    def setData(self, column, role, value):
-        """
-        Reimplemented to set the search text to dirty.
-
-        Set the value for the item's column and role to the given value.
-
-        :type column: int or str
-        :type role: int
-        :type value: QtCore.QVariant
-        :rtype: None
-        """
-        self._searchText = None
-
-        if role == self.SortRole:
-
-            if isinstance(column, int):
-                column = self.labelFromColumn(column)
-
-            self._data.setdefault(column, {})
-            self._data[column]["sortValue"] = value
-
-        elif role == QtCore.Qt.DisplayRole:
-
-            if isinstance(column, int):
-                column = self.labelFromColumn(column)
-
-            self._data.setdefault(column, {})
-            self._data[column]["displayValue"] = value
-
-        elif role == self.DataRole:
-
-            if isinstance(column, int):
-                column = self.labelFromColumn(column)
-
-            self._data.setdefault(column, {})
-            self._data[column]["value"] = value
-
-        else:
-            QtWidgets.QTreeWidgetItem.setData(self, column, role, value)
-
-    def data(self, column, role):
-        """
-        Reimplemented to add support for setting the sort data.
-
-        :type column: int or str
-        :type role: int
-        :rtype: object
-        """
-        if role == self.SortRole:
-
-            if isinstance(column, int):
-                column = self.labelFromColumn(column)
-
-            value = self._data.get(column, {}).get("sortValue")
-            if not value:
-                value = self._data.get(column, {}).get("value", "")
-
-        elif role == QtCore.Qt.DisplayRole:
-
-            if isinstance(column, int):
-                column = self.labelFromColumn(column)
-
-            value = self._data.get(column, {}).get("displayValue")
-            if not value:
-                value = self._data.get(column, {}).get("value", "")
-
-        elif role == self.DataRole:
-
-            if isinstance(column, int):
-                column = self.labelFromColumn(column)
-
-            value = self._data.get(column, {}).get("value") or ""
-
-        else:
-            value = QtWidgets.QTreeWidgetItem.data(self, column, role)
-
-        return value
-
     def setItemData(self, data):
         """
         Set the given dictionary as the data for the item.
@@ -294,16 +217,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type data: dict
         :rtype: None
         """
-        for column in data:
-
-            self._data.setdefault(column, {})
-
-            columnData = data.get(column, {})
-
-            if isinstance(columnData, dict):
-                self._data[column].update(columnData)
-            else:
-                self._data[column]["value"] = columnData
+        self._itemData = data
 
     def itemData(self):
         """
@@ -311,7 +225,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :rtype: dict
         """
-        return self._data
+        return self._itemData
 
     def setName(self, text):
         """
@@ -320,8 +234,9 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type text: str
         :rtype: None 
         """
-        self.setText("icon", text)
-        self.setText("name", text)
+        itemData = self.itemData()
+        itemData['icon'] = text
+        itemData['name'] = text
 
     def name(self):
         """
@@ -329,55 +244,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :rtype: str
         """
-        return self.text("name")
-
-    def setText(self, label, value):
-        """
-        Set the text to be displayed for the given column.
-
-        :type label: int or str
-        :type value: str
-        :rtype: None
-        """
-        self.setData(label, self.DataRole, unicode(value))
-
-    def text(self, label):
-        """
-        Return the text for the given column.
-
-        :type label: int or str
-        :rtype: str
-        """
-        return self.data(label, self.DataRole)
-
-    def setSortText(self, label, value):
-        """
-        Set the sort data for the given column.
-
-        :type label: str
-        :int value: str
-        :rtype: None
-        """
-        self.setData(label, self.SortRole, unicode(value))
-
-    def sortText(self, label):
-        """
-        Return the sort data for the given column.
-
-        :type label: str
-        :rtype: str
-        """
-        return self.data(label, self.SortRole)
-
-    def setDisplayText(self, label, value):
-        """
-        Set the sort data for the given column.
-
-        :type label: str
-        :int value: str
-        :rtype: None
-        """
-        self.setData(label, QtCore.Qt.DisplayRole, unicode(value))
+        return self.itemData().get("name")
 
     def displayText(self, label):
         """
@@ -386,7 +253,16 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type label: str
         :rtype: str
         """
-        return unicode(self.data(label, QtCore.Qt.DisplayRole))
+        return unicode(self.itemData().get(label, ''))
+
+    def sortText(self, label):
+        """
+        Return the sort data for the given column.
+
+        :type label: str
+        :rtype: str
+        """
+        return unicode(self.itemData().get(label, ''))
 
     def update(self):
         """
@@ -1115,7 +991,8 @@ class Item(QtWidgets.QTreeWidgetItem):
         if self.itemsWidget().isIconView():
             text = self.name()
         else:
-            text = self.displayText(column)
+            label = self.labelFromColumn(column)
+            text = self.displayText(label)
 
         isSelected = option.state & QtWidgets.QStyle.State_Selected
 

@@ -702,7 +702,7 @@ class ItemsWidget(QtWidgets.QWidget):
         for item in self.items():
             key = item.id()
             if key in data:
-                item.setDataDict(data[key])
+                item.setItemData(data[key])
 
         self.refreshSortBy()
 
