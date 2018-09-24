@@ -1,75 +1,527 @@
 {
-    "../../images": {}, 
-    "../../images/Pixar": {}, 
-    "../../images/Pixar/download (12).jpg": {}, 
-    "../../images/Pixar/download (15).jpg": {}, 
-    "../../images/Pixar/images (13).jpg": {}, 
-    "../../images/Pixar/images (4).jpg": {}, 
-    "../../images/VFX": {}, 
-    "../../images/VFX/download (2).jpg": {}, 
-    "../../images/VFX/download (3).jpg": {}, 
-    "../../images/VFX/download (4).jpg": {}, 
-    "../../images/VFX/download (5).jpg": {}, 
-    "../../images/VFX/download (6).jpg": {}, 
-    "../../images/VFX/download (7).jpg": {}, 
-    "../../images/VFX/download (8).jpg": {}, 
-    "../../images/VFX/download.jpg": {}, 
-    "../../images/animated": {}, 
-    "../../images/animated/food dance.gif": {}, 
-    "../../images/animated/fruit fit.gif": {}, 
-    "../../images/download (10).jpg": {}, 
-    "../../images/download (13).jpg": {}, 
-    "../../images/download (14).jpg": {}, 
-    "../../images/download (16).jpg": {}, 
-    "../../images/download (17).jpg": {}, 
-    "../../images/download (18).jpg": {}, 
-    "../../images/download (19).jpg": {}, 
-    "../../images/download (7).jpg": {}, 
-    "../../images/download (8).jpg": {}, 
-    "../../images/download (9).jpg": {}, 
-    "../../images/icons": {}, 
-    "../../images/icons/ic_filter_vintage_white_48dp.png": {}, 
-    "../../images/icons/ic_flare_white_48dp.png": {}, 
-    "../../images/icons/ic_flash_auto_white_48dp.png": {}, 
-    "../../images/icons/ic_healing_white_48dp.png": {}, 
-    "../../images/icons/ic_leak_remove_white_48dp.png": {}, 
-    "../../images/icons/ic_movie_creation_white_48dp.png": {}, 
-    "../../images/icons/ic_movie_filter_white_48dp.png": {}, 
-    "../../images/icons/ic_nature_people_white_48dp.png": {}, 
-    "../../images/icons/ic_tag_faces_white_48dp.png": {}, 
-    "../../images/images (1).jpg": {}, 
-    "../../images/images (10).jpg": {}, 
-    "../../images/images (11).jpg": {}, 
-    "../../images/images (12).jpg": {}, 
-    "../../images/images (14).jpg": {}, 
-    "../../images/images (15).jpg": {}, 
-    "../../images/images (16).jpg": {}, 
-    "../../images/images (17).jpg": {}, 
-    "../../images/images (18).jpg": {}, 
-    "../../images/images (19).jpg": {}, 
-    "../../images/images (2).jpg": {}, 
-    "../../images/images (20).jpg": {}, 
-    "../../images/images (21).jpg": {}, 
-    "../../images/images (22).jpg": {}, 
-    "../../images/images (23).jpg": {}, 
-    "../../images/images (24).jpg": {}, 
-    "../../images/images (3).jpg": {}, 
-    "../../images/images (5).jpg": {}, 
-    "../../images/images (6).jpg": {}, 
-    "../../images/images (7).jpg": {}, 
-    "../../images/images (8).jpg": {}, 
-    "../../images/images (9).jpg": {}, 
-    "../../images/images.jpg": {}, 
-    "../../images/minimalist": {}, 
-    "../../images/minimalist/download (1).jpg": {}, 
-    "../../images/minimalist/download (20).jpg": {}, 
-    "../../images/minimalist/download.jpg": {}, 
-    "../../images/minimalist/images (1).jpg": {}, 
-    "../../images/minimalist/images (2).jpg": {}, 
-    "../../images/minimalist/images (3).jpg": {}, 
-    "../../images/minimalist/images (4).jpg": {}, 
-    "../../images/minimalist/images (5).jpg": {}, 
-    "../../images/minimalist/images (6).jpg": {}, 
-    "../../images/minimalist/images (7).jpg": {}, 
-    "../../images/minimalist/images.jpg": {}
+    "../../images": {
+        "category": "data", 
+        "path": "../../images", 
+        "folder": "../..", 
+        "type": "Folder", 
+        "name": "images"
+    }, 
+    "../../images/Pixar": {
+        "category": "images", 
+        "path": "../../images/Pixar", 
+        "folder": "../../images", 
+        "type": "Folder", 
+        "name": "Pixar"
+    }, 
+    "../../images/Pixar/Movies": {
+        "category": "Pixar", 
+        "path": "../../images/Pixar/Movies", 
+        "folder": "../../images/Pixar", 
+        "type": "Folder", 
+        "name": "Movies"
+    }, 
+    "../../images/Pixar/Movies/Nemo": {
+        "category": "Movies", 
+        "path": "../../images/Pixar/Movies/Nemo", 
+        "folder": "../../images/Pixar/Movies", 
+        "type": "Folder", 
+        "name": "Nemo"
+    }, 
+    "../../images/Pixar/Movies/Nemo/download (12).jpg": {
+        "category": "Nemo", 
+        "path": "../../images/Pixar/Movies/Nemo/download (12).jpg", 
+        "folder": "../../images/Pixar/Movies/Nemo", 
+        "type": ".jpg", 
+        "name": "download (12).jpg"
+    }, 
+    "../../images/Pixar/download (15).jpg": {
+        "category": "Pixar", 
+        "path": "../../images/Pixar/download (15).jpg", 
+        "folder": "../../images/Pixar", 
+        "type": ".jpg", 
+        "name": "download (15).jpg"
+    }, 
+    "../../images/Pixar/images (13).jpg": {
+        "category": "Pixar", 
+        "path": "../../images/Pixar/images (13).jpg", 
+        "folder": "../../images/Pixar", 
+        "type": ".jpg", 
+        "name": "images (13).jpg"
+    }, 
+    "../../images/Pixar/images (4).jpg": {
+        "category": "Pixar", 
+        "path": "../../images/Pixar/images (4).jpg", 
+        "folder": "../../images/Pixar", 
+        "type": ".jpg", 
+        "name": "images (4).jpg"
+    }, 
+    "../../images/VFX": {
+        "category": "images", 
+        "path": "../../images/VFX", 
+        "folder": "../../images", 
+        "type": "Folder", 
+        "name": "VFX"
+    }, 
+    "../../images/VFX/download (2).jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download (2).jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download (2).jpg"
+    }, 
+    "../../images/VFX/download (3).jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download (3).jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download (3).jpg"
+    }, 
+    "../../images/VFX/download (4).jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download (4).jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download (4).jpg"
+    }, 
+    "../../images/VFX/download (5).jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download (5).jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download (5).jpg"
+    }, 
+    "../../images/VFX/download (6).jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download (6).jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download (6).jpg"
+    }, 
+    "../../images/VFX/download (7).jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download (7).jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download (7).jpg"
+    }, 
+    "../../images/VFX/download (8).jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download (8).jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download (8).jpg"
+    }, 
+    "../../images/VFX/download.jpg": {
+        "category": "VFX", 
+        "path": "../../images/VFX/download.jpg", 
+        "folder": "../../images/VFX", 
+        "type": ".jpg", 
+        "name": "download.jpg"
+    }, 
+    "../../images/animated": {
+        "category": "images", 
+        "path": "../../images/animated", 
+        "folder": "../../images", 
+        "type": "Folder", 
+        "name": "animated"
+    }, 
+    "../../images/animated/food dance.gif": {
+        "category": "animated", 
+        "path": "../../images/animated/food dance.gif", 
+        "folder": "../../images/animated", 
+        "type": ".gif", 
+        "name": "food dance.gif"
+    }, 
+    "../../images/animated/fruit fit.gif": {
+        "category": "animated", 
+        "path": "../../images/animated/fruit fit.gif", 
+        "folder": "../../images/animated", 
+        "type": ".gif", 
+        "name": "fruit fit.gif"
+    }, 
+    "../../images/download (10).jpg": {
+        "category": "images", 
+        "path": "../../images/download (10).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (10).jpg"
+    }, 
+    "../../images/download (13).jpg": {
+        "category": "images", 
+        "path": "../../images/download (13).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (13).jpg"
+    }, 
+    "../../images/download (14).jpg": {
+        "category": "images", 
+        "path": "../../images/download (14).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (14).jpg"
+    }, 
+    "../../images/download (16).jpg": {
+        "category": "images", 
+        "path": "../../images/download (16).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (16).jpg"
+    }, 
+    "../../images/download (17).jpg": {
+        "category": "images", 
+        "path": "../../images/download (17).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (17).jpg"
+    }, 
+    "../../images/download (18).jpg": {
+        "category": "images", 
+        "path": "../../images/download (18).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (18).jpg"
+    }, 
+    "../../images/download (19).jpg": {
+        "category": "images", 
+        "path": "../../images/download (19).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (19).jpg"
+    }, 
+    "../../images/download (7).jpg": {
+        "category": "images", 
+        "path": "../../images/download (7).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (7).jpg"
+    }, 
+    "../../images/download (8).jpg": {
+        "category": "images", 
+        "path": "../../images/download (8).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (8).jpg"
+    }, 
+    "../../images/download (9).jpg": {
+        "category": "images", 
+        "path": "../../images/download (9).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "download (9).jpg"
+    }, 
+    "../../images/icons": {
+        "category": "images", 
+        "path": "../../images/icons", 
+        "folder": "../../images", 
+        "type": "Folder", 
+        "name": "icons"
+    }, 
+    "../../images/icons/ic_filter_vintage_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_filter_vintage_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_filter_vintage_white_48dp.png"
+    }, 
+    "../../images/icons/ic_flare_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_flare_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_flare_white_48dp.png"
+    }, 
+    "../../images/icons/ic_flash_auto_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_flash_auto_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_flash_auto_white_48dp.png"
+    }, 
+    "../../images/icons/ic_healing_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_healing_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_healing_white_48dp.png"
+    }, 
+    "../../images/icons/ic_leak_remove_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_leak_remove_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_leak_remove_white_48dp.png"
+    }, 
+    "../../images/icons/ic_movie_creation_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_movie_creation_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_movie_creation_white_48dp.png"
+    }, 
+    "../../images/icons/ic_movie_filter_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_movie_filter_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_movie_filter_white_48dp.png"
+    }, 
+    "../../images/icons/ic_nature_people_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_nature_people_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_nature_people_white_48dp.png"
+    }, 
+    "../../images/icons/ic_tag_faces_white_48dp.png": {
+        "category": "icons", 
+        "path": "../../images/icons/ic_tag_faces_white_48dp.png", 
+        "folder": "../../images/icons", 
+        "type": ".png", 
+        "name": "ic_tag_faces_white_48dp.png"
+    }, 
+    "../../images/images (1).jpg": {
+        "category": "images", 
+        "path": "../../images/images (1).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (1).jpg"
+    }, 
+    "../../images/images (10).jpg": {
+        "category": "images", 
+        "path": "../../images/images (10).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (10).jpg"
+    }, 
+    "../../images/images (11).jpg": {
+        "category": "images", 
+        "path": "../../images/images (11).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (11).jpg"
+    }, 
+    "../../images/images (12).jpg": {
+        "category": "images", 
+        "path": "../../images/images (12).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (12).jpg"
+    }, 
+    "../../images/images (14).jpg": {
+        "category": "images", 
+        "path": "../../images/images (14).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (14).jpg"
+    }, 
+    "../../images/images (15).jpg": {
+        "category": "images", 
+        "path": "../../images/images (15).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (15).jpg"
+    }, 
+    "../../images/images (16).jpg": {
+        "category": "images", 
+        "path": "../../images/images (16).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (16).jpg"
+    }, 
+    "../../images/images (17).jpg": {
+        "category": "images", 
+        "path": "../../images/images (17).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (17).jpg"
+    }, 
+    "../../images/images (18).jpg": {
+        "category": "images", 
+        "path": "../../images/images (18).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (18).jpg"
+    }, 
+    "../../images/images (19).jpg": {
+        "category": "images", 
+        "path": "../../images/images (19).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (19).jpg"
+    }, 
+    "../../images/images (2).jpg": {
+        "category": "images", 
+        "path": "../../images/images (2).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (2).jpg"
+    }, 
+    "../../images/images (20).jpg": {
+        "category": "images", 
+        "path": "../../images/images (20).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (20).jpg"
+    }, 
+    "../../images/images (21).jpg": {
+        "category": "images", 
+        "path": "../../images/images (21).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (21).jpg"
+    }, 
+    "../../images/images (22).jpg": {
+        "category": "images", 
+        "path": "../../images/images (22).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (22).jpg"
+    }, 
+    "../../images/images (23).jpg": {
+        "category": "images", 
+        "path": "../../images/images (23).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (23).jpg"
+    }, 
+    "../../images/images (24).jpg": {
+        "category": "images", 
+        "path": "../../images/images (24).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (24).jpg"
+    }, 
+    "../../images/images (3).jpg": {
+        "category": "images", 
+        "path": "../../images/images (3).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (3).jpg"
+    }, 
+    "../../images/images (5).jpg": {
+        "category": "images", 
+        "path": "../../images/images (5).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (5).jpg"
+    }, 
+    "../../images/images (6).jpg": {
+        "category": "images", 
+        "path": "../../images/images (6).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (6).jpg"
+    }, 
+    "../../images/images (7).jpg": {
+        "category": "images", 
+        "path": "../../images/images (7).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (7).jpg"
+    }, 
+    "../../images/images (8).jpg": {
+        "category": "images", 
+        "path": "../../images/images (8).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (8).jpg"
+    }, 
+    "../../images/images (9).jpg": {
+        "category": "images", 
+        "path": "../../images/images (9).jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images (9).jpg"
+    }, 
+    "../../images/images.jpg": {
+        "category": "images", 
+        "path": "../../images/images.jpg", 
+        "folder": "../../images", 
+        "type": ".jpg", 
+        "name": "images.jpg"
+    }, 
+    "../../images/minimalist": {
+        "category": "images", 
+        "path": "../../images/minimalist", 
+        "folder": "../../images", 
+        "type": "Folder", 
+        "name": "minimalist"
+    }, 
+    "../../images/minimalist/download (1).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/download (1).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "download (1).jpg"
+    }, 
+    "../../images/minimalist/download (20).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/download (20).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "download (20).jpg"
+    }, 
+    "../../images/minimalist/download.jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/download.jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "download.jpg"
+    }, 
+    "../../images/minimalist/images (1).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images (1).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images (1).jpg"
+    }, 
+    "../../images/minimalist/images (2).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images (2).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images (2).jpg"
+    }, 
+    "../../images/minimalist/images (3).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images (3).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images (3).jpg"
+    }, 
+    "../../images/minimalist/images (4).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images (4).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images (4).jpg"
+    }, 
+    "../../images/minimalist/images (5).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images (5).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images (5).jpg"
+    }, 
+    "../../images/minimalist/images (6).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images (6).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images (6).jpg"
+    }, 
+    "../../images/minimalist/images (7).jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images (7).jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images (7).jpg"
+    }, 
+    "../../images/minimalist/images.jpg": {
+        "category": "minimalist", 
+        "path": "../../images/minimalist/images.jpg", 
+        "folder": "../../images/minimalist", 
+        "type": ".jpg", 
+        "name": "images.jpg"
+    }
 }

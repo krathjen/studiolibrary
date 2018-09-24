@@ -11,5 +11,8 @@
 // full path to your config.json file.
 
 {
-"recursiveSearchDepth": 4
+  "recursiveSearchDepth": 4,
+
+  // A list of paths to ignore when walking the root directory
+  "ignorePaths": ["/."]
 }

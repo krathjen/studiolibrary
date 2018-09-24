@@ -33,6 +33,8 @@ try:
 except ImportError:
     from os import walk
 
+import studiolibrary
+
 
 __all__ = [
     "user",
@@ -78,7 +80,6 @@ __all__ = [
     "itemsFromUrls",
     "findItems",
     "findItemsInFolders",
-    "IGNORE_PATHS",
     "ANALYTICS_ID",
     "ANALYTICS_ENABLED",
     "SHOW_IN_FOLDER_CMD",
@@ -88,11 +89,9 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-_config = None
 _itemClasses = collections.OrderedDict()
 
 
-IGNORE_PATHS = ["/."]  # Ignore all paths the start with a "."
 ANALYTICS_ID = "UA-50172384-1"
 ANALYTICS_ENABLED = True
 SHOW_IN_FOLDER_CMD = None
@@ -170,7 +169,7 @@ def itemFromPath(path, **kwargs):
     """
     path = normPath(path)
 
-    for ignore in IGNORE_PATHS:
+    for ignore in studiolibrary.config().get('ignorePaths', []):
         if ignore in path:
             return None
 
