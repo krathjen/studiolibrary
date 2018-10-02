@@ -999,7 +999,7 @@ class ItemsWidget(QtWidgets.QWidget):
         :rtype: None
         """
         for item in self.items():
-            path = item.url().toLocalFile()
+            path = item.id()
             if path in paths:
                 item.setSelected(True)
 
@@ -1010,7 +1010,7 @@ class ItemsWidget(QtWidgets.QWidget):
         :type items: list[studiolibrary.LibraryItem]
         :rtype: None
         """
-        paths = [item.path() for item in items]
+        paths = [item.id() for item in items]
         self.selectPaths(paths)
 
     def isIconView(self):

@@ -369,11 +369,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         if "Custom Order" not in labels:
             labels.append("Custom Order")
 
-        if "Search Order" not in labels:
-            labels.append("Search Order")
-
         self.setColumnHidden("Custom Order", True)
-        self.setColumnHidden("Search Order", True)
 
         columnSettings = self.columnSettings()
 

@@ -185,10 +185,7 @@ class Library(QtCore.QObject):
             data[path] = itemData
 
         self.save(data)
-        self.setDirty(True)
 
-        # Force the dataChanged signal to trigger so that the slots also
-        # update. It might be better to add a 'synced' signal instead.
         self.dataChanged.emit()
 
     def findItems(self, queries, libraryWidget=None):
