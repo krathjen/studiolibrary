@@ -70,8 +70,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
         try:
             self.selectionChanged()
             self.setScriptJobEnabled(True)
-        except NameError, msg:
-            logger.exception(msg)
+        except NameError as error:
+            logger.exception(error)
 
         self.setItem(item)
         self.updateContains()
@@ -249,8 +249,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
 
         try:
             selection = maya.cmds.ls(selection=True) or []
-        except NameError, e:
-            logger.exception(e)
+        except NameError as error:
+            logger.exception(error)
 
         return len(selection)
 

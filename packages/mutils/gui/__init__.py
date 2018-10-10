@@ -16,8 +16,8 @@
 
 try:
     import maya.OpenMayaUI as omui
-except ImportError, e:
-    print e
+except ImportError as error:
+    print(error)
 
 from studioqt import QtCore
 from studioqt import QtWidgets
@@ -28,8 +28,8 @@ try:
 except ImportError:
     try:
         from shiboken import wrapInstance
-    except ImportError, e:
-        print e
+    except ImportError as error:
+        print(error)
 
 
 from .framerangemenu import FrameRangeMenu
