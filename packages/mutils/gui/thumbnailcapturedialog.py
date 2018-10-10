@@ -84,11 +84,11 @@ def thumbnailCapture(
     Capture a playblast and save it to the given path.
 
     :type path: str
-    :type startFrame: int
-    :type endFrame:  int
+    :type startFrame: int or None
+    :type endFrame:  int or None
     :type step: int
     :type clearCache: bool
-    :type captured: func
+    :type captured: func or None
     :rtype: ThumbnailCaptureDialog
     """
 

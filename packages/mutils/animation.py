@@ -16,6 +16,7 @@ import shutil
 import logging
 
 import mutils
+import mutils.gui
 
 from studioqt import QtWidgets
 
@@ -120,10 +121,10 @@ def saveAnim(
     iconPath = path + "/thumbnail.jpg"
     sequencePath = path + "/sequence/thumbnail.jpg"
 
-    sequencePath = mutils.createSnapshot(
+    sequencePath = mutils.gui.thumbnailCapture(
         path=sequencePath,
-        start=start,
-        end=end,
+        startFrame=start,
+        endFrame=end,
         step=step,
     )
 
