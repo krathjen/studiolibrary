@@ -78,7 +78,8 @@ def thumbnailCapture(
         step=1,
         clearCache=False,
         captured=None,
-        show=False
+        show=False,
+        modifier=True,
 ):
     """
     Capture a playblast and save it to the given path.
@@ -117,7 +118,7 @@ def thumbnailCapture(
 
     d.show()
 
-    if not show and not studioqt.isControlModifier():
+    if not show and not (modifier and studioqt.isControlModifier()):
         d.capture()
         d.close()
 

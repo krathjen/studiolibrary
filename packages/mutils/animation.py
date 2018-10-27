@@ -88,21 +88,27 @@ def saveAnim(
     Save the anim data for the given objects.
 
     Example:
-        anim = "C:/example.anim"
-        anim = saveAnim(path, metadata={'description': 'Example anim'})
-        print anim.metadata()
-        # {'description': 'test', 'user': 'Hovel', 'mayaVersion': u'2016'}
-
+        import mutils
+        mutils.saveAnim(
+            path="c:/example.anim", 
+            time=(1, 20),
+            metadata={'description': 'Example anim'}
+            )
+            
     :type path: str
     :type objects: None or list[str]
     :type time: None or int
     :type sampleBy: int
     :type metadata: dict or None
     :type bakeConnected: bool
+    
     :rtype: mutils.Animation
     """
     step = 1
     objects = objects or maya.cmds.ls(selection=True) or []
+
+    if os.path.exists(path):
+        raise Exception("Cannot override an existing path. " + path)
 
     if not objects:
         raise Exception(
@@ -118,26 +124,34 @@ def saveAnim(
         msg = "The start frame cannot be greater than or equal to the end frame!"
         raise AnimationTransferError(msg)
 
-    iconPath = path + "/thumbnail.jpg"
-    sequencePath = path + "/sequence/thumbnail.jpg"
+    tmpPath = mutils.TempDir("anim", clean=True).path()
 
-    sequencePath = mutils.gui.thumbnailCapture(
+    os.makedirs(tmpPath + '/sequence')
+
+    iconPath = tmpPath + "/thumbnail.jpg"
+    sequencePath = tmpPath + "/sequence/thumbnail.jpg"
+
+    window = mutils.gui.thumbnailCapture(
         path=sequencePath,
         startFrame=start,
         endFrame=end,
         step=step,
+        modifier=False,
     )
 
     if iconPath:
-        shutil.copyfile(sequencePath, iconPath)
+        shutil.copyfile(window.capturedPath(), iconPath)
 
     anim = mutils.Animation.fromObjects(objects)
 
     if metadata:
         anim.updateMetadata(metadata)
 
-    anim.save(path, time=time, bakeConnected=bakeConnected, sampleBy=sampleBy)
-    return anim
+    anim.save(tmpPath, time=time, bakeConnected=bakeConnected, sampleBy=sampleBy)
+
+    shutil.copytree(tmpPath, path)
+
+    return mutils.Animation.fromPath(path)
 
 
 def clampRange(srcTime, dstTime):
