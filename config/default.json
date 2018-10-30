@@ -11,8 +11,13 @@
 // full path to your config.json file.
 
 {
+  // The max walking depth from the root directory
   "recursiveSearchDepth": 4,
 
   // A list of paths to ignore when walking the root directory
-  "ignorePaths": ["/."]
+  "ignorePaths": ["/."],
+
+  // Used for very basic analytics and does not send any personal information
+  "analyticsEnabled": true,
+  "analyticsId": "UA-50172384-1"
 }

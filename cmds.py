@@ -80,8 +80,6 @@ __all__ = [
     "itemsFromUrls",
     "findItems",
     "findItemsInFolders",
-    "ANALYTICS_ID",
-    "ANALYTICS_ENABLED",
     "SHOW_IN_FOLDER_CMD",
 ]
 
@@ -92,8 +90,6 @@ logger = logging.getLogger(__name__)
 _itemClasses = collections.OrderedDict()
 
 
-ANALYTICS_ID = "UA-50172384-1"
-ANALYTICS_ENABLED = True
 SHOW_IN_FOLDER_CMD = None
 
 
@@ -1057,10 +1053,10 @@ def sendAnalytics(
     :type tid: str
     :rtype: None
     """
-    if not ANALYTICS_ENABLED:
+    if not studiolibrary.config().get('analyticsEnabled'):
         return
 
-    tid = tid or ANALYTICS_ID
+    tid = tid or studiolibrary.config().get('analyticsId')
     cid = userUuid()
 
     url = "http://www.google-analytics.com/collect?" \
