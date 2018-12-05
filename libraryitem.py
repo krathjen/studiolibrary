@@ -147,9 +147,10 @@ class LibraryItem(studioqt.Item):
         studioqt.Item.__init__(self)
 
         self._path = ""
+        self._modal = None
+        self._library = None
         self._iconPath = None
         self._typePixmap = None
-        self._library = None
         self._libraryWidget = None
 
         if libraryWidget:
@@ -185,12 +186,22 @@ class LibraryItem(studioqt.Item):
         
         :type title: str
         :type text: str
-        :rtype: QMessageBox.StandardButton
+        :rtype: QMessageBox.StandardButton or None
         """
         if self.libraryWidget():
             self.libraryWidget().showErrorMessage(text)
 
-        return studioqt.MessageBox.critical(self.libraryWidget(), title, text)
+        button = None
+
+        if not self._modal:
+            self._modal = True
+            
+            try:
+                button = studioqt.MessageBox.critical(self.libraryWidget(), title, text)
+            finally:
+                self._modal = False
+
+        return button
 
     def showExceptionDialog(self, title, error):
         """
