@@ -33,6 +33,9 @@ MIN_TIME_LIMIT = -10000
 MAX_TIME_LIMIT = 100000
 DEFAULT_FILE_TYPE = "mayaBinary"  # "mayaAscii"
 
+# A feature flag that will be removed in the future.
+FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR = False
+
 
 class PasteOption:
 
@@ -228,14 +231,14 @@ def findFirstLastKeyframes(curves, time=None):
     result = (first, last)
 
     if time:
-        
-        # It's possible (but unlikely) that the curves will not lie within the 
+
+        # It's possible (but unlikely) that the curves will not lie within the
         # first and last frame
         try:
             result = clampRange(time, result)
         except OutOfBoundsError as error:
             logger.warning(error)
-            
+
     return result
 
 
@@ -632,9 +635,11 @@ class Animation(mutils.Pose):
 
                     # Might return more than one object when duplicating shapes or blendshapes
                     transform, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
-                    deleteObjects.append(transform)
 
-                    mutils.disconnectAll(transform)
+                    if not FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR:
+                        mutils.disconnectAll(transform)
+
+                    deleteObjects.append(transform)
                     maya.cmds.pasteKey(transform)
 
                     attrs = maya.cmds.listAttr(transform, unlocked=True, keyable=True) or []
