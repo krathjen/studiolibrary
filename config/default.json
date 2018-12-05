@@ -17,6 +17,9 @@
   // A list of paths to ignore when walking the root directory
   "ignorePaths": ["/."],
 
+  // The command used to show a path in the file explorer
+  //"showInFolderCmd": "konqueror \"{path}\"&",
+
   // Used for very basic analytics and does not send any personal information
   "analyticsEnabled": true,
   "analyticsId": "UA-50172384-1"

@@ -1100,20 +1100,24 @@ def showInFolder(path):
     :type path: unicode
     :rtype: None
     """
-    cmd = os.system
-    args = []
+    if isWindows():
+        # os.system() and subprocess.call() can't pass command with
+        # non ascii symbols, use ShellExecuteW directly
+        cmd = ctypes.windll.shell32.ShellExecuteW
+    else:
+        cmd = os.system
 
-    if SHOW_IN_FOLDER_CMD:
-        args = [unicode(SHOW_IN_FOLDER_CMD)]
+    args = studiolibrary.config().get('showInFolderCmd')
+
+    if args:
+        if isinstance(args, basestring):
+            args = [args]
 
     elif isLinux():
         args = [u'xdg-open "{path}"&']
 
     elif isWindows():
-        # os.system() and subprocess.call() can't pass command with
-        # non ascii symbols, use ShellExecuteW directly
         args = [None, u'open', u'explorer.exe', u'/n,/select, "{path}"', None, 1]
-        cmd = ctypes.windll.shell32.ShellExecuteW
 
     elif isMac():
         args = [u'open -R "{path}"']
