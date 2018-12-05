@@ -1107,7 +1107,7 @@ def showInFolder(path):
         args = [unicode(SHOW_IN_FOLDER_CMD)]
 
     elif isLinux():
-        args = [u'konqueror "{path}"&']
+        args = [u'xdg-open "{path}"&']
 
     elif isWindows():
         # os.system() and subprocess.call() can't pass command with
