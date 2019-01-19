@@ -12,6 +12,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import json
 import uuid
 import ctypes
@@ -37,6 +38,7 @@ import studiolibrary
 
 
 __all__ = [
+    "reload",
     "user",
     "isMac",
     "isMaya",
@@ -121,6 +123,30 @@ class MovePathError(PathError):
 
 class RenamePathError(PathError):
     """"""
+
+
+def reload():
+    """
+    Removes all Studio Library modules from the Python cache.
+    
+    You can use this function for developing within DCC applications, however,
+    it should not be used in production. 
+    
+    Example:
+        import studiolibrary
+        studiolibrary.reload()
+        
+        import studiolibrary
+        studiolibrary.main()
+    """
+    studiolibrary.LibraryWidget.destroyInstances()
+
+    names = ['studiolibrary', 'studioqt', 'studiolibrarymaya',  'mutils']
+
+    for mod in sys.modules.keys():
+        for name in names:
+            if mod in sys.modules and mod.startswith(name):
+                del sys.modules[mod]
 
 
 def registerItem(cls):

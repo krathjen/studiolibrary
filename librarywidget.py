@@ -49,6 +49,7 @@ class GlobalSignal(QtCore.QObject):
 
 
 class LibraryWidget(QtWidgets.QWidget):
+
     _instances = {}
 
     DEFAULT_NAME = "Default"
@@ -104,14 +105,23 @@ class LibraryWidget(QtWidgets.QWidget):
     folderRenamed = QtCore.Signal(str, str)
     folderSelectionChanged = QtCore.Signal(object)
 
-    @classmethod
-    def instances(cls):
+    @staticmethod
+    def instances():
         """
         Return all the LibraryWidget instances that have been initialised.
 
         :rtype: list[LibraryWidget]
         """
-        return cls._instances.values()
+        return LibraryWidget._instances.values()
+
+    @staticmethod
+    def destroyInstances():
+        """Delete all library widget instances."""
+        for widget in LibraryWidget.instances():
+            widget.hide()
+            widget.close()
+
+        LibraryWidget._instances = []
 
     @classmethod
     def instance(
@@ -140,11 +150,11 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         name = name or cls.DEFAULT_NAME
 
-        libraryWidget = cls._instances.get(name)
+        libraryWidget = LibraryWidget._instances.get(name)
 
         if not libraryWidget:
             libraryWidget = cls(name=name)
-            cls._instances[name] = libraryWidget
+            LibraryWidget._instances[name] = libraryWidget
 
         libraryWidget.setLocked(lock)
         libraryWidget.setSuperusers(superusers)
