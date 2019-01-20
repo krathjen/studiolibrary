@@ -34,19 +34,10 @@ Tip: If you would like to share the Studio Library with other users then
 place the unzipped "studiolibrary" folder on a network drive.
 
 
-## Develop
+## Documentation
 
-You can use the following code for developing within Maya.
+Find the latest documentation [here](DOCS.md).
 
-This code removes all previously imported Studio Library modules and caches before loading.
-
-```python
-import studiolibrary
-studiolibrary.reload()
-
-import studiolibrary
-studiolibrary.main()
-```
 
 ## Contributing
 
@@ -61,7 +52,7 @@ We follow the below guides for...
 ## License
 
 The Studio Library is free to use in production under the GNU Lesser General Public License v3.0.
-For more information please click [here](https://github.com/krathjen/studiolibrary/blob/master/LICENSE.md).
+For more information please click [here](LICENSE.md).
 
 
 ## Support
