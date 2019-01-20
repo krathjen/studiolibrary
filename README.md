@@ -1,5 +1,6 @@
 
-# ![logo](./resource/icons/icon_black_on_white.png) Studio Library
+
+<img src="./src/studiolibrary/resource/icons/header.png" width="252" height="42"/>
 
 A free tool written in python for managing poses and animation in Maya.
 
@@ -21,6 +22,32 @@ A free tool written in python for managing poses and animation in Maya.
 * [How to use selection sets](https://www.youtube.com/watch?v=xejWubal_j8)
 * [How to use mirror tables](https://www.youtube.com/watch?v=kCv0XleJfjU&t=3s)
 
+## Installation
+
+1. Download and unzip the *studiolibrary.zip* file from [github releases](https://github.com/krathjen/studiolibrary/releases) or [website](http://www.studiolibrary.com/download).
+
+2. Drag and drop the "studiolibrary/install.py" file onto the Maya viewport.
+
+3. Click the Studio Library icon on the shelf to run.
+
+Tip: If you would like to share the Studio Library with other users then
+place the unzipped "studiolibrary" folder on a network drive.
+
+
+## Develop
+
+You can use the following code for developing within Maya.
+
+This code removes all previously imported Studio Library modules and caches before loading.
+
+```python
+import studiolibrary
+studiolibrary.reload()
+
+import studiolibrary
+studiolibrary.main()
+```
+
 ## Contributing
 
 Contributions to Studio Library are always welcome! Whether it's reporting bugs, feature requests, discussing ideas or committing code.
@@ -30,47 +57,6 @@ We follow the below guides for...
 * [Commit messages style](https://github.com/erlang/otp/wiki/Writing-good-commit-messages)
 * [GitHub Forking Workflow](https://gist.github.com/Chaser324/ce0505fbed06b947d962)
 * [Python Qt Style Guidelines](http://bitesofcode.blogspot.co.uk/2011/10/pyqt-coding-style-guidelines.html)
-
-
-## Download
-
-Download and unzip the *studiolibrary.zip* file from [github releases](https://github.com/krathjen/studiolibrary/releases) or [website](http://www.studiolibrary.com/download).
-
-
-## Setup
-
-### OSX
-Use SHIFT+G in the finder and copy the *studiolibrary* folder to *~/Library/Preferences/Autodesk/maya/scripts*.
-
-### Linux
-Open the file manager and copy the *studiolibrary* folder to *~/maya/scripts*.
-
-### Windows
-Open the file explorer and copy the *studiolibrary* folder to *C:/Users/USERNAME/Documents/maya/scripts*.
-
-
-## Run
-
-Start Maya and run the following code in the **Python** script editor.
-
-```python
-import studiolibrary
-studiolibrary.main()
-```
-
-## Develop
-
-You can use the following for developing within Maya/DCC applications.
-
-The 'studiolibrary.reload' function should not be used in production.
-
-```python
-import studiolibrary
-studiolibrary.reload()
-
-import studiolibrary
-studiolibrary.main()
-```
 
 ## License
 

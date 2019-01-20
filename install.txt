@@ -1,0 +1,12 @@
+How to install the Studio Library.
+
+1. Drag and drop the "install.py" file onto the Maya viewport.
+
+2. Click the Studio Library icon on the shelf to run.
+
+Tip: If you would like to share the Studio Library with other users then
+place the downloaded "studiolibrary" folder on a network drive.
+
+Support:
+
+www.studiolibrary.com
