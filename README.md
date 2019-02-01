@@ -34,6 +34,10 @@ Tip: If you would like to share the Studio Library with other users then
 place the unzipped "studiolibrary" folder on a network drive.
 
 
+<img src="install.gif" width="640" height="360"/>
+
+
+
 ## Documentation
 
 Find the latest documentation [here](DOCS.md).
