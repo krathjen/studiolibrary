@@ -7,15 +7,15 @@ Please feel free to improve this page as needed. Thank you.
 
 ### Index
 
-* [How to run from code](#linkA)
-* [How to set the name and path from code](#linkB)
-* [How to create a local and shared library](#linkC1)
-* [How to create more than one library instance](#linkC2)
-* [How to reload for development](#linkD)
-* [How to load a library for several projects](#linkE)
-* [How to debug "No object match when loading data"](#linkF)
-* [How to fix a scene that has unknown nodes](#linkG)
-* [How to lock and unlock specific folders](#linkH)
+* [How to run from code](#jf82ksc)
+* [How to set the name and path from code](#nc2dokp)
+* [How to create a local and shared library](#k25lyqw)
+* [How to create more than one library instance](#ou3nb4z)
+* [How to reload for development](#gw4un1m)
+* [How to load a library for several projects](#lvx2med)
+* [How to debug "No object match when loading data"](#zi20df5)
+* [How to fix a scene that has unknown nodes](#ufj2oi4)
+* [How to lock and unlock specific folders](#we7zm9m)
 
 ### FAQ
 
@@ -26,7 +26,7 @@ https://github.com/krathjen/studiolibrary/labels/FAQ
 <br>
 
 
-### <a name="linkA"></a> How to run from code
+### <a name="jf82ksc"></a> How to run from code
 
 ```python
 import studiolibrary
@@ -38,7 +38,7 @@ studiolibrary.main()
 <br>
 
 
-### <a name="linkB"></a> How to set the name and path from code
+### <a name="nc2dokp"></a> How to set the name and path from code
 
 Create and show a library with the name "Figaro Pho - Anim" that points to a custom path.
 
@@ -52,7 +52,7 @@ studiolibrary.main(name="Figaro Pho - Anim", path="P:/figaro/studiolibrary/anim"
 <br>
 
 
-### <a name="linkC1"></a> How to create a local and shared library
+### <a name="k25lyqw"></a> How to create a local and shared library
 
 Create and show both a shared library and a local library.
 
@@ -67,7 +67,7 @@ studiolibrary.main(name="Shared", path="P:/shared/studiolibrary/")
 <br>
 
 
-### <a name="linkC2"></a> How to create more than one library instance
+### <a name="ou3nb4z"></a> How to create more than one library instance
 
 In this example we create a library for the animation department, previs department and another library for a local temp folder.
 
@@ -86,7 +86,7 @@ studiolibrary.main(name="Figaro Pho - Previs", path="P:/figaro/studiolibrary/pre
 <br>
 
 
-### <a name="linkD"></a> How to reload for development
+### <a name="gw4un1m"></a> How to reload for development
 
 This code removes all previously imported Studio Library modules and caches before loading.
 
@@ -103,7 +103,7 @@ studiolibrary.main()
 <br>
 
 
-### <a name="linkE"></a> How to load a library for several projects
+### <a name="lvx2med"></a> How to load a library for several projects
 
 When implementing the Studio Library for several projects we can get the current project name and then set the name and path.
 
@@ -124,7 +124,7 @@ studiolibrary.main(name=name, path=path)
 <br>
 
 
-### <a name="linkF"></a> How to debug "No object match when loading data": (version 1.3.9+)
+### <a name="zi20df5"></a> How to debug "No object match when loading data": (version 1.3.9+)
 
 In version 1.3.9+ you can now switch on debug mode which should log any strange behavior in the script editor.
 
@@ -142,7 +142,7 @@ You might see something like...
 <br>
 
 
-### <a name="linkG"></a> How to fix a scene that has unknown nodes
+### <a name="ufj2oi4"></a> How to fix a scene that has unknown nodes
 
 Unknown nodes are because a plugin is missing. An easy way to fix this issue is to execute the following code in the **Python** script editor. The other way is to find the missing plugin and make sure it’s loaded.
 
@@ -160,7 +160,7 @@ if n:
 <br>
 
 
-### <a name="linkH"></a> How to lock and unlock specific folders
+### <a name="we7zm9m"></a> How to lock and unlock specific folders
 
 ```python
 import studiolibrary
