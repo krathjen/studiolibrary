@@ -1125,6 +1125,11 @@ class LibraryWidget(QtWidgets.QWidget):
         menu.addAction(action)
 
         menu.addSeparator()
+
+        action = QtWidgets.QAction("Save Settings", menu)
+        action.triggered.connect(self.saveSettings)
+        menu.addAction(action)
+
         action = QtWidgets.QAction("Reset Settings", menu)
         action.triggered.connect(self.resetSettings)
         menu.addAction(action)
