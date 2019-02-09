@@ -1130,6 +1130,10 @@ class LibraryWidget(QtWidgets.QWidget):
         action.triggered.connect(self.saveSettings)
         menu.addAction(action)
 
+        action = QtWidgets.QAction("Show Settings", menu)
+        action.triggered.connect(self.showSettings)
+        menu.addAction(action)
+
         action = QtWidgets.QAction("Reset Settings", menu)
         action.triggered.connect(self.resetSettings)
         menu.addAction(action)
@@ -1780,6 +1784,11 @@ class LibraryWidget(QtWidgets.QWidget):
         data = self.readSettings()
         data.update(settings)
         self.saveSettings(data)
+
+    def showSettings(self):
+        """Show the settings file."""
+        path = self.settingsPath()
+        studiolibrary.showInFolder(path)
 
     def saveSettings(self, settings=None):
         """
