@@ -63,4 +63,4 @@ For more information please click [here](LICENSE.md).
 
 Comments, suggestions and bug reports are welcome.
 
-Feel free to submit any issues with the error message and a detailed step by step process of how you got the error in [github issues](https://github.com/krathjen/studiolibrary/issues/new) or contact [krathjen](http://www.studiolibrary.com/contact).
+Feel free to submit any issues with the error message and a detailed step by step process of how you got the error in [github issues](https://github.com/krathjen/studiolibrary/issues/new) or contact [support@studiolibrary.com](support@studiolibrary.com).
