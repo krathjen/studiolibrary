@@ -11,7 +11,11 @@
 // full path to your config.json file.
 
 {
-  // The max walking depth from the root directory
+  // The database path is used for caching the library items.
+  // You can use environment variables within the path. eg: {HOME}
+  "databasePath": "{root}/.studiolibrary/database.json",
+
+  // The maximum walking depth from the root directory
   "recursiveSearchDepth": 4,
 
   // A list of paths to ignore when walking the root directory

@@ -400,17 +400,24 @@ def formatPath(formatString, path="", **kwargs):
     :type kwargs: dict
     :rtype: str
     """
+    logger.debug("Format String: %s", formatString)
+
     dirname, name, extension = splitPath(path)
 
     local = os.getenv('APPDATA') or os.getenv('HOME')
-    # Environemt variables return raw strings so we need to convert them to
+    # Environment variables return raw strings so we need to convert them to
     # unicode using system encoding
     if local:
         local = local.decode(locale.getpreferredencoding())
 
+    kwargs.update(os.environ)
+
     labels = {
         "name": name,
         "path": path,
+        "root": path,  # legacy
+        "user": user(),
+        "home": local,  # legacy
         "local": local,
         "dirname": dirname,
         "extension": extension,
@@ -418,8 +425,11 @@ def formatPath(formatString, path="", **kwargs):
 
     kwargs.update(labels)
 
-    return unicode(formatString).format(**kwargs)
+    resolvedString = unicode(formatString).format(**kwargs)
 
+    logger.debug("Resolved String: %s", resolvedString)
+
+    return resolvedString
 
 def copyPath(src, dst):
     """

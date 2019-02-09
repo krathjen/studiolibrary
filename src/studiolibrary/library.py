@@ -51,8 +51,6 @@ class Library(QtCore.QObject):
         # "modified",
     ]
 
-    DatabasePath = "{path}/.studiolibrary/database.json"
-
     dataChanged = QtCore.Signal()
 
     def __init__(self, path, *args):
@@ -105,7 +103,8 @@ class Library(QtCore.QObject):
         
         :rtype: str 
         """
-        return studiolibrary.formatPath(self.DatabasePath, path=self.path())
+        formatString = studiolibrary.config().get('databasePath')
+        return studiolibrary.formatPath(formatString, path=self.path())
 
     def mtime(self):
         """
