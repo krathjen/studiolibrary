@@ -90,6 +90,8 @@ studiolibrary.main(name="Figaro Pho - Previs", path="P:/figaro/studiolibrary/pre
 
 This code removes all previously imported Studio Library modules and caches before loading.
 
+Tip: You can also hold "Shift" when clicking the shelf button to reload the modules.
+
 ```python
 import studiolibrary
 studiolibrary.reload()
