@@ -112,7 +112,7 @@ def resource():
 
 import studioqt
 
-from studiolibrary.cmds import *
+from studiolibrary.utils import *
 from studiolibrary.library import Library
 from studiolibrary.libraryitem import LibraryItem
 from studiolibrary.librarywidget import LibraryWidget

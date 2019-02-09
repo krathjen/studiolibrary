@@ -12,7 +12,7 @@
 
 from studioqt.vendor.Qt import QtGui, QtCore, QtWidgets, QtUiTools
 
-from studioqt.cmds import *
+from studioqt.utils import *
 from studioqt.icon import Icon
 from studioqt.menu import Menu
 from studioqt.theme import Theme, ThemesMenu
