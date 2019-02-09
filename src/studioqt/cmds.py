@@ -29,6 +29,7 @@ __all__ = [
     "fadeOut",
     "loadUi",
     "isAltModifier",
+    "isShiftModifier",
     "isControlModifier",
     "InvokeRepeatingThread",
 ]
@@ -177,6 +178,16 @@ def isControlModifier():
     """
     modifiers = QtWidgets.QApplication.keyboardModifiers()
     return modifiers == QtCore.Qt.ControlModifier
+
+
+def isShiftModifier():
+    """
+    Return True if the shift key is down.
+
+    :rtype: bool
+    """
+    modifiers = QtWidgets.QApplication.keyboardModifiers()
+    return modifiers == QtCore.Qt.ShiftModifier
 
 
 def fadeIn(widget, duration=200, onFinished=None):

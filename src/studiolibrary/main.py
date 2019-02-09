@@ -11,6 +11,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import studioqt
 import studiolibrary
 
 
@@ -30,6 +31,14 @@ def main(*args, **kwargs):
 
     :rtype: studiolibrary.LibraryWidget
     """
+    # Reload all Studio Library modules when Shift is pressed.
+    # This is for developers to test their changes in a DCC application.
+    if studioqt.isShiftModifier():
+        import studiolibrary
+        studiolibrary.reload()
+
+    import studiolibrary
+
     if studiolibrary.isMaya():
         import studiolibrarymaya
         libraryWidget = studiolibrarymaya.main(*args, **kwargs)

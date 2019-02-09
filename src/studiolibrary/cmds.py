@@ -139,6 +139,7 @@ def reload():
         import studiolibrary
         studiolibrary.main()
     """
+    import studiolibrary
     studiolibrary.LibraryWidget.destroyInstances()
 
     names = ['studiolibrary', 'studioqt', 'studiolibrarymaya',  'mutils']
@@ -146,6 +147,7 @@ def reload():
     for mod in sys.modules.keys():
         for name in names:
             if mod in sys.modules and mod.startswith(name):
+                logger.info('Removing module: %s', mod)
                 del sys.modules[mod]
 
 
