@@ -50,6 +50,10 @@ class Config(dict):
         path = os.environ.get("STUDIO_LIBRARY_CONFIG_PATH")
         path = path or os.path.join(cwd, "config", "config.json")
 
+        if not os.path.exists(path):
+            cwd = os.path.dirname(os.path.dirname(cwd))
+            path = os.path.join(cwd, "config", "config.json")
+
         if os.path.exists(path):
             paths.append(path)
 

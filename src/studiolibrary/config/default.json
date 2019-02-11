@@ -2,8 +2,8 @@
 //
 // There are two ways to create a custom config.
 //
-// 1. You can create a config.json file in the same directory as the
-// default.json. This file will override any keys in the default.json file
+// 1. You can create a "config.json" at repo/config/config.json.
+// This file will override any keys in this default.json file
 // and will be ignored by git.
 //
 // 2. The other way is to create an environment variable with the name
