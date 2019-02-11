@@ -47,6 +47,13 @@ class GlobalSignal(QtCore.QObject):
     folderSelectionChanged = QtCore.Signal(object, object)
 
 
+class PreviewWidget(QtWidgets.QWidget):
+
+    def __init__(self, *args):
+        QtWidgets.QWidget.__init__(self, *args)
+        studioqt.loadUi(self)
+
+
 class LibraryWidget(QtWidgets.QWidget):
 
     _instances = {}
@@ -343,6 +350,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self.folderSelectionChanged.connect(self.updateLock)
 
         self.updateViewButton()
+        self.updatePreviewWidget()
 
         if path:
             self.setPath(path)
@@ -1545,8 +1553,12 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Set the default preview widget.
         """
-        widget = QtWidgets.QWidget(None)
+        widget = PreviewWidget()
         self.setPreviewWidget(widget)
+
+    def updatePreviewWidget(self):
+        """Update the current preview widget."""
+        self.setPreviewWidget(self._currentItem)
 
     def setPreviewWidgetFromItem(self, item):
         """
