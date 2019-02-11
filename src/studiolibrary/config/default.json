@@ -19,6 +19,9 @@
   // eg: /library/data/animation/nemo/.metadata
   "metadataPath": "{path}/.metadata",
 
+  // Used for saving persistent user data
+  "settingsPath": "{local}/StudioLibrary/LibraryWidget.json",
+
   // The maximum walking depth from the root directory
   "recursiveSearchDepth": 4,
 

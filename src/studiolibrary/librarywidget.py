@@ -87,8 +87,6 @@ class LibraryWidget(QtWidgets.QWidget):
             }
         }
 
-    SETTINGS_PATH = "{local}/StudioLibrary/LibraryWidget.json"
-
     TRASH_ENABLED = True
 
     RECURSIVE_SEARCH_ENABLED = False
@@ -1644,7 +1642,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: str
         """
-        return studiolibrary.formatPath(self.SETTINGS_PATH)
+        formatString = studiolibrary.config().get('settingsPath')
+        return studiolibrary.formatPath(formatString)
 
     def geometrySettings(self):
         """
