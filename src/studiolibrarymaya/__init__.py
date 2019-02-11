@@ -58,6 +58,13 @@ def saveSettings(data):
     studiolibrary.updateJson(SETTINGS_PATH, data)
 
 
+def resetSettings():
+    """Remove and reset the item settings."""
+    global _settings
+    _settings = None
+    studiolibrary.removePath(SETTINGS_PATH)
+
+
 def settings():
     """
     Return the local settings for importing and exporting an animation.

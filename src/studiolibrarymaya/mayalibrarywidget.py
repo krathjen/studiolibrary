@@ -14,6 +14,7 @@ import uuid
 import logging
 
 import studiolibrary
+import studiolibrarymaya
 
 import maya.cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
@@ -34,6 +35,11 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
         name = '{0}_{1}'.format(name, uuid.uuid4())
 
         studiolibrary.LibraryWidget.setObjectName(self, name)
+
+    def resetSettings(self):
+        """Reset all the settings for the library widget and library items."""
+        studiolibrary.LibraryWidget.resetSettings(self)
+        studiolibrarymaya.resetSettings()
 
     def tabWidget(self):
         """
