@@ -541,12 +541,12 @@ class LibraryWidget(QtWidgets.QWidget):
 
         title = "Welcome"
         title = title.format(studiolibrary.version(), name)
-
+        icon = studiolibrary.resource().get('icons/icon_white.png')
         text = "Before you get started please choose a folder " \
                "location for storing the data. A network folder is " \
                "recommended for sharing within a studio."
 
-        dialog = studioqt.createMessageBox(self, title, text)
+        dialog = studioqt.createMessageBox(self, title, text, headerIcon=icon)
         dialog.show()
 
         dialog.accepted.connect(self.showChangePathDialog)

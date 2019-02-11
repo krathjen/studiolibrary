@@ -61,6 +61,7 @@ def createMessageBox(
 
     if headerIcon:
         p = studioqt.resource.pixmap(headerIcon)
+        print(p)
         mb.setPixmap(p)
 
     try:
@@ -624,6 +625,7 @@ class MessageBox(QtWidgets.QDialog):
         :type pixmap: QWidgets.QPixmap
         :rtype: None 
         """
+        print(pixmap)
         self._icon.setPixmap(pixmap)
         self._icon.show()
 

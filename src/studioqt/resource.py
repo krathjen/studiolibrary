@@ -96,7 +96,11 @@ class Resource(object):
         :type extension: str
         :rtype: QtWidgets.QPixmap
         """
-        path = self.get(scope, name + "." + extension)
+        if os.path.exists(name):
+            path = name
+        else:
+            path = self.get(scope, name + "." + extension)
+
         p = Pixmap(path)
 
         if color:
