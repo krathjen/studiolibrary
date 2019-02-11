@@ -732,7 +732,7 @@ class LibraryWidget(QtWidgets.QWidget):
         for item in items:
             if item.DisplayInSidebar:
                 path = item.path()
-                paths[path] = {}
+                paths[path] = item.metadata()
 
         self.sidebarWidget().setPaths(paths, root=rootPath)
         self.updateTrashFolder()

@@ -148,6 +148,7 @@ class LibraryItem(studioqt.Item):
         self._path = ""
         self._modal = None
         self._library = None
+        self._metadata = None
         self._iconPath = None
         self._typePixmap = None
         self._libraryWidget = None
@@ -430,6 +431,54 @@ class LibraryItem(studioqt.Item):
         self._path = path
 
         self.updateItemData()
+
+    def setMetadata(self, metadata):
+        """
+        Set the given metadata for the item.
+        
+        :type metadata: dict
+        """
+        self._metadata = metadata
+
+    def metadata(self):
+        """
+        Get the metadata for the item from disc.
+        
+        :rtype: dict
+        """
+        return self._metadata
+
+    def updateMetadata(self, metadata):
+        """
+        Update the current metadata from disc with the given metadata.
+        
+        :type metadata: dict
+        """
+        metadata_ = self.readMetadata()
+        metadata_.update(metadata)
+        self.saveMetadata(metadata_)
+
+    def saveMetadata(self, metadata):
+        """
+        Save the given metadata to disc.
+        
+        :type metadata: dict
+        """
+        formatString = studiolibrary.config().get('metadataPath')
+        path = studiolibrary.formatPath(formatString, self.path())
+        studiolibrary.saveJson(path, metadata)
+        self.setMetadata(metadata)
+
+    def readMetadata(self):
+        """
+        Read the metadata for the item from disc.
+        
+        :rtype: dict
+        """
+        formatString = studiolibrary.config().get('metadataPath')
+        path = studiolibrary.formatPath(formatString, self.path())
+        metadata = studiolibrary.readJson(path)
+        return metadata
 
     def updateItemData(self):
         itemData = self.createItemData()

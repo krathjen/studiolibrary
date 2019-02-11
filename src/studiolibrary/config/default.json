@@ -15,6 +15,10 @@
   // You can use environment variables within the path. eg: {HOME}
   "databasePath": "{root}/.studiolibrary/database.json",
 
+  // The metadata path used for each item. Used for tags, item color etc
+  // eg: /library/data/animation/nemo/.metadata
+  "metadataPath": "{path}/.metadata",
+
   // The maximum walking depth from the root directory
   "recursiveSearchDepth": 4,
 
