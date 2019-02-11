@@ -250,6 +250,9 @@ class Library(QtCore.QObject):
                     elif cond == 'contains':
                         match = value in itemValue
 
+                    elif cond == 'not_contains':
+                        match = value not in itemValue
+
                     elif cond == 'is':
                         match = value == itemValue
 

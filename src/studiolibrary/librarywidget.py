@@ -948,6 +948,9 @@ class LibraryWidget(QtWidgets.QWidget):
         for text in self.searchWidget().text().split():
             filters.append(('path', 'contains', text))
 
+        if not self.isTrashFolderVisible():
+            filters.append(('path', 'not_contains', '/Trash/'))
+
         return {'operator': 'and', 'filters': filters}
 
     def searchWidgetFilter(self, items):
@@ -2155,6 +2158,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         self._isTrashFolderVisible = visible
         self.updateTrashFolder()
+        self.updateItems()
 
     def updateTrashFolder(self):
         """
