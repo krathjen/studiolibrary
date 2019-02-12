@@ -13,6 +13,7 @@
 import os
 
 import studiolibrary
+import studiolibrary.widgets
 
 import studioqt
 from studioqt import QtWidgets
@@ -28,6 +29,7 @@ class FolderItem(studiolibrary.LibraryItem):
     MenuOrder = 1
     MenuIconPath = studiolibrary.resource().get("icons/folder.png")
     ThumbnailPath = studiolibrary.resource().get("icons/folder_item.png")
+    PreviewWidgetClass = studiolibrary.widgets.PreviewWidget
 
     @classmethod
     def match(cls, path):

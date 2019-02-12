@@ -97,6 +97,13 @@ def uiPath(cls):
     dirname = os.path.dirname(path)
 
     path = dirname + "/resource/ui/" + name + ".ui"
+
+    if not os.path.exists(path):
+        path = dirname + "/ui/" + name + ".ui"
+
+    if not os.path.exists(path):
+        path = dirname + "/" + name + ".ui"
+
     return path
 
 

@@ -23,6 +23,7 @@ from studioqt import QtWidgets
 
 import studioqt
 import studiolibrary
+import studiolibrary.widgets
 
 
 __all__ = ["LibraryWidget"]
@@ -45,13 +46,6 @@ class GlobalSignal(QtCore.QObject):
     """
     debugModeChanged = QtCore.Signal(object, object)
     folderSelectionChanged = QtCore.Signal(object, object)
-
-
-class PreviewWidget(QtWidgets.QWidget):
-
-    def __init__(self, *args):
-        QtWidgets.QWidget.__init__(self, *args)
-        studioqt.loadUi(self)
 
 
 class LibraryWidget(QtWidgets.QWidget):
@@ -1554,7 +1548,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Set the default preview widget.
         """
-        widget = PreviewWidget()
+        widget = studiolibrary.widgets.PlaceholderWidget()
         self.setPreviewWidget(widget)
 
     def updatePreviewWidget(self):
