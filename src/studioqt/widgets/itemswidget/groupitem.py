@@ -26,11 +26,11 @@ class GroupItem(studioqt.Item):
 
         self._children = []
 
-        font = self.font(0)
-        font.setBold(True)
+        self._font = self.font(0)
+        self._font.setBold(True)
 
-        self.setFont(0, font)
-        self.setFont(1, font)
+        self.setFont(0, self._font)
+        self.setFont(1, self._font)
         self.setDragEnabled(False)
 
     def setChildren(self, children):
@@ -184,9 +184,11 @@ class GroupItem(studioqt.Item):
         painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
         visualRect = self.visualRect(option)
 
-        textWidth = self.textWidth(0)
+        text = self.name()
+        metrics = QtGui.QFontMetricsF(self._font)
+        textWidth = metrics.width(text)
 
-        padding = (20 * self.dpi())
+        padding = (25 * self.dpi())
 
         visualRect.setX(textWidth + padding)
         visualRect.setY(visualRect.y() + (visualRect.height() / 2))
