@@ -284,7 +284,7 @@ class LabelOption(OptionWidget):
         self.setWidget(widget)
 
     def value(self):
-        return str(self.widget().text())
+        return unicode(self.widget().text())
 
     def setValue(self, value):
         self.widget().setText(value)
