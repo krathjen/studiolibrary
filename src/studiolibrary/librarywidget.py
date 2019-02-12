@@ -902,6 +902,10 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
+        if not self.library():
+            logger.info("No library set")
+            return
+
         # Create a query using the sidebar and search widgets
         queries = self.sidebarQuery(), self.searchQuery()
 

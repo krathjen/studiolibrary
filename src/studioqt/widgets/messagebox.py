@@ -625,7 +625,6 @@ class MessageBox(QtWidgets.QDialog):
         :type pixmap: QWidgets.QPixmap
         :rtype: None 
         """
-        print(pixmap)
         self._icon.setPixmap(pixmap)
         self._icon.show()
 
