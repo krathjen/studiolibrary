@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from datetime import datetime
 
 import studiolibrary
 import studiolibrary.widgets
@@ -41,6 +42,33 @@ class FolderItem(studiolibrary.LibraryItem):
         """
         if os.path.isdir(path):
             return True
+
+    def options(self):
+
+        created = os.stat(self.path()).st_ctime
+        created = datetime.fromtimestamp(created).strftime("%Y-%m-%d %H:%M %p")
+
+        modified = os.stat(self.path()).st_mtime
+        modified = datetime.fromtimestamp(modified).strftime("%Y-%m-%d %H:%M %p")
+
+        return [
+            {
+                "name": "name",
+                "value": self.name()
+            },
+            {
+                "name": "path",
+                "value": self.path()
+            },
+            {
+                "name": "created",
+                "value":  created,
+            },
+            {
+                "name": "modified",
+                "value": modified,
+            }
+        ]
 
     @classmethod
     def showCreateWidget(cls, libraryWidget):

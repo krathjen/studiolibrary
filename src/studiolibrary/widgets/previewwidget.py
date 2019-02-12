@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-
+import studiolibrary.widgets
 import studioqt
 from studioqt import QtWidgets
 
@@ -24,3 +24,8 @@ class PreviewWidget(QtWidgets.QWidget):
         pixmap = studioqt.Pixmap(item.thumbnailPath())
         pixmap.setColor('rgb(255,255,255,20)')
         self.ui.thumbnailLabel.setPixmap(pixmap)
+
+        self._optionsWidget = studiolibrary.widgets.OptionsWidget(self)
+        self.ui.optionsFrame.layout().addWidget(self._optionsWidget)
+
+        self._optionsWidget.setOptions(item.options())
