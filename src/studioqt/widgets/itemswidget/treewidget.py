@@ -72,7 +72,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
             "sortOrder": self.sortOrderToInt(self._sortOrder),
             "sortColumn": self.labelFromColumn(self._sortColumn),
             "groupOrder": self.sortOrderToInt(self._groupOrder),
-            "groupColumn": self.labelFromColumn(self._groupColumn)
+            "groupColumn": self._groupColumn
         }
 
         return settings
@@ -122,7 +122,6 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         groupColumn = settings.get("groupColumn")
 
         sortColumn = self.columnFromLabel(sortColumn)
-        groupColumn = self.columnFromLabel(groupColumn)
 
         sortOrder = self.intToSortOrder(sortOrder)
         groupOrder = self.intToSortOrder(groupOrder)
@@ -864,13 +863,13 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         if groupOrder is None:
             groupOrder = self._groupOrder
 
-        if isinstance(groupColumn, basestring):
-            groupColumn = self.columnFromLabel(groupColumn)
+        groupKey = groupColumn
+        if isinstance(groupColumn, int):
+            groupKey = self.labelFromColumn(groupColumn)
 
         self._groupOrder = groupOrder
-        self._groupColumn = groupColumn
+        self._groupColumn = groupKey
 
-        groupKey = self.labelFromColumn(groupColumn)
         groupReverse = groupOrder == QtCore.Qt.DescendingOrder
 
         groups = {}
