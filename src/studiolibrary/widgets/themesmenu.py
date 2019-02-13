@@ -15,6 +15,7 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studioqt
+import studiolibrary
 
 
 __all__ = ["Theme", "ThemeAction", "ThemesMenu"]
@@ -112,7 +113,7 @@ class ThemeAction(QtWidgets.QAction):
         else:
             color = "rgb(255,255,255)"
 
-        icon = studioqt.resource.icon(ThemesMenu.THEME_ICON, color=color)
+        icon = studiolibrary.resource().icon(ThemesMenu.THEME_ICON, color=color)
         self.setIcon(icon)
 
     def theme(self):
@@ -166,7 +167,7 @@ class ThemesMenu(QtWidgets.QMenu):
             action = QtWidgets.QAction("Custom", self)
             action.triggered.connect(self.theme().browseAccentColor)
             color = self.theme().accentColor().toString()
-            icon = studioqt.resource.icon(ThemesMenu.THEME_ICON, color=color)
+            icon = studiolibrary.resource().icon(ThemesMenu.THEME_ICON, color=color)
             action.setIcon(icon)
             self.addAction(action)
 
@@ -183,7 +184,7 @@ class ThemesMenu(QtWidgets.QMenu):
             action = QtWidgets.QAction("Custom", self)
             action.triggered.connect(self._theme.browseBackgroundColor)
             color = self._theme.backgroundColor().toString()
-            icon = studioqt.resource.icon(ThemesMenu.THEME_ICON, color=color)
+            icon = studiolibrary.resource().icon(ThemesMenu.THEME_ICON, color=color)
             action.setIcon(icon)
             self.addAction(action)
 
@@ -584,7 +585,8 @@ class Theme(QtCore.QObject):
         else:
             darkness = "black"
 
-        resourceDirname = studioqt.RESOURCE_DIRNAME.replace("\\", "/")
+        resourceDirname = studiolibrary.resource().dirname()
+        resourceDirname = resourceDirname.replace("\\", "/")
 
         options = {
             "DARKNESS": darkness,
@@ -624,7 +626,7 @@ class Theme(QtCore.QObject):
         :rtype: str
         """
         options = self.options()
-        path = studioqt.resource.get("css", "default.css")
+        path = studiolibrary.resource().get("css", "default.css")
         styleSheet = studioqt.StyleSheet.fromPath(path, options=options, dpi=self.dpi())
         return styleSheet.data()
 
@@ -636,8 +638,8 @@ def example():
     :rtype: None
     """
     theme = showThemesMenu()
-    print "Accent color:", theme.accentColor()
-    print "Background color:", theme.backgroundColor()
+    print("Accent color:", theme.accentColor())
+    print("Background color:", theme.backgroundColor())
 
 
 if __name__ == "__main__":

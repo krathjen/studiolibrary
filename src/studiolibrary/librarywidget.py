@@ -220,16 +220,16 @@ class LibraryWidget(QtWidgets.QWidget):
         self._sidebarFrame = SidebarFrame(self)
         self._previewFrame = PreviewFrame(self)
 
-        self._itemsWidget = studioqt.ItemsWidget(self)
+        self._itemsWidget = studiolibrary.widgets.ItemsWidget(self)
 
         tip = "Search all current items."
-        self._searchWidget = studioqt.SearchWidget(self)
+        self._searchWidget = studiolibrary.widgets.SearchWidget(self)
         self._searchWidget.setToolTip(tip)
         self._searchWidget.setStatusTip(tip)
 
-        self._statusWidget = studioqt.StatusWidget(self)
-        self._menuBarWidget = studioqt.MenuBarWidget()
-        self._sidebarWidget = studioqt.SidebarWidget(self)
+        self._statusWidget = studiolibrary.widgets.StatusWidget(self)
+        self._menuBarWidget = studiolibrary.widgets.MenuBarWidget(self)
+        self._sidebarWidget = studiolibrary.widgets.SidebarWidget(self)
 
         self.setMinimumWidth(5)
         self.setMinimumHeight(5)
@@ -239,40 +239,40 @@ class LibraryWidget(QtWidgets.QWidget):
         # --------------------------------------------------------------------
 
         name = "New Item"
-        icon = studioqt.resource.icon("add")
+        icon = studiolibrary.resource().icon("add_28")
         tip = "Add a new item to the selected folder"
         self.addMenuBarAction(name, icon, tip, callback=self.showNewMenu)
 
         self._menuBarWidget.addWidget(self._searchWidget)
 
         name = "Item View"
-        icon = studioqt.resource.icon("view_settings")
+        icon = studiolibrary.resource().icon("view_settings")
         tip = "Change the style of the item view"
         self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
 
         name = "Group By"
-        icon = studioqt.resource.icon("groupby")
+        icon = studiolibrary.resource().icon("groupby")
         tip = "Group the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showGroupByMenu)
 
         name = "Sort By"
-        icon = studioqt.resource.icon("sortby")
+        icon = studiolibrary.resource().icon("sortby")
         tip = "Sort the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showSortByMenu)
 
         name = "View"
-        icon = studioqt.resource.icon("view")
+        icon = studiolibrary.resource().icon("view")
         tip = "Choose to show/hide both the preview and navigation pane. " \
               "Click + CTRL will hide the menu bar as well."
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
 
         name = "Sync items"
-        icon = studioqt.resource.icon("sync")
+        icon = studiolibrary.resource().icon("sync")
         tip = "Sync with the filesystem"
         self.addMenuBarAction(name, icon, tip, callback=self.sync)
 
         name = "Settings"
-        icon = studioqt.resource.icon("settings")
+        icon = studiolibrary.resource().icon("settings")
         tip = "Settings menu"
         self.addMenuBarAction(name, icon, tip, callback=self.showSettingsMenu)
 
@@ -760,7 +760,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Return the widget the contains all the items.
 
-        :rtype: studioqt.ItemsWidget
+        :rtype: studiolibrary.widgets.ItemsWidget
         """
         return self._itemsWidget
 
@@ -1103,7 +1103,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         menu.addSeparator()
         theme = self.theme()
-        themesMenu = studioqt.ThemesMenu(menu, theme)
+        themesMenu = studiolibrary.widgets.ThemesMenu(menu, theme)
         themesMenu.triggered.connect(self.reloadStyleSheet)
         menu.addMenu(themesMenu)
 
@@ -2025,7 +2025,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :type settings: dict
         :rtype: None
         """
-        theme = studioqt.Theme()
+        theme = studiolibrary.widgets.Theme()
         theme.setSettings(settings)
         self.setTheme(theme)
 
@@ -2047,7 +2047,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: studioqt.Theme
         """
         if not self._theme:
-            self._theme = studioqt.Theme()
+            self._theme = studiolibrary.widgets.Theme()
 
         return self._theme
 
@@ -2167,7 +2167,7 @@ class LibraryWidget(QtWidgets.QWidget):
         
         :rtype: None 
         """
-        iconPath = studioqt.resource.get("icons", "delete.png")
+        iconPath = studiolibrary.resource().get("icons", "delete_96.png")
 
         for item in self.sidebarWidget().items():
             if self.trashPath() == item.path():
@@ -2360,11 +2360,11 @@ class LibraryWidget(QtWidgets.QWidget):
         action = self.menuBarWidget().findAction("New Item")
 
         if self.isLocked():
-            pixmap = studioqt.resource.pixmap("lock")
+            pixmap = studiolibrary.resource().pixmap("lock")
             action.setEnabled(False)
             action.setIcon(pixmap)
         else:
-            pixmap = studioqt.resource.pixmap("add")
+            pixmap = studiolibrary.resource().pixmap("add_28")
             action.setEnabled(True)
             action.setIcon(pixmap)
 
@@ -2552,9 +2552,9 @@ class LibraryWidget(QtWidgets.QWidget):
         action = self.menuBarWidget().findAction("View")
 
         if not compact:
-            icon = studioqt.resource.icon("view_all")
+            icon = studiolibrary.resource().icon("view_all")
         else:
-            icon = studioqt.resource.icon("view_compact")
+            icon = studiolibrary.resource().icon("view_compact")
 
         action.setIcon(icon)
 

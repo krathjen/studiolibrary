@@ -19,6 +19,8 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studioqt
+import studiolibrary
+
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +199,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         if isinstance(icon, basestring):
             if not os.path.exists(icon):
                 color = color or studioqt.Color(255, 255, 255, 20)
-                icon = studioqt.resource.icon("image", color=color)
+                icon = studiolibrary.resource().icon("image", color=color)
             else:
                 icon = QtGui.QIcon(icon)
 
@@ -476,7 +478,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         if not os.path.exists(thumbnailPath):
             color = self.textColor()
-            thumbnailPath = studioqt.resource.icon("thumbnail", color=color)
+            thumbnailPath = studiolibrary.resource().icon("thumbnail", color=color)
 
         if not self._thumbnailIcon:
 

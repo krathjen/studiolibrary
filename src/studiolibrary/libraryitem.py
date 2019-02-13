@@ -15,6 +15,7 @@ import logging
 from functools import partial
 
 import studiolibrary
+import studiolibrary.widgets
 
 import studioqt
 
@@ -48,7 +49,8 @@ class LibraryItemSignals(QtCore.QObject):
     renamed = QtCore.Signal(object, object, object)
 
 
-class LibraryItem(studioqt.Item):
+# Note: We will be changing the base class in the near future
+class LibraryItem(studiolibrary.widgets.Item):
 
     EnableDelete = False
     EnableNestedItems = False
@@ -58,7 +60,7 @@ class LibraryItem(studioqt.Item):
     MenuName = ""
     MenuOrder = 10
     MenuIconPath = ""
-    ThumbnailPath = studioqt.resource.get("icons", "thumbnail.png")
+    ThumbnailPath = studiolibrary.resource().get("icons", "thumbnail.png")
 
     RegisterOrder = 10
     TypeIconPath = ""
@@ -143,7 +145,7 @@ class LibraryItem(studioqt.Item):
         :type library: studiolibrary.Library or None 
         :type libraryWidget: studiolibrary.LibraryWidget or None
         """
-        studioqt.Item.__init__(self)
+        super(LibraryItem, self).__init__()
 
         self._path = ""
         self._modal = None
@@ -768,7 +770,7 @@ class LibraryItem(studioqt.Item):
         :type option: QtWidgets.QStyleOptionViewItem
         :rtype: None
         """
-        studioqt.Item.paint(self, painter, option, index)
+        super(LibraryItem, self).paint(painter, option, index)
 
         painter.save()
         try:

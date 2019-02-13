@@ -11,15 +11,12 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from functools import partial
 
-from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
 
-
 import studioqt
-
+import studiolibrary
 
 logger = logging.getLogger(__name__)
 
@@ -36,14 +33,13 @@ class SearchWidget(QtWidgets.QLineEdit):
         self._iconPadding = 6
         self._iconButton = QtWidgets.QPushButton(self)
         self._iconButton.clicked.connect(self._iconClicked)
-        self._searchFilter = studioqt.SearchFilter("")
 
-        icon = studioqt.resource.icon("search")
+        icon = studiolibrary.resource().icon("search")
         self.setIcon(icon)
 
         self._clearButton = QtWidgets.QPushButton(self)
         self._clearButton.setCursor(QtCore.Qt.ArrowCursor)
-        icon = studioqt.resource.icon("cross")
+        icon = studiolibrary.resource().icon("cross")
         self._clearButton.setIcon(icon)
         self._clearButton.setToolTip("Clear all search text")
         self._clearButton.clicked.connect(self._clearClicked)
@@ -51,7 +47,6 @@ class SearchWidget(QtWidgets.QLineEdit):
         self.setPlaceholderText(self.DEFAULT_PLACEHOLDER_TEXT)
 
         self.textChanged.connect(self._textChanged)
-        self.searchChanged = self.searchFilter().searchChanged
 
         self.update()
 
@@ -94,8 +89,8 @@ class SearchWidget(QtWidgets.QLineEdit):
         :type text: str
         :rtype: None
         """
-        self.searchFilter().setPattern(text)
         self.updateClearButton()
+        self.searchChanged.emit()
 
     def updateClearButton(self):
         """
@@ -116,84 +111,7 @@ class SearchWidget(QtWidgets.QLineEdit):
         :type event: QtCore.QEvent
         :rtype: None
         """
-        self.showContextMenu()
-
-    def setSpaceOperator(self, operator):
-        """
-        Set the space operator for the search filter.
-
-        :type operator: studioqt.SearchFilter.Operator
-        :rtype: None
-        """
-        self._searchFilter.setSpaceOperator(operator)
-
-    def createSpaceOperatorMenu(self, parent=None):
-        """
-        Return the menu for changing the space operator.
-
-        :type parent: QGui.QMenu
-        :rtype: QGui.QMenu
-        """
-        searchFilter = self.searchFilter()
-
-        menu = QtWidgets.QMenu(parent)
-        menu.setTitle("Space Operator")
-
-        # Create the space operator for the OR operator
-        action = QtWidgets.QAction(menu)
-        action.setText("OR")
-        action.setCheckable(True)
-
-        callback = partial(self.setSpaceOperator, searchFilter.Operator.OR)
-        action.triggered.connect(callback)
-
-        if searchFilter.spaceOperator() == searchFilter.Operator.OR:
-            action.setChecked(True)
-
-        menu.addAction(action)
-
-        # Create the space operator for the AND operator
-        action = QtWidgets.QAction(menu)
-        action.setText("AND")
-        action.setCheckable(True)
-
-        callback = partial(self.setSpaceOperator, searchFilter.Operator.AND)
-        action.triggered.connect(callback)
-
-        if searchFilter.spaceOperator() == searchFilter.Operator.AND:
-            action.setChecked(True)
-
-        menu.addAction(action)
-
-        return menu
-
-    def showContextMenu(self):
-        """
-        Create and show the context menu for the search widget.
-
-        :rtype QtWidgets.QAction
-        """
-        menu = QtWidgets.QMenu(self)
-
-        subMenu = self.createStandardContextMenu()
-        subMenu.setTitle("Edit")
-        menu.addMenu(subMenu)
-
-        subMenu = self.createSpaceOperatorMenu(menu)
-        menu.addMenu(subMenu)
-
-        point = QtGui.QCursor.pos()
-        action = menu.exec_(point)
-
-        return action
-
-    def searchFilter(self):
-        """
-        Return the search filter for the widget.
-
-        :rtype: studioqt.SearchFilter
-        """
-        return self._searchFilter
+        pass
 
     def setIcon(self, icon):
         """
@@ -228,7 +146,6 @@ class SearchWidget(QtWidgets.QLineEdit):
         :rtype: dict
         """
         settings = {"text": self.text()}
-        settings["searchFilter"] = self.searchFilter().settings()
         return settings
 
     def setSettings(self, settings):
@@ -238,10 +155,6 @@ class SearchWidget(QtWidgets.QLineEdit):
         :type settings: dict
         :rtype: None
         """
-        searchFilterSettings = settings.get("searchFilter", None)
-        if searchFilterSettings is not None:
-            self.searchFilter().setSettings(searchFilterSettings)
-
         text = settings.get("text", "")
         self.setText(text)
 
@@ -276,19 +189,9 @@ def showExample():
     with studioqt.app():
         searchWidget = studioqt.SearchWidget()
 
-        items = [
-            "This is a dog",
-            "I love cats",
-            "how man eggs can you eat?"
-        ]
-
         def searchChanged():
-            print "--- Search changed! ---"
-
-            searchFilter = searchWidget.searchFilter()
-            for item in items:
-                print "Match:", searchFilter.match(item), searchFilter.matches(), item
-
+            print("--- Search changed! ---")
+            print(searchWidget.text())
 
         searchWidget.searchChanged.connect(searchChanged)
         searchWidget.show()

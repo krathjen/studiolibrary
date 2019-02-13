@@ -520,18 +520,18 @@ class ExampleWindow(QtWidgets.QWidget):
         self._treeWidget.setPaths(data)
 
     def itemClicked(self):
-        print "ITEM CLICKED"
-        print self._treeWidget.settings()
+        print("ITEM CLICKED")
+        print(self._treeWidget.settings())
 
         items = self._treeWidget.selectedItems()
         for item in items:
-            print item.path()
+            print(item.path())
 
     def selectionChanged(self, *args):
-        print "SELECTION CHANGED", args
+        print("SELECTION CHANGED", args)
 
     def searchChanged(self, text):
-        print "SEARCH CHANGED", text
+        print("SEARCH CHANGED", text)
 
         items = self._treeWidget.items()
 

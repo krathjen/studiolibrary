@@ -15,7 +15,6 @@ from studioqt.vendor.Qt import QtGui, QtCore, QtWidgets, QtUiTools
 from studioqt.utils import *
 from studioqt.icon import Icon
 from studioqt.menu import Menu
-from studioqt.theme import Theme, ThemesMenu
 from studioqt.color import Color
 from studioqt.pixmap import Pixmap
 from studioqt.resource import Resource, RESOURCE_DIRNAME
@@ -27,19 +26,7 @@ from studioqt.decorators import showArrowCursor
 from studioqt.imagesequence import ImageSequence
 from studioqt.imagesequence import ImageSequenceWidget
 
-from studioqt.widgets.messagebox import MessageBox, createMessageBox
-from studioqt.widgets.toastwidget import ToastWidget
-from studioqt.widgets.statuswidget import StatusWidget
-from studioqt.widgets.menubarwidget import MenuBarWidget
-
-from studioqt.widgets.searchwidget import SearchWidget
-from studioqt.widgets.searchwidget import SearchFilter
-
-from studioqt.widgets.itemswidget.item import Item
-from studioqt.widgets.itemswidget.groupitem import GroupItem
-from studioqt.widgets.itemswidget.itemswidget import ItemsWidget
-
-from studioqt.widgets.sidebarwidget import SidebarWidget
+from studioqt.messagebox import MessageBox, createMessageBox
 
 # Custom qt actions
 from studioqt.actions.slideraction import SliderAction

@@ -20,6 +20,7 @@ from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
 
+from .groupitem import GroupItem
 from .itemviewmixin import ItemViewMixin
 
 
@@ -203,7 +204,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         items_ = QtWidgets.QTreeWidget.selectedItems(self)
 
         for item in items_:
-            if not isinstance(item, studioqt.GroupItem):
+            if not isinstance(item, GroupItem):
                 items.append(item)
 
         return items
@@ -237,7 +238,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         items = []
 
         for item in self._items():
-            if not isinstance(item, studioqt.GroupItem):
+            if not isinstance(item, GroupItem):
                 items.append(item)
 
         return items
@@ -879,7 +880,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
             # Group the items into a dictionary
             for item in items:
-                if isinstance(item, studioqt.GroupItem):
+                if isinstance(item, GroupItem):
                     continue
 
                 groupText = item.displayText(groupKey)
@@ -913,9 +914,9 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         :type text: str
         :type children: list[studioqt.Item]
         
-        :rtype: studioqt.GroupItem
+        :rtype: GroupItem
         """
-        groupItem = studioqt.GroupItem()
+        groupItem = GroupItem()
         groupItem.setName(text)
         groupItem.setStretchToWidget(self.parent())
         groupItem.setChildren(children)

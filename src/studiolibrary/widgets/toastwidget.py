@@ -24,7 +24,7 @@ class ToastWidget(QtWidgets.QLabel):
     The toast class helps you create and show those.
 
     Example:
-        toast = studioqt.ToastWidget(parent)
+        toast = studiolibrary.widgets.ToastWidget(parent)
         toast.setDuration(1000)  # Show for 1 second
         toast.setText("Hello world")
         toast.show()

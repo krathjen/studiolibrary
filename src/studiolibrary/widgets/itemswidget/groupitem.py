@@ -16,13 +16,15 @@ from studioqt import QtGui
 from studioqt import QtCore
 from studioqt import QtWidgets
 
+from .item import Item
 
-class GroupItem(studioqt.Item):
+
+class GroupItem(Item):
 
     DEFAULT_FONT_SIZE = 24
 
     def __init__(self, *args):
-        studioqt.Item.__init__(self, *args)
+        super(GroupItem, self).__init__(*args)
 
         self._children = []
 
@@ -179,7 +181,7 @@ class GroupItem(studioqt.Item):
         :type index: QtCore.QModelIndex
         :rtype: None
         """
-        studioqt.Item.paintBackground(self, painter, option, index)
+        super(GroupItem, self).paintBackground(painter, option, index)
 
         painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
         visualRect = self.visualRect(option)

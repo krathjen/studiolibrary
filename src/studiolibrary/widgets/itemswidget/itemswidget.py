@@ -22,7 +22,7 @@ from .item import Item
 from .listview import ListView
 from .treewidget import TreeWidget
 from .itemdelegate import ItemDelegate
-
+from ..toastwidget import ToastWidget
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ class ItemsWidget(QtWidgets.QWidget):
         self._listView.setItemDelegate(self._delegate)
         self._treeWidget.setItemDelegate(self._delegate)
 
-        self._toastWidget = studioqt.ToastWidget(self)
+        self._toastWidget = ToastWidget(self)
         self._toastWidget.hide()
         self._toastEnabled = True
 

@@ -18,6 +18,7 @@ from studioqt import QtWidgets
 
 
 import studioqt
+import studiolibrary
 
 
 logger = logging.getLogger(__name__)
@@ -268,7 +269,7 @@ def showExample():
         w = QtWidgets.QLineEdit()
         menuBarWidget.addWidget(w)
 
-        icon = studioqt.resource.icon("add")
+        icon = studiolibrary.resource().icon("add")
         menuBarWidget.addAction(icon, "Plus")
         menuBarWidget.setStyleSheet("""
 background-color: rgb(0,200,100);

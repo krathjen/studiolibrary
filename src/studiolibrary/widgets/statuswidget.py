@@ -14,7 +14,7 @@ from studioqt import QtWidgets
 from studioqt import QtCore
 
 import studioqt
-
+import studiolibrary
 
 class StatusWidget(QtWidgets.QFrame):
 
@@ -88,7 +88,7 @@ class StatusWidget(QtWidgets.QFrame):
         if self.isBlocking():
             return
 
-        icon = studioqt.resource.icon("info")
+        icon = studiolibrary.resource().icon("info")
         self.setStyleSheet(self.INFO_CSS)
         self.showMessage(message, icon, msecs)
 
@@ -101,7 +101,7 @@ class StatusWidget(QtWidgets.QFrame):
         
         :rtype: None 
         """
-        icon = studioqt.resource.icon("error")
+        icon = studiolibrary.resource().icon("error")
         self.setStyleSheet(self.ERROR_CSS)
         self.showMessage(message, icon, msecs, blocking=True)
 
@@ -117,7 +117,7 @@ class StatusWidget(QtWidgets.QFrame):
         if self.isBlocking():
             return
 
-        icon = studioqt.resource.icon("warning")
+        icon = studiolibrary.resource().icon("warning")
         self.setStyleSheet(self.WARNING_CSS)
         self.showMessage(message, icon, msecs)
 
@@ -159,7 +159,7 @@ class StatusWidget(QtWidgets.QFrame):
         self._timer.stop()
         self._button.hide()
         self._label.setText("")
-        icon = studioqt.resource.icon("blank")
+        icon = studiolibrary.resource().icon("blank")
         self._button.setIcon(icon)
         self.setStyleSheet("")
         self._blocking = False

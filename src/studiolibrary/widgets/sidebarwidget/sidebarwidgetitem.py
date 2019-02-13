@@ -17,6 +17,7 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studioqt
+import studiolibrary
 
 
 __all__ = ["SidebarWidgetItem"]
@@ -54,7 +55,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         
         :rtype: str 
         """
-        return self._expandedIconPath or studioqt.resource.get("icons", "folder_open")
+        return self._expandedIconPath or studiolibrary.resource().get("icons", "folder_open")
 
     def collapsedIconPath(self):
         """
@@ -62,7 +63,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: str 
         """
-        return self._collapsedIconPath or studioqt.resource.get("icons", "folder")
+        return self._collapsedIconPath or studiolibrary.resource().get("icons", "folder_48")
 
     def defaultIconPath(self):
         """
