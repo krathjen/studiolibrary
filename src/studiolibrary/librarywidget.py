@@ -499,6 +499,9 @@ class LibraryWidget(QtWidgets.QWidget):
         library = self.createLibrary()
         self.setLibrary(library)
 
+        if not os.path.exists(library.databasePath()):
+            library.sync()
+
         self.refresh()
 
     @studioqt.showArrowCursor
