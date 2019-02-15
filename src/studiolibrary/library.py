@@ -222,52 +222,13 @@ class Library(QtCore.QObject):
 
         self._currentItems = []
 
+        logger.debug("Queries")
+        for query in queries:
+            logger.debug(query)
+
         for item in items:
-
-            matches = []
-
-            for query in queries:
-
-                filters = query.get('filters')
-                operator = query.get('operator', 'and')
-
-                if not filters:
-                    continue
-
-                match = False
-
-                for key, cond, value in filters:
-
-                    value = value.lower()
-                    itemValue = item.itemData().get(key)
-
-                    if itemValue:
-                        itemValue = itemValue.lower()
-
-                    if not itemValue:
-                        match = False
-
-                    elif cond == 'contains':
-                        match = value in itemValue
-
-                    elif cond == 'not_contains':
-                        match = value not in itemValue
-
-                    elif cond == 'is':
-                        match = value == itemValue
-
-                    elif cond == 'startswith':
-                        match = itemValue.startswith(value)
-
-                    if operator == 'or' and match:
-                        break
-
-                    if operator == 'and' and not match:
-                        break
-
-                matches.append(match)
-
-            if all(matches):
+            match = self.match(item.itemData(), queries)
+            if match:
                 self._currentItems.append(item)
 
         return self._currentItems
@@ -438,3 +399,190 @@ class Library(QtCore.QObject):
                 del data[path]
 
         self.save(data)
+
+    @staticmethod
+    def match(data, queries):
+        """
+        Match the given data with the given queries.
+        
+        Examples:
+            
+            queries = [
+                {
+                    'operator': 'or',
+                    'filters': [
+                        ('folder', 'is' '/library/proj/test'),
+                        ('folder', 'startswith', '/library/proj/test'),
+                    ]
+                },
+                {
+                    'operator': 'and',
+                    'filters': [
+                        ('path', 'contains' 'test'),
+                        ('path', 'contains', 'run'),
+                    ]
+                }
+            ]
+            
+            print(library.find(queries))
+        """
+        matches = []
+
+        for query in queries:
+
+            filters = query.get('filters')
+            operator = query.get('operator', 'and')
+
+            if not filters:
+                continue
+
+            match = False
+
+            for key, cond, value in filters:
+
+                if key == '*':
+                    itemValue = unicode(data)
+                else:
+                    itemValue = data.get(key)
+
+                if isinstance(value, basestring):
+                    value = value.lower()
+
+                if isinstance(itemValue, basestring):
+                    itemValue = itemValue.lower()
+
+                if not itemValue:
+                    match = False
+
+                elif cond == 'contains':
+                    match = value in itemValue
+
+                elif cond == 'not_contains':
+                    match = value not in itemValue
+
+                elif cond == 'is':
+                    match = value == itemValue
+
+                elif cond == 'startswith':
+                    match = itemValue.startswith(value)
+
+                if operator == 'or' and match:
+                    break
+
+                if operator == 'and' and not match:
+                    break
+
+            matches.append(match)
+
+        return all(matches)
+
+    @staticmethod
+    def sortedData(data, sortBy):
+        """
+        Return the given data sorted using the sortBy argument.
+        
+        Example:
+            data = [
+                {'name':'red', 'index':1},
+                {'name':'green', 'index':2},
+                {'name':'blue', 'index':3},
+            ]
+            
+            sortBy = ['index:asc', 'name']
+            # sortBy = ['index:dsc', 'name']
+            
+            print(sortedData(data, sortBy))
+            
+        :type data: list[dict]
+        :type sortBy: list[str]
+        :rtype: list[dict]
+        """
+        for field in reversed(sortBy):
+
+            tokens = field.split(':')
+
+            reverse = False
+            if len(tokens) > 1:
+                field = tokens[0]
+                reverse = tokens[1] != 'asc'
+
+            def sortKey(_data):
+
+                default = False if reverse else ''
+
+                return _data.get(field, default)
+
+            data = sorted(data, key=sortKey, reverse=reverse)
+
+        return data
+
+
+def testsuite():
+
+    data = [
+        {'name': 'blue', 'index': 3},
+        {'name': 'red', 'index': 1},
+        {'name': 'green', 'index': 2},
+    ]
+
+    sortBy = ['index:asc', 'name']
+    data2 = (Library.sortedData(data, sortBy))
+
+    assert(data2[0].get('index') == 1)
+    assert(data2[1].get('index') == 2)
+    assert(data2[2].get('index') == 3)
+
+    sortBy = ['index:dsc', 'name']
+    data3 = (Library.sortedData(data, sortBy))
+
+    assert(data3[0].get('index') == 3)
+    assert(data3[1].get('index') == 2)
+    assert(data3[2].get('index') == 1)
+
+    data = {'name': 'blue', 'index': 3}
+    queries = [{'filters': [('name', 'is', 'blue')]}]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{'filters': [('name', 'is', 'blue')]}]
+    assert not Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{'filters': [('name', 'startswith', 're')]}]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{'filters': [('name', 'startswith', 'ed')]}]
+    assert not Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'or',
+        'filters': [('name', 'is', 'pink'), ('name', 'is', 'red')]
+    }]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'and',
+        'filters': [('name', 'is', 'pink'), ('name', 'is', 'red')]
+    }]
+    assert not Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'and',
+        'filters': [('name', 'is', 'red'), ('index', 'is', 3)]
+    }]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'and',
+        'filters': [('name', 'is', 'red'), ('index', 'is', '3')]
+    }]
+    assert not Library.match(data, queries)
+
+
+if __name__ == "__main__":
+    testsuite()
