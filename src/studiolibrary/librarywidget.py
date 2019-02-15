@@ -954,22 +954,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         return {'operator': 'and', 'filters': filters}
 
-    def searchWidgetFilter(self, items):
-        """
-        Filter the given items using the search widget.
-        
-        :type items: list[studiolibrary.LibraryItem]
-        :rtype: list[studiolibrary.LibraryItem] 
-        """
-        # Filter the items using the search widget
-        validItems = []
-        searchFilter = self.searchWidget().searchFilter()
-        for item in items:
-            if searchFilter.match(item.searchText()):
-                validItems.append(item)
-
-        return validItems
-
     def createItemsFromUrls(self, urls):
         """
         Return a new list of items from the given urls.
