@@ -19,6 +19,7 @@ from studioqt import QtWidgets
 
 import studioqt
 import studiolibrarymaya
+import studiolibrary.widgets
 
 try:
     import mutils
@@ -371,7 +372,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
                   QtWidgets.QMessageBox.Cancel
 
         parent = self.item().libraryWidget()
-        button = studioqt.MessageBox.question(
+        button = studiolibrary.widgets.MessageBox.question(
             parent,
             title,
             text,
@@ -419,7 +420,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
 
         except Exception as e:
             title = "Error while saving"
-            studioqt.MessageBox.critical(self.libraryWidget(), title, str(e))
+            studiolibrary.widgets.MessageBox.critical(self.libraryWidget(), title, str(e))
             raise
 
     def save(self, objects, path, iconPath, metadata):

@@ -199,7 +199,7 @@ class LibraryItem(studiolibrary.widgets.Item):
             self._modal = True
             
             try:
-                button = studioqt.MessageBox.critical(self.libraryWidget(), title, text)
+                button = studiolibrary.widgets.MessageBox.critical(self.libraryWidget(), title, text)
             finally:
                 self._modal = False
 
@@ -224,7 +224,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type text: str
         :rtype: QMessageBox.StandardButton
         """
-        return studioqt.MessageBox.question(self.libraryWidget(), title, text)
+        return studiolibrary.widgets.MessageBox.question(self.libraryWidget(), title, text)
 
     def typeIconPath(self):
         """
@@ -634,7 +634,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         parent = parent or self.libraryWidget()
 
-        name, button = studioqt.MessageBox.input(
+        name, button = studiolibrary.widgets.MessageBox.input(
             parent,
             "Rename item",
             "Rename the current item to:",

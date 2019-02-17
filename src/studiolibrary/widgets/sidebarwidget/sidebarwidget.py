@@ -102,7 +102,6 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         
         :type enable: bool
         """
-        print(">>>>>")
         self._recursive = enable
         self.search()
 

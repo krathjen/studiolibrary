@@ -16,7 +16,6 @@ from datetime import datetime
 import studiolibrary
 import studiolibrary.widgets
 
-import studioqt
 from studioqt import QtWidgets
 
 
@@ -79,7 +78,7 @@ class FolderItem(studiolibrary.LibraryItem):
         """
         path = libraryWidget.selectedFolderPath() or libraryWidget.path()
 
-        name, button = studioqt.MessageBox.input(
+        name, button = studiolibrary.widgets.MessageBox.input(
             libraryWidget,
             "Create folder",
             "Create a new folder with the name:",

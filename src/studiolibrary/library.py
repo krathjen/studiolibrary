@@ -174,9 +174,10 @@ class Library(QtCore.QObject):
 
         :rtype: dict
         """
-        if self.isDirty() and self.path():
-            self._data = studiolibrary.readJson(self.databasePath())
-            self.setDirty(False)
+        if self.path():
+            if self.isDirty():
+                self._data = studiolibrary.readJson(self.databasePath())
+                self.setDirty(False)
         else:
             logger.info('No path set for reading the data from disc.')
 

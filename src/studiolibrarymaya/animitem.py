@@ -53,6 +53,7 @@ from studioqt import QtWidgets
 import studioqt
 import studiolibrary
 import studiolibrarymaya
+import studiolibrary.widgets
 
 from studiolibrarymaya import baseitem
 from studiolibrarymaya import basecreatewidget
@@ -508,7 +509,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
             buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel
 
-            result = studioqt.MessageBox.question(
+            result = studiolibrary.widgets.MessageBox.question(
                 self.libraryWidget(),
                 title="Anim Item Tip",
                 text=text,

@@ -27,9 +27,9 @@ if __name__ == "__main__":
                "for storing the data. A network folder is recommended for " \
                "sharing within a studio."
 
-        print studioqt.MessageBox.warning(libraryWidget, "Warning", text)
+        print studiolibrary.widgets.MessageBox.warning(libraryWidget, "Warning", text)
 
-        button = studioqt.MessageBox.question(
+        button = studiolibrary.widgets.MessageBox.question(
             libraryWidget,
             "Welcome",
             text,
@@ -43,16 +43,16 @@ if __name__ == "__main__":
         else:
             print "Rejected"
 
-        print studioqt.MessageBox.input(
+        print studiolibrary.widgets.MessageBox.input(
             libraryWidget,
             "Rename",
             "Rename the selected item?",
             inputText="face.anim",
         )
 
-        print studioqt.MessageBox.critical(libraryWidget, "Error", text)
+        print studiolibrary.widgets.MessageBox.critical(libraryWidget, "Error", text)
 
-        dialog = studioqt.createMessageBox(libraryWidget, "Move Item", text)
+        dialog = studiolibrary.widgets.createMessageBox(libraryWidget, "Move Item", text)
         dialog.buttonBox().clear()
 
         dialog.addButton(u'Copy', QtWidgets.QDialogButtonBox.AcceptRole)

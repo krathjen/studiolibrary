@@ -1060,9 +1060,6 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
         currentGroupCollumn = self.groupColumn()
 
-        print(">>>>>")
-        print(currentGroupCollumn)
-
         if currentGroupCollumn is None:
             action.setChecked(True)
 

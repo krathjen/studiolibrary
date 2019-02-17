@@ -12,6 +12,8 @@
 
 import os
 
+from .themesmenu import Theme
+
 from studioqt import QtCore
 from studioqt import QtWidgets
 
@@ -67,7 +69,7 @@ def createMessageBox(
     try:
         theme = parent.theme()
     except AttributeError:
-        theme = studioqt.Theme()
+        theme = Theme()
 
     mb.setStyleSheet(theme.styleSheet())
 
@@ -719,7 +721,7 @@ def testMessageBox():
         buttons = QtWidgets.QDialogButtonBox.Ok | \
                   QtWidgets.QDialogButtonBox.Cancel
 
-        print studioqt.MessageBox.input(
+        print studiolibrary.widgets.MessageBox.input(
             None,
             "Rename",
             "Rename the selected item?",

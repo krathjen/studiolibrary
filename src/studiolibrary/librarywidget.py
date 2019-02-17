@@ -520,7 +520,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         text = text.format(path=path)
 
-        dialog = studioqt.createMessageBox(self, title, text)
+        dialog = studiolibrary.widgets.createMessageBox(self, title, text)
 
         dialog.setHeaderColor("rgb(230, 80, 80)")
         dialog.show()
@@ -543,7 +543,7 @@ class LibraryWidget(QtWidgets.QWidget):
                "location for storing the data. A network folder is " \
                "recommended for sharing within a studio."
 
-        dialog = studioqt.createMessageBox(self, title, text, headerIcon=icon)
+        dialog = studiolibrary.widgets.createMessageBox(self, title, text, headerIcon=icon)
         dialog.show()
 
         dialog.accepted.connect(self.showChangePathDialog)
@@ -1280,11 +1280,11 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Create and return a dialog for moving items.
         
-        :rtype: studioqt.MessageBox
+        :rtype: studiolibrary.widgets.MessageBox
         """
         text = 'Would you like to copy or move the selected item/s?'
 
-        dialog = studioqt.createMessageBox(self, "Move or Copy items?", text)
+        dialog = studiolibrary.widgets.createMessageBox(self, "Move or Copy items?", text)
         dialog.buttonBox().clear()
 
         dialog.addButton(u'Copy', QtWidgets.QDialogButtonBox.AcceptRole)
@@ -1501,19 +1501,20 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         Set the default preview widget.
         """
+        self._previewWidget = None
         widget = studiolibrary.widgets.PlaceholderWidget()
         self.setPreviewWidget(widget)
 
     def updatePreviewWidget(self):
         """Update the current preview widget."""
-        self.setPreviewWidget(self._currentItem)
+        self.setPreviewWidgetFromItem(self._currentItem, force=True)
 
-    def setPreviewWidgetFromItem(self, item):
+    def setPreviewWidgetFromItem(self, item, force=False):
         """
         :type item: studiolibrary.LibraryItem
         :rtype: None
         """
-        if self._currentItem == item:
+        if not force and self._currentItem == item:
             logger.debug("The current item preview widget is already set.")
             return
 
@@ -2240,7 +2241,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         buttons = QtWidgets.QMessageBox.Ok
 
-        return studioqt.MessageBox.question(self, title, text, buttons=buttons)
+        return studiolibrary.widgets.MessageBox.question(self, title, text, buttons=buttons)
 
     def showErrorDialog(self, title, text):
         """
@@ -2251,7 +2252,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: QMessageBox.StandardButton
         """
         self.showErrorMessage(text)
-        return studioqt.MessageBox.critical(self, title, text)
+        return studiolibrary.widgets.MessageBox.critical(self, title, text)
 
     def showExceptionDialog(self, title, error):
         """
@@ -2278,7 +2279,7 @@ class LibraryWidget(QtWidgets.QWidget):
                   QtWidgets.QMessageBox.No | \
                   QtWidgets.QMessageBox.Cancel
 
-        return studioqt.MessageBox.question(self, title, text, buttons=buttons)
+        return studiolibrary.widgets.MessageBox.question(self, title, text, buttons=buttons)
 
     def updateWindowTitle(self):
         """
