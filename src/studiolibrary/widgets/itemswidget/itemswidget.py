@@ -20,6 +20,7 @@ import studioqt
 
 from .item import Item
 from .listview import ListView
+from .groupitem import GroupItem
 from .treewidget import TreeWidget
 from .itemdelegate import ItemDelegate
 from ..toastwidget import ToastWidget
@@ -120,7 +121,7 @@ class ItemsWidget(QtWidgets.QWidget):
         :type item: studioqt.ItemsWidget
         :rtype: None
         """
-        if isinstance(item, studioqt.GroupItem):
+        if isinstance(item, GroupItem):
             self.groupClicked.emit(item)
         else:
             self.itemClicked.emit(item)

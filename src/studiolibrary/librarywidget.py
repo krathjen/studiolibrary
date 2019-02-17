@@ -119,7 +119,7 @@ class LibraryWidget(QtWidgets.QWidget):
             widget.hide()
             widget.close()
 
-        LibraryWidget._instances = []
+        LibraryWidget._instances = {}
 
     @classmethod
     def instance(
@@ -233,6 +233,10 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self.setMinimumWidth(5)
         self.setMinimumHeight(5)
+
+        library = studiolibrary.Library(libraryWidget=self)
+        library.searchFinished.connect(self._searchFinished)
+        self.setLibrary(library)
 
         # --------------------------------------------------------------------
         # Setup the menu bar buttons
@@ -408,18 +412,9 @@ class LibraryWidget(QtWidgets.QWidget):
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
 
-    def createLibrary(self):
-        """
-        Create a new library model instance.
-        
-        :rtype: studiolibrary.Library 
-        """
-        path = self.path()
-
-        library = studiolibrary.Library(path)
-        library.dataChanged.connect(self.refresh)
-
-        return library
+    def _searchFinished(self):
+        items = self.library()._results
+        self.setItems(items)
 
     def library(self):
         """
@@ -496,13 +491,18 @@ class LibraryWidget(QtWidgets.QWidget):
 
         self._path = path
 
-        library = self.createLibrary()
-        self.setLibrary(library)
+        library = self.library()
+        library.setPath(path)
+
+        self._searchWidget.setDataset(library)
+        self._sidebarWidget.setDataset(library)
 
         if not os.path.exists(library.databasePath()):
             library.sync()
 
         self.refresh()
+        self.library().search()
+        self.updatePreviewWidget()
 
     @studioqt.showArrowCursor
     def showPathErrorDialog(self):
@@ -709,7 +709,7 @@ class LibraryWidget(QtWidgets.QWidget):
         """
         rootPath = self.path()
 
-        paths = {
+        data = {
             rootPath: {
                 "iconPath": "none",
                 "bold": True,
@@ -718,19 +718,26 @@ class LibraryWidget(QtWidgets.QWidget):
             }
         }
 
+        filters = [('type', 'is', 'Folder')]
+        if not self.isTrashFolderVisible():
+            filters.append(('path', 'not_contains', 'Trash'))
+
         queries = [{
-            'filters': [('type', 'is', 'Folder')]
+            'filters': filters
         }]
 
-        items = self.library().findItems(queries, libraryWidget=self)
+        items = self.library().findItems(queries)
+        trashIconPath = studiolibrary.resource().get("icons", "delete_96.png")
 
         for item in items:
-            if item.DisplayInSidebar:
-                path = item.path()
-                paths[path] = item.metadata()
+            path = item.path()
 
-        self.sidebarWidget().setPaths(paths, root=rootPath)
-        self.updateTrashFolder()
+            if 'Trash' in item.path():
+                data[path] = {'iconPath': trashIconPath}
+            else:
+                data[path] = {}
+
+        self.sidebarWidget().setPaths(data, root=rootPath)
 
     def createFolderContextMenu(self):
         """
@@ -908,51 +915,6 @@ class LibraryWidget(QtWidgets.QWidget):
         if not self.library():
             logger.info("No library set")
             return
-
-        # Create a query using the sidebar and search widgets
-        queries = self.sidebarQuery(), self.searchQuery()
-
-        items = self.library().findItems(queries, libraryWidget=self)
-
-        self.setItems(items)
-
-    def sidebarQuery(self):
-        """
-        Get the query for the sidebar widget.
-        
-        :rtype: dict
-        """
-        isRecursive = self.isRecursiveSearchEnabled()
-        selectedPaths = self.selectedFolderPaths()
-
-        filters = []
-
-        if isRecursive:
-            condition = 'startswith'
-        else:
-            condition = 'is'
-
-        for path in selectedPaths:
-            filter_ = ('folder', condition, path)
-            filters.append(filter_)
-
-        return {'operator': 'or', 'filters': filters}
-
-    def searchQuery(self):
-        """
-        Get the query for the search widget.
-        
-        :rtype: dict 
-        """
-        filters = []
-
-        for text in self.searchWidget().text().split():
-            filters.append(('path', 'contains', text))
-
-        if not self.isTrashFolderVisible():
-            filters.append(('path', 'not_contains', '/Trash/'))
-
-        return {'operator': 'and', 'filters': filters}
 
     def createItemsFromUrls(self, urls):
         """
@@ -2142,21 +2104,22 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self._isTrashFolderVisible = visible
-        self.updateTrashFolder()
-        self.updateItems()
 
-    def updateTrashFolder(self):
-        """
-        Update the state of the trash folder.
-        
-        :rtype: None 
-        """
-        iconPath = studiolibrary.resource().get("icons", "delete_96.png")
+        if visible:
+            query = {
+                'name': 'trash_query',
+                'filters': []
+            }
+        else:
+            query = {
+                'name': 'trash_query',
+                'filters': [('path', 'not_contains', 'Trash')]
+            }
 
-        for item in self.sidebarWidget().items():
-            if self.trashPath() == item.path():
-                item.setIconPath(iconPath)
-                item.setHidden(not self.isTrashFolderVisible())
+        self.library().addQuery(query)
+
+        self.updateSidebar()
+        self.library().search()
 
     def isTrashSelected(self):
         """
@@ -2550,7 +2513,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: bool
         """
-        return self._recursiveSearchEnabled
+        return self.sidebarWidget().isRecursive()
 
     def setRecursiveSearchEnabled(self, value):
         """
@@ -2560,8 +2523,9 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        self._recursiveSearchEnabled = value
-        self.refresh()
+        self.sidebarWidget().setRecursive(value)
+        # self._recursiveSearchEnabled = value
+        # self.refresh()
 
     @staticmethod
     def help():

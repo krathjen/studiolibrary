@@ -1,11 +1,11 @@
 # Copyright 2019 by Kurt Rathjen. All Rights Reserved.
 #
-# This library is free software: you can redistribute it and/or modify it 
-# under the terms of the GNU Lesser General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. This library is distributed in the 
-# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# This library is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version. This library is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
@@ -77,6 +77,8 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         self._dpi = 1
         self._items = []
         self._locked = False
+        self._dataset = None
+        self._recursive = True
 
         self.itemExpanded.connect(self.update)
         self.itemCollapsed.connect(self.update)
@@ -89,6 +91,86 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         self.setSelectionMode(QtWidgets.QTreeWidget.ExtendedSelection)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
+
+    def selectionChanged(self, *args):
+        """Triggered the current selection has changed."""
+        self.search()
+
+    def setRecursive(self, enable):
+        """
+        Set the search query on the dataset to be recursive.
+        
+        :type enable: bool
+        """
+        print(">>>>>")
+        self._recursive = enable
+        self.search()
+
+    def isRecursive(self):
+        """
+        Get the recursive query enable state.
+        
+        :rtype: bool 
+        """
+        return self._recursive
+
+    def _dataChanged(self):
+        """Triggered when the data set has changed."""
+        pass
+    #     paths = collections.OrderedDict()
+    #
+    #     for value in self.dataset().values(self.field(), self.sortBy()):
+    #         paths[value] = collections.OrderedDict()
+    #
+    #     if paths:
+    #         root = findRoot(paths.keys(), separator=self.separator())
+    #         self.setPaths(paths, root=root)
+
+    def setDataset(self, dataset):
+        """
+        Set the dataset for the search widget:
+        
+        :type dataset: studioqt.Dataset
+        """
+        self._dataset = dataset
+        self._dataset.dataChanged.connect(self._dataChanged)
+        self._dataChanged()
+
+    def dataset(self):
+        """
+        Get the dataset for the search widget.
+        
+        :rtype: studioqt.Dataset 
+        """
+        return self._dataset
+
+    def search(self):
+        """Run the dataset search."""
+        if self.dataset():
+            self.dataset().addQuery(self.query())
+            self.dataset().search()
+        else:
+            logger.info('No dataset found for the sidebar widget.')
+
+    def query(self):
+        """
+        Get the query for the sidebar widget.
+        
+        :rtype: dict
+        """
+        filters = []
+
+        if self.isRecursive():
+            condition = 'startswith'
+        else:
+            condition = 'is'
+
+        for path in self.selectedPaths():
+            filter_ = ('folder', condition, path)
+            filters.append(filter_)
+
+        uniqueName = 'sidebarwidget_' + str(id(self))
+        return {'name': uniqueName, 'operator': 'or', 'filters': filters}
 
     def setLocked(self, locked):
         """

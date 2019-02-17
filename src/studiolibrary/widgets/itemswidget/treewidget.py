@@ -1059,6 +1059,10 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         groupByLabels = self.groupLabels()
 
         currentGroupCollumn = self.groupColumn()
+
+        print(">>>>>")
+        print(currentGroupCollumn)
+
         if currentGroupCollumn is None:
             action.setChecked(True)
 

@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import time
 import logging
 
 import studiolibrary
@@ -53,15 +54,20 @@ class Library(QtCore.QObject):
     ]
 
     dataChanged = QtCore.Signal()
+    searchStarted = QtCore.Signal()
+    searchFinished = QtCore.Signal()
 
-    def __init__(self, path, *args):
+    def __init__(self, path=None, libraryWidget=None, *args):
         QtCore.QObject.__init__(self, *args)
 
-        self._path = None
+        self._path = path
         self._mtime = None
         self._data = {}
         self._items = []
+        self._results = []
+        self._queries = []
         self._currentItems = []
+        self._libraryWidget = libraryWidget
 
         self.setPath(path)
         self.setDirty(True)
@@ -107,6 +113,28 @@ class Library(QtCore.QObject):
         formatString = studiolibrary.config().get('databasePath')
         return studiolibrary.formatPath(formatString, path=self.path())
 
+    def distinct(self, field, sortBy=None):
+        """
+        Get all the values for the given field.
+        
+        :type field: str
+        :type sortBy: None or list[str]
+        :rtype: list 
+        """
+        # sortBy = sortBy or [field]
+
+        data = self._results
+        # data = self.sortedData(data, sortBy=sortBy)
+
+        values = []
+
+        for item in data:
+            value = item.get(field)
+            if value:
+                values.append(value)
+
+        return list(set(values))
+
     def mtime(self):
         """
         Return when the database was last modified.
@@ -146,9 +174,11 @@ class Library(QtCore.QObject):
 
         :rtype: dict
         """
-        if self.isDirty():
+        if self.isDirty() and self.path():
             self._data = studiolibrary.readJson(self.databasePath())
             self.setDirty(False)
+        else:
+            logger.info('No path set for reading the data from disc.')
 
         return self._data
 
@@ -159,11 +189,18 @@ class Library(QtCore.QObject):
         :type data: dict
         :rtype: None
         """
-        studiolibrary.saveJson(self.databasePath(), data)
-        self.setDirty(True)
+        if self.path():
+            studiolibrary.saveJson(self.databasePath(), data)
+            self.setDirty(True)
+        else:
+            logger.info('No path set for saving the data to disc.')
 
     def sync(self):
         """Sync the file system with the database."""
+        if not self.path():
+            logger.info('No path set for syncing data')
+            return
+
         data = self.read()
 
         for path in data.keys():
@@ -232,6 +269,49 @@ class Library(QtCore.QObject):
                 self._currentItems.append(item)
 
         return self._currentItems
+
+    def addQuery(self, query):
+        """
+        Add the given query to the dataset.
+        
+        Examples:
+            addQuery({
+                'operator': 'or',
+                'filters': [
+                    ('folder', 'is' '/library/proj/test'),
+                    ('folder', 'startswith', '/library/proj/test'),
+                ]
+            })
+        
+        :type query: dict
+        """
+        if query.get('name'):
+            for i, query_ in enumerate(self._queries):
+                if query_.get('name') == query.get('name'):
+                    self._queries[i] = query
+
+        if query not in self._queries:
+            self._queries.append(query)
+
+    def search(self):
+        """Run a search using the queries added to this dataset."""
+        t = time.time()
+        results = []
+
+        self.searchStarted.emit()
+
+        logger.debug('Search queries: %s', self._queries)
+
+        items = self.createItems(libraryWidget=self._libraryWidget)
+        for item in items:
+            match = self.match(item.itemData(), self._queries)
+            if match:
+                results.append(item)
+
+        self._results = results
+
+        self.searchFinished.emit()
+        logger.debug('Search took: %s', time.time()-t)
 
     def updateItem(self, item):
         """
@@ -306,7 +386,10 @@ class Library(QtCore.QObject):
 
             data.setdefault(path, itemData)
 
-        studiolibrary.updateJson(self.databasePath(), data)
+        if self.path():
+            studiolibrary.updateJson(self.databasePath(), data)
+        else:
+            logger.info('No path set for updating the data on disc.')
 
     def loadItemData(self, items):
         """
@@ -477,7 +560,7 @@ class Library(QtCore.QObject):
         return all(matches)
 
     @staticmethod
-    def sortedData(data, sortBy):
+    def sorted(data, sortBy):
         """
         Return the given data sorted using the sortBy argument.
         
