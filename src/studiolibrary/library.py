@@ -349,6 +349,7 @@ class Library(QtCore.QObject):
             data_[path].update(data)
 
         self.save(data_)
+        self.search()
 
         self.dataChanged.emit()
 
