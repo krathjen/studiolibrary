@@ -1225,7 +1225,7 @@ class LibraryWidget(QtWidgets.QWidget):
                 if self.trashEnabled():
                     editMenu.addSeparator()
 
-                    callback = partial(self.showMoveItemsToTrashDialog, [item])
+                    callback = partial(self.showMoveItemsToTrashDialog, items)
 
                     action = QtWidgets.QAction("Move to Trash", editMenu)
                     action.setEnabled(not self.isTrashSelected())

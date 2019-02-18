@@ -64,6 +64,7 @@ class Library(QtCore.QObject):
         self._mtime = None
         self._data = {}
         self._items = []
+        self._sortBy = []
         self._results = []
         self._queries = []
         self._currentItems = []
@@ -71,6 +72,22 @@ class Library(QtCore.QObject):
 
         self.setPath(path)
         self.setDirty(True)
+
+    def sortBy(self):
+        """
+        Get the list of fields to sort by.
+        
+        :rtype: list[str] 
+        """
+        return self._sortBy or self._fields
+
+    def setSortBy(self, fields):
+        """
+        Set the list of fields to sort by.
+        
+        :type fields: list[str] 
+        """
+        self._sortBy = fields
 
     def currentItems(self):
         """
