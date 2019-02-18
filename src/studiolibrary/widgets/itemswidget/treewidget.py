@@ -958,7 +958,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
         for label in sortByLabels:
 
-            action = menu.addAction(label)
+            action = menu.addAction(label.title())
             action.setCheckable(True)
 
             if sortLabel == label:
@@ -1070,10 +1070,10 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
             if groupByLabels and label not in groupByLabels:
                 continue
 
-            action = menu.addAction(label)
+            action = menu.addAction(label.title())
             action.setCheckable(True)
 
-            if currentGroupCollumn == column:
+            if currentGroupCollumn == label:
                 action.setChecked(True)
 
             callback = partial(self.setGroupColumn, column, groupOrder)
