@@ -898,13 +898,8 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: list[studiolibrary.LibraryItem]
         """
         if self.isRefreshEnabled():
-
-            elapsedTime = time.time()
-
             self.updateItems()
-
-            elapsedTime = time.time() - elapsedTime
-            self.showRefreshMessage(elapsedTime)
+            self.showRefreshMessage()
 
     def updateItems(self):
         """
@@ -1243,7 +1238,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype:  None
         """
-        self.library().saveItemData(self.items())
+        self.library().saveItemData(self.items(), emitDataChanged=False)
 
     # -------------------------------------------------------------------
     # Support for moving items with drag and drop
@@ -2212,20 +2207,16 @@ class LibraryWidget(QtWidgets.QWidget):
         self.statusWidget().showWarningMessage(text)
         self.setStatusBarWidgetVisible(True)
 
-    def showRefreshMessage(self, elapsedTime):
-        """
-        Show how long the current refresh took with the given elapsedTime.
-
-        :type elapsedTime: time.time
-        :rtype None
-        """
-        itemCount = len(self.items())
+    def showRefreshMessage(self):
+        """Show how long the current refresh took."""
+        itemCount = len(self.library().results())
+        elapsedTime = self.library().searchTime()
 
         plural = ""
         if itemCount > 1:
             plural = "s"
 
-        msg = "Displayed {0} item{1} in {2:.3f} seconds."
+        msg = "Found {0} item{1} in {2:.3f} seconds."
         msg = msg.format(itemCount, plural, elapsedTime)
         self.statusWidget().showInfoMessage(msg)
 

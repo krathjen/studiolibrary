@@ -67,7 +67,7 @@ class Library(QtCore.QObject):
         self._sortBy = []
         self._results = []
         self._queries = []
-        self._currentItems = []
+        self._searchTime = 0
         self._libraryWidget = libraryWidget
 
         self.setPath(path)
@@ -88,14 +88,6 @@ class Library(QtCore.QObject):
         :type fields: list[str] 
         """
         self._sortBy = fields
-
-    def currentItems(self):
-        """
-        The items that are displayed in the view.
-        
-        :rtype: list[studiolibrary.LibraryItem]
-        """
-        return self._currentItems
 
     def recursiveDepth(self):
         """
@@ -139,14 +131,13 @@ class Library(QtCore.QObject):
         :rtype: list 
         """
         # sortBy = sortBy or [field]
-
-        data = self._results
+        # data = self._items
         # data = self.sortedData(data, sortBy=sortBy)
 
         values = []
 
-        for item in data:
-            value = item.get(field)
+        for item in self._items:
+            value = item.itemData().get(field)
             if value:
                 values.append(value)
 
@@ -243,7 +234,28 @@ class Library(QtCore.QObject):
 
         self.dataChanged.emit()
 
-    def findItems(self, queries, libraryWidget=None):
+    def createItems(self, libraryWidget=None):
+        """
+        Create all the items for the model.
+
+        :rtype: list[studiolibrary.LibraryItem] 
+        """
+        # Check if the database has changed since the last read call
+        if self.isDirty():
+
+            paths = self.read().keys()
+            items = studiolibrary.itemsFromPaths(
+                paths,
+                library=self,
+                libraryWidget=libraryWidget
+            )
+
+            self._items = list(items)
+            self.loadItemData(self._items)
+
+        return self._items
+
+    def findItems(self, queries):
         """
         Get the items that match the given queries.
         
@@ -268,25 +280,22 @@ class Library(QtCore.QObject):
             
             print(library.find(queries))
             
-        :type queries: list[dict]
-        :type libraryWidget: studiolibrary.LibraryWIdget or None
-            
+        :type queries: list[dict]            
         :rtype: list[studiolibrary.LibraryItem]
         """
-        items = self.createItems(libraryWidget=libraryWidget)
+        results = []
 
-        self._currentItems = []
-
-        logger.debug("Queries")
+        logger.debug("Search queries:")
         for query in queries:
-            logger.debug(query)
+            logger.debug('Query: %s', query)
 
+        items = self.createItems(libraryWidget=self._libraryWidget)
         for item in items:
             match = self.match(item.itemData(), queries)
             if match:
-                self._currentItems.append(item)
+                results.append(item)
 
-        return self._currentItems
+        return results
 
     def addQuery(self, query):
         """
@@ -314,31 +323,32 @@ class Library(QtCore.QObject):
     def search(self):
         """Run a search using the queries added to this dataset."""
         t = time.time()
-        results = []
 
         self.searchStarted.emit()
 
-        logger.debug('Search queries: %s', self._queries)
-
-        items = self.createItems(libraryWidget=self._libraryWidget)
-        for item in items:
-            match = self.match(item.itemData(), self._queries)
-            if match:
-                results.append(item)
-
-        self._results = results
+        self._results = self.findItems(self._queries)
 
         self.searchFinished.emit()
-        logger.debug('Search took: %s', time.time()-t)
 
-    def updateItem(self, item):
+        self._searchTime = time.time() - t
+
+        logger.debug('Search time: %s', self._searchTime)
+
+    def results(self):
         """
-        Update the given item in the database.    
-    
-        :type item: studiolibrary.LibraryItem
-        :rtype: None 
+        Return the items found after a search is ran.
+        
+        :rtype: list[Item] 
         """
-        self.addItems([item])
+        return self._results
+
+    def searchTime(self):
+        """
+        Return the time taken to run a search.
+        
+        :rtype: float 
+        """
+        return self._searchTime
 
     def addItem(self, item):
         """
@@ -347,7 +357,7 @@ class Library(QtCore.QObject):
         :type item: studiolibrary.LibraryItem
         :rtype: None 
         """
-        self.addItems([item])
+        self.saveItemData([item])
 
     def addItems(self, items):
         """
@@ -355,7 +365,25 @@ class Library(QtCore.QObject):
         
         :type items: list[studiolibrary.LibraryItem]
         """
-        logger.info("Add items %s", items)
+        self.saveItemData(items)
+
+    def updateItem(self, item):
+        """
+        Update the given item in the database.    
+    
+        :type item: studiolibrary.LibraryItem
+        :rtype: None 
+        """
+        self.saveItemData([item])
+
+    def saveItemData(self, items, emitDataChanged=True):
+        """
+        Add the given items to the database.
+
+        :type items: list[studiolibrary.LibraryItem]
+        :type emitDataChanged: bool
+        """
+        logger.info("Save item data %s", items)
 
         data_ = self.read()
 
@@ -366,49 +394,10 @@ class Library(QtCore.QObject):
             data_[path].update(data)
 
         self.save(data_)
-        self.search()
 
-        self.dataChanged.emit()
-
-    def createItems(self, libraryWidget=None):
-        """
-        Create all the items for the model.
-
-        :rtype: list[studiolibrary.LibraryItem] 
-        """
-        # Check if the database has changed since the last read call
-        if self.isDirty():
-
-            paths = self.read().keys()
-            items = studiolibrary.itemsFromPaths(
-                paths,
-                library=self,
-                libraryWidget=libraryWidget
-            )
-
-            self._items = list(items)
-            self.loadItemData(self._items)
-
-        return self._items
-
-    def saveItemData(self, items):
-        """
-        Save the item data to the database for the given items and columns.
-
-        :type items: list[studiolibrary.LibraryItem]
-        """
-        data = {}
-
-        for item in items:
-            path = item.path()
-            itemData = item.itemData()
-
-            data.setdefault(path, itemData)
-
-        if self.path():
-            studiolibrary.updateJson(self.databasePath(), data)
-        else:
-            logger.info('No path set for updating the data on disc.')
+        if emitDataChanged:
+            self.search()
+            self.dataChanged.emit()
 
     def loadItemData(self, items):
         """
@@ -416,6 +405,8 @@ class Library(QtCore.QObject):
 
         :type items: list[studiolibrary.LibraryItem]
         """
+        logger.info("Loading item data %s", items)
+
         data = self.read()
 
         for item in items:
