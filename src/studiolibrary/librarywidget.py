@@ -54,6 +54,9 @@ class LibraryWidget(QtWidgets.QWidget):
 
     DEFAULT_NAME = "Default"
     DEFAULT_SETTINGS = {
+        "library": {
+          "sortBy": ["name:asc"]
+        },
         "paneSizes": [160, 280, 180],
         "geometry": [-1, -1, 860, 720],
         "trashFolderVisible": False,
@@ -217,6 +220,9 @@ class LibraryWidget(QtWidgets.QWidget):
         # Create Widgets
         # --------------------------------------------------------------------
 
+        library = studiolibrary.Library(libraryWidget=self)
+        library.searchFinished.connect(self._searchFinished)
+
         self._sidebarFrame = SidebarFrame(self)
         self._previewFrame = PreviewFrame(self)
 
@@ -227,6 +233,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self._searchWidget.setToolTip(tip)
         self._searchWidget.setStatusTip(tip)
 
+        self._sortMenu = studiolibrary.widgets.SortMenu(self)
         self._statusWidget = studiolibrary.widgets.StatusWidget(self)
         self._menuBarWidget = studiolibrary.widgets.MenuBarWidget(self)
         self._sidebarWidget = studiolibrary.widgets.SidebarWidget(self)
@@ -234,8 +241,11 @@ class LibraryWidget(QtWidgets.QWidget):
         self.setMinimumWidth(5)
         self.setMinimumHeight(5)
 
-        library = studiolibrary.Library(libraryWidget=self)
-        library.searchFinished.connect(self._searchFinished)
+        self._sortMenu.setDataset(library)
+        self._itemsWidget.setDataset(library)
+        self._searchWidget.setDataset(library)
+        self._sidebarWidget.setDataset(library)
+
         self.setLibrary(library)
 
         # --------------------------------------------------------------------
@@ -413,8 +423,10 @@ class LibraryWidget(QtWidgets.QWidget):
         self.globalSignal.folderSelectionChanged.emit(self, path)
 
     def _searchFinished(self):
-        items = self.library()._results
+        items = self.library().results()
         self.setItems(items)
+
+        self.showRefreshMessage()
 
     def library(self):
         """
@@ -432,7 +444,7 @@ class LibraryWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self._library = library
-        self.itemsWidget().setSortLabels(library.SortLabels)
+        self.itemsWidget().setSortLabels(library.SortFields)
         self.itemsWidget().setGroupLabels(library.GroupLabels)
         self.itemsWidget().setColumnLabels(library.ColumnLabels)
 
@@ -493,9 +505,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         library = self.library()
         library.setPath(path)
-
-        self._searchWidget.setDataset(library)
-        self._sidebarWidget.setDataset(library)
 
         if not os.path.exists(library.databasePath()):
             library.sync()
@@ -971,11 +980,9 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        menu = self.itemsWidget().createSortByMenu()
         widget = self.menuBarWidget().findToolButton("Sort By")
-
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
-        menu.exec_(point)
+        self._sortMenu.show(point)
 
     def showItemViewMenu(self):
         """
@@ -1239,7 +1246,8 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype:  None
         """
-        self.library().saveItemData(self.items(), emitDataChanged=False)
+        self.library().saveItemData(self.items(), emitDataChanged=True)
+        # self.library().search()
 
     # -------------------------------------------------------------------
     # Support for moving items with drag and drop
@@ -1251,10 +1259,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: bool 
         """
-        sortColumn = self.itemsWidget().sortColumn()
-        customOrderColumn = self.itemsWidget().columnFromLabel("Custom Order")
-
-        return sortColumn == customOrderColumn
+        return 'Custom Order' in str(self.library().sortBy())
 
     def isMoveItemsEnabled(self):
         """
@@ -1639,6 +1644,7 @@ class LibraryWidget(QtWidgets.QWidget):
         if self.theme():
             settings['theme'] = self.theme().settings()
 
+        settings["library"] = self.library().settings()
         settings["trashFolderVisible"] = self.isTrashFolderVisible()
         settings["sidebarWidgetVisible"] = self.isFoldersWidgetVisible()
         settings["previewWidgetVisible"] = self.isPreviewWidgetVisible()
@@ -1718,6 +1724,10 @@ class LibraryWidget(QtWidgets.QWidget):
             self.reloadStyleSheet()
             self.setRefreshEnabled(isRefreshEnabled)
             self.refresh()
+
+        value = settings.get('library')
+        if value is not None:
+            self.library().setSettings(value)
 
         value = settings.get('trashFolderVisible')
         if value is not None:

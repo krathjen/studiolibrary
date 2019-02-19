@@ -65,6 +65,7 @@ class ItemsWidget(QtWidgets.QWidget):
         self._zoomAmount = self.DEFAULT_ZOOM_AMOUNT
         self._isItemTextVisible = True
 
+        self._dataset = None
         self._treeWidget = TreeWidget(self)
 
         self._listView = ListView(self)
@@ -134,6 +135,12 @@ class ItemsWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.itemDoubleClicked.emit(item)
+
+    def setDataset(self, dataset):
+        self._dataset = dataset
+
+    def dataset(self):
+        return self._dataset
 
     def setToastEnabled(self, enabled):
         """
@@ -583,9 +590,6 @@ class ItemsWidget(QtWidgets.QWidget):
         menu.addAction(action)
 
         menu.addSeparator()
-
-        sortByMenu = self.treeWidget().createSortByMenu()
-        menu.addMenu(sortByMenu)
 
         groupByMenu = self.treeWidget().createGroupByMenu()
         menu.addMenu(groupByMenu)

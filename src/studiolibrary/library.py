@@ -33,17 +33,17 @@ class Library(QtCore.QObject):
         "name",
         "path",
         "type",
-        "category",
         "folder",
+        "category",
         # "modified"
     ]
 
-    SortLabels = [
+    SortFields = [
         "name",
         "path",
         "type",
-        "category",
         "folder",
+        "category",
         # "modified"
     ]
 
@@ -81,15 +81,38 @@ class Library(QtCore.QObject):
         
         :rtype: list[str] 
         """
-        return self._sortBy or self._fields
+        return self._sortBy
 
     def setSortBy(self, fields):
         """
         Set the list of fields to sort by.
         
+        Example:
+            library.setSortBy(["name:asc", "type:asc"])
+        
         :type fields: list[str] 
         """
         self._sortBy = fields
+
+    def settings(self):
+        """
+        Get the settings for the dataset.
+        
+        :rtype: dict 
+        """
+        return {
+            'sortBy': self.sortBy()
+        }
+
+    def setSettings(self, settings):
+        """
+        Set the settings for the dataset object.
+        
+        :type settings: dict
+        """
+        sortBy = settings.get('sortBy')
+        if sortBy is not None:
+            self.setSortBy(sortBy)
 
     def setSearchEnabled(self, enabled):
         """Enable or disable the search the for the library."""
@@ -312,6 +335,10 @@ class Library(QtCore.QObject):
             fields.extend(item.itemData().keys())
 
         self._fields = list(set(fields))
+
+        if self.sortBy():
+            results = self.sorted(results, self.sortBy())
+
         return results
 
     def addQuery(self, query):
@@ -345,7 +372,7 @@ class Library(QtCore.QObject):
 
         t = time.time()
 
-        logger.info("Searching items")
+        logger.debug("Searching items")
 
         self.searchStarted.emit()
 
@@ -406,7 +433,7 @@ class Library(QtCore.QObject):
         :type items: list[studiolibrary.LibraryItem]
         :type emitDataChanged: bool
         """
-        logger.info("Save item data %s", items)
+        logger.debug("Save item data %s", items)
 
         data_ = self.read()
 
@@ -428,7 +455,7 @@ class Library(QtCore.QObject):
 
         :type items: list[studiolibrary.LibraryItem]
         """
-        logger.info("Loading item data %s", items)
+        logger.debug("Loading item data %s", items)
 
         data = self.read()
 
@@ -593,7 +620,7 @@ class Library(QtCore.QObject):
         return all(matches)
 
     @staticmethod
-    def sorted(data, sortBy):
+    def sorted(items, sortBy):
         """
         Return the given data sorted using the sortBy argument.
         
@@ -609,10 +636,12 @@ class Library(QtCore.QObject):
             
             print(sortedData(data, sortBy))
             
-        :type data: list[dict]
+        :type items: list[Item]
         :type sortBy: list[str]
-        :rtype: list[dict]
+        :rtype: list[Item]
         """
+        logger.debug('Sort By: %s', sortBy)
+
         for field in reversed(sortBy):
 
             tokens = field.split(':')
@@ -622,15 +651,15 @@ class Library(QtCore.QObject):
                 field = tokens[0]
                 reverse = tokens[1] != 'asc'
 
-            def sortKey(_data):
+            def sortKey(item):
 
                 default = False if reverse else ''
 
-                return _data.get(field, default)
+                return item.itemData().get(field, default)
 
-            data = sorted(data, key=sortKey, reverse=reverse)
+            items = sorted(items, key=sortKey, reverse=reverse)
 
-        return data
+        return items
 
 
 def testsuite():

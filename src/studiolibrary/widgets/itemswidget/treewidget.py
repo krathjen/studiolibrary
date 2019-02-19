@@ -470,8 +470,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
         :rtype: bool
         """
-        sortColumnLabel = self.sortColumnLabel()
-        return sortColumnLabel == "Custom Order"
+        return "Custom Order" in str(self.itemsWidget().dataset().sortBy())
 
     def setItemsCustomOrder(self, items, row=1, padding=5):
         """
@@ -816,41 +815,10 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
         :rtype: None
         """
-        if isinstance(sortColumn, basestring):
-            sortColumn = self.columnFromLabel(sortColumn)
-
-        if not sortColumn:
-            sortColumn = 0
-
-        sortKey = self.labelFromColumn(sortColumn)
-
-        self._sortOrder = sortOrder
-        self._sortColumn = sortColumn
-
-        items = self._sortItems(sortKey, sortOrder)
+        items = list(self.items())
         items = self._groupItems(items, groupColumn, groupOrder)
 
         self.setItems(items)
-
-    def _sortItems(self, sortColumn, sortOrder):
-        """
-        Sort the items by the given sort key and sort order.
-
-        :type sortColumn: str
-        :type sortOrder: int or None
-        """
-        items = list(self.items())
-
-        isCustomOrder = sortColumn == "Custom Order"
-        if isCustomOrder and sortOrder != QtCore.Qt.AscendingOrder:
-            sortOrder = QtCore.Qt.AscendingOrder
-
-        reverse = sortOrder == QtCore.Qt.DescendingOrder
-
-        def _sortKey(item):
-            return unicode(item.sortText(sortColumn)).lower()
-
-        return sorted(items, key=_sortKey, reverse=reverse)
 
     def _groupItems(self, items, groupColumn, groupOrder):
         """
@@ -938,55 +906,6 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         :rtype: list[str] 
         """
         return self._sortLabels
-
-    def createSortByMenu(self):
-        """
-        Create a new instance of the sort by menu.
-
-        :rtype: QtWidgets.QMenu
-        """
-        menu = QtWidgets.QMenu("Sort By", self)
-
-        sortOrder = self._sortOrder
-        sortColumn = self._sortColumn
-        sortLabel = self.labelFromColumn(sortColumn)
-
-        action = studioqt.SeparatorAction("Sort By", menu)
-        menu.addAction(action)
-
-        sortByLabels = self.sortLabels()
-
-        for label in sortByLabels:
-
-            action = menu.addAction(label.title())
-            action.setCheckable(True)
-
-            if sortLabel == label:
-                action.setChecked(True)
-            else:
-                action.setChecked(False)
-
-            callback = partial(self.setSortColumn, label, sortOrder)
-            action.triggered.connect(callback)
-
-        action = studioqt.SeparatorAction("Sort Order", menu)
-        menu.addAction(action)
-
-        action = menu.addAction("Ascending")
-        action.setCheckable(True)
-        action.setChecked(sortOrder == QtCore.Qt.AscendingOrder)
-
-        callback = partial(self.setSortColumn, sortColumn, QtCore.Qt.AscendingOrder)
-        action.triggered.connect(callback)
-
-        action = menu.addAction("Descending")
-        action.setCheckable(True)
-        action.setChecked(sortOrder == QtCore.Qt.DescendingOrder)
-
-        callback = partial(self.setSortColumn, sortColumn, QtCore.Qt.DescendingOrder)
-        action.triggered.connect(callback)
-
-        return menu
 
     # ----------------------------------------------------------------------
     # Support for grouping items.
