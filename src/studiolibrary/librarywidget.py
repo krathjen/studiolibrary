@@ -602,6 +602,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: bool 
         """
+        self.library().setSearchEnabled(enable)
         self._refreshEnabled = enable
 
     @studioqt.showWaitCursor

@@ -64,10 +64,12 @@ class Library(QtCore.QObject):
         self._mtime = None
         self._data = {}
         self._items = []
+        self._fields = []
         self._sortBy = []
         self._results = []
         self._queries = []
         self._searchTime = 0
+        self._searchEnabled = True
         self._libraryWidget = libraryWidget
 
         self.setPath(path)
@@ -89,6 +91,14 @@ class Library(QtCore.QObject):
         """
         self._sortBy = fields
 
+    def setSearchEnabled(self, enabled):
+        """Enable or disable the search the for the library."""
+        self._searchEnabled = enabled
+
+    def isSearchEnabled(self):
+        """Check if search is enabled for the library."""
+        return self._searchEnabled
+
     def recursiveDepth(self):
         """
         Return the recursive search depth.
@@ -96,6 +106,10 @@ class Library(QtCore.QObject):
         :rtype: int
         """
         return studiolibrary.config().get('recursiveSearchDepth')
+
+    def fields(self):
+        """Return all the fields for the library."""
+        return self._fields
 
     def path(self):
         """
@@ -283,6 +297,7 @@ class Library(QtCore.QObject):
         :type queries: list[dict]            
         :rtype: list[studiolibrary.LibraryItem]
         """
+        fields = []
         results = []
 
         logger.debug("Search queries:")
@@ -294,7 +309,9 @@ class Library(QtCore.QObject):
             match = self.match(item.itemData(), queries)
             if match:
                 results.append(item)
+            fields.extend(item.itemData().keys())
 
+        self._fields = list(set(fields))
         return results
 
     def addQuery(self, query):
@@ -322,7 +339,13 @@ class Library(QtCore.QObject):
 
     def search(self):
         """Run a search using the queries added to this dataset."""
+        if not self.isSearchEnabled():
+            logger.debug('Search is disabled')
+            return
+
         t = time.time()
+
+        logger.info("Searching items")
 
         self.searchStarted.emit()
 
