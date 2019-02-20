@@ -30,8 +30,8 @@ class ImageItem(studiolibrary.LibraryItem):
         text = "Loaded: {path}".format(path=self.path())
 
         print(text)
-        self.libraryWidget().showInfoMessage(text)
-        self.libraryWidget().showInfoDialog("Loaded", text)
+        self.libraryWindow().showInfoMessage(text)
+        self.libraryWindow().showInfoDialog("Loaded", text)
 
     def doubleClicked(self):
         """Overriding this method to load any data on double click."""
@@ -45,11 +45,11 @@ class ImageItem(studiolibrary.LibraryItem):
         """
         return self.path()
 
-    def previewWidget(self, libraryWidget):
+    def previewWidget(self, libraryWindow):
         """
         Return the widget to be shown when the user clicks on the item.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         :rtype: ImagePreviewWidget
         """
         return ImagePreviewWidget(self)

@@ -23,7 +23,7 @@ from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 logger = logging.getLogger(__name__)
 
 
-class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
+class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
 
     def setObjectName(self, name):
         """
@@ -34,11 +34,11 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
         """
         name = '{0}_{1}'.format(name, uuid.uuid4())
 
-        studiolibrary.LibraryWidget.setObjectName(self, name)
+        studiolibrary.LibraryWindow.setObjectName(self, name)
 
     def resetSettings(self):
         """Reset all the settings for the library widget and library items."""
-        studiolibrary.LibraryWidget.resetSettings(self)
+        studiolibrary.LibraryWindow.resetSettings(self)
         studiolibrarymaya.resetSettings()
 
     def tabWidget(self):
@@ -100,7 +100,7 @@ class MayaLibraryWidget(MayaQWidgetDockableMixin, studiolibrary.LibraryWidget):
         if self.isDocked():
             return self
         else:
-            return studiolibrary.LibraryWidget.window(self)
+            return studiolibrary.LibraryWindow.window(self)
 
     def show(self, **kwargs):
         """

@@ -13,11 +13,11 @@
 import studiolibrary
 
 
-class CustomLibraryWidget(studiolibrary.LibraryWidget):
+class CustomLibraryWindow(studiolibrary.LibraryWindow):
 
     def createSettingsMenu(self):
         """Reimplementing this method to add a custom action."""
-        menu = super(CustomLibraryWidget, self).createSettingsMenu()
+        menu = super(CustomLibraryWindow, self).createSettingsMenu()
 
         menu.addSeparator()
 
@@ -36,4 +36,4 @@ if __name__ == "__main__":
     # Use the studiolibrary.app context for creating a QApplication instance
     with studiolibrary.app():
 
-        w = CustomLibraryWidget.instance(name="Example2", path="data")
+        w = CustomLibraryWindow.instance(name="Example2", path="data")

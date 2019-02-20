@@ -105,16 +105,16 @@ class AnimItem(baseitem.BaseItem):
         self.setTransferClass(mutils.Animation)
         self.setTransferBasename("")
 
-    def previewWidget(self, libraryWidget):
+    def previewWidget(self, libraryWindow):
         """
         Return the widget to be shown when the user clicks on the item.
 
         Overriding this method to add support for loading many animations.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         :rtype: AnimationPreviewWidget
         """
-        items = libraryWidget.selectedItems()
+        items = libraryWindow.selectedItems()
         self.setItems(items)
         return AnimPreviewWidget(parent=None, item=self)
 
@@ -510,7 +510,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
             buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel
 
             result = studiolibrary.widgets.MessageBox.question(
-                self.libraryWidget(),
+                self.libraryWindow(),
                 title="Anim Item Tip",
                 text=text,
                 buttons=buttons,
@@ -562,7 +562,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
         except Exception as e:
             title = "Error while capturing thumbnail"
-            QtWidgets.QMessageBox.critical(self.libraryWidget(), title, str(e))
+            QtWidgets.QMessageBox.critical(self.libraryWindow(), title, str(e))
             raise
 
     def validateFrameRange(self):
@@ -612,7 +612,7 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
     def __init__(self, *args, **kwargs):
         """
         :type item: AnimItem
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         """
         super(AnimPreviewWidget, self).__init__(*args, **kwargs)
 

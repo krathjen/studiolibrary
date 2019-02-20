@@ -57,7 +57,7 @@ class Library(QtCore.QObject):
     searchStarted = QtCore.Signal()
     searchFinished = QtCore.Signal()
 
-    def __init__(self, path=None, libraryWidget=None, *args):
+    def __init__(self, path=None, libraryWindow=None, *args):
         QtCore.QObject.__init__(self, *args)
 
         self._path = path
@@ -70,7 +70,7 @@ class Library(QtCore.QObject):
         self._queries = []
         self._searchTime = 0
         self._searchEnabled = True
-        self._libraryWidget = libraryWidget
+        self._libraryWindow = libraryWindow
 
         self.setPath(path)
         self.setDirty(True)
@@ -271,7 +271,7 @@ class Library(QtCore.QObject):
 
         self.dataChanged.emit()
 
-    def createItems(self, libraryWidget=None):
+    def createItems(self, libraryWindow=None):
         """
         Create all the items for the model.
 
@@ -284,7 +284,7 @@ class Library(QtCore.QObject):
             items = studiolibrary.itemsFromPaths(
                 paths,
                 library=self,
-                libraryWidget=libraryWidget
+                libraryWindow=libraryWindow
             )
 
             self._items = list(items)
@@ -327,7 +327,7 @@ class Library(QtCore.QObject):
         for query in queries:
             logger.debug('Query: %s', query)
 
-        items = self.createItems(libraryWidget=self._libraryWidget)
+        items = self.createItems(libraryWindow=self._libraryWindow)
         for item in items:
             match = self.match(item.itemData(), queries)
             if match:

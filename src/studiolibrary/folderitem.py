@@ -70,16 +70,16 @@ class FolderItem(studiolibrary.LibraryItem):
         ]
 
     @classmethod
-    def showCreateWidget(cls, libraryWidget):
+    def showCreateWidget(cls, libraryWindow):
         """
         Show the dialog for creating a new folder.
 
         :rtype: None
         """
-        path = libraryWidget.selectedFolderPath() or libraryWidget.path()
+        path = libraryWindow.selectedFolderPath() or libraryWindow.path()
 
         name, button = studiolibrary.widgets.MessageBox.input(
-            libraryWidget,
+            libraryWindow,
             "Create folder",
             "Create a new folder with the name:",
         )
@@ -89,7 +89,7 @@ class FolderItem(studiolibrary.LibraryItem):
         if name and button == QtWidgets.QDialogButtonBox.Ok:
             path = os.path.join(path, name)
 
-            item = cls(path, libraryWidget=libraryWidget)
+            item = cls(path, libraryWindow=libraryWindow)
             item.save()
 
     def createItemData(self):
@@ -102,7 +102,7 @@ class FolderItem(studiolibrary.LibraryItem):
 
     def doubleClicked(self):
         """Overriding this method to show the items contained in the folder."""
-        self.libraryWidget().selectFolderPath(self.path())
+        self.libraryWindow().selectFolderPath(self.path())
 
     def save(self, *args, **kwargs):
         """
@@ -112,8 +112,8 @@ class FolderItem(studiolibrary.LibraryItem):
         """
         super(FolderItem, self).save(*args, **kwargs)
 
-        if self.libraryWidget():
-            self.libraryWidget().selectFolderPath(self.path())
+        if self.libraryWindow():
+            self.libraryWindow().selectFolderPath(self.path())
 
 
 studiolibrary.registerItem(FolderItem)

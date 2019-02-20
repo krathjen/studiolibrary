@@ -45,29 +45,29 @@ class BaseItem(studiolibrary.LibraryItem):
     """Base class for anim, pose, mirror and sets transfer items."""
 
     @classmethod
-    def showCreateWidget(cls, libraryWidget):
+    def showCreateWidget(cls, libraryWindow):
         """
         Overriding this method to set the destination location
         for the create widget.
 
         Triggered when the user clicks the item action in the new item menu.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         """
-        widget = cls.CreateWidgetClass(parent=libraryWidget)
+        widget = cls.CreateWidgetClass(parent=libraryWindow)
 
-        path = libraryWidget.selectedFolderPath()
+        path = libraryWindow.selectedFolderPath()
 
         if path:
             widget.folderFrame().hide()
         else:
-            path = libraryWidget.path()
+            path = libraryWindow.path()
 
         widget.setFolderPath(path)
-        widget.setLibraryWidget(libraryWidget)
+        widget.setLibraryWindow(libraryWindow)
 
-        libraryWidget.setCreateWidget(widget)
-        libraryWidget.folderSelectionChanged.connect(widget.setFolderPath)
+        libraryWindow.setCreateWidget(widget)
+        libraryWindow.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """
@@ -221,7 +221,7 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         import setsmenu
 
-        parent = parent or self.libraryWidget()
+        parent = parent or self.libraryWindow()
 
         namespaces = self.namespaces()
 

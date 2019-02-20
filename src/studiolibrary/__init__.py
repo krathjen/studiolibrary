@@ -119,7 +119,7 @@ import studioqt
 from studiolibrary.utils import *
 from studiolibrary.library import Library
 from studiolibrary.libraryitem import LibraryItem
-from studiolibrary.librarywidget import LibraryWidget
+from studiolibrary.librarywindow import LibraryWindow
 from studiolibrary.main import main
 
 import studiolibrary.folderitem

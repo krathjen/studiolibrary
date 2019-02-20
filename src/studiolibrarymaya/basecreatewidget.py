@@ -55,7 +55,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self._iconPath = ""
         self._scriptJob = None
         self._focusWidget = None
-        self._libraryWidget = None
+        self._libraryWindow = None
 
         text = "Click to capture a thumbnail from the current model panel.\n" \
                "CTRL + Click to show the capture window for better framing."
@@ -79,22 +79,22 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self.updateContains()
         self.updateThumbnailSize()
 
-    def setLibraryWidget(self, libraryWidget):
+    def setLibraryWindow(self, libraryWindow):
         """
         Set the library widget for the item.
         
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         :rtype: None
         """
-        self.item().setLibraryWidget(libraryWidget)
+        self.item().setLibraryWindow(libraryWindow)
 
-    def libraryWidget(self):
+    def libraryWindow(self):
         """
         Return the library widget for the item.
 
-        :rtype: libraryWidget: studiolibrary.LibraryWidget
+        :rtype: libraryWindow: studiolibrary.LibraryWindow
         """
-        return self.item().libraryWidget()
+        return self.item().libraryWindow()
 
     def item(self):
         """
@@ -169,9 +169,9 @@ class BaseCreateWidget(QtWidgets.QWidget):
 
         path = self.folderPath()
         position = QtGui.QCursor().pos()
-        libraryWidget = self.libraryWidget()
+        libraryWindow = self.libraryWindow()
 
-        menu = setsmenu.SetsMenu.fromPath(path, libraryWidget=libraryWidget)
+        menu = setsmenu.SetsMenu.fromPath(path, libraryWindow=libraryWindow)
         menu.exec_(position)
 
     def close(self):
@@ -371,7 +371,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
                   QtWidgets.QMessageBox.Ignore | \
                   QtWidgets.QMessageBox.Cancel
 
-        parent = self.item().libraryWidget()
+        parent = self.item().libraryWindow()
         button = studiolibrary.widgets.MessageBox.question(
             parent,
             title,
@@ -420,7 +420,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
 
         except Exception as e:
             title = "Error while saving"
-            studiolibrary.widgets.MessageBox.critical(self.libraryWidget(), title, str(e))
+            studiolibrary.widgets.MessageBox.critical(self.libraryWindow(), title, str(e))
             raise
 
     def save(self, objects, path, iconPath, metadata):

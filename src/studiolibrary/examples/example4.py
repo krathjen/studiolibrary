@@ -21,16 +21,16 @@ if __name__ == "__main__":
     # Use the studiolibrary.app context for creating a QApplication instance
     with studiolibrary.app():
 
-        libraryWidget = studiolibrary.main(name="Example4", path="data")
+        libraryWindow = studiolibrary.main(name="Example4", path="data")
 
         text = "Before you get started please choose a folder location " \
                "for storing the data. A network folder is recommended for " \
                "sharing within a studio."
 
-        print studiolibrary.widgets.MessageBox.warning(libraryWidget, "Warning", text)
+        print studiolibrary.widgets.MessageBox.warning(libraryWindow, "Warning", text)
 
         button = studiolibrary.widgets.MessageBox.question(
-            libraryWidget,
+            libraryWindow,
             "Welcome",
             text,
             width=450,
@@ -44,15 +44,15 @@ if __name__ == "__main__":
             print "Rejected"
 
         print studiolibrary.widgets.MessageBox.input(
-            libraryWidget,
+            libraryWindow,
             "Rename",
             "Rename the selected item?",
             inputText="face.anim",
         )
 
-        print studiolibrary.widgets.MessageBox.critical(libraryWidget, "Error", text)
+        print studiolibrary.widgets.MessageBox.critical(libraryWindow, "Error", text)
 
-        dialog = studiolibrary.widgets.createMessageBox(libraryWidget, "Move Item", text)
+        dialog = studiolibrary.widgets.createMessageBox(libraryWindow, "Move Item", text)
         dialog.buttonBox().clear()
 
         dialog.addButton(u'Copy', QtWidgets.QDialogButtonBox.AcceptRole)

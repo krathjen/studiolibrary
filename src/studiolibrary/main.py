@@ -18,7 +18,7 @@ def main(*args, **kwargs):
     """
     Convenience method for creating/showing a library widget instance.
 
-    return studiolibrary.LibraryWidget.instance(
+    return studiolibrary.LibraryWindow.instance(
         name="",
         path="",
         show=True,
@@ -28,7 +28,7 @@ def main(*args, **kwargs):
         unlockRegExp=None
     )
 
-    :rtype: studiolibrary.LibraryWidget
+    :rtype: studiolibrary.LibraryWindow
     """
     # Reload all Studio Library modules when Shift is pressed.
     # This is for developers to test their changes in a DCC application.
@@ -40,11 +40,11 @@ def main(*args, **kwargs):
 
     if studiolibrary.isMaya():
         import studiolibrarymaya
-        libraryWidget = studiolibrarymaya.main(*args, **kwargs)
+        libraryWindow = studiolibrarymaya.main(*args, **kwargs)
     else:
-        libraryWidget = studiolibrary.LibraryWidget.instance(*args, **kwargs)
+        libraryWindow = studiolibrary.LibraryWindow.instance(*args, **kwargs)
 
-    return libraryWidget
+    return libraryWindow
 
 
 if __name__ == "__main__":

@@ -113,8 +113,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
         item = self.item()
         editable = True
 
-        if item and item.libraryWidget():
-            editable = not item.libraryWidget().isLocked()
+        if item and item.libraryWindow():
+            editable = not item.libraryWindow().isLocked()
 
         return editable
 
@@ -125,7 +125,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         :rtype: None 
         """
         if enable:
-            parent = self.item().libraryWidget()
+            parent = self.item().libraryWindow()
 
             iconPath = self.iconPath()
             if iconPath == "":

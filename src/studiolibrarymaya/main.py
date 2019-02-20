@@ -15,9 +15,9 @@ import studiolibrary
 
 def main(*args, **kwargs):
     """
-    Convenience method for creating/showing a MayaLibraryWidget instance.
+    Convenience method for creating/showing a MayaLibraryWindow instance.
 
-    return studiolibrarymaya.MayaLibraryWidget.instance(
+    return studiolibrarymaya.MayaLibraryWindow.instance(
         name="",
         path="",
         show=True,
@@ -28,7 +28,7 @@ def main(*args, **kwargs):
         dockable=True
     )
 
-    :rtype: studiolibrarymaya.MayaLibraryWidget
+    :rtype: studiolibrarymaya.MayaLibraryWindow
     """
     import studiolibrarymaya
 
@@ -36,14 +36,14 @@ def main(*args, **kwargs):
     studiolibrarymaya.enableMayaClosedEvent()
 
     if studiolibrary.isMaya():
-        import studiolibrarymaya.mayalibrarywidget
-        cls = studiolibrarymaya.mayalibrarywidget.MayaLibraryWidget
+        import studiolibrarymaya.mayalibrarywindow
+        cls = studiolibrarymaya.mayalibrarywindow.MayaLibraryWindow
     else:
-        cls = studiolibrary.LibraryWidget
+        cls = studiolibrary.LibraryWindow
 
-    libraryWidget = cls.instance(*args, **kwargs)
+    libraryWindow = cls.instance(*args, **kwargs)
 
-    return libraryWidget
+    return libraryWindow
 
 
 if __name__ == "__main__":

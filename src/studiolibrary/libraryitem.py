@@ -78,19 +78,19 @@ class LibraryItem(studiolibrary.widgets.Item):
     deleted = _libraryItemSignals.deleted
 
     @classmethod
-    def createAction(cls, menu, libraryWidget):
+    def createAction(cls, menu, libraryWindow):
         """
         Return the action to be displayed when the user 
         ks the "plus" icon.
 
         :type menu: QtWidgets.QMenu
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         :rtype: QtCore.QAction
         """
         if cls.MenuName:
 
             icon = QtGui.QIcon(cls.MenuIconPath)
-            callback = partial(cls.showCreateWidget, libraryWidget)
+            callback = partial(cls.showCreateWidget, libraryWindow)
 
             action = QtWidgets.QAction(icon, cls.MenuName, menu)
             action.triggered.connect(callback)
@@ -98,14 +98,14 @@ class LibraryItem(studiolibrary.widgets.Item):
             return action
 
     @classmethod
-    def showCreateWidget(cls, libraryWidget):
+    def showCreateWidget(cls, libraryWindow):
         """
         Show the create widget for creating a new item.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         """
         widget = cls.CreateWidgetClass()
-        libraryWidget.setCreateWidget(widget)
+        libraryWindow.setCreateWidget(widget)
 
     @classmethod
     def isValidPath(cls, path):
@@ -136,14 +136,14 @@ class LibraryItem(studiolibrary.widgets.Item):
             self,
             path="",
             library=None,
-            libraryWidget=None,
+            libraryWindow=None,
     ):
         """
-        The LibraryItem class provides an item for use with the LibraryWidget.
+        The LibraryItem class provides an item for use with the LibraryWindow.
 
         :type path: str
         :type library: studiolibrary.Library or None 
-        :type libraryWidget: studiolibrary.LibraryWidget or None
+        :type libraryWindow: studiolibrary.LibraryWindow or None
         """
         super(LibraryItem, self).__init__()
 
@@ -153,10 +153,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         self._metadata = None
         self._iconPath = None
         self._typePixmap = None
-        self._libraryWidget = None
+        self._libraryWindow = None
 
-        if libraryWidget:
-            self.setLibraryWidget(libraryWidget)
+        if libraryWindow:
+            self.setLibraryWindow(libraryWindow)
 
         if library:
             self.setLibrary(library)
@@ -179,8 +179,8 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type text: str
         :rtype: None
         """
-        if self.libraryWidget():
-            self.libraryWidget().showToastMessage(text)
+        if self.libraryWindow():
+            self.libraryWindow().showToastMessage(text)
 
     def showErrorDialog(self, title, text):
         """
@@ -190,8 +190,8 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type text: str
         :rtype: QMessageBox.StandardButton or None
         """
-        if self.libraryWidget():
-            self.libraryWidget().showErrorMessage(text)
+        if self.libraryWindow():
+            self.libraryWindow().showErrorMessage(text)
 
         button = None
 
@@ -199,7 +199,7 @@ class LibraryItem(studiolibrary.widgets.Item):
             self._modal = True
             
             try:
-                button = studiolibrary.widgets.MessageBox.critical(self.libraryWidget(), title, text)
+                button = studiolibrary.widgets.MessageBox.critical(self.libraryWindow(), title, text)
             finally:
                 self._modal = False
 
@@ -224,7 +224,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type text: str
         :rtype: QMessageBox.StandardButton
         """
-        return studiolibrary.widgets.MessageBox.question(self.libraryWidget(), title, text)
+        return studiolibrary.widgets.MessageBox.question(self.libraryWindow(), title, text)
 
     def typeIconPath(self):
         """
@@ -242,20 +242,20 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return self.ThumbnailPath
 
-    def showPreviewWidget(self, libraryWidget):
+    def showPreviewWidget(self, libraryWindow):
         """
         Show the preview Widget for the item instance.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         """
-        widget = self.previewWidget(libraryWidget)
-        libraryWidget.setPreviewWidget(widget)
+        widget = self.previewWidget(libraryWindow)
+        libraryWindow.setPreviewWidget(widget)
 
-    def previewWidget(self, libraryWidget):
+    def previewWidget(self, libraryWindow):
         """
         Return the widget to be shown when the user clicks on the item.
 
-        :type libraryWidget: studiolibrary.LibraryWidget
+        :type libraryWindow: studiolibrary.LibraryWindow
         :rtype: QtWidgets.QWidget or None
         """
         widget = None
@@ -350,21 +350,21 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         return None
 
-    def setLibraryWidget(self, libraryWidget):
+    def setLibraryWindow(self, libraryWindow):
         """
         Set the library widget containing the item.
         
-        :rtype: studiolibrary.LibraryWidget or None
+        :rtype: studiolibrary.LibraryWindow or None
         """
-        self._libraryWidget = libraryWidget
+        self._libraryWindow = libraryWindow
 
-    def libraryWidget(self):
+    def libraryWindow(self):
         """
         Return the library widget containing the item.
         
-        :rtype: studiolibrary.LibraryWidget or None
+        :rtype: studiolibrary.LibraryWindow or None
         """
-        return self._libraryWidget
+        return self._libraryWindow
 
     def setLibrary(self, library):
         """
@@ -380,8 +380,8 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :rtype: studiolibrary.Library or None
         """
-        if not self._library and self.libraryWidget():
-            return self.libraryWidget().library()
+        if not self._library and self.libraryWindow():
+            return self.libraryWindow().library()
 
         return self._library
 
@@ -546,8 +546,8 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         self.saveItemData()
 
-        if self.libraryWidget():
-            self.libraryWidget().selectItems([self])
+        if self.libraryWindow():
+            self.libraryWindow().selectItems([self])
 
         self.saved.emit(self)
         logger.debug(u'Item Saved: {0}'.format(self.path()))
@@ -584,8 +584,8 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         self.copied.emit(self, src, dst)
 
-        if self.libraryWidget():
-            self.libraryWidget().refresh()
+        if self.libraryWindow():
+            self.libraryWindow().refresh()
 
     def move(self, dst):
         """
@@ -623,8 +623,8 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         self.renamed.emit(self, src, dst)
 
-        if self.libraryWidget():
-            self.libraryWidget().refresh()
+        if self.libraryWindow():
+            self.libraryWindow().refresh()
 
     def showRenameDialog(self, parent=None):
         """
@@ -632,7 +632,7 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :type parent: QtWidgets.QWidget
         """
-        parent = parent or self.libraryWidget()
+        parent = parent or self.libraryWindow()
 
         name, button = studiolibrary.widgets.MessageBox.input(
             parent,
@@ -692,7 +692,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         
         :rtype: None
         """
-        if not self.libraryWidget():
+        if not self.libraryWindow():
             raise ItemSaveError("Item already exists!")
 
         path = self.path()
@@ -704,12 +704,12 @@ class LibraryItem(studiolibrary.widgets.Item):
         buttons = QtWidgets.QMessageBox.Yes | \
                   QtWidgets.QMessageBox.Cancel
 
-        button = self.libraryWidget().showQuestionDialog(title, text, buttons)
+        button = self.libraryWindow().showQuestionDialog(title, text, buttons)
 
         if button == QtWidgets.QMessageBox.Yes:
             library = self.library()
             item = studiolibrary.LibraryItem(path, library=library)
-            self.libraryWidget().moveItemsToTrash([item])
+            self.libraryWindow().moveItemsToTrash([item])
             self.setPath(path)
         else:
             raise ItemSaveError("You cannot save over an existing item.")

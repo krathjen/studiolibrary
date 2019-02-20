@@ -26,7 +26,7 @@ import studiolibrary
 import studiolibrary.widgets
 
 
-__all__ = ["LibraryWidget"]
+__all__ = ["LibraryWindow"]
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class GlobalSignal(QtCore.QObject):
     folderSelectionChanged = QtCore.Signal(object, object)
 
 
-class LibraryWidget(QtWidgets.QWidget):
+class LibraryWindow(QtWidgets.QWidget):
 
     _instances = {}
 
@@ -109,20 +109,20 @@ class LibraryWidget(QtWidgets.QWidget):
     @staticmethod
     def instances():
         """
-        Return all the LibraryWidget instances that have been initialised.
+        Return all the LibraryWindow instances that have been initialised.
 
-        :rtype: list[LibraryWidget]
+        :rtype: list[LibraryWindow]
         """
-        return LibraryWidget._instances.values()
+        return LibraryWindow._instances.values()
 
     @staticmethod
     def destroyInstances():
         """Delete all library widget instances."""
-        for widget in LibraryWidget.instances():
+        for widget in LibraryWindow.instances():
             widget.hide()
             widget.close()
 
-        LibraryWidget._instances = {}
+        LibraryWindow._instances = {}
 
     @classmethod
     def instance(
@@ -147,28 +147,28 @@ class LibraryWidget(QtWidgets.QWidget):
         :type lockRegExp: str
         :type unlockRegExp: str
         
-        :rtype: LibraryWidget
+        :rtype: LibraryWindow
         """
         name = name or cls.DEFAULT_NAME
 
-        libraryWidget = LibraryWidget._instances.get(name)
+        libraryWindow = LibraryWindow._instances.get(name)
 
-        if not libraryWidget:
-            libraryWidget = cls(name=name)
-            LibraryWidget._instances[name] = libraryWidget
+        if not libraryWindow:
+            libraryWindow = cls(name=name)
+            LibraryWindow._instances[name] = libraryWindow
 
-        libraryWidget.setLocked(lock)
-        libraryWidget.setSuperusers(superusers)
-        libraryWidget.setLockRegExp(lockRegExp)
-        libraryWidget.setUnlockRegExp(unlockRegExp)
+        libraryWindow.setLocked(lock)
+        libraryWindow.setSuperusers(superusers)
+        libraryWindow.setLockRegExp(lockRegExp)
+        libraryWindow.setUnlockRegExp(unlockRegExp)
 
         if path:
-            libraryWidget.setPath(path)
+            libraryWindow.setPath(path)
 
         if show:
-            libraryWidget.show(**kwargs)
+            libraryWindow.show(**kwargs)
 
-        return libraryWidget
+        return libraryWindow
 
     def __init__(self, parent=None, name="", path=""):
         """
@@ -220,7 +220,7 @@ class LibraryWidget(QtWidgets.QWidget):
         # Create Widgets
         # --------------------------------------------------------------------
 
-        library = studiolibrary.Library(libraryWidget=self)
+        library = studiolibrary.Library(libraryWindow=self)
         library.searchFinished.connect(self._searchFinished)
 
         self._sidebarFrame = SidebarFrame(self)
@@ -599,7 +599,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def isRefreshEnabled(self):
         """
-        Return True if the LibraryWidget can be refreshed.
+        Return True if the LibraryWindow can be refreshed.
         
         :rtype: bool 
         """
@@ -761,7 +761,7 @@ class LibraryWidget(QtWidgets.QWidget):
         items = []
 
         if path:
-            item = studiolibrary.itemFromPath(path, libraryWidget=self)
+            item = studiolibrary.itemFromPath(path, libraryWindow=self)
 
             if item:
                 items = [item]
@@ -927,7 +927,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        return studiolibrary.itemsFromUrls(urls, libraryWidget=self)
+        return studiolibrary.itemsFromUrls(urls, libraryWindow=self)
 
     # -----------------------------------------------------------------
     # Support for custom context menus
@@ -1590,7 +1590,7 @@ class LibraryWidget(QtWidgets.QWidget):
 
     def settingsPath(self):
         """
-        Return the settings path for the LibraryWidget.
+        Return the settings path for the LibraryWindow.
 
         :rtype: str
         """

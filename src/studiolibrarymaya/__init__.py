@@ -152,15 +152,15 @@ def mayaClosedEvent():
 
     :rtype: None
     """
-    for libraryWidget in studiolibrary.LibraryWidget.instances():
-        libraryWidget.saveSettings()
+    for libraryWindow in studiolibrary.LibraryWindow.instances():
+        libraryWindow.saveSettings()
 
 
-def setDebugMode(libraryWidget, value):
+def setDebugMode(libraryWindow, value):
     """
     Triggered when the user chooses debug mode.
 
-    :type libraryWidget: studiolibrary.LibraryWidget
+    :type libraryWindow: studiolibrary.LibraryWindow
     :type value: int
     :rtype: None
     """
@@ -176,4 +176,4 @@ def setDebugMode(libraryWidget, value):
     logger_.setLevel(level)
 
 
-studiolibrary.LibraryWidget.globalSignal.debugModeChanged.connect(setDebugMode)
+studiolibrary.LibraryWindow.globalSignal.debugModeChanged.connect(setDebugMode)
