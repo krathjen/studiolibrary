@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from .sortmenu import SortMenu
+from .sortbymenu import SortByMenu
 from .groupbymenu import GroupByMenu
 from .messagebox import MessageBox, createMessageBox
 from .toastwidget import ToastWidget

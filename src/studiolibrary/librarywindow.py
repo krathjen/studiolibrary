@@ -229,7 +229,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._searchWidget.setToolTip(tip)
         self._searchWidget.setStatusTip(tip)
 
-        self._sortMenu = studiolibrary.widgets.SortMenu(self)
+        self._sortByMenu = studiolibrary.widgets.SortByMenu(self)
         self._groupByMenu = studiolibrary.widgets.GroupByMenu(self)
         self._statusWidget = studiolibrary.widgets.StatusWidget(self)
         self._menuBarWidget = studiolibrary.widgets.MenuBarWidget(self)
@@ -238,7 +238,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self.setMinimumWidth(5)
         self.setMinimumHeight(5)
 
-        self._sortMenu.setDataset(library)
+        self._sortByMenu.setDataset(library)
         self._groupByMenu.setDataset(library)
         self._itemsWidget.setDataset(library)
         self._searchWidget.setDataset(library)
@@ -957,7 +957,7 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         widget = self.menuBarWidget().findToolButton("Sort By")
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
-        self._sortMenu.show(point)
+        self._sortByMenu.show(point)
 
     def showItemViewMenu(self):
         """

@@ -18,30 +18,49 @@ from studioqt import QtWidgets
 import studioqt
 
 
-class SortMenu(QtWidgets.QMenu):
+class SortByMenu(QtWidgets.QMenu):
 
     def __init__(self, *args, **kwargs):
-        super(SortMenu, self).__init__(*args, **kwargs)
+        super(SortByMenu, self).__init__(*args, **kwargs)
 
         self._dataset = None
 
-    def dataset(self):
-        return self._dataset
-
     def setDataset(self, dataset):
+        """
+        Set the dataset model for the menu:
+        
+        :type dataset: studiolibrary.Dataset
+        """
         self._dataset = dataset
 
-    def setSortBy(self, sortBy, sortOrder):
+    def dataset(self):
+        """
+        Get the dataset model for the menu.
+        
+        :rtype: studiolibrary.Dataset 
+        """
+        return self._dataset
 
-        if sortBy == "Custom Order":
+    def setSortBy(self, sortName, sortOrder):
+        """
+        Set the sort by value for the dataset.
+        
+        :type sortName: str 
+        :type sortOrder: str
+        """
+        if sortName == "Custom Order":
             sortOrder = "asc"
 
-        value = sortBy + ":" + sortOrder
+        value = sortName + ":" + sortOrder
         self.dataset().setSortBy([value])
         self.dataset().search()
 
     def show(self, point=None):
-
+        """
+        Show the menu options.
+        
+        :type point: QtGui.QPoint or None
+        """
         self.clear()
 
         sortby = self.dataset().sortBy()
