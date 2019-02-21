@@ -142,8 +142,8 @@ def enableMayaClosedEvent():
         event = ['quitApplication', mayaClosedEvent]
         try:
             _mayaCloseScriptJob = mutils.ScriptJob(event=event)
-        except NameError, e:
-            logging.exception(e)
+        except NameError as error:
+            logging.exception(error)
 
 
 def mayaClosedEvent():
