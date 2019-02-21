@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 from .sortmenu import SortMenu
+from .groupbymenu import GroupByMenu
 from .messagebox import MessageBox, createMessageBox
 from .toastwidget import ToastWidget
 from .searchwidget import SearchWidget

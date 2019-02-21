@@ -13,6 +13,7 @@
 import os
 import time
 import logging
+import collections
 
 import studiolibrary
 
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class Library(QtCore.QObject):
 
-    ColumnLabels = [
+    Fields = [
         "icon",
         "name",
         "path",
@@ -44,10 +45,11 @@ class Library(QtCore.QObject):
         "type",
         "folder",
         "category",
+        "Custom Order",  # legacy case
         # "modified"
     ]
 
-    GroupLabels = [
+    GroupFields = [
         "type",
         "category",
         # "modified",
@@ -56,6 +58,7 @@ class Library(QtCore.QObject):
     dataChanged = QtCore.Signal()
     searchStarted = QtCore.Signal()
     searchFinished = QtCore.Signal()
+    searchTimeFinished = QtCore.Signal()
 
     def __init__(self, path=None, libraryWindow=None, *args):
         QtCore.QObject.__init__(self, *args)
@@ -66,8 +69,10 @@ class Library(QtCore.QObject):
         self._items = []
         self._fields = []
         self._sortBy = []
+        self._groupBy = []
         self._results = []
         self._queries = []
+        self._groupedResults = {}
         self._searchTime = 0
         self._searchEnabled = True
         self._libraryWindow = libraryWindow
@@ -85,7 +90,7 @@ class Library(QtCore.QObject):
 
     def setSortBy(self, fields):
         """
-        Set the list of fields to sort by.
+        Set the list of fields to group by.
         
         Example:
             library.setSortBy(["name:asc", "type:asc"])
@@ -94,6 +99,25 @@ class Library(QtCore.QObject):
         """
         self._sortBy = fields
 
+    def groupBy(self):
+        """
+        Get the list of fields to group by.
+        
+        :rtype: list[str] 
+        """
+        return self._groupBy
+
+    def setGroupBy(self, fields):
+        """
+        Set the list of fields to group by.
+        
+        Example:
+            library.setGroupBy(["name:asc", "type:asc"])
+        
+        :type fields: list[str] 
+        """
+        self._groupBy = fields
+
     def settings(self):
         """
         Get the settings for the dataset.
@@ -101,7 +125,8 @@ class Library(QtCore.QObject):
         :rtype: dict 
         """
         return {
-            'sortBy': self.sortBy()
+            "sortBy": self.sortBy(),
+            "groupBy": self.groupBy()
         }
 
     def setSettings(self, settings):
@@ -110,9 +135,13 @@ class Library(QtCore.QObject):
         
         :type settings: dict
         """
-        sortBy = settings.get('sortBy')
-        if sortBy is not None:
-            self.setSortBy(sortBy)
+        value = settings.get('sortBy')
+        if value is not None:
+            self.setSortBy(value)
+
+        value = settings.get('groupBy')
+        if value is not None:
+            self.setGroupBy(value)
 
     def setSearchEnabled(self, enabled):
         """Enable or disable the search the for the library."""
@@ -378,9 +407,13 @@ class Library(QtCore.QObject):
 
         self._results = self.findItems(self._queries)
 
+        self._groupedResults = self.groupItems(self._results, self.groupBy())
+
         self.searchFinished.emit()
 
         self._searchTime = time.time() - t
+
+        self.searchTimeFinished.emit()
 
         logger.debug('Search time: %s', self._searchTime)
 
@@ -391,6 +424,14 @@ class Library(QtCore.QObject):
         :rtype: list[Item] 
         """
         return self._results
+
+    def groupedResults(self):
+        """
+        Get the results grouped after a search is ran.
+        
+        :rtype: dict
+        """
+        return self._groupedResults
 
     def searchTime(self):
         """
@@ -640,7 +681,9 @@ class Library(QtCore.QObject):
         :type sortBy: list[str]
         :rtype: list[Item]
         """
-        logger.debug('Sort By: %s', sortBy)
+        logger.debug('Sort by: %s', sortBy)
+
+        t = time.time()
 
         for field in reversed(sortBy):
 
@@ -659,7 +702,52 @@ class Library(QtCore.QObject):
 
             items = sorted(items, key=sortKey, reverse=reverse)
 
+        logger.debug("Sort items took %s", time.time() - t)
+
         return items
+
+    @staticmethod
+    def groupItems(items, fields):
+        """
+        Group the given items by the given field.
+
+        :type items: list[Item]
+        :type fields: list[str]
+        :rtype: dict
+        """
+        logger.debug('Group by: %s', fields)
+
+        # Only support for top level grouping at the moment.
+        if fields:
+            field = fields[0]
+        else:
+            return {'None': items}
+
+        t = time.time()
+
+        results_ = {}
+        tokens = field.split(':')
+
+        reverse = False
+        if len(tokens) > 1:
+            field = tokens[0]
+            reverse = tokens[1] != 'asc'
+
+        for item in items:
+            value = item.itemData().get(field)
+            if value:
+                results_.setdefault(value, [])
+                results_[value].append(item)
+
+        groups = sorted(results_.keys(), reverse=reverse)
+
+        results = collections.OrderedDict()
+        for group in groups:
+            results[group] = results_[group]
+
+        logger.debug("Group Items Took %s", time.time() - t)
+
+        return results
 
 
 def testsuite():

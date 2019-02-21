@@ -55,7 +55,8 @@ class LibraryWindow(QtWidgets.QWidget):
     DEFAULT_NAME = "Default"
     DEFAULT_SETTINGS = {
         "library": {
-          "sortBy": ["name:asc"]
+            "sortBy": ["name:asc"],
+            "groupBy": ["category:asc"]
         },
         "paneSizes": [160, 280, 180],
         "geometry": [-1, -1, 860, 720],
@@ -68,10 +69,6 @@ class LibraryWindow(QtWidgets.QWidget):
         "itemsWidget": {
                 "spacing": 2,
                 "padding": 6,
-                "sortOrder": 0,
-                "sortColumn": "Custom Order",
-                "groupOrder": 0,
-                "groupColumn": "category",
                 "zoomAmount": 80,
                 "textVisible": True,
             },
@@ -85,7 +82,6 @@ class LibraryWindow(QtWidgets.QWidget):
         }
 
     TRASH_ENABLED = True
-
     RECURSIVE_SEARCH_ENABLED = False
 
     # Still in development
@@ -221,7 +217,7 @@ class LibraryWindow(QtWidgets.QWidget):
         # --------------------------------------------------------------------
 
         library = studiolibrary.Library(libraryWindow=self)
-        library.searchFinished.connect(self._searchFinished)
+        library.searchTimeFinished.connect(self._searchFinished)
 
         self._sidebarFrame = SidebarFrame(self)
         self._previewFrame = PreviewFrame(self)
@@ -234,6 +230,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._searchWidget.setStatusTip(tip)
 
         self._sortMenu = studiolibrary.widgets.SortMenu(self)
+        self._groupByMenu = studiolibrary.widgets.GroupByMenu(self)
         self._statusWidget = studiolibrary.widgets.StatusWidget(self)
         self._menuBarWidget = studiolibrary.widgets.MenuBarWidget(self)
         self._sidebarWidget = studiolibrary.widgets.SidebarWidget(self)
@@ -242,6 +239,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self.setMinimumHeight(5)
 
         self._sortMenu.setDataset(library)
+        self._groupByMenu.setDataset(library)
         self._itemsWidget.setDataset(library)
         self._searchWidget.setDataset(library)
         self._sidebarWidget.setDataset(library)
@@ -361,6 +359,9 @@ class LibraryWindow(QtWidgets.QWidget):
         if path:
             self.setPath(path)
 
+    def _searchFinished(self):
+        self.showRefreshMessage()
+
     def _searchChanged(self):
         """
         Triggered when the search text has changed.
@@ -422,12 +423,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
 
-    def _searchFinished(self):
-        items = self.library().results()
-        self.setItems(items)
-
-        self.showRefreshMessage()
-
     def library(self):
         """
         Return the library model object.
@@ -444,9 +439,6 @@ class LibraryWindow(QtWidgets.QWidget):
         :rtype: None
         """
         self._library = library
-        self.itemsWidget().setSortLabels(library.SortFields)
-        self.itemsWidget().setGroupLabels(library.GroupLabels)
-        self.itemsWidget().setColumnLabels(library.ColumnLabels)
 
     def statusWidget(self):
         """
@@ -885,21 +877,6 @@ class LibraryWindow(QtWidgets.QWidget):
             self.selectItems(items)
             self.scrollToSelectedItem()
 
-    def setItems(self, items):
-        """
-        Set the items for the library widget.
-
-        :rtype: list[studiolibrary.LibraryItem]
-        """
-        self._items = items
-
-        selectedItems = self.selectedItems()
-
-        self.itemsWidget().setItems(items, sort=True)
-
-        if selectedItems:
-            self.selectItems(selectedItems)
-
     @studioqt.showWaitCursor
     def refreshItems(self):
         """
@@ -968,11 +945,9 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :rtype: None
         """
-        menu = self.itemsWidget().createGroupByMenu()
         widget = self.menuBarWidget().findToolButton("Group By")
-
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
-        menu.exec_(point)
+        self._groupByMenu.show(point)
 
     def showSortByMenu(self):
         """

@@ -138,9 +138,48 @@ class ItemsWidget(QtWidgets.QWidget):
 
     def setDataset(self, dataset):
         self._dataset = dataset
+        self.setColumnLabels(dataset.Fields)
+        dataset.searchFinished.connect(self.updateItems)
 
     def dataset(self):
         return self._dataset
+
+    def updateItems(self):
+        """Sets the items to the widget."""
+        selectedItems = self.selectedItems()
+        self.clearSelection()
+
+        results = self.dataset().groupedResults()
+
+        items = []
+
+        for group in results:
+            if group != "None":
+                groupItem = self.createGroupItem(group)
+                items.append(groupItem)
+            items.extend(results[group])
+
+        self.treeWidget().setItems(items)
+
+        if selectedItems:
+            self.selectItems(selectedItems)
+            self.scrollToSelectedItem()
+
+    def createGroupItem(self, text, children=None):
+        """
+        Create a new group item for the given text and children.
+
+        :type text: str
+        :type children: list[studioqt.Item]
+        
+        :rtype: GroupItem
+        """
+        groupItem = GroupItem()
+        groupItem.setName(text)
+        groupItem.setStretchToWidget(self)
+        groupItem.setChildren(children)
+
+        return groupItem
 
     def setToastEnabled(self, enabled):
         """
@@ -167,46 +206,6 @@ class ItemsWidget(QtWidgets.QWidget):
             self._toastWidget.setDuration(duration)
             self._toastWidget.setText(text)
             self._toastWidget.show()
-
-    def sortOrder(self):
-        """
-        Reimplemented for convenience.
-
-        Calls self.treeWidget().sortOrder()
-        """
-        return self.treeWidget().sortOrder()
-
-    def sortColumn(self):
-        """
-        Reimplemented for convenience.
-
-        Calls self.treeWidget().sortColumn()
-        """
-        return self.treeWidget().sortColumn()
-
-    def sortByColumn(self, *args, **kwargs):
-        """
-        Reimplemented for convenience.
-
-        Calls self.treeWidget().sortByColumn(*args)
-        """
-        self.treeWidget().sortByColumn(*args, **kwargs)
-
-    def groupOrder(self):
-        """
-        Reimplemented for convenience.
-
-        Calls self.treeWidget().groupOrder()
-        """
-        return self.treeWidget().groupOrder()
-
-    def groupColumn(self):
-        """
-        Reimplemented for convenience.
-
-        Calls self.treeWidget().groupColumn()
-        """
-        return self.treeWidget().groupColumn()
 
     def columnFromLabel(self, *args):
         """
@@ -378,12 +377,7 @@ class ItemsWidget(QtWidgets.QWidget):
         self.treeWidget().clear()
 
     def refresh(self):
-        """
-        Refresh the sorting and size of the items.
-
-        :rtype: None
-        """
-        self.refreshSortBy()
+        """Refresh the item size."""
         self.refreshSize()
 
     def refreshSize(self):
@@ -395,14 +389,6 @@ class ItemsWidget(QtWidgets.QWidget):
         self.setZoomAmount(self.zoomAmount() + 1)
         self.setZoomAmount(self.zoomAmount() - 1)
         self.repaint()
-
-    def refreshSortBy(self):
-        """
-        Refresh the sorting of the items.
-
-        :rtype: None
-        """
-        self.treeWidget().refreshSortBy()
 
     def itemFromIndex(self, index):
         """
@@ -525,12 +511,6 @@ class ItemsWidget(QtWidgets.QWidget):
 
         return settings
 
-    def createSortByMenu(self):
-        return self.treeWidget().createSortByMenu()
-
-    def createGroupByMenu(self):
-        return self.treeWidget().createGroupByMenu()
-
     def createCopyTextMenu(self):
         return self.treeWidget().createCopyTextMenu()
 
@@ -590,9 +570,6 @@ class ItemsWidget(QtWidgets.QWidget):
         menu.addAction(action)
 
         menu.addSeparator()
-
-        groupByMenu = self.treeWidget().createGroupByMenu()
-        menu.addMenu(groupByMenu)
 
         copyTextMenu = self.treeWidget().createCopyTextMenu()
         menu.addMenu(copyTextMenu)
@@ -708,8 +685,6 @@ class ItemsWidget(QtWidgets.QWidget):
             if key in data:
                 item.setItemData(data[key])
 
-        self.refreshSortBy()
-
     def updateColumns(self):
         """
         Update the column labels with the current item data.
@@ -736,25 +711,6 @@ class ItemsWidget(QtWidgets.QWidget):
         s = set()
         sadd = s.add
         return [x for x in labels if x.strip() and not (x in s or sadd(x))]
-
-    def setGroupLabels(self, labels):
-        """
-        Set the columns that can be grouped.
-        
-        :type labels: list[str]
-        """
-        self.treeWidget().setGroupLabels(labels)
-
-    def setSortLabels(self, labels):
-        """
-        Set the column labels that can be sorted.
-        
-        :type labels: list[str]
-        """
-        if "Custom Order" not in labels:
-            labels.append("Custom Order")
-
-        self.treeWidget().setSortLabels(labels)
 
     def setColumnLabels(self, labels):
         """
@@ -817,31 +773,6 @@ class ItemsWidget(QtWidgets.QWidget):
 
     def refreshColumns(self):
         self.setColumnLabels(self.columnLabelsFromItems())
-
-    def setItems(self, items, data=None, sort=True):
-        """
-        Sets the items to the widget.
-
-        :type items: list[studioqt.Item]
-        :type data: dict
-        :type sort: bool
-        
-        :rtype: None
-        """
-        selectedItems = self.selectedItems()
-        self.clearSelection()
-
-        self.treeWidget().setItems(items)
-
-        if data:
-            self.setItemData(data)
-
-        if sort:
-            self.refreshSortBy()
-
-        if selectedItems:
-            self.selectItems(selectedItems)
-            self.scrollToSelectedItem()
 
     def padding(self):
         """
