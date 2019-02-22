@@ -139,7 +139,7 @@ def reload():
         studiolibrary.main()
     """
     import studiolibrary
-    studiolibrary.LibraryWidget.destroyInstances()
+    studiolibrary.LibraryWindow.destroyInstances()
 
     names = ['studiolibrary', 'studioqt', 'studiolibrarymaya',  'mutils']
 

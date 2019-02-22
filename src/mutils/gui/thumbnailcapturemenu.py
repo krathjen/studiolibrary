@@ -17,6 +17,7 @@ import logging
 import mutils.gui
 
 import studioqt
+import studiolibrary.widgets
 
 from studioqt import QtGui
 from studioqt import QtCore
@@ -78,7 +79,7 @@ class ThumbnailCaptureMenu(QtWidgets.QMenu):
                u"confirm the action to take a new image and delete " \
                u"the previous one?"
 
-        clickedButton = studioqt.MessageBox.warning(
+        clickedButton = studiolibrary.widgets.MessageBox.warning(
             self.parent(),
             title=title,
             text=text,

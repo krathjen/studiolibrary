@@ -11,7 +11,9 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import time
 import logging
+import collections
 
 import studiolibrary
 
@@ -27,52 +29,127 @@ logger = logging.getLogger(__name__)
 
 class Library(QtCore.QObject):
 
-    ColumnLabels = [
+    Fields = [
         "icon",
         "name",
         "path",
         "type",
-        "category",
         "folder",
+        "category",
         # "modified"
     ]
 
-    SortLabels = [
+    SortFields = [
         "name",
         "path",
         "type",
-        "category",
         "folder",
+        "category",
+        "Custom Order",  # legacy case
         # "modified"
     ]
 
-    GroupLabels = [
+    GroupFields = [
         "type",
         "category",
         # "modified",
     ]
 
     dataChanged = QtCore.Signal()
+    searchStarted = QtCore.Signal()
+    searchFinished = QtCore.Signal()
+    searchTimeFinished = QtCore.Signal()
 
-    def __init__(self, path, *args):
+    def __init__(self, path=None, libraryWindow=None, *args):
         QtCore.QObject.__init__(self, *args)
 
-        self._path = None
+        self._path = path
         self._mtime = None
         self._data = {}
         self._items = []
-        self._currentItems = []
+        self._fields = []
+        self._sortBy = []
+        self._groupBy = []
+        self._results = []
+        self._queries = []
+        self._groupedResults = {}
+        self._searchTime = 0
+        self._searchEnabled = True
+        self._libraryWindow = libraryWindow
 
         self.setPath(path)
         self.setDirty(True)
 
-    def currentItems(self):
+    def sortBy(self):
         """
-        The items that are displayed in the view.
+        Get the list of fields to sort by.
         
-        :rtype: list[studiolibrary.LibraryItem]
+        :rtype: list[str] 
         """
-        return self._currentItems
+        return self._sortBy
+
+    def setSortBy(self, fields):
+        """
+        Set the list of fields to group by.
+        
+        Example:
+            library.setSortBy(["name:asc", "type:asc"])
+        
+        :type fields: list[str] 
+        """
+        self._sortBy = fields
+
+    def groupBy(self):
+        """
+        Get the list of fields to group by.
+        
+        :rtype: list[str] 
+        """
+        return self._groupBy
+
+    def setGroupBy(self, fields):
+        """
+        Set the list of fields to group by.
+        
+        Example:
+            library.setGroupBy(["name:asc", "type:asc"])
+        
+        :type fields: list[str] 
+        """
+        self._groupBy = fields
+
+    def settings(self):
+        """
+        Get the settings for the dataset.
+        
+        :rtype: dict 
+        """
+        return {
+            "sortBy": self.sortBy(),
+            "groupBy": self.groupBy()
+        }
+
+    def setSettings(self, settings):
+        """
+        Set the settings for the dataset object.
+        
+        :type settings: dict
+        """
+        value = settings.get('sortBy')
+        if value is not None:
+            self.setSortBy(value)
+
+        value = settings.get('groupBy')
+        if value is not None:
+            self.setGroupBy(value)
+
+    def setSearchEnabled(self, enabled):
+        """Enable or disable the search the for the library."""
+        self._searchEnabled = enabled
+
+    def isSearchEnabled(self):
+        """Check if search is enabled for the library."""
+        return self._searchEnabled
 
     def recursiveDepth(self):
         """
@@ -81,6 +158,10 @@ class Library(QtCore.QObject):
         :rtype: int
         """
         return studiolibrary.config().get('recursiveSearchDepth')
+
+    def fields(self):
+        """Return all the fields for the library."""
+        return self._fields
 
     def path(self):
         """
@@ -106,6 +187,25 @@ class Library(QtCore.QObject):
         """
         formatString = studiolibrary.config().get('databasePath')
         return studiolibrary.formatPath(formatString, path=self.path())
+
+    def distinct(self, field, queries=None):
+        """
+        Get all the values for the given field.
+        
+        :type field: str
+        :type queries None or list[dict]
+        :type sortBy: None or list[str]
+        :rtype: list 
+        """
+        values = []
+        queries = queries or []
+
+        for item in self.findItems(queries):
+            value = item.itemData().get(field)
+            if value:
+                values.append(value)
+
+        return list(set(values))
 
     def mtime(self):
         """
@@ -146,9 +246,12 @@ class Library(QtCore.QObject):
 
         :rtype: dict
         """
-        if self.isDirty():
-            self._data = studiolibrary.readJson(self.databasePath())
-            self.setDirty(False)
+        if self.path():
+            if self.isDirty():
+                self._data = studiolibrary.readJson(self.databasePath())
+                self.setDirty(False)
+        else:
+            logger.info('No path set for reading the data from disc.')
 
         return self._data
 
@@ -159,11 +262,18 @@ class Library(QtCore.QObject):
         :type data: dict
         :rtype: None
         """
-        studiolibrary.saveJson(self.databasePath(), data)
-        self.setDirty(True)
+        if self.path():
+            studiolibrary.saveJson(self.databasePath(), data)
+            self.setDirty(True)
+        else:
+            logger.info('No path set for saving the data to disc.')
 
     def sync(self):
         """Sync the file system with the database."""
+        if not self.path():
+            logger.info('No path set for syncing data')
+            return
+
         data = self.read()
 
         for path in data.keys():
@@ -190,7 +300,6 @@ class Library(QtCore.QObject):
 
         self.dataChanged.emit()
 
-
     def postSync(self, data):
         """
         Use this function to execute code on the data after sync, but before save and dataChanged.emit
@@ -200,8 +309,28 @@ class Library(QtCore.QObject):
         """
         pass
 
+    def createItems(self, libraryWindow=None):
+        """
+        Create all the items for the model.
 
-    def findItems(self, queries, libraryWidget=None):
+        :rtype: list[studiolibrary.LibraryItem] 
+        """
+        # Check if the database has changed since the last read call
+        if self.isDirty():
+
+            paths = self.read().keys()
+            items = studiolibrary.itemsFromPaths(
+                paths,
+                library=self,
+                libraryWindow=libraryWindow
+            )
+
+            self._items = list(items)
+            self.loadItemData(self._items)
+
+        return self._items
+
+    def findItems(self, queries):
         """
         Get the items that match the given queries.
         
@@ -226,76 +355,111 @@ class Library(QtCore.QObject):
             
             print(library.find(queries))
             
-        :type queries: list[dict]
-        :type libraryWidget: studiolibrary.LibraryWIdget or None
-            
+        :type queries: list[dict]            
         :rtype: list[studiolibrary.LibraryItem]
         """
-        items = self.createItems(libraryWidget=libraryWidget)
+        fields = []
+        results = []
 
-        self._currentItems = []
+        logger.debug("Search queries:")
+        for query in queries:
+            logger.debug('Query: %s', query)
 
+        items = self.createItems(libraryWindow=self._libraryWindow)
         for item in items:
+            match = self.match(item.itemData(), queries)
+            if match:
+                results.append(item)
+            fields.extend(item.itemData().keys())
 
-            matches = []
+        self._fields = list(set(fields))
 
-            for query in queries:
+        if self.sortBy():
+            results = self.sorted(results, self.sortBy())
 
-                filters = query.get('filters')
-                operator = query.get('operator', 'and')
+        return results
 
-                if not filters:
-                    continue
-
-                match = False
-
-                for key, cond, value in filters:
-
-                    value = value.lower()
-                    itemValue = item.itemData().get(key)
-
-                    if itemValue:
-                        itemValue = itemValue.lower()
-
-                    if not itemValue:
-                        match = False
-
-                    elif cond == 'contains':
-                        match = value in itemValue
-
-                    elif cond == 'not_contains':
-                        match = value not in itemValue
-
-                    elif cond == 'is':
-                        match = value == itemValue
-
-                    elif cond == 'not':
-                        match = value != itemValue
-
-                    elif cond == 'startswith':
-                        match = itemValue.startswith(value)
-
-                    if operator == 'or' and match:
-                        break
-
-                    if operator == 'and' and not match:
-                        break
-
-                matches.append(match)
-
-            if all(matches):
-                self._currentItems.append(item)
-
-        return self._currentItems
-
-    def updateItem(self, item):
+    def addQuery(self, query):
         """
-        Update the given item in the database.    
-    
-        :type item: studiolibrary.LibraryItem
-        :rtype: None 
+        Add the given query to the dataset.
+        
+        Examples:
+            addQuery({
+                'operator': 'or',
+                'filters': [
+                    ('folder', 'is' '/library/proj/test'),
+                    ('folder', 'startswith', '/library/proj/test'),
+                ]
+            })
+        
+        :type query: dict
         """
-        self.addItems([item])
+        if query.get('name'):
+            for i, query_ in enumerate(self._queries):
+                if query_.get('name') == query.get('name'):
+                    self._queries[i] = query
+
+        if query not in self._queries:
+            self._queries.append(query)
+
+    def removeQuery(self, name):
+        """
+        Remove the query with the given name.
+        
+        :type name: str 
+        """
+        for query in self._queries:
+            if query.get('name') == name:
+                self._queries.remove(query)
+                break
+
+    def search(self):
+        """Run a search using the queries added to this dataset."""
+        if not self.isSearchEnabled():
+            logger.debug('Search is disabled')
+            return
+
+        t = time.time()
+
+        logger.debug("Searching items")
+
+        self.searchStarted.emit()
+
+        self._results = self.findItems(self._queries)
+
+        self._groupedResults = self.groupItems(self._results, self.groupBy())
+
+        self.searchFinished.emit()
+
+        self._searchTime = time.time() - t
+
+        self.searchTimeFinished.emit()
+
+        logger.debug('Search time: %s', self._searchTime)
+
+    def results(self):
+        """
+        Return the items found after a search is ran.
+        
+        :rtype: list[Item] 
+        """
+        return self._results
+
+    def groupedResults(self):
+        """
+        Get the results grouped after a search is ran.
+        
+        :rtype: dict
+        """
+        return self._groupedResults
+
+    def searchTime(self):
+        """
+        Return the time taken to run a search.
+        
+        :rtype: float 
+        """
+        return self._searchTime
 
     def addItem(self, item):
         """
@@ -304,7 +468,7 @@ class Library(QtCore.QObject):
         :type item: studiolibrary.LibraryItem
         :rtype: None 
         """
-        self.addItems([item])
+        self.saveItemData([item])
 
     def addItems(self, items):
         """
@@ -312,7 +476,25 @@ class Library(QtCore.QObject):
         
         :type items: list[studiolibrary.LibraryItem]
         """
-        logger.info("Add items %s", items)
+        self.saveItemData(items)
+
+    def updateItem(self, item):
+        """
+        Update the given item in the database.    
+    
+        :type item: studiolibrary.LibraryItem
+        :rtype: None 
+        """
+        self.saveItemData([item])
+
+    def saveItemData(self, items, emitDataChanged=True):
+        """
+        Add the given items to the database.
+
+        :type items: list[studiolibrary.LibraryItem]
+        :type emitDataChanged: bool
+        """
+        logger.debug("Save item data %s", items)
 
         data_ = self.read()
 
@@ -324,44 +506,9 @@ class Library(QtCore.QObject):
 
         self.save(data_)
 
-        self.dataChanged.emit()
-
-    def createItems(self, libraryWidget=None):
-        """
-        Create all the items for the model.
-
-        :rtype: list[studiolibrary.LibraryItem] 
-        """
-        # Check if the database has changed since the last read call
-        if self.isDirty():
-
-            paths = self.read().keys()
-            items = studiolibrary.itemsFromPaths(
-                paths,
-                library=self,
-                libraryWidget=libraryWidget
-            )
-
-            self._items = list(items)
-            self.loadItemData(self._items)
-
-        return self._items
-
-    def saveItemData(self, items):
-        """
-        Save the item data to the database for the given items and columns.
-
-        :type items: list[studiolibrary.LibraryItem]
-        """
-        data = {}
-
-        for item in items:
-            path = item.path()
-            itemData = item.itemData()
-
-            data.setdefault(path, itemData)
-
-        studiolibrary.updateJson(self.databasePath(), data)
+        if emitDataChanged:
+            self.search()
+            self.dataChanged.emit()
 
     def loadItemData(self, items):
         """
@@ -369,6 +516,8 @@ class Library(QtCore.QObject):
 
         :type items: list[studiolibrary.LibraryItem]
         """
+        logger.debug("Loading item data %s", items)
+
         data = self.read()
 
         for item in items:
@@ -454,3 +603,242 @@ class Library(QtCore.QObject):
                 del data[path]
 
         self.save(data)
+
+    @staticmethod
+    def match(data, queries):
+        """
+        Match the given data with the given queries.
+        
+        Examples:
+            
+            queries = [
+                {
+                    'operator': 'or',
+                    'filters': [
+                        ('folder', 'is' '/library/proj/test'),
+                        ('folder', 'startswith', '/library/proj/test'),
+                    ]
+                },
+                {
+                    'operator': 'and',
+                    'filters': [
+                        ('path', 'contains' 'test'),
+                        ('path', 'contains', 'run'),
+                    ]
+                }
+            ]
+            
+            print(library.find(queries))
+        """
+        matches = []
+
+        for query in queries:
+
+            filters = query.get('filters')
+            operator = query.get('operator', 'and')
+
+            if not filters:
+                continue
+
+            match = False
+
+            for key, cond, value in filters:
+
+                if key == '*':
+                    itemValue = unicode(data)
+                else:
+                    itemValue = data.get(key)
+
+                if isinstance(value, basestring):
+                    value = value.lower()
+
+                if isinstance(itemValue, basestring):
+                    itemValue = itemValue.lower()
+
+                if not itemValue:
+                    match = False
+
+                elif cond == 'contains':
+                    match = value in itemValue
+
+                elif cond == 'not_contains':
+                    match = value not in itemValue
+
+                elif cond == 'is':
+                    match = value == itemValue
+
+                elif cond == 'not':
+                    match = value != itemValue
+
+                elif cond == 'startswith':
+                    match = itemValue.startswith(value)
+
+                if operator == 'or' and match:
+                    break
+
+                if operator == 'and' and not match:
+                    break
+
+            matches.append(match)
+
+        return all(matches)
+
+    @staticmethod
+    def sorted(items, sortBy):
+        """
+        Return the given data sorted using the sortBy argument.
+        
+        Example:
+            data = [
+                {'name':'red', 'index':1},
+                {'name':'green', 'index':2},
+                {'name':'blue', 'index':3},
+            ]
+            
+            sortBy = ['index:asc', 'name']
+            # sortBy = ['index:dsc', 'name']
+            
+            print(sortedData(data, sortBy))
+            
+        :type items: list[Item]
+        :type sortBy: list[str]
+        :rtype: list[Item]
+        """
+        logger.debug('Sort by: %s', sortBy)
+
+        t = time.time()
+
+        for field in reversed(sortBy):
+
+            tokens = field.split(':')
+
+            reverse = False
+            if len(tokens) > 1:
+                field = tokens[0]
+                reverse = tokens[1] != 'asc'
+
+            def sortKey(item):
+
+                default = False if reverse else ''
+
+                return item.itemData().get(field, default)
+
+            items = sorted(items, key=sortKey, reverse=reverse)
+
+        logger.debug("Sort items took %s", time.time() - t)
+
+        return items
+
+    @staticmethod
+    def groupItems(items, fields):
+        """
+        Group the given items by the given field.
+
+        :type items: list[Item]
+        :type fields: list[str]
+        :rtype: dict
+        """
+        logger.debug('Group by: %s', fields)
+
+        # Only support for top level grouping at the moment.
+        if fields:
+            field = fields[0]
+        else:
+            return {'None': items}
+
+        t = time.time()
+
+        results_ = {}
+        tokens = field.split(':')
+
+        reverse = False
+        if len(tokens) > 1:
+            field = tokens[0]
+            reverse = tokens[1] != 'asc'
+
+        for item in items:
+            value = item.itemData().get(field)
+            if value:
+                results_.setdefault(value, [])
+                results_[value].append(item)
+
+        groups = sorted(results_.keys(), reverse=reverse)
+
+        results = collections.OrderedDict()
+        for group in groups:
+            results[group] = results_[group]
+
+        logger.debug("Group Items Took %s", time.time() - t)
+
+        return results
+
+
+def testsuite():
+
+    data = [
+        {'name': 'blue', 'index': 3},
+        {'name': 'red', 'index': 1},
+        {'name': 'green', 'index': 2},
+    ]
+
+    sortBy = ['index:asc', 'name']
+    data2 = (Library.sortedData(data, sortBy))
+
+    assert(data2[0].get('index') == 1)
+    assert(data2[1].get('index') == 2)
+    assert(data2[2].get('index') == 3)
+
+    sortBy = ['index:dsc', 'name']
+    data3 = (Library.sortedData(data, sortBy))
+
+    assert(data3[0].get('index') == 3)
+    assert(data3[1].get('index') == 2)
+    assert(data3[2].get('index') == 1)
+
+    data = {'name': 'blue', 'index': 3}
+    queries = [{'filters': [('name', 'is', 'blue')]}]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{'filters': [('name', 'is', 'blue')]}]
+    assert not Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{'filters': [('name', 'startswith', 're')]}]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{'filters': [('name', 'startswith', 'ed')]}]
+    assert not Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'or',
+        'filters': [('name', 'is', 'pink'), ('name', 'is', 'red')]
+    }]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'and',
+        'filters': [('name', 'is', 'pink'), ('name', 'is', 'red')]
+    }]
+    assert not Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'and',
+        'filters': [('name', 'is', 'red'), ('index', 'is', 3)]
+    }]
+    assert Library.match(data, queries)
+
+    data = {'name': 'red', 'index': 3}
+    queries = [{
+        'operator': 'and',
+        'filters': [('name', 'is', 'red'), ('index', 'is', '3')]
+    }]
+    assert not Library.match(data, queries)
+
+
+if __name__ == "__main__":
+    testsuite()

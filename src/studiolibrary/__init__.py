@@ -15,7 +15,7 @@ import sys
 import json
 
 
-__version__ = "2.4.0.b32"
+__version__ = "2.4.0.b33"
 
 _config = None
 _resource = None
@@ -119,7 +119,7 @@ import studioqt
 from studiolibrary.utils import *
 from studiolibrary.library import Library
 from studiolibrary.libraryitem import LibraryItem
-from studiolibrary.librarywidget import LibraryWidget
+from studiolibrary.librarywindow import LibraryWindow
 from studiolibrary.main import main
 
 import studiolibrary.folderitem
