@@ -335,9 +335,6 @@ class LibraryWindow(QtWidgets.QWidget):
         # Setup Connections
         # -------------------------------------------------------------------
 
-        searchWidget = self.searchWidget()
-        searchWidget.searchChanged.connect(self._searchChanged)
-
         itemsWidget = self.itemsWidget()
         itemsWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         itemsWidget.itemMoved.connect(self._itemMoved)
@@ -361,14 +358,6 @@ class LibraryWindow(QtWidgets.QWidget):
 
     def _searchFinished(self):
         self.showRefreshMessage()
-
-    def _searchChanged(self):
-        """
-        Triggered when the search text has changed.
-
-        :rtype: None
-        """
-        self.refreshItems()
 
     def _itemMoved(self, item):
         """
@@ -418,7 +407,7 @@ class LibraryWindow(QtWidgets.QWidget):
         :rtype: None
         """
         path = self.selectedFolderPath()
-        self.refreshItems()
+        self.library().search()
 
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
@@ -636,10 +625,6 @@ class LibraryWindow(QtWidgets.QWidget):
         """Update the library widget and the data. """
         self.refreshSidebar()
         self.updateWindowTitle()
-
-        if self.path():
-            self.refreshItems()
-            self.showToastMessage("Refreshed")
 
     # -----------------------------------------------------------------
     # Methods for the sidebar widget
@@ -876,27 +861,6 @@ class LibraryWindow(QtWidgets.QWidget):
         if select:
             self.selectItems(items)
             self.scrollToSelectedItem()
-
-    @studioqt.showWaitCursor
-    def refreshItems(self):
-        """
-        Refresh the items for the library widget.
-
-        :rtype: list[studiolibrary.LibraryItem]
-        """
-        if self.isRefreshEnabled():
-            self.updateItems()
-            self.showRefreshMessage()
-
-    def updateItems(self):
-        """
-        Update the items to be shown in the items widget.
-
-        :rtype: list[studiolibrary.LibraryItem]
-        """
-        if not self.library():
-            logger.info("No library set")
-            return
 
     def createItemsFromUrls(self, urls):
         """
