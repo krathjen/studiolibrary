@@ -58,7 +58,6 @@ class LibraryWindow(QtWidgets.QWidget):
             "sortBy": ["name:asc"],
             "groupBy": ["category:asc"]
         },
-        "foldersFilterEnabled": True,
         "paneSizes": [160, 280, 180],
         "geometry": [-1, -1, 860, 720],
         "trashFolderVisible": False,
@@ -1677,7 +1676,7 @@ class LibraryWindow(QtWidgets.QWidget):
             if value is not None:
                 self.setRecursiveSearchEnabled(value)
 
-            value = settings.get('foldersFilterEnabled')
+            value = settings.get('foldersVisible')
             if value is not None:
                 self.setFoldersVisible(value)
 
