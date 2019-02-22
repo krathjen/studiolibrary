@@ -62,6 +62,7 @@ class LibraryWidget(QtWidgets.QWidget):
         "menuBarWidgetVisible": True,
         "statusBarWidgetVisible": True,
         "recursiveSearchEnabled": True,
+        "foldersVisible": True,
         "itemsWidget": {
                 "spacing": 2,
                 "padding": 6,
@@ -103,6 +104,13 @@ class LibraryWidget(QtWidgets.QWidget):
     folderRenamed = QtCore.Signal(str, str)
     folderSelectionChanged = QtCore.Signal(object)
 
+    # Customize widget classes
+    ITEMSWIDGETCLASSTYPE = studioqt.ItemsWidget
+    SEARCHWIDGETCLASSTYPE = studioqt.SearchWidget
+    STATUSWIDGETCLASSTYPE = studioqt.StatusWidget
+    MENUBARWIDGETCLASSTYPE = studioqt.MenuBarWidget
+    SIDEBARWIDGETCLASSTYPE = studioqt.SidebarWidget
+
     @staticmethod
     def instances():
         """
@@ -119,7 +127,7 @@ class LibraryWidget(QtWidgets.QWidget):
             widget.hide()
             widget.close()
 
-        LibraryWidget._instances = []
+        LibraryWidget._instances = {}
 
     @classmethod
     def instance(
@@ -212,6 +220,7 @@ class LibraryWidget(QtWidgets.QWidget):
         self._sidebarWidgetVisible = True
         self._previewWidgetVisible = True
         self._statusBarWidgetVisible = True
+        self._areFoldersVisible = True
 
         # --------------------------------------------------------------------
         # Create Widgets
@@ -220,16 +229,16 @@ class LibraryWidget(QtWidgets.QWidget):
         self._sidebarFrame = SidebarFrame(self)
         self._previewFrame = PreviewFrame(self)
 
-        self._itemsWidget = studioqt.ItemsWidget(self)
+        self._itemsWidget = self.ITEMSWIDGETCLASSTYPE(self)
 
         tip = "Search all current items."
-        self._searchWidget = studioqt.SearchWidget(self)
+        self._searchWidget = self.SEARCHWIDGETCLASSTYPE(self)
         self._searchWidget.setToolTip(tip)
         self._searchWidget.setStatusTip(tip)
 
-        self._statusWidget = studioqt.StatusWidget(self)
-        self._menuBarWidget = studioqt.MenuBarWidget()
-        self._sidebarWidget = studioqt.SidebarWidget(self)
+        self._statusWidget = self.STATUSWIDGETCLASSTYPE(self)
+        self._menuBarWidget = self.MENUBARWIDGETCLASSTYPE()
+        self._sidebarWidget = self.SIDEBARWIDGETCLASSTYPE(self)
 
         self.setMinimumWidth(5)
         self.setMinimumHeight(5)
@@ -498,9 +507,6 @@ class LibraryWidget(QtWidgets.QWidget):
 
         library = self.createLibrary()
         self.setLibrary(library)
-
-        if not os.path.exists(library.databasePath()):
-            library.sync()
 
         self.refresh()
 
@@ -910,8 +916,19 @@ class LibraryWidget(QtWidgets.QWidget):
             return
 
         # Create a query using the sidebar and search widgets
-        queries = self.sidebarQuery(), self.searchQuery()
-
+        queries = [self.sidebarQuery(), self.searchQuery()]
+        
+        #we do not want folder in the view
+        if not self.areFoldersVisible():
+            queries.append(
+                {
+                    'operator': 'and',
+                    'filters': [
+                        ('type', 'not', 'Folder')
+                    ]
+                }
+            )
+        
         items = self.library().findItems(queries, libraryWidget=self)
 
         self.setItems(items)
@@ -1147,8 +1164,15 @@ class LibraryWidget(QtWidgets.QWidget):
         action.triggered.connect(self.resetSettings)
         menu.addAction(action)
 
+        menu.addSeparator()
+
+        action = QtWidgets.QAction("Show Folders", menu)
+        action.setCheckable(True)
+        action.setChecked(self.areFoldersVisible())
+        action.triggered[bool].connect(self.setFoldersVisible)
+        menu.addAction(action)
+
         if self.trashEnabled():
-            menu.addSeparator()
             action = QtWidgets.QAction("Show Trash Folder", menu)
             action.setEnabled(self.trashFolderExists())
             action.setCheckable(True)
@@ -1697,6 +1721,7 @@ class LibraryWidget(QtWidgets.QWidget):
             settings['theme'] = self.theme().settings()
 
         settings["trashFolderVisible"] = self.isTrashFolderVisible()
+        settings["foldersVisible"] = self.areFoldersVisible()
         settings["sidebarWidgetVisible"] = self.isFoldersWidgetVisible()
         settings["previewWidgetVisible"] = self.isPreviewWidgetVisible()
         settings["menuBarWidgetVisible"] = self.isMenuBarWidgetVisible()
@@ -1770,6 +1795,10 @@ class LibraryWidget(QtWidgets.QWidget):
             value = settings.get("recursiveSearchEnabled")
             if value is not None:
                 self.setRecursiveSearchEnabled(value)
+
+            value = settings.get('foldersVisible')
+            if value is not None:
+                self.setFoldersVisible(value)
 
         finally:
             self.reloadStyleSheet()
@@ -2160,6 +2189,25 @@ class LibraryWidget(QtWidgets.QWidget):
         self._isTrashFolderVisible = visible
         self.updateTrashFolder()
         self.updateItems()
+
+    def areFoldersVisible(self):
+        """
+        return True if the folders are visible in the library view
+
+        :rtype: bool
+        """
+        return self._areFoldersVisible
+
+    def setFoldersVisible(self, visible):
+        """
+        Enable the folders to be visible in the library view
+
+        :type visible: bool
+        :rtype: None
+        """
+        self._areFoldersVisible = visible
+        self.updateItems()
+        
 
     def updateTrashFolder(self):
         """

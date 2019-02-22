@@ -184,9 +184,22 @@ class Library(QtCore.QObject):
 
             data[path] = itemData
 
+        self.postSync(data)
+
         self.save(data)
 
         self.dataChanged.emit()
+
+
+    def postSync(self, data):
+        """
+        Use this function to execute code on the data after sync, but before save and dataChanged.emit
+
+        :type data: dict
+        :rtype: None
+        """
+        pass
+
 
     def findItems(self, queries, libraryWidget=None):
         """
@@ -255,6 +268,9 @@ class Library(QtCore.QObject):
 
                     elif cond == 'is':
                         match = value == itemValue
+
+                    elif cond == 'not':
+                        match = value != itemValue
 
                     elif cond == 'startswith':
                         match = itemValue.startswith(value)

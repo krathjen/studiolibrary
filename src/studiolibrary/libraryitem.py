@@ -291,6 +291,11 @@ class LibraryItem(studioqt.Item):
         action.triggered.connect(self.showInFolder)
         menu.addAction(action)
 
+        if self.libraryWidget():
+            action = QtWidgets.QAction("Select Folder", menu)
+            action.triggered.connect(self.selectFolder)
+            menu.addAction(action)
+
     def contextMenu(self, menu, items=None):
         """
         Called when the user right clicks on the item.
@@ -305,6 +310,12 @@ class LibraryItem(studioqt.Item):
         """Open the file explorer at the given path location."""
         path = self.path()
         studiolibrary.showInFolder(path)
+
+    def selectFolder(self):
+        """select the folder in the library widget"""
+        if self.libraryWidget():
+            path = '/'.join(studiolibrary.normPath(self.path()).split('/')[:-1])
+            self.libraryWidget().selectFolderPath(path)
 
     def url(self):
         """Used by the mime data when dragging/dropping the item."""
