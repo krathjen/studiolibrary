@@ -188,21 +188,19 @@ class Library(QtCore.QObject):
         formatString = studiolibrary.config().get('databasePath')
         return studiolibrary.formatPath(formatString, path=self.path())
 
-    def distinct(self, field, sortBy=None):
+    def distinct(self, field, queries=None):
         """
         Get all the values for the given field.
         
         :type field: str
+        :type queries None or list[dict]
         :type sortBy: None or list[str]
         :rtype: list 
         """
-        # sortBy = sortBy or [field]
-        # data = self._items
-        # data = self.sortedData(data, sortBy=sortBy)
-
         values = []
+        queries = queries or []
 
-        for item in self._items:
+        for item in self.findItems(queries):
             value = item.itemData().get(field)
             if value:
                 values.append(value)
