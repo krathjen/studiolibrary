@@ -293,7 +293,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         action.triggered.connect(self.showInFolder)
         menu.addAction(action)
 
-        if self.libraryWidget():
+        if self.libraryWindow():
             action = QtWidgets.QAction("Select Folder", menu)
             action.triggered.connect(self.selectFolder)
             menu.addAction(action)
@@ -315,9 +315,9 @@ class LibraryItem(studiolibrary.widgets.Item):
 
     def selectFolder(self):
         """select the folder in the library widget"""
-        if self.libraryWidget():
+        if self.libraryWindow():
             path = '/'.join(studiolibrary.normPath(self.path()).split('/')[:-1])
-            self.libraryWidget().selectFolderPath(path)
+            self.libraryWindow().selectFolderPath(path)
 
     def url(self):
         """Used by the mime data when dragging/dropping the item."""
