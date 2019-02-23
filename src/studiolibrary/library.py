@@ -188,24 +188,27 @@ class Library(QtCore.QObject):
         formatString = studiolibrary.config().get('databasePath')
         return studiolibrary.formatPath(formatString, path=self.path())
 
-    def distinct(self, field, queries=None):
+    def distinct(self, field, queries=None, sortBy="name"):
         """
         Get all the values for the given field.
         
         :type field: str
         :type queries None or list[dict]
-        :type sortBy: None or list[str]
+        :type sortBy: str
         :rtype: list 
         """
-        values = []
+        results = {}
         queries = queries or []
 
         for item in self.findItems(queries):
             value = item.itemData().get(field)
-            if value:
-                values.append(value)
+            results.setdefault(value, {'count': 0, 'name': value})
+            results[value]['count'] += 1
 
-        return list(set(values))
+        def sortKey(facet):
+            return facet.get(sortBy)
+
+        return sorted(results.values(), key=sortKey)
 
     def mtime(self):
         """
@@ -412,6 +415,19 @@ class Library(QtCore.QObject):
             if query.get('name') == name:
                 self._queries.remove(query)
                 break
+
+    def queryExists(self, name):
+        """
+        Check if the given query name exists.
+        
+        :type name: str
+        :rtype: bool 
+        """
+        for query in self._queries:
+            if query.get('name') == name:
+                return True
+
+        return False
 
     def search(self):
         """Run a search using the queries added to this dataset."""

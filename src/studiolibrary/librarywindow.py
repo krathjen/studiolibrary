@@ -66,21 +66,23 @@ class LibraryWindow(QtWidgets.QWidget):
         "menuBarWidgetVisible": True,
         "statusBarWidgetVisible": True,
         "recursiveSearchEnabled": True,
-        "foldersVisible": True,
         "itemsWidget": {
-                "spacing": 2,
-                "padding": 6,
-                "zoomAmount": 80,
-                "textVisible": True,
-            },
+            "spacing": 2,
+            "padding": 6,
+            "zoomAmount": 80,
+            "textVisible": True,
+        },
         "searchWidget": {
-                "text": "",
-            },
+            "text": "",
+        },
+        "typeFilterMenu": {
+            "Folder": False
+        },
         "theme": {
-                "accentColor": "rgb(0, 175, 240, 255)",
-                "backgroundColor": "rgb(60, 64, 79, 255)",
-            }
+            "accentColor": "rgb(0, 175, 240, 255)",
+            "backgroundColor": "rgb(60, 64, 79, 255)",
         }
+    }
 
     TRASH_ENABLED = True
     RECURSIVE_SEARCH_ENABLED = False
@@ -219,7 +221,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self._sidebarWidgetVisible = True
         self._previewWidgetVisible = True
         self._statusBarWidgetVisible = True
-        self._areFoldersVisible = True
 
         # --------------------------------------------------------------------
         # Create Widgets
@@ -240,6 +241,8 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self._sortByMenu = studiolibrary.widgets.SortByMenu(self)
         self._groupByMenu = studiolibrary.widgets.GroupByMenu(self)
+        self._filtersMenu = studiolibrary.widgets.FiltersMenu(self)
+
         self._statusWidget = self.STATUSWIDGETCLASSTYPE(self)
         self._menuBarWidget = self.MENUBARWIDGETCLASSTYPE(self)
         self._sidebarWidget = self.SIDEBARWIDGETCLASSTYPE(self)
@@ -249,6 +252,8 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self._sortByMenu.setDataset(library)
         self._groupByMenu.setDataset(library)
+        self._filtersMenu.setDataset(library)
+
         self._itemsWidget.setDataset(library)
         self._searchWidget.setDataset(library)
         self._sidebarWidget.setDataset(library)
@@ -270,6 +275,11 @@ class LibraryWindow(QtWidgets.QWidget):
         icon = studiolibrary.resource().icon("view_settings")
         tip = "Change the style of the item view"
         self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
+
+        name = "Filters"
+        icon = studiolibrary.resource().icon("filter")
+        tip = "Group the current items in the view by column"
+        self.addMenuBarAction(name, icon, tip, callback=self.showFiltersMenu)
 
         name = "Group By"
         icon = studiolibrary.resource().icon("groupby")
@@ -912,6 +922,16 @@ class LibraryWindow(QtWidgets.QWidget):
 
         return action
 
+    def showFiltersMenu(self):
+        """
+        Show the filters menu.
+
+        :rtype: None
+        """
+        widget = self.menuBarWidget().findToolButton("Filters")
+        point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
+        self._filtersMenu.show(point)
+
     def showGroupByMenu(self):
         """
         Show the group by menu at the group button.
@@ -1045,12 +1065,6 @@ class LibraryWindow(QtWidgets.QWidget):
         menu.addAction(action)
 
         menu.addSeparator()
-
-        action = QtWidgets.QAction("Show Folders", menu)
-        action.setCheckable(True)
-        action.setChecked(self.areFoldersVisible())
-        action.triggered[bool].connect(self.setFoldersVisible)
-        menu.addAction(action)
 
         if self.trashEnabled():
             action = QtWidgets.QAction("Show Trash Folder", menu)
@@ -1601,17 +1615,17 @@ class LibraryWindow(QtWidgets.QWidget):
 
         settings["library"] = self.library().settings()
         settings["trashFolderVisible"] = self.isTrashFolderVisible()
-        settings["foldersVisible"] = self.areFoldersVisible()
         settings["sidebarWidgetVisible"] = self.isFoldersWidgetVisible()
         settings["previewWidgetVisible"] = self.isPreviewWidgetVisible()
         settings["menuBarWidgetVisible"] = self.isMenuBarWidgetVisible()
         settings["statusBarWidgetVisible"] = self.isStatusBarWidgetVisible()
 
-        settings["recursiveSearchEnabled"] = self.isRecursiveSearchEnabled()
-
         settings['itemsWidget'] = self.itemsWidget().settings()
         settings['searchWidget'] = self.searchWidget().settings()
         settings['sidebarWidget'] = self.sidebarWidget().settings()
+        settings["recursiveSearchEnabled"] = self.isRecursiveSearchEnabled()
+
+        settings['typeFilterMenu'] = self._filtersMenu.settings()
 
         settings["path"] = self.path()
 
@@ -1676,9 +1690,9 @@ class LibraryWindow(QtWidgets.QWidget):
             if value is not None:
                 self.setRecursiveSearchEnabled(value)
 
-            value = settings.get('foldersVisible')
+            value = settings.get('typeFilterMenu')
             if value is not None:
-                self.setFoldersVisible(value)
+                self._filtersMenu.setSettings(value)
 
         finally:
             self.reloadStyleSheet()
@@ -2054,36 +2068,6 @@ class LibraryWindow(QtWidgets.QWidget):
         path = self.trashPath()
         if not os.path.exists(path):
             os.makedirs(path)
-
-    def areFoldersVisible(self):
-        """
-        return True if the folders are visible in the library view
-
-        :rtype: bool
-        """
-        return self._areFoldersVisible
-
-    def setFoldersVisible(self, visible):
-        """
-        Enable the folders to be visible in the library view
-
-        :type visible: bool
-        :rtype: None
-        """
-        self._areFoldersVisible = visible
-
-        if not visible:
-            query = {
-                'name': 'foldersFilter',
-                'filters': [
-                    ('type', 'not', 'Folder')
-                ]
-            }
-            self.library().addQuery(query)
-        else:
-            self.library().removeQuery('foldersFilter')
-
-        self.library().search()
 
     def isTrashFolderVisible(self):
         """
