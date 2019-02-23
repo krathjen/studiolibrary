@@ -15,7 +15,7 @@ import sys
 import json
 
 
-__version__ = "2.4.0.b35"
+__version__ = "2.4.0.b36"
 
 _config = None
 _resource = None
