@@ -106,6 +106,10 @@ class LibraryWindow(QtWidgets.QWidget):
     folderSelectionChanged = QtCore.Signal(object)
 
     # Customize widget classes
+    SORTBY_MENU_CLASS = studiolibrary.widgets.SortByMenu
+    GROUPBY_MENU_CLASS = studiolibrary.widgets.GroupByMenu
+    FILTERS_MENU_CLASS = studiolibrary.widgets.FiltersMenu
+
     ITEMS_WIDGET_CLASS = studiolibrary.widgets.ItemsWidget
     SEARCH_WIDGET_CLASS = studiolibrary.widgets.SearchWidget
     STATUS_WIDGET_CLASS = studiolibrary.widgets.StatusWidget
@@ -239,26 +243,24 @@ class LibraryWindow(QtWidgets.QWidget):
         self._searchWidget.setToolTip(tip)
         self._searchWidget.setStatusTip(tip)
 
-        self._sortByMenu = studiolibrary.widgets.SortByMenu(self)
-        self._groupByMenu = studiolibrary.widgets.GroupByMenu(self)
-        self._filtersMenu = studiolibrary.widgets.FiltersMenu(self)
-
+        self._sortByMenu = self.SORTBY_MENU_CLASS(self)
+        self._groupByMenu = self.GROUPBY_MENU_CLASS(self)
+        self._filtersMenu = self.FILTERS_MENU_CLASS(self)
         self._statusWidget = self.STATUS_WIDGET_CLASS(self)
         self._menuBarWidget = self.MENUBAR_WIDGET_CLASS(self)
         self._sidebarWidget = self.SIDEBAR_WIDGET_CLASS(self)
 
-        self.setMinimumWidth(5)
-        self.setMinimumHeight(5)
-
         self._sortByMenu.setDataset(library)
         self._groupByMenu.setDataset(library)
         self._filtersMenu.setDataset(library)
-
         self._itemsWidget.setDataset(library)
         self._searchWidget.setDataset(library)
         self._sidebarWidget.setDataset(library)
 
         self.setLibrary(library)
+
+        self.setMinimumWidth(5)
+        self.setMinimumHeight(5)
 
         # --------------------------------------------------------------------
         # Setup the menu bar buttons
