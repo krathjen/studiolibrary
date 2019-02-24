@@ -24,8 +24,16 @@ class FiltersMenu(QtWidgets.QMenu):
         super(FiltersMenu, self).__init__(*args, **kwargs)
 
         self._dataset = None
-        self._options = {'field': 'type'}
+        self._options = {"field": "type"}
         self._settings = {}
+
+    def name(self):
+        """
+        The name of the filter used by the dataset.
+        
+        :rtype: str
+        """
+        return self._options.get("field") + "FilterMenu"
 
     def _actionChecked(self, name, checked):
         """
@@ -83,15 +91,15 @@ class FiltersMenu(QtWidgets.QMenu):
         filters = []
 
         settings = self.settings()
-        field = self._options.get('field')
+        field = self._options.get("field")
 
         for name in settings:
             checked = settings.get(name, True)
             if not checked:
-                filters.append((field, 'not', name))
+                filters.append((field, "not", name))
 
         query = {
-            "name": "typeFilterMenu",
+            "name": self.name(),
             "operator": "and",
             "filters": filters
         }
@@ -106,16 +114,22 @@ class FiltersMenu(QtWidgets.QMenu):
         """
         self.clear()
 
-        field = self._options.get('field')
-        facets = self.dataset().distinct(field)
+        field = self._options.get("field")
+        queries = self.dataset().queries(exclude=self.name())
+
+        facets = self.dataset().distinct(field, queries=queries)
 
         action = studioqt.SeparatorAction("Show " + field.title(), self)
         self.addAction(action)
 
         for facet in facets:
 
-            name = facet.get('name')
-            title = name.replace('.', '').title()
+            title = "{name}\t({count})"
+
+            name = facet.get("name")
+            count = facet.get("count")
+
+            title = title.format(name=name.replace(".", "").title(), count=count)
 
             action = self.addAction(title)
             action.setCheckable(True)

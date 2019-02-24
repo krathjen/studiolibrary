@@ -200,10 +200,13 @@ class Library(QtCore.QObject):
         results = {}
         queries = queries or []
 
-        for item in self.findItems(queries):
+        items = self.createItems()
+        for item in items:
             value = item.itemData().get(field)
             results.setdefault(value, {'count': 0, 'name': value})
-            results[value]['count'] += 1
+            match = self.match(item.itemData(), queries)
+            if match:
+                results[value]['count'] += 1
 
         def sortKey(facet):
             return facet.get(sortBy)
@@ -312,7 +315,7 @@ class Library(QtCore.QObject):
         """
         pass
 
-    def createItems(self, libraryWindow=None):
+    def createItems(self):
         """
         Create all the items for the model.
 
@@ -325,7 +328,7 @@ class Library(QtCore.QObject):
             items = studiolibrary.itemsFromPaths(
                 paths,
                 library=self,
-                libraryWindow=libraryWindow
+                libraryWindow=self._libraryWindow
             )
 
             self._items = list(items)
@@ -368,7 +371,7 @@ class Library(QtCore.QObject):
         for query in queries:
             logger.debug('Query: %s', query)
 
-        items = self.createItems(libraryWindow=self._libraryWindow)
+        items = self.createItems()
         for item in items:
             match = self.match(item.itemData(), queries)
             if match:
@@ -381,6 +384,23 @@ class Library(QtCore.QObject):
             results = self.sorted(results, self.sortBy())
 
         return results
+
+    def queries(self, exclude=None):
+        """
+        Get all the queries for the dataset excluding the given ones.
+        
+        :type exclude: list[str] or None
+        
+        :rtype: list[dict] 
+        """
+        queries = []
+        exclude = exclude or []
+
+        for query in self._queries:
+            if query.get('name') not in exclude:
+                queries.append(query)
+
+        return queries
 
     def addQuery(self, query):
         """
