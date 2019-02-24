@@ -106,11 +106,11 @@ class LibraryWindow(QtWidgets.QWidget):
     folderSelectionChanged = QtCore.Signal(object)
 
     # Customize widget classes
-    ITEMSWIDGETCLASSTYPE = studiolibrary.widgets.ItemsWidget
-    SEARCHWIDGETCLASSTYPE = studiolibrary.widgets.SearchWidget
-    STATUSWIDGETCLASSTYPE = studiolibrary.widgets.StatusWidget
-    MENUBARWIDGETCLASSTYPE = studiolibrary.widgets.MenuBarWidget
-    SIDEBARWIDGETCLASSTYPE = studiolibrary.widgets.SidebarWidget
+    ITEMS_WIDGET_CLASS = studiolibrary.widgets.ItemsWidget
+    SEARCH_WIDGET_CLASS = studiolibrary.widgets.SearchWidget
+    STATUS_WIDGET_CLASS = studiolibrary.widgets.StatusWidget
+    MENUBAR_WIDGET_CLASS = studiolibrary.widgets.MenuBarWidget
+    SIDEBAR_WIDGET_CLASS = studiolibrary.widgets.SidebarWidget
 
     @staticmethod
     def instances():
@@ -232,10 +232,10 @@ class LibraryWindow(QtWidgets.QWidget):
         self._sidebarFrame = SidebarFrame(self)
         self._previewFrame = PreviewFrame(self)
 
-        self._itemsWidget = self.ITEMSWIDGETCLASSTYPE(self)
+        self._itemsWidget = self.ITEMS_WIDGET_CLASS(self)
 
         tip = "Search all current items."
-        self._searchWidget = self.SEARCHWIDGETCLASSTYPE(self)
+        self._searchWidget = self.SEARCH_WIDGET_CLASS(self)
         self._searchWidget.setToolTip(tip)
         self._searchWidget.setStatusTip(tip)
 
@@ -243,9 +243,9 @@ class LibraryWindow(QtWidgets.QWidget):
         self._groupByMenu = studiolibrary.widgets.GroupByMenu(self)
         self._filtersMenu = studiolibrary.widgets.FiltersMenu(self)
 
-        self._statusWidget = self.STATUSWIDGETCLASSTYPE(self)
-        self._menuBarWidget = self.MENUBARWIDGETCLASSTYPE(self)
-        self._sidebarWidget = self.SIDEBARWIDGETCLASSTYPE(self)
+        self._statusWidget = self.STATUS_WIDGET_CLASS(self)
+        self._menuBarWidget = self.MENUBAR_WIDGET_CLASS(self)
+        self._sidebarWidget = self.SIDEBAR_WIDGET_CLASS(self)
 
         self.setMinimumWidth(5)
         self.setMinimumHeight(5)
