@@ -116,6 +116,9 @@ class LibraryWindow(QtWidgets.QWidget):
     MENUBAR_WIDGET_CLASS = studiolibrary.widgets.MenuBarWidget
     SIDEBAR_WIDGET_CLASS = studiolibrary.widgets.SidebarWidget
 
+    # Customize library classe
+    LIBRARY_CLASS = studiolibrary.Library
+
     @staticmethod
     def instances():
         """
@@ -230,7 +233,7 @@ class LibraryWindow(QtWidgets.QWidget):
         # Create Widgets
         # --------------------------------------------------------------------
 
-        library = studiolibrary.Library(libraryWindow=self)
+        library = self.LIBRARY_CLASS(libraryWindow=self)
         library.searchTimeFinished.connect(self._searchFinished)
 
         self._sidebarFrame = SidebarFrame(self)
