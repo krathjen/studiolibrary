@@ -71,7 +71,8 @@ class Library(QtCore.QObject):
         self._sortBy = []
         self._groupBy = []
         self._results = []
-        self._queries = []
+        self._queries = {}
+        self._globalQueries = {}
         self._groupedResults = {}
         self._searchTime = 0
         self._searchEnabled = True
@@ -199,6 +200,7 @@ class Library(QtCore.QObject):
         """
         results = {}
         queries = queries or []
+        queries.extend(self._globalQueries.values())
 
         items = self.createItems()
         for item in items:
@@ -366,6 +368,7 @@ class Library(QtCore.QObject):
         """
         fields = []
         results = []
+        queries.extend(self._globalQueries.values())
 
         logger.debug("Search queries:")
         for query in queries:
@@ -396,18 +399,27 @@ class Library(QtCore.QObject):
         queries = []
         exclude = exclude or []
 
-        for query in self._queries:
+        for query in self._queries.values():
             if query.get('name') not in exclude:
                 queries.append(query)
 
         return queries
 
+    def addGlobalQuery(self, query):
+        """
+        Add a global query to library.
+        
+        :type query: dict 
+        """
+        self._globalQueries[query["name"]] = query
+
     def addQuery(self, query):
         """
-        Add the given query to the dataset.
+        Add a search query to the library.
         
         Examples:
             addQuery({
+                'name': 'My Query',
                 'operator': 'or',
                 'filters': [
                     ('folder', 'is' '/library/proj/test'),
@@ -417,13 +429,7 @@ class Library(QtCore.QObject):
         
         :type query: dict
         """
-        if query.get('name'):
-            for i, query_ in enumerate(self._queries):
-                if query_.get('name') == query.get('name'):
-                    self._queries[i] = query
-
-        if query not in self._queries:
-            self._queries.append(query)
+        self._queries[query["name"]] = query
 
     def removeQuery(self, name):
         """
@@ -431,10 +437,8 @@ class Library(QtCore.QObject):
         
         :type name: str 
         """
-        for query in self._queries:
-            if query.get('name') == name:
-                self._queries.remove(query)
-                break
+        if name in self._queries:
+            del self._queries[name]
 
     def queryExists(self, name):
         """
@@ -443,11 +447,7 @@ class Library(QtCore.QObject):
         :type name: str
         :rtype: bool 
         """
-        for query in self._queries:
-            if query.get('name') == name:
-                return True
-
-        return False
+        return name in self._queries
 
     def search(self):
         """Run a search using the queries added to this dataset."""
@@ -461,7 +461,7 @@ class Library(QtCore.QObject):
 
         self.searchStarted.emit()
 
-        self._results = self.findItems(self._queries)
+        self._results = self.findItems(self.queries())
 
         self._groupedResults = self.groupItems(self._results, self.groupBy())
 
