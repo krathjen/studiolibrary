@@ -13,6 +13,7 @@
 import os
 
 from studioqt import QtGui
+from studioqt import Icon
 from studioqt import Pixmap
 
 
@@ -84,8 +85,7 @@ class Resource(object):
         :rtype: QtGui.QIcon
         """
         p = self.pixmap(name, extension=extension, color=color)
-
-        return QtGui.QIcon(p)
+        return Icon(p)
 
     def pixmap(self, name, scope="icons", extension="png", color=None):
         """

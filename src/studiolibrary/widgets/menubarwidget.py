@@ -37,8 +37,6 @@ class MenuBarWidget(QtWidgets.QToolBar):
         self._expandHeight = self.DEFAULT_EXPANDED_HEIGHT
         self._collapseHeight = self.DEFAULT_COLLAPSED_HEIGHT
 
-        self.updateIconColor()
-
     def dpi(self):
         """
         Return the zoom multiplier.
@@ -57,15 +55,6 @@ class MenuBarWidget(QtWidgets.QToolBar):
         :rtype: None 
         """
         self._dpi = dpi
-        self.refresh()
-
-    def refresh(self):
-        """
-        Refresh the current state of the widget.
-
-        :rtype: None 
-        """
-        self.updateIconColor()
 
     def mousePressEvent(self, *args):
         if not self.isExpanded():
@@ -136,7 +125,6 @@ class MenuBarWidget(QtWidgets.QToolBar):
         self.setFixedHeight(height)
         self.setChildrenHidden(False)
         self.setIconSize(QtCore.QSize(height, height))
-        self.updateIconColor()
 
     def collapse(self):
         """
@@ -150,17 +138,6 @@ class MenuBarWidget(QtWidgets.QToolBar):
         self.setChildrenHeight(0)
         self.setChildrenHidden(True)
         self.setIconSize(QtCore.QSize(0, 0))
-        self.updateIconColor()
-
-    def updateIconColor(self):
-        """
-        Update the icon colors to the current foregroundRole.
-
-        :rtype: None
-        """
-        color = self.palette().color(self.foregroundRole())
-        color = studioqt.Color.fromColor(color)
-        self.setIconColor(color)
 
     def setIconColor(self, color):
         """

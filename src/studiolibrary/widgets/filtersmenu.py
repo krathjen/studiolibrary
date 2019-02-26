@@ -106,6 +106,18 @@ class FiltersMenu(QtWidgets.QMenu):
 
         self.dataset().addQuery(query)
 
+    def isActive(self):
+        """
+        Check if there are any filters currently active.
+        
+        :rtype: bool 
+        """
+        settings = self.settings()
+        for name in self.settings():
+            if not settings.get(name):
+                return True
+        return False
+
     def show(self, point=None):
         """
         Show the menu options.

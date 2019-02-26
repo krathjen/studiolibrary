@@ -26,7 +26,6 @@ class Icon(QtGui.QIcon):
         """
         icon = self
         size = size or icon.actualSize(QtCore.QSize(256, 256))
-
         pixmap = icon.pixmap(size)
 
         if not self.isNull():
@@ -36,6 +35,36 @@ class Icon(QtGui.QIcon):
             painter.setPen(color)
             painter.drawRect(pixmap.rect())
             painter.end()
+
+        icon = QtGui.QIcon(pixmap)
+        self.swap(icon)
+
+    def setBadge(self, x, y, w, h, color=None):
+        """
+        Set a for the icon.
+        
+        :type x: int 
+        :type y: int 
+        :type w: int
+        :type h: int 
+        :type color: QtGui.QColor or None
+        """
+        color = color or QtGui.QColor(240, 100, 100)
+
+        size = self.actualSize(QtCore.QSize(256, 256))
+        pixmap = self.pixmap(size)
+
+        painter = QtGui.QPainter(pixmap)
+
+        pen = QtGui.QPen(color)
+        pen.setWidth(0)
+        painter.setPen(pen)
+
+        painter.setBrush(color)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+
+        painter.drawEllipse(x, y, w, h)
+        painter.end()
 
         icon = QtGui.QIcon(pixmap)
         self.swap(icon)
