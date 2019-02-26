@@ -291,7 +291,8 @@ class LibraryWindow(QtWidgets.QWidget):
         name = "Filters"
         icon = studiolibrary.resource().icon("filter")
         icon.setColor(iconColor)
-        tip = "Filter the current results by type"
+        tip = "Filter the current results by type.\n" \
+              "CTRL + Click will hide the others and show the selected one."
         self.addMenuBarAction(name, icon, tip, callback=self.showFiltersMenu)
 
         name = "Group By"
@@ -309,8 +310,8 @@ class LibraryWindow(QtWidgets.QWidget):
         name = "View"
         icon = studiolibrary.resource().icon("view")
         icon.setColor(iconColor)
-        tip = "Choose to show/hide both the preview and navigation pane. " \
-              "Click + CTRL will hide the menu bar as well."
+        tip = "Choose to show/hide both the preview and navigation pane.\n" \
+              "CTRL + Click will hide the menu bar as well."
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
 
         name = "Sync items"

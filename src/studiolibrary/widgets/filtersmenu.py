@@ -23,6 +23,7 @@ class FiltersMenu(QtWidgets.QMenu):
     def __init__(self, *args, **kwargs):
         super(FiltersMenu, self).__init__(*args, **kwargs)
 
+        self._facets = []
         self._dataset = None
         self._options = {"field": "type"}
         self._settings = {}
@@ -42,8 +43,50 @@ class FiltersMenu(QtWidgets.QMenu):
         :type name: str
         :type checked: bool
         """
-        self._settings[name] = checked
+        if studioqt.isControlModifier():
+            self.setAllEnabled(False)
+            self._settings[name] = True
+        else:
+            self._settings[name] = checked
+
         self.dataset().search()
+
+    def _showAllClicked(self):
+        """Triggered when the user clicks the show all action."""
+        self.setAllEnabled(True)
+        self.dataset().search()
+
+    def setAllEnabled(self, enabled):
+        """
+        Set all the filters enabled.
+        
+        :type enabled: bool 
+        """
+        for facet in self._facets:
+            self._settings[facet.get("name")] = enabled
+
+    def isShowAllEnabled(self):
+        """
+        Check if all the current filters are enabled.
+        
+        :rtype: bool 
+        """
+        for facet in self._facets:
+            if not self._settings.get(facet.get("name"), True):
+                return False
+        return True
+
+    def isActive(self):
+        """
+        Check if there are any filters currently active using the settings.
+        
+        :rtype: bool 
+        """
+        settings = self.settings()
+        for name in settings:
+            if not settings.get(name):
+                return True
+        return False
 
     def setOptions(self, options):
         """
@@ -106,18 +149,6 @@ class FiltersMenu(QtWidgets.QMenu):
 
         self.dataset().addQuery(query)
 
-    def isActive(self):
-        """
-        Check if there are any filters currently active.
-        
-        :rtype: bool 
-        """
-        settings = self.settings()
-        for name in self.settings():
-            if not settings.get(name):
-                return True
-        return False
-
     def show(self, point=None):
         """
         Show the menu options.
@@ -129,12 +160,19 @@ class FiltersMenu(QtWidgets.QMenu):
         field = self._options.get("field")
         queries = self.dataset().queries(exclude=self.name())
 
-        facets = self.dataset().distinct(field, queries=queries)
+        self._facets = self.dataset().distinct(field, queries=queries)
 
         action = studioqt.SeparatorAction("Show " + field.title(), self)
         self.addAction(action)
 
-        for facet in facets:
+        action = self.addAction("Show All")
+        action.setEnabled(not self.isShowAllEnabled())
+        callback = partial(self._showAllClicked)
+        action.triggered.connect(callback)
+
+        self.addSeparator()
+
+        for facet in self._facets:
 
             title = "{name}\t({count})"
 
