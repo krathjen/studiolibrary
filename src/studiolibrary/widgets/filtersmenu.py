@@ -17,6 +17,8 @@ from studioqt import QtWidgets
 
 import studioqt
 
+from .separatoraction import SeparatorAction
+
 
 class FiltersMenu(QtWidgets.QMenu):
 
@@ -162,7 +164,7 @@ class FiltersMenu(QtWidgets.QMenu):
 
         self._facets = self.dataset().distinct(field, queries=queries)
 
-        action = studioqt.SeparatorAction("Show " + field.title(), self)
+        action = SeparatorAction("Show " + field.title(), self)
         self.addAction(action)
 
         action = self.addAction("Show All")

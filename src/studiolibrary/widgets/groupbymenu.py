@@ -15,7 +15,7 @@ from functools import partial
 from studioqt import QtGui
 from studioqt import QtWidgets
 
-import studioqt
+from .separatoraction import SeparatorAction
 
 
 class GroupByMenu(QtWidgets.QMenu):
@@ -72,7 +72,7 @@ class GroupByMenu(QtWidgets.QMenu):
             currentField = ""
             currentOrder = ""
 
-        action = studioqt.SeparatorAction("Group By", self)
+        action = SeparatorAction("Group By", self)
         self.addAction(action)
 
         action = self.addAction("None")
@@ -96,7 +96,7 @@ class GroupByMenu(QtWidgets.QMenu):
             callback = partial(self.setGroupBy, field, currentOrder)
             action.triggered.connect(callback)
 
-        action = studioqt.SeparatorAction("Group Order", self)
+        action = SeparatorAction("Group Order", self)
         self.addAction(action)
 
         action = self.addAction("Ascending")

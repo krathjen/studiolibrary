@@ -1022,7 +1022,7 @@ class LibraryWindow(QtWidgets.QWidget):
         menu.addSeparator()
 
         if self.DPI_ENABLED:
-            action = studioqt.SliderAction("Dpi", menu)
+            action = studiolibrary.widgets.SliderAction("Dpi", menu)
             dpi = self.dpi() * 100.0
             action.slider().setRange(self.DPI_MIN_VALUE, self.DPI_MAX_VALUE)
             action.slider().setValue(dpi)

@@ -25,7 +25,3 @@ from studioqt.decorators import showArrowCursor
 
 from studioqt.imagesequence import ImageSequence
 from studioqt.imagesequence import ImageSequenceWidget
-
-# Custom qt actions
-from studioqt.actions.slideraction import SliderAction
-from studioqt.actions.separatoraction import SeparatorAction

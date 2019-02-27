@@ -17,6 +17,8 @@ from studioqt import QtWidgets
 import studioqt
 import studiolibrary
 
+from .separatoraction import SeparatorAction
+
 
 __all__ = ["Theme", "ThemeAction", "ThemesMenu"]
 
@@ -150,7 +152,7 @@ class ThemesMenu(QtWidgets.QMenu):
         :rtype: None 
         """
         # Create the menu actions for setting the accent color
-        action = studioqt.SeparatorAction("Accent", self)
+        action = SeparatorAction("Accent", self)
         self.addAction(action)
 
         themes = self._themes
@@ -172,7 +174,7 @@ class ThemesMenu(QtWidgets.QMenu):
             self.addAction(action)
 
         # Create the menu actions for setting the background color
-        action = studioqt.SeparatorAction("Background", self)
+        action = SeparatorAction("Background", self)
         self.addAction(action)
 
         for theme in themes:

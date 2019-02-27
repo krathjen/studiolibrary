@@ -24,6 +24,8 @@ from .groupitem import GroupItem
 from .treewidget import TreeWidget
 from .itemdelegate import ItemDelegate
 from ..toastwidget import ToastWidget
+from ..slideraction import SliderAction
+from ..separatoraction import SeparatorAction
 
 logger = logging.getLogger(__name__)
 
@@ -518,31 +520,31 @@ class ItemsWidget(QtWidgets.QWidget):
 
         menu = QtWidgets.QMenu("Item View", self)
 
-        action = studioqt.SeparatorAction("View Settings", menu)
+        action = SeparatorAction("View Settings", menu)
         menu.addAction(action)
 
-        action = studioqt.SliderAction("Size", menu)
+        action = SliderAction("Size", menu)
         action.slider().setMinimum(10)
         action.slider().setMaximum(200)
         action.slider().setValue(self.zoomAmount())
         action.slider().valueChanged.connect(self.setZoomAmount)
         menu.addAction(action)
 
-        action = studioqt.SliderAction("Border", menu)
+        action = SliderAction("Border", menu)
         action.slider().setMinimum(0)
         action.slider().setMaximum(20)
         action.slider().setValue(self.padding())
         action.slider().valueChanged.connect(self.setPadding)
         menu.addAction(action)
         #
-        action = studioqt.SliderAction("Spacing", menu)
+        action = SliderAction("Spacing", menu)
         action.slider().setMinimum(self.DEFAULT_MIN_SPACING)
         action.slider().setMaximum(self.DEFAULT_MAX_SPACING)
         action.slider().setValue(self.spacing())
         action.slider().valueChanged.connect(self.setSpacing)
         menu.addAction(action)
 
-        action = studioqt.SeparatorAction("Item Options", menu)
+        action = SeparatorAction("Item Options", menu)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Show labels", menu)
@@ -576,21 +578,21 @@ class ItemsWidget(QtWidgets.QWidget):
 
         menu.addSeparator()
 
-        action = studioqt.SliderAction("Size", menu)
+        action = SliderAction("Size", menu)
         action.slider().setMinimum(10)
         action.slider().setMaximum(200)
         action.slider().setValue(self.zoomAmount())
         action.slider().valueChanged.connect(self.setZoomAmount)
         menu.addAction(action)
 
-        action = studioqt.SliderAction("Border", menu)
+        action = SliderAction("Border", menu)
         action.slider().setMinimum(0)
         action.slider().setMaximum(20)
         action.slider().setValue(self.padding())
         action.slider().valueChanged.connect(self.setPadding)
         menu.addAction(action)
         #
-        action = studioqt.SliderAction("Spacing", menu)
+        action = SliderAction("Spacing", menu)
         action.slider().setMinimum(self.DEFAULT_MIN_SPACING)
         action.slider().setMaximum(self.DEFAULT_MAX_SPACING)
         action.slider().setValue(self.spacing())

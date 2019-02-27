@@ -15,7 +15,7 @@ from functools import partial
 from studioqt import QtGui
 from studioqt import QtWidgets
 
-import studioqt
+from .separatoraction import SeparatorAction
 
 
 class SortByMenu(QtWidgets.QMenu):
@@ -71,7 +71,7 @@ class SortByMenu(QtWidgets.QMenu):
             currentField = ""
             currentOrder = ""
 
-        action = studioqt.SeparatorAction("Sort By", self)
+        action = SeparatorAction("Sort By", self)
         self.addAction(action)
 
         fields = self.dataset().SortFields
@@ -89,7 +89,7 @@ class SortByMenu(QtWidgets.QMenu):
             callback = partial(self.setSortBy, field, currentOrder)
             action.triggered.connect(callback)
 
-        action = studioqt.SeparatorAction("Sort Order", self)
+        action = SeparatorAction("Sort Order", self)
         self.addAction(action)
 
         action = self.addAction("Ascending")
