@@ -16,7 +16,6 @@ import json
 import uuid
 import ctypes
 import shutil
-import urllib2
 import locale
 import logging
 import getpass
@@ -34,6 +33,9 @@ except ImportError:
     from os import walk
 
 import studiolibrary
+
+from studiolibrary.vendor import six
+from studiolibrary.vendor.six.moves import urllib
 
 
 __all__ = [
@@ -102,7 +104,7 @@ class PathError(IOError):
         """
         :type: str or unicode 
         """
-        msg = unicode(msg).encode('unicode_escape')
+        msg = six.u(msg)
         super(PathError, self).__init__(msg)
         self._msg = msg
 
@@ -112,7 +114,7 @@ class PathError(IOError):
         
         :rtype: unicode 
         """
-        msg = unicode(self._msg).decode('unicode_escape')
+        msg = six.u(self._msg).decode('unicode_escape')
         return msg
 
 
@@ -424,7 +426,7 @@ def formatPath(formatString, path="", **kwargs):
 
     kwargs.update(labels)
 
-    resolvedString = unicode(formatString).format(**kwargs)
+    resolvedString = six.u(formatString).format(**kwargs)
 
     logger.debug("Resolved String: %s", resolvedString)
 
@@ -470,7 +472,7 @@ def movePath(src, dst):
     :type dst: str
     :rtype: str
     """
-    src = unicode(src)
+    src = six.u(src)
     dirname, name, extension = splitPath(src)
 
     if not os.path.exists(src):
@@ -836,9 +838,10 @@ def normPath(path):
     Return a normalized path containing only forward slashes.
     
     :type path: str
-    :rtype: str or unicode 
+    :rtype: unicode 
     """
-    path = unicode(path.replace("\\", "/"))
+    path = path.replace("\\", "/")
+    path = six.u(path)
     return path.rstrip("/")
 
 
@@ -1122,7 +1125,7 @@ def sendAnalytics(
     def _send(url):
         try:
             url = url.replace(" ", "")
-            f = urllib2.urlopen(url, None, 1.0)
+            f = urllib.request.urlopen(url)
         except Exception:
             pass
 
@@ -1147,7 +1150,7 @@ def showInFolder(path):
     args = studiolibrary.config().get('showInFolderCmd')
 
     if args:
-        if isinstance(args, basestring):
+        if isinstance(args, six.string_types):
             args = [args]
 
     elif isLinux():
@@ -1163,7 +1166,7 @@ def showInFolder(path):
     path = os.path.normpath(path)
 
     for i, a in enumerate(args):
-        if isinstance(a, basestring) and '{path}' in a:
+        if isinstance(a, six.string_types) and '{path}' in a:
             args[i] = a.format(path=path)
 
     logger.info("Call: '%s' with arguments: %s", cmd.__name__, args)
