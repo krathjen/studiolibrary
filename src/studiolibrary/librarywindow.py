@@ -173,6 +173,15 @@ class LibraryWindow(QtWidgets.QWidget):
             libraryWindow = cls(name=name)
             LibraryWindow._instances[name] = libraryWindow
 
+        kwargs_ = {
+            "lock": lock,
+            "show": show,
+            "superusers": superusers,
+            "lockRegExp": lockRegExp,
+            "unlockRegExp": unlockRegExp
+        }
+
+        libraryWindow.setKwargs(kwargs_)
         libraryWindow.setLocked(lock)
         libraryWindow.setSuperusers(superusers)
         libraryWindow.setLockRegExp(lockRegExp)
@@ -209,6 +218,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._items = []
         self._name = name or self.DEFAULT_NAME
         self._theme = None
+        self._kwargs = {}
         self._isDebug = False
         self._isLocked = False
         self._isLoaded = False
@@ -450,6 +460,14 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
+
+    def setKwargs(self, kwargs):
+        """
+        Set the key word arguments used to open the window.
+        
+        :type kwargs: dict
+        """
+        self._kwargs.update(kwargs)
 
     def library(self):
         """
@@ -1028,6 +1046,11 @@ class LibraryWindow(QtWidgets.QWidget):
             action.slider().setValue(dpi)
             action.valueChanged.connect(self._dpiSliderChanged)
             menu.addAction(action)
+            menu.addSeparator()
+
+        librariesMenu = studiolibrary.widgets.LibrariesMenu(libraryWindow=self)
+        menu.addMenu(librariesMenu)
+        menu.addSeparator()
 
         action = QtWidgets.QAction("Change Root Path", menu)
         action.triggered.connect(self.showChangePathDialog)
@@ -1622,6 +1645,7 @@ class LibraryWindow(QtWidgets.QWidget):
         settings = {}
 
         settings['dpi'] = self.dpi()
+        settings['kwargs'] = self._kwargs
         settings['geometry'] = self.geometrySettings()
         settings['paneSizes'] = self._splitter.sizes()
 

@@ -26,5 +26,6 @@ from .itemswidget.item import Item
 from .itemswidget.groupitem import GroupItem
 from .itemswidget.itemswidget import ItemsWidget
 from .themesmenu import Theme, ThemesMenu
+from .librariesmenu import LibrariesMenu
 from .slideraction import SliderAction
 from .separatoraction import SeparatorAction
