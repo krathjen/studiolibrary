@@ -70,6 +70,11 @@ THEME_PRESETS = [
         "backgroundColor": "rgb(60, 64, 79)",
     },
     {
+        "name": "Grey",
+        "accentColor": None,
+        "backgroundColor": "rgb(60, 60, 60)",
+    },
+    {
         "name": "Light",
         "accentColor": None,
         "backgroundColor": "rgb(245, 245, 255)",
