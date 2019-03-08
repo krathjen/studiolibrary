@@ -20,6 +20,105 @@ import studioqt
 from .separatoraction import SeparatorAction
 
 
+NEW_STYLE = True
+
+
+class LabelAction(QtWidgets.QWidgetAction):
+
+    def _triggered(self, checked=None):
+        """Triggered when the checkbox value has changed."""
+        self.triggered.emit()
+        self.parent().close()
+
+    def createWidget(self, menu):
+        """
+        This method is called by the QWidgetAction base class.
+
+        :type menu: QtWidgets.QMenu
+        """
+        widget = QtWidgets.QFrame(self.parent())
+        widget.setObjectName("actionWidget")
+
+        title = self._name
+
+        # Using a checkbox so that the text aligns with the other actions
+        label = QtWidgets.QCheckBox(widget)
+        label.setText(title)
+        label.toggled.connect(self._triggered)
+        label.setStyleSheet("""
+#QCheckBox::indicator:checked {
+    image: url(none.png)
+}
+QCheckBox::indicator:unchecked {
+    image: url(none.png)
+}
+""")
+        actionLayout = QtWidgets.QHBoxLayout(widget)
+        actionLayout.setContentsMargins(0, 0, 0, 0)
+        actionLayout.addWidget(label, stretch=1)
+        widget.setLayout(actionLayout)
+
+        return widget
+
+
+class FilterAction(QtWidgets.QWidgetAction):
+
+    def __init__(self, parent=None):
+        """
+        :type parent: QtWidgets.QMenu
+        """
+        QtWidgets.QWidgetAction.__init__(self, parent)
+
+        self._facet = None
+        self._checked = False
+
+    def setChecked(self, checked):
+        self._checked = checked
+
+    def setFacet(self, facet):
+        self._facet = facet
+
+    def _triggered(self, checked=None):
+        """Triggered when the checkbox value has changed."""
+        self.triggered.emit()
+        self.parent().close()
+
+    def createWidget(self, menu):
+        """
+        This method is called by the QWidgetAction base class.
+
+        :type menu: QtWidgets.QMenu
+        """
+        widget = QtWidgets.QFrame(self.parent())
+        widget.setObjectName("actionWidget")
+
+        facet = self._facet
+
+        name = facet.get("name") or ""
+        count = str(facet.get("count", 0))
+
+        title = name.replace(".", "").title()
+
+        label = QtWidgets.QCheckBox(widget)
+        label.setText(title)
+        label.installEventFilter(self)
+        label.toggled.connect(self._triggered)
+        label.setChecked(self._checked)
+
+        label2 = QtWidgets.QLabel(widget)
+        label2.setObjectName("actionCounter")
+        label2.setText(count)
+
+        layout = QtWidgets.QHBoxLayout(widget)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(label, stretch=1)
+        layout.addWidget(label2)
+        widget.setLayout(layout)
+
+        return widget
+
+
 class FiltersMenu(QtWidgets.QMenu):
 
     def __init__(self, *args, **kwargs):
@@ -167,7 +266,13 @@ class FiltersMenu(QtWidgets.QMenu):
         action = SeparatorAction("Show " + field.title(), self)
         self.addAction(action)
 
-        action = self.addAction("Show All")
+        if NEW_STYLE:
+            action = LabelAction(self)
+            action._name = "Show All"
+            self.addAction(action)
+        else:
+            action = self.addAction("Show All")
+
         action.setEnabled(not self.isShowAllEnabled())
         callback = partial(self._showAllClicked)
         action.triggered.connect(callback)
@@ -176,18 +281,22 @@ class FiltersMenu(QtWidgets.QMenu):
 
         for facet in self._facets:
 
+            name = facet.get("name") or ""
+            count = facet.get("count", 0)
+            checked = self.settings().get(name, True)
+
             title = "{name}\t({count})"
-
-            name = facet.get("name")
-            count = facet.get("count")
-
             title = title.format(name=name.replace(".", "").title(), count=count)
 
-            action = self.addAction(title)
-            action.setCheckable(True)
-
-            checked = self.settings().get(name, True)
-            action.setChecked(checked)
+            if NEW_STYLE:
+                action = FilterAction(self)
+                action.setFacet(facet)
+                action.setChecked(checked)
+                self.addAction(action)
+            else:
+                action = self.addAction(title)
+                action.setCheckable(True)
+                action.setChecked(checked)
 
             callback = partial(self._actionChecked, name, not checked)
             action.triggered.connect(callback)

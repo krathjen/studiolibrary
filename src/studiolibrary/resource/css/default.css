@@ -677,3 +677,30 @@ PreviewFrame QPushButton:hover {
 #messageBoxFrame {
     background-color: rgb(BACKGROUND_COLOR_R,BACKGROUND_COLOR_G,BACKGROUND_COLOR_B,210);
 }
+
+
+#actionWidget QWidget {
+    background-color: transparent;
+}
+
+#actionWidget:hover {
+    background-color: ACCENT_COLOR;
+    color: ACCENT_FOREGROUND_COLOR;
+}
+
+#actionWidget {
+    height: 22px;
+    padding: 4px;
+    background-color: transparent;
+}
+
+#actionWidget #actionCounter {
+    padding: 2px;
+    border-radius: 5px;
+    background-color: rgb(255,255,255,20);
+}
+
+#actionWidget QCheckBox {
+    width: 56px;
+}
+
