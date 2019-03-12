@@ -13,6 +13,7 @@
 from functools import partial
 
 from studioqt import QtGui
+from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studioqt
@@ -44,6 +45,7 @@ class LabelAction(QtWidgets.QWidgetAction):
         # Using a checkbox so that the text aligns with the other actions
         label = QtWidgets.QCheckBox(widget)
         label.setText(title)
+        label.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
         label.toggled.connect(self._triggered)
         label.setStyleSheet("""
 #QCheckBox::indicator:checked {
@@ -100,6 +102,7 @@ class FilterAction(QtWidgets.QWidgetAction):
         title = name.replace(".", "").title()
 
         label = QtWidgets.QCheckBox(widget)
+        label.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
         label.setText(title)
         label.installEventFilter(self)
         label.toggled.connect(self._triggered)

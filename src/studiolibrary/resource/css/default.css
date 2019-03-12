@@ -690,7 +690,7 @@ PreviewFrame QPushButton:hover {
 
 #actionWidget {
     height: 22px;
-    padding: 4px;
+    padding: 2px;
     background-color: transparent;
 }
 
@@ -704,6 +704,11 @@ PreviewFrame QPushButton:hover {
     width: 56px;
 }
 
+#actionWidget QCheckBox::indicator {
+	width: 14px;
+	height: 14px;
+	padding-left: 2px;
+}
 
 ColorPickerWidget {
    margin: 10px;
