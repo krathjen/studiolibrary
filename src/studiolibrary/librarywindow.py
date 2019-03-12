@@ -292,18 +292,18 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self._menuBarWidget.addWidget(self._searchWidget)
 
-        name = "Item View"
-        icon = studiolibrary.resource().icon("view_settings")
-        icon.setColor(iconColor)
-        tip = "Change the style of the item view"
-        self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
-
         name = "Filters"
         icon = studiolibrary.resource().icon("filter")
         icon.setColor(iconColor)
         tip = "Filter the current results by type.\n" \
               "CTRL + Click will hide the others and show the selected one."
         self.addMenuBarAction(name, icon, tip, callback=self.showFiltersMenu)
+
+        name = "Item View"
+        icon = studiolibrary.resource().icon("view_settings")
+        icon.setColor(iconColor)
+        tip = "Change the style of the item view"
+        self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
 
         name = "Group By"
         icon = studiolibrary.resource().icon("groupby")

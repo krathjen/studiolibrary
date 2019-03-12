@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class MenuBarWidget(QtWidgets.QToolBar):
 
-    DEFAULT_EXPANDED_HEIGHT = 36
+    DEFAULT_EXPANDED_HEIGHT = 34
     DEFAULT_COLLAPSED_HEIGHT = 10
 
     def __init__(self, parent=None):
