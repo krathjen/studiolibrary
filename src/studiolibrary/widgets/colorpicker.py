@@ -19,13 +19,6 @@ from studioqt import QtWidgets
 import studioqt
 
 
-__all__ = [
-    "ColorButton",
-    "ColorPickerAction",
-    "ColorPickerWidget",
-]
-
-
 class ColorButton(QtWidgets.QPushButton):
 
     def __init__(self, *args):
@@ -323,7 +316,7 @@ def example2():
     menu.addAction(action)
     menu.addSeparator()
 
-    menu.exec()
+    menu.exec_()
 
 
 if __name__ == "__main__":
