@@ -704,3 +704,36 @@ PreviewFrame QPushButton:hover {
     width: 56px;
 }
 
+
+ColorPickerWidget {
+   margin: 10px;
+}
+
+ColorPickerWidget {
+   padding: 10px;
+   margin-left: 20px;
+   margin-right: 20px;
+   border-radius: 4px;
+   background-color: rgb(0, 0, 0, 10);
+}
+
+ColorPickerWidget #colorButton,
+ColorPickerWidget #browseColorButton{
+    min-width: 18px;
+    min-height: 18px;
+    max-height: 18px;
+    max-width: 18px;
+}
+
+ColorPickerWidget #colorButton:hover,
+ColorPickerWidget #browseColorButton:hover {
+    border: 2px solid rgb(255, 255, 255, 155);
+}
+
+ColorPickerWidget #browseColorButton {
+    min-width: 18px;
+    min-height: 18px;
+    max-height: 18px;
+    max-width: 18px;
+    background-color: rgb(120, 120, 120);
+}
