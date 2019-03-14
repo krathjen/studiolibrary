@@ -8,11 +8,11 @@ Please feel free to improve this page as needed. Thank you.
 ### Index
 
 * [How to run from code](#jf82ksc)
+* [How to reload for development](#gw4un1m)
 * [How to set the name and path from code](#nc2dokp)
 * [How to create a local and shared library](#k25lyqw)
 * [How to create more than one library instance](#ou3nb4z)
-* [How to reload for development](#gw4un1m)
-* [How to load a library for several projects](#lvx2med)
+* [How to create a library for several projects](#lvx2med)
 * [How to debug "No object match when loading data"](#zi20df5)
 * [How to fix a scene that has unknown nodes](#ufj2oi4)
 * [How to lock and unlock specific folders](#we7zm9m)
@@ -29,6 +29,25 @@ https://github.com/krathjen/studiolibrary/labels/FAQ
 ### <a name="jf82ksc"></a> How to run from code
 
 ```python
+import studiolibrary
+studiolibrary.main()
+```
+
+[Top](#top)
+
+<br>
+
+
+### <a name="gw4un1m"></a> How to reload for development
+
+This code removes all previously imported Studio Library modules and caches before loading.
+
+Tip: You can also hold "Shift" when clicking the shelf button to reload the modules.
+
+```python
+import studiolibrary
+studiolibrary.reload()
+
 import studiolibrary
 studiolibrary.main()
 ```
@@ -86,26 +105,7 @@ studiolibrary.main(name="Figaro Pho - Previs", path="P:/figaro/studiolibrary/pre
 <br>
 
 
-### <a name="gw4un1m"></a> How to reload for development
-
-This code removes all previously imported Studio Library modules and caches before loading.
-
-Tip: You can also hold "Shift" when clicking the shelf button to reload the modules.
-
-```python
-import studiolibrary
-studiolibrary.reload()
-
-import studiolibrary
-studiolibrary.main()
-```
-
-[Top](#top)
-
-<br>
-
-
-### <a name="lvx2med"></a> How to load a library for several projects
+### <a name="lvx2med"></a> How to create a library for several projects
 
 When implementing the Studio Library for several projects we can get the current project name and then set the name and path.
 
