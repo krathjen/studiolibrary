@@ -25,7 +25,7 @@ class PreviewWidget(QtWidgets.QWidget):
         pixmap.setColor('rgb(255,255,255,20)')
         self.ui.thumbnailLabel.setPixmap(pixmap)
 
-        self._optionsWidget = studiolibrary.widgets.OptionsWidget(self)
-        self.ui.optionsFrame.layout().addWidget(self._optionsWidget)
+        self._infoWidget = studiolibrary.widgets.OptionsWidget(self)
+        self._infoWidget.setOptions(item.info())
 
-        self._optionsWidget.setOptions(item.options())
+        self.ui.infoFrame.layout().addWidget(self._infoWidget)
