@@ -81,9 +81,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self.setupConnections()
 
     def setupConnections(self):
-        """
-        :rtype: None
-        """
+        """Setup the connections for all the widgets."""
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
@@ -159,17 +157,6 @@ class BasePreviewWidget(QtWidgets.QWidget):
             infoWidget.setOptions(item.info())
             self.ui.infoFrame.layout().addWidget(infoWidget)
 
-        else:
-            # Legacy
-            self.ui.name.setText(item.name())
-            self.ui.owner.setText(item.owner())
-            self.ui.comment.setText(item.description())
-            self.updateContains()
-
-            ctime = item.ctime()
-            if ctime:
-                self.ui.created.setText(studiolibrary.timeAgo(ctime))
-
     def iconPath(self):
         """
         Return the icon path to be used for the thumbnail.
@@ -202,9 +189,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self.ui.thumbnailButton.setText("")
 
     def showSelectionSetsMenu(self):
-        """
-        :rtype: None
-        """
+        """Show the selection sets menu."""
         item = self.item()
         item.showSelectionSetsMenu()
 
@@ -243,7 +228,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def scriptJob(self):
         """
-        Return the script job object used when the users selection changes.
+        Get the script job object used when the users selection changes.
 
         :rtype: mutils.ScriptJob
         """
@@ -272,16 +257,6 @@ class BasePreviewWidget(QtWidgets.QWidget):
         :rtype: int
         """
         return self.item().objectCount()
-
-    def updateContains(self):
-        """
-        Refresh the contains information.
-
-        :rtype: None
-        """
-        count = self.objectCount()
-        plural = "s" if count > 1 else ""
-        self.ui.contains.setText(str(count) + " Object" + plural)
 
     def _namespaceEditChanged(self, text):
         """
@@ -330,6 +305,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def namespaceOption(self):
         """
+        Get the current namespace option.
+        
         :rtype: NamespaceOption
         """
         if self.ui.useFileNamespace.isChecked():
@@ -343,6 +320,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def setNamespaceOption(self, namespaceOption):
         """
+        Set the current namespace option.
+        
         :type namespaceOption: NamespaceOption
         """
         if namespaceOption == NamespaceOption.FromFile:
@@ -354,6 +333,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def setSettings(self, settings):
         """
+        Set the state of the widget.
+        
         :type settings: dict
         """
         namespaces = settings.get("namespaces", [])
@@ -380,6 +361,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def settings(self):
         """
+        Get the current state of the widget.
+        
         :rtype: dict
         """
         settings = {}
@@ -396,6 +379,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def loadSettings(self):
         """
+        Load the user settings from disc.
+        
         :rtype: None
         """
         data = studiolibrarymaya.settings()
@@ -403,6 +388,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def saveSettings(self):
         """
+        Save the user settings to disc.
+        
         :rtype: None
         """
         data = self.settings()
@@ -410,6 +397,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def selectionChanged(self):
         """
+        Triggered when the users Maya selection has changed.
+        
         :rtype: None
         """
         self.updateNamespaceEdit()
@@ -444,6 +433,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def updateNamespaceEdit(self):
         """
+        Update the namespace edit.
+        
         :rtype: None
         """
         logger.debug('Updating namespace edit')
@@ -470,6 +461,8 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
     def accept(self):
         """
+        Called when the user clicks the apply button.
+        
         :rtype: None
         """
         try:
