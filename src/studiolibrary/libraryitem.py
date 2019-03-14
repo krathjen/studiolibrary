@@ -165,6 +165,14 @@ class LibraryItem(studiolibrary.widgets.Item):
         if path:
             self.setPath(path)
 
+    def info(self):
+        """
+        Get the info to display to user.
+        
+        :rtype: list[dict]
+        """
+        return []
+
     def id(self):
         """
         Return the unique id for the item.

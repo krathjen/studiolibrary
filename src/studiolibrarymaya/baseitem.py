@@ -86,6 +86,43 @@ class BaseItem(studiolibrary.LibraryItem):
         self._transferObject = None
         self._transferBasename = None
 
+    def info(self):
+        """
+        Get the info to display to user.
+        
+        :rtype: list[dict]
+        """
+        ctime = self.ctime()
+        if ctime:
+            ctime = studiolibrary.timeAgo(ctime)
+
+        count = self.objectCount()
+        plural = "s" if count > 1 else ""
+        contains = str(count) + " Object" + plural
+
+        return [
+            {
+                "name": "name",
+                "value": self.name(),
+            },
+            {
+                "name": "owner",
+                "value": self.owner(),
+            },
+            {
+                "name": "created",
+                "value": ctime,
+            },
+            {
+                "name": "contains",
+                "value": contains,
+            },
+            {
+                "name": "comment",
+                "value": self.description() or "No comment",
+            },
+        ]
+
     def setTransferClass(self, classname):
         """
         Set the transfer class used to read and write the data.

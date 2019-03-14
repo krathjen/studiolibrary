@@ -58,6 +58,7 @@ class OptionWidget(QtWidgets.QFrame):
 
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.setLayout(layout)
         self.setContentsMargins(0, 0, 0, 0)
@@ -65,8 +66,13 @@ class OptionWidget(QtWidgets.QFrame):
         self._label = QtWidgets.QLabel(self)
         self._label.setObjectName('label')
         self._label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self._label.setSizePolicy(
+            QtWidgets.QSizePolicy.Preferred,
+            QtWidgets.QSizePolicy.Preferred,
+        )
 
         layout.addWidget(self._label)
+        layout.setStretchFactor(self._label, 2)
 
     def label(self):
         """
@@ -257,8 +263,13 @@ class OptionWidget(QtWidgets.QFrame):
         """
         self._widget = widget
         self._widget.setObjectName('widget')
+        self._widget.setSizePolicy(
+            QtWidgets.QSizePolicy.Preferred,
+            QtWidgets.QSizePolicy.Preferred,
+        )
 
         self.layout().addWidget(self._widget)
+        self.layout().setStretchFactor(self._widget, 4)
 
     def widget(self,):
         """
@@ -318,19 +329,23 @@ class OptionsWidget(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
         super(OptionsWidget, self).__init__(*args, **kwargs)
 
+        self._widgets = []
+        self._validator = None
+
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.setStyleSheet(STYLE)
         self.setLayout(layout)
-
-        self._widgets = []
-        self._validator = None
 
         self._optionsFrame = QtWidgets.QFrame(self)
         self._optionsFrame.setObjectName('optionsFrame')
 
         layout = QtWidgets.QVBoxLayout(self._optionsFrame)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
         self._optionsFrame.setLayout(layout)
 
         self.layout().addWidget(self._optionsFrame)
@@ -466,6 +481,21 @@ QWidget {
     text-align: left;
 }
 
+OptionWidget {
+    margin-bottom: 3px;
+}
+
+OptionWidget > #label {
+    margin-right: 4px;
+    min-width: 64px;
+    color: rgb(255, 255, 255, 100);
+}
+
+LabelOption > #widget {
+    color: rgb(255, 255, 255, 200);
+}
+
+/*
 FormWidget > #title {
     font: bold;
     font-size: 12pt;
@@ -489,7 +519,6 @@ FormWidget #acceptButton {
     background-color: rgb(100, 140, 255);
 }
 
-/*--- Options Frame ---*/
 FormWidget > #optionsFrame {
     background-color: rgb(255, 255, 255);
 }
@@ -499,7 +528,6 @@ FormWidget QLineEdit {
     border: 1px solid rgb(240, 0, 0, 255);
 }
 
-/*--- Path Options ---*/
 PathOptionWidget QPushButton {
     height: 20px;
     min-width: 24px;
@@ -516,17 +544,6 @@ SeparatorOptionWidget > #separator {
     background-color: rgb(0, 0, 0, 25);
     min-height: 1px;
     max-height: 1px;
-}
-
-OptionWidget > #label {
-    margin-right: 2px;
-    min-width: 52px;
-    max-width: 52px;
-    color: rgb(255, 255, 255, 100);
-}
-
-LabelOption > #widget {
-    color: rgb(255, 255, 255, 200);
 }
 
 OptionWidget[default=true] QLineEdit,
@@ -572,11 +589,11 @@ OptionWidget QTextEdit:disabled {
     border: 1px solid rgb(100, 100, 100, 255);
     background-color: rgb(100, 100, 100, 100);
 }
+*/
 """
 
 
 def example1():
-
 
     options = [
         {

@@ -79,6 +79,21 @@ class MirrorItem(baseitem.BaseItem):
         self.setTransferBasename("mirrortable.json")
         self.setTransferClass(mutils.MirrorTable)
 
+    def info(self):
+        """
+        Get the info to display to user.
+        
+        :rtype: list[dict]
+        """
+        info = baseitem.BaseItem.info(self)
+
+        mt = self.transferObject()
+
+        info.insert(2, {"name": "Left", "value": mt.leftSide()})
+        info.insert(3, {"name": "Right", "value": mt.rightSide()})
+
+        return info
+
     def doubleClicked(self):
         """Overriding this method to load the item on double click."""
         self.loadFromSettings()
@@ -252,19 +267,6 @@ class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
 
         self.ui.mirrorAnimationCheckBox.stateChanged.connect(self.saveSettings)
         self.ui.mirrorOptionComboBox.currentIndexChanged.connect(self.saveSettings)
-
-    def setItem(self, item):
-        """
-        Set the item for the preview widget.
-
-        :type item: MirrorItem
-        :rtype: None
-        """
-        super(MirrorPreviewWidget, self).setItem(item)
-
-        mt = item.transferObject()
-        self.ui.left.setText(mt.leftSide())
-        self.ui.right.setText(mt.rightSide())
 
     def mirrorOption(self):
         """

@@ -105,6 +105,22 @@ class AnimItem(baseitem.BaseItem):
         self.setTransferClass(mutils.Animation)
         self.setTransferBasename("")
 
+    def info(self):
+        """
+        Get the info to display to user.
+        
+        :rtype: list[dict]
+        """
+        info = baseitem.BaseItem.info(self)
+
+        startFrame = str(self.startFrame())
+        endFrame = str(self.endFrame())
+
+        info.insert(3, {"name": "Start frame", "value": startFrame})
+        info.insert(4, {"name": "End frame", "value": endFrame})
+
+        return info
+
     def previewWidget(self, libraryWindow):
         """
         Return the widget to be shown when the user clicks on the item.
@@ -650,8 +666,6 @@ class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
         startFrame = str(item.startFrame())
         endFrame = str(item.endFrame())
 
-        self.ui.start.setText(startFrame)
-        self.ui.end.setText(endFrame)
         self.ui.sourceStartEdit.setText(startFrame)
         self.ui.sourceEndEdit.setText(endFrame)
 

@@ -20,6 +20,7 @@ from studioqt import QtWidgets
 import studioqt
 import studiolibrary
 import studiolibrarymaya
+import studiolibrary.widgets
 
 try:
     import mutils
@@ -153,15 +154,21 @@ class BasePreviewWidget(QtWidgets.QWidget):
         """
         self._item = item
 
-        self.ui.name.setText(item.name())
-        self.ui.owner.setText(item.owner())
-        self.ui.comment.setText(item.description())
+        if hasattr(self.ui, "infoFrame"):
+            infoWidget = studiolibrary.widgets.OptionsWidget(self)
+            infoWidget.setOptions(item.info())
+            self.ui.infoFrame.layout().addWidget(infoWidget)
 
-        self.updateContains()
+        else:
+            # Legacy
+            self.ui.name.setText(item.name())
+            self.ui.owner.setText(item.owner())
+            self.ui.comment.setText(item.description())
+            self.updateContains()
 
-        ctime = item.ctime()
-        if ctime:
-            self.ui.created.setText(studiolibrary.timeAgo(ctime))
+            ctime = item.ctime()
+            if ctime:
+                self.ui.created.setText(studiolibrary.timeAgo(ctime))
 
     def iconPath(self):
         """
