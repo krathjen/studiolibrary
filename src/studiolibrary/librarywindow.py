@@ -75,7 +75,7 @@ class LibraryWindow(QtWidgets.QWidget):
         "searchWidget": {
             "text": "",
         },
-        "typeFilterMenu": {
+        "filterByMenu": {
             "Folder": False
         },
         "theme": {
@@ -111,7 +111,7 @@ class LibraryWindow(QtWidgets.QWidget):
     # Customize widget classes
     SORTBY_MENU_CLASS = studiolibrary.widgets.SortByMenu
     GROUPBY_MENU_CLASS = studiolibrary.widgets.GroupByMenu
-    FILTERS_MENU_CLASS = studiolibrary.widgets.FiltersMenu
+    FILTERBY_MENU_CLASS = studiolibrary.widgets.FilterByMenu
 
     ITEMS_WIDGET_CLASS = studiolibrary.widgets.ItemsWidget
     SEARCH_WIDGET_CLASS = studiolibrary.widgets.SearchWidget
@@ -261,14 +261,14 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self._sortByMenu = self.SORTBY_MENU_CLASS(self)
         self._groupByMenu = self.GROUPBY_MENU_CLASS(self)
-        self._filtersMenu = self.FILTERS_MENU_CLASS(self)
+        self._filterByMenu = self.FILTERBY_MENU_CLASS(self)
         self._statusWidget = self.STATUS_WIDGET_CLASS(self)
         self._menuBarWidget = self.MENUBAR_WIDGET_CLASS(self)
         self._sidebarWidget = self.SIDEBAR_WIDGET_CLASS(self)
 
         self._sortByMenu.setDataset(library)
         self._groupByMenu.setDataset(library)
-        self._filtersMenu.setDataset(library)
+        self._filterByMenu.setDataset(library)
         self._itemsWidget.setDataset(library)
         self._searchWidget.setDataset(library)
         self._sidebarWidget.setDataset(library)
@@ -297,7 +297,7 @@ class LibraryWindow(QtWidgets.QWidget):
         icon.setColor(iconColor)
         tip = "Filter the current results by type.\n" \
               "CTRL + Click will hide the others and show the selected one."
-        self.addMenuBarAction(name, icon, tip, callback=self.showFiltersMenu)
+        self.addMenuBarAction(name, icon, tip, callback=self.showFilterByMenu)
 
         name = "Item View"
         icon = studiolibrary.resource().icon("view_settings")
@@ -954,7 +954,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         return action
 
-    def showFiltersMenu(self):
+    def showFilterByMenu(self):
         """
         Show the filters menu.
 
@@ -962,7 +962,7 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         widget = self.menuBarWidget().findToolButton("Filters")
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
-        self._filtersMenu.show(point)
+        self._filterByMenu.show(point)
         self.updateFiltersButton()
 
     def showGroupByMenu(self):
@@ -1664,7 +1664,7 @@ class LibraryWindow(QtWidgets.QWidget):
         settings['sidebarWidget'] = self.sidebarWidget().settings()
         settings["recursiveSearchEnabled"] = self.isRecursiveSearchEnabled()
 
-        settings['typeFilterMenu'] = self._filtersMenu.settings()
+        settings['filterByMenu'] = self._filterByMenu.settings()
 
         settings["path"] = self.path()
 
@@ -1729,9 +1729,9 @@ class LibraryWindow(QtWidgets.QWidget):
             if value is not None:
                 self.setRecursiveSearchEnabled(value)
 
-            value = settings.get('typeFilterMenu')
+            value = settings.get('filterByMenu')
             if value is not None:
-                self._filtersMenu.setSettings(value)
+                self._filterByMenu.setSettings(value)
 
         finally:
             self.reloadStyleSheet()
@@ -2527,7 +2527,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         action = self.menuBarWidget().findAction("Filters")
 
-        if self._filtersMenu.isActive():
+        if self._filterByMenu.isActive():
             icon = studiolibrary.resource().icon("filter")
             icon.setColor(self.iconColor())
             icon.setBadge(14, 1, 13, 13, color=self.ICON_BADGE_COLOR)

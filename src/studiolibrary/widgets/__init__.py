@@ -12,7 +12,7 @@
 
 from .sortbymenu import SortByMenu
 from .groupbymenu import GroupByMenu
-from .filtersmenu import FiltersMenu
+from .filterbymenu import FilterByMenu
 from .messagebox import MessageBox, createMessageBox
 from .toastwidget import ToastWidget
 from .searchwidget import SearchWidget

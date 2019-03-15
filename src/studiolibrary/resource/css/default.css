@@ -679,36 +679,37 @@ PreviewFrame QPushButton:hover {
 }
 
 
-#actionWidget QWidget {
+#filterByAction QWidget {
     background-color: transparent;
 }
 
-#actionWidget:hover {
+#filterByAction:hover {
     background-color: ACCENT_COLOR;
     color: ACCENT_FOREGROUND_COLOR;
 }
 
-#actionWidget {
+#filterByAction {
     height: 22px;
-    padding: 2px;
+    padding: 3px;
     background-color: transparent;
 }
 
-#actionWidget #actionCounter {
+#filterByAction #actionCounter {
     padding: 2px;
     border-radius: 5px;
     background-color: rgb(255,255,255,20);
 }
 
-#actionWidget QCheckBox {
-    width: 56px;
+#filterByAction QCheckBox {
+    width: 64px;
 }
 
-#actionWidget QCheckBox::indicator {
+#filterByAction QCheckBox::indicator {
 	width: 14px;
 	height: 14px;
 	padding-left: 2px;
 }
+
 
 ColorPickerWidget {
    margin: 10px;

@@ -63,7 +63,7 @@ QCheckBox::indicator:unchecked {
         return widget
 
 
-class FilterAction(QtWidgets.QWidgetAction):
+class FilterByAction(QtWidgets.QWidgetAction):
 
     def __init__(self, parent=None):
         """
@@ -92,7 +92,7 @@ class FilterAction(QtWidgets.QWidgetAction):
         :type menu: QtWidgets.QMenu
         """
         widget = QtWidgets.QFrame(self.parent())
-        widget.setObjectName("actionWidget")
+        widget.setObjectName("filterByAction")
 
         facet = self._facet
 
@@ -122,10 +122,10 @@ class FilterAction(QtWidgets.QWidgetAction):
         return widget
 
 
-class FiltersMenu(QtWidgets.QMenu):
+class FilterByMenu(QtWidgets.QMenu):
 
     def __init__(self, *args, **kwargs):
-        super(FiltersMenu, self).__init__(*args, **kwargs)
+        super(FilterByMenu, self).__init__(*args, **kwargs)
 
         self._facets = []
         self._dataset = None
@@ -292,7 +292,7 @@ class FiltersMenu(QtWidgets.QMenu):
             title = title.format(name=name.replace(".", "").title(), count=count)
 
             if NEW_STYLE:
-                action = FilterAction(self)
+                action = FilterByAction(self)
                 action.setFacet(facet)
                 action.setChecked(checked)
                 self.addAction(action)
