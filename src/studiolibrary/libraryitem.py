@@ -173,6 +173,14 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return []
 
+    def options(self, *args, **kwargs):
+        """
+        Get the options to pass to the load method.
+        
+        :rtype: list[dict]
+        """
+        return []
+
     def id(self):
         """
         Return the unique id for the item.
@@ -537,9 +545,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         self.updateItemData()
         self.library().updateItem(self)
 
-    def load(self):
+    def load(self, *args, **kwargs):
         """Reimplement this method for loading any item data."""
         logger.debug(u'Loading "{0}"'.format(self.name()))
+        logger.debug(u'Loading kwargs {0}'.format(kwargs))
         LibraryItem.loaded.emit(self)
 
     def save(self, path=None, contents=None):

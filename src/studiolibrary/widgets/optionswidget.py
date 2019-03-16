@@ -106,11 +106,13 @@ class OptionWidget(QtWidgets.QFrame):
             self.setItems(items)
 
         value = state.get('value')
-        default = state.get('default') or value
+        default = state.get('default')
 
         # Must set the default before value
         if default is not None:
             self.setDefault(default)
+        else:
+            self.setDefault(value)
 
         if value is not None:
             self.setValue(value)
@@ -285,37 +287,164 @@ class OptionWidget(QtWidgets.QFrame):
         self.setStyleSheet(self.styleSheet())
 
 
-class LabelOption(OptionWidget):
+class LabelOptionWidget(OptionWidget):
 
     def __init__(self, *args, **kwargs):
-        super(LabelOption, self).__init__(*args, **kwargs)
+        super(LabelOptionWidget, self).__init__(*args, **kwargs)
 
         widget = Label(self)
         widget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         self.setWidget(widget)
 
     def value(self):
+        """
+        Get the value of the label.
+        
+        :rtype: str 
+        """
         return unicode(self.widget().text())
 
     def setValue(self, value):
+        """
+        Set the value of the label.
+        
+        :type value: str 
+        """
         self.widget().setText(value)
-        super(LabelOption, self).setValue(value)
+        super(LabelOptionWidget, self).setValue(value)
 
 
 class Label(QtWidgets.QLabel):
+
+    """A custom label which supports elide right."""
 
     def __init__(self, *args):
         super(Label, self).__init__(*args)
         self._text = ''
 
     def setText(self, text):
+        """
+        Overriding this method to store the original text.
+        
+        :type text: str
+        """
         self._text = text
         QtWidgets.QLabel.setText(self, text)
 
     def resizeEvent(self, event):
+        """Overriding this method to modify the text with elided text."""
         metrics = QtGui.QFontMetrics(self.font())
         elided = metrics.elidedText(self._text, QtCore.Qt.ElideRight, self.width())
         QtWidgets.QLabel.setText(self, elided)
+
+
+class BoolOptionWidget(OptionWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(BoolOptionWidget, self).__init__(*args, **kwargs)
+
+        widget = QtWidgets.QCheckBox(self)
+        widget.stateChanged.connect(self.emitValueChanged)
+
+        self.setWidget(widget)
+
+    def value(self):
+        """
+        Get the value of the checkbox.
+        
+        :rtype: bool 
+        """
+        return bool(self.widget().isChecked())
+
+    def setValue(self, value):
+        """
+        Set the value of the checkbox.
+        
+        :type value: bool 
+        """
+        self.widget().setChecked(value)
+        super(BoolOptionWidget, self).setValue(value)
+
+
+class EnumOptionWidget(OptionWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(EnumOptionWidget, self).__init__(*args, **kwargs)
+
+        widget = QtWidgets.QComboBox(self)
+        widget.currentIndexChanged.connect(self.emitValueChanged)
+
+        self.setWidget(widget)
+
+    def value(self):
+        """
+        Get the value of the combobox.
+        
+        :rtype: str 
+        """
+        return str(self.widget().currentText())
+
+    def setState(self, state):
+        """
+        Set the current state with support for editable.
+        
+        :type state: dict
+        """
+        super(EnumOptionWidget, self).setState(state)
+
+        editable = state.get('editable')
+        if editable is not None:
+            self.widget().setEditable(editable)
+
+    def setValue(self, item):
+        """
+        Set the current value of the combobox.
+        
+        :type item: str 
+        """
+        self.widget().setCurrentText(item)
+
+    def setItems(self, items):
+        """
+        Set the current items of the combobox.
+        
+        :type items: list[str]
+        """
+        self.widget().clear()
+        self.widget().addItems(items)
+
+
+class SeparatorOptionWidget(OptionWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(SeparatorOptionWidget, self).__init__(*args, **kwargs)
+
+        separator = QtWidgets.QLabel(self)
+        separator.setObjectName('widget')
+        separator.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred
+        )
+
+        self.setWidget(separator)
+
+        self.label().hide()
+
+    def setValue(self, value):
+        """
+        Set the current text of the separator.
+        
+        :type value: str 
+        """
+        self.widget().setText(value)
+
+    def value(self):
+        """
+        Get the current text of the combobox.
+        
+        :rtype: str 
+        """
+        return self.widget().text()
 
 
 class OptionsWidget(QtWidgets.QFrame):
@@ -323,7 +452,10 @@ class OptionsWidget(QtWidgets.QFrame):
     accepted = QtCore.Signal(object)
 
     OptionWidgetMap = {
-        'label': LabelOption
+        "bool": BoolOptionWidget,
+        "enum": EnumOptionWidget,
+        "label": LabelOptionWidget,
+        "separator": SeparatorOptionWidget
     }
 
     def __init__(self, *args, **kwargs):
@@ -336,7 +468,7 @@ class OptionsWidget(QtWidgets.QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self.setStyleSheet(STYLE)
+        # self.setStyleSheet(STYLE)
         self.setLayout(layout)
 
         self._optionsFrame = QtWidgets.QFrame(self)
@@ -348,7 +480,19 @@ class OptionsWidget(QtWidgets.QFrame):
 
         self._optionsFrame.setLayout(layout)
 
+        self._titleWidget = QtWidgets.QPushButton(self)
+        self._titleWidget.setObjectName("titleWidget")
+        self._titleWidget.clicked.connect(self._titleClicked)
+        self._titleWidget.hide()
+
+        self.layout().addWidget(self._titleWidget)
         self.layout().addWidget(self._optionsFrame)
+
+    def _titleClicked(self):
+        pass
+
+    def setTitle(self, title):
+        self._titleWidget.setText(title)
 
     def reset(self):
         """Reset all option widgets back to their default value."""
@@ -364,8 +508,17 @@ class OptionsWidget(QtWidgets.QFrame):
 
             cls = self.OptionWidgetMap.get(option.get('type', 'label'))
 
+            if not cls:
+                logger.warning("Cannot find widget for %s", option)
+                continue
+
             widget = cls()
             widget.setOption(option)
+
+            value = option.get('value')
+            default = option.get('default')
+            if value is None and default is not None:
+                widget.setValue(default)
 
             self._widgets.append(widget)
 
@@ -462,38 +615,20 @@ class OptionsWidget(QtWidgets.QFrame):
         self._setState(state)
         self.validate()
 
-    def _setState(self, state):
+    def _setState(self, options):
         for widget in self._widgets:
             widget.blockSignals(True)
 
         for widget in self._widgets:
-            name = widget.option().get('name')
-            widget.setState(state.get(name, {}))
+            for option in options:
+                if option.get("name") == widget.option().get('name'):
+                    widget.setOption(option)
 
         for widget in self._widgets:
             widget.blockSignals(False)
 
 
 STYLE = """
-
-QWidget {
-    /*font-size: 12px;*/
-    text-align: left;
-}
-
-OptionWidget {
-    margin-bottom: 3px;
-}
-
-OptionWidget > #label {
-    margin-right: 4px;
-    min-width: 64px;
-    color: rgb(255, 255, 255, 100);
-}
-
-LabelOption > #widget {
-    color: rgb(255, 255, 255, 200);
-}
 
 /*
 FormWidget > #title {
@@ -534,17 +669,6 @@ PathOptionWidget QPushButton {
     max-width: 24px;
 }
 
-SeparatorOptionWidget {
-    min-height: 12px;
-    max-height: 12px;
-}
-
-SeparatorOptionWidget > #separator {
-    font: bold;
-    background-color: rgb(0, 0, 0, 25);
-    min-height: 1px;
-    max-height: 1px;
-}
 
 OptionWidget[default=true] QLineEdit,
 OptionWidget[default=true] QTextEdit {

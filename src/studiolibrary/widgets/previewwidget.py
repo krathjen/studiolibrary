@@ -21,11 +21,29 @@ class PreviewWidget(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, *args)
         studioqt.loadUi(self)
 
+        self._item = item
+
         pixmap = studioqt.Pixmap(item.thumbnailPath())
         pixmap.setColor('rgb(255,255,255,20)')
         self.ui.thumbnailLabel.setPixmap(pixmap)
 
         self._infoWidget = studiolibrary.widgets.OptionsWidget(self)
+        self._infoWidget.setTitle("Info")
         self._infoWidget.setOptions(item.info())
 
         self.ui.infoFrame.layout().addWidget(self._infoWidget)
+
+        self._optionsWidget = studiolibrary.widgets.OptionsWidget(self)
+        self._optionsWidget.setTitle("Options")
+        self._optionsWidget.setOptions(item.options())
+
+        self.ui.optionsFrame.layout().addWidget(self._optionsWidget)
+
+        self.ui.acceptButton.hide()
+        self.ui.acceptButton.setText("Load")
+        self.ui.acceptButton.clicked.connect(self.accept)
+
+    def accept(self):
+        """Called when the user clicks the load button."""
+        kwargs = self._optionsWidget.options()
+        self._item.load(**kwargs)
