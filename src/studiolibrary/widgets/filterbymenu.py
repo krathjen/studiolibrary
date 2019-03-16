@@ -38,7 +38,7 @@ class LabelAction(QtWidgets.QWidgetAction):
         :type menu: QtWidgets.QMenu
         """
         widget = QtWidgets.QFrame(self.parent())
-        widget.setObjectName("actionWidget")
+        widget.setObjectName("filterByAction")
 
         title = self._name
 
