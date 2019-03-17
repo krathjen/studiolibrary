@@ -462,13 +462,14 @@ class OptionsWidget(QtWidgets.QFrame):
         super(OptionsWidget, self).__init__(*args, **kwargs)
 
         self._widgets = []
+        self._options = []
+        self._expanded = False
         self._validator = None
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # self.setStyleSheet(STYLE)
         self.setLayout(layout)
 
         self._optionsFrame = QtWidgets.QFrame(self)
@@ -481,16 +482,17 @@ class OptionsWidget(QtWidgets.QFrame):
         self._optionsFrame.setLayout(layout)
 
         self._titleWidget = QtWidgets.QPushButton(self)
+        self._titleWidget.setCheckable(True)
         self._titleWidget.setObjectName("titleWidget")
-        self._titleWidget.clicked.connect(self._titleClicked)
+        self._titleWidget.toggled.connect(self._titleClicked)
         self._titleWidget.hide()
 
         self.layout().addWidget(self._titleWidget)
         self.layout().addWidget(self._optionsFrame)
 
-    def _titleClicked(self):
+    def _titleClicked(self, toggle):
         """Triggered when the user clicks the title widget."""
-        pass
+        self.setExpanded(not toggle)
 
     def titleWidget(self):
         """
@@ -507,6 +509,15 @@ class OptionsWidget(QtWidgets.QFrame):
         :type title: str
         """
         self.titleWidget().setText(title)
+
+    def setExpanded(self, expand):
+        """
+        Expands the options if expand is true, otherwise collapses the options.
+        
+        :type expand: bool
+        """
+        self._expanded = expand
+        self._optionsFrame.setVisible(expand)
 
     def setTitleVisible(self, visible):
         """
@@ -548,8 +559,6 @@ class OptionsWidget(QtWidgets.QFrame):
             widget.valueChanged.connect(callback)
 
             self._optionsFrame.layout().addWidget(widget)
-
-        self._optionsFrame.layout().addStretch(0)
 
     def _optionChanged(self, widget):
         """

@@ -784,12 +784,15 @@ OptionWidget > #label {
 }
 
 OptionsWidget #titleWidget {
-    min-height: 18px;
-    max-height: 18px;
     font-size: 12px;
-    padding: 3px;
+    padding: 2px;
+    padding-left: 5px;
     background-color: rgb(255, 255, 255, 20);
     border-bottom: 0px solid rgb(255, 255, 255, 20);
+}
+
+OptionsWidget #titleWidget:checked {
+    background-color: rgb(255, 255, 255, 5);
 }
 
 OptionsWidget #optionsFrame {
