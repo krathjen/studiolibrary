@@ -489,10 +489,32 @@ class OptionsWidget(QtWidgets.QFrame):
         self.layout().addWidget(self._optionsFrame)
 
     def _titleClicked(self):
+        """Triggered when the user clicks the title widget."""
         pass
 
+    def titleWidget(self):
+        """
+        Get the title widget.
+        
+        :rtype: QWidget
+        """
+        return self._titleWidget
+
     def setTitle(self, title):
-        self._titleWidget.setText(title)
+        """
+        Set the text for the title widget.
+        
+        :type title: str
+        """
+        self.titleWidget().setText(title)
+
+    def setTitleVisible(self, visible):
+        """
+        A convenience method for setting the title visible.
+        
+        :type visible: bool
+        """
+        self.titleWidget().setVisible(visible)
 
     def reset(self):
         """Reset all option widgets back to their default value."""

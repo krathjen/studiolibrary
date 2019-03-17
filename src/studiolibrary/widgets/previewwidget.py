@@ -28,14 +28,19 @@ class PreviewWidget(QtWidgets.QWidget):
         self.ui.thumbnailLabel.setPixmap(pixmap)
 
         self._infoWidget = studiolibrary.widgets.OptionsWidget(self)
-        self._infoWidget.setTitle("Info")
+        self._infoWidget.setTitle("INFO")
+        self._infoWidget.setTitleVisible(True)
         self._infoWidget.setOptions(item.info())
 
         self.ui.infoFrame.layout().addWidget(self._infoWidget)
 
         self._optionsWidget = studiolibrary.widgets.OptionsWidget(self)
-        self._optionsWidget.setTitle("Options")
-        self._optionsWidget.setOptions(item.options())
+        self._optionsWidget.setTitle("OPTIONS")
+
+        options = item.options()
+        if options:
+            self._optionsWidget.setOptions(options)
+            self._optionsWidget.setTitleVisible(True)
 
         self.ui.optionsFrame.layout().addWidget(self._optionsWidget)
 
