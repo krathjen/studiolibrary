@@ -82,6 +82,17 @@ class OptionWidget(QtWidgets.QFrame):
         """
         return self._label
 
+    def state(self):
+        """
+        Get the current state of the option.
+        
+        :rtype: dict
+        """
+        return {
+            "name": self._option["name"],
+            "value": self.value()
+        }
+
     def option(self):
         """
         Get the option data for the widget.
@@ -266,7 +277,7 @@ class OptionWidget(QtWidgets.QFrame):
         self._widget = widget
         self._widget.setObjectName('widget')
         self._widget.setSizePolicy(
-            QtWidgets.QSizePolicy.Preferred,
+            QtWidgets.QSizePolicy.Ignored,
             QtWidgets.QSizePolicy.Preferred,
         )
 
@@ -450,6 +461,7 @@ class SeparatorOptionWidget(OptionWidget):
 class OptionsWidget(QtWidgets.QFrame):
 
     accepted = QtCore.Signal(object)
+    stateChanged = QtCore.Signal()
 
     OptionWidgetMap = {
         "bool": BoolOptionWidget,
@@ -463,7 +475,6 @@ class OptionsWidget(QtWidgets.QFrame):
 
         self._widgets = []
         self._options = []
-        self._expanded = False
         self._validator = None
 
         layout = QtWidgets.QVBoxLayout(self)
@@ -493,6 +504,7 @@ class OptionsWidget(QtWidgets.QFrame):
     def _titleClicked(self, toggle):
         """Triggered when the user clicks the title widget."""
         self.setExpanded(not toggle)
+        self.stateChanged.emit()
 
     def titleWidget(self):
         """
@@ -516,8 +528,21 @@ class OptionsWidget(QtWidgets.QFrame):
         
         :type expand: bool
         """
-        self._expanded = expand
-        self._optionsFrame.setVisible(expand)
+        self._titleWidget.blockSignals(True)
+
+        try:
+            self._titleWidget.setChecked(not expand)
+            self._optionsFrame.setVisible(expand)
+        finally:
+            self._titleWidget.blockSignals(False)
+
+    def isExpanded(self):
+        """
+        Returns true if the item is expanded, otherwise returns false.
+        
+        :rtype: bool
+        """
+        return self._optionsFrame.isVisible()
 
     def setTitleVisible(self, visible):
         """
@@ -566,6 +591,7 @@ class OptionsWidget(QtWidgets.QFrame):
         
         :type widget: OptionWidget 
         """
+        self.stateChanged.emit()
         self.validate()
 
     def accept(self):
@@ -630,11 +656,16 @@ class OptionsWidget(QtWidgets.QFrame):
         
         :rtype: dict 
         """
-        state = {}
+        options = []
+
         for widget in self._widgets:
-            name = widget.option().get('name')
-            state.setdefault(name, {})
-            state[name]['value'] = widget.value()
+            options.append(widget.state())
+
+        state = {
+            "options": options,
+            "expanded": self.isExpanded()
+        }
+
         return state
 
     def setState(self, state):
@@ -643,7 +674,14 @@ class OptionsWidget(QtWidgets.QFrame):
         
         :type state: dict 
         """
-        self._setState(state)
+        expanded = state.get('expanded')
+        if expanded is not None:
+            self.setExpanded(expanded)
+
+        options = state.get("options")
+        if options is not None:
+            self._setState(options)
+
         self.validate()
 
     def _setState(self, options):

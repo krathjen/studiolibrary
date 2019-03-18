@@ -31,11 +31,13 @@ class PreviewWidget(QtWidgets.QWidget):
         self._infoWidget.setTitle("INFO")
         self._infoWidget.setTitleVisible(True)
         self._infoWidget.setOptions(item.info())
+        self._infoWidget.stateChanged.connect(self._stateChanged)
 
         self.ui.infoFrame.layout().addWidget(self._infoWidget)
 
         self._optionsWidget = studiolibrary.widgets.OptionsWidget(self)
         self._optionsWidget.setTitle("OPTIONS")
+        self._optionsWidget.stateChanged.connect(self._stateChanged)
 
         options = item.options()
         if options:
@@ -47,6 +49,59 @@ class PreviewWidget(QtWidgets.QWidget):
         self.ui.acceptButton.hide()
         self.ui.acceptButton.setText("Load")
         self.ui.acceptButton.clicked.connect(self.accept)
+
+        self.loadSettings()
+
+    def _stateChanged(self):
+        """Triggered when the user changes the options."""
+        self.saveSettings()
+
+    def settingsPath(self):
+        """
+        Get the user settings path for the item.
+        
+        :rtype: str
+        """
+        return studiolibrary.localPath("ItemSettings.json")
+
+    def readSettings(self):
+        """
+        Return the local settings from the location of the SETTING_PATH.
+    
+        :rtype: dict
+        """
+        return studiolibrary.readJson(self.settingsPath())
+
+    def loadSettings(self):
+        """Load the user settings for the preview widget."""
+        data = self.readSettings()
+
+        name = self._item.__class__.__name__
+
+        state = data.get(name, {}).get("optionsWidget")
+        if state is not None:
+            self._optionsWidget.setState(state)
+
+        expand = data.get("infoExpanded")
+        if expand is not None:
+            self._infoWidget.setExpanded(expand)
+
+        expand = data.get("optionsExpanded")
+        if expand is not None:
+            self._optionsWidget.setExpanded(expand)
+
+    def saveSettings(self):
+        """Save the current user state for the preview widget."""
+
+        name = self._item.__class__.__name__
+
+        data = {
+            "infoExpanded": self._infoWidget.isExpanded(),
+            "optionsExpanded": self._optionsWidget.isExpanded(),
+            name: {"optionsWidget": self._optionsWidget.state()}
+        }
+
+        studiolibrary.updateJson(self.settingsPath(), data)
 
     def accept(self):
         """Called when the user clicks the load button."""

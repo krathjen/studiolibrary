@@ -42,11 +42,19 @@ class FolderItem(studiolibrary.LibraryItem):
         if os.path.isdir(path):
             return True
 
+    def options(self):
+        """
+        Get the options used for loading.
+        
+        :rtype: list[dict] 
+        """
+        return []
+
     def info(self):
         """
         Get the info to display to user.
         
-        :rtype: dict
+        :rtype: list[dict]
         """
         created = os.stat(self.path()).st_ctime
         created = datetime.fromtimestamp(created).strftime("%Y-%m-%d %H:%M %p")
