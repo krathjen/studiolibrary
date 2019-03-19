@@ -30,25 +30,35 @@ class GlobalSignals(QtCore.QObject):
     blendChanged = QtCore.Signal(float)
 
 
-class IconThread(QtCore.QThread):
-    """A convenience class for loading an icon in a thread."""
-
+class WorkerSignals(QtCore.QObject):
     triggered = QtCore.Signal(object)
 
-    def __init__(self, path, *args):
-        QtCore.QThread.__init__(self, *args)
 
+class ImageWorker(QtCore.QRunnable):
+    """A convenience class for loading an image in a thread."""
+
+    def __init__(self, *args):
+        QtCore.QRunnable.__init__(self, *args)
+
+        self._path = None
+        self.signals = WorkerSignals()
+
+    def setPath(self, path):
+        """
+        Set the image path to be processed.
+        
+        :type path: str
+        """
         self._path = path
 
     def run(self):
-        """
-        The starting point for the thread.
-
-        :rtype: None 
-        """
-        if self._path:
-            image = QtGui.QImage(unicode(self._path))
-            self.triggered.emit(image)
+        """The starting point for the thread."""
+        try:
+            if self._path:
+                image = QtGui.QImage(unicode(self._path))
+                self.signals.triggered.emit(image)
+        except Exception as error:
+            logger.exception("Cannot load thumbnail image.")
 
 
 class Item(QtWidgets.QTreeWidgetItem):
@@ -57,13 +67,15 @@ class Item(QtWidgets.QTreeWidgetItem):
     SortRole = "SortRole"
     DataRole = "DataRole"
 
+    ThreadPool = QtCore.QThreadPool()
+
     MAX_ICON_SIZE = 256
 
     DEFAULT_FONT_SIZE = 13
     DEFAULT_PLAYHEAD_COLOR = QtGui.QColor(255, 255, 255, 220)
 
     THUMBNAIL_COLUMN = 0
-    ENABLE_THUMBNAIL_THREAD = False  # Still in development/testing
+    ENABLE_THUMBNAIL_THREAD = True
 
     _globalSignals = GlobalSignals()
     blendChanged = _globalSignals.blendChanged
@@ -110,6 +122,11 @@ class Item(QtWidgets.QTreeWidgetItem):
         self._blendPreviousValue = 0.0
         self._blendPosition = None
         self._blendingEnabled = False
+
+        self._worker = ImageWorker()
+        self._worker.setAutoDelete(False)
+        self._worker.signals.triggered.connect(self._thumbnailFromImage)
+        self._workerStarted = False
 
     def __eq__(self, other):
         return id(other) == id(self)
@@ -280,6 +297,10 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :rtype: None 
         """
+        self.clearCache()
+
+    def clearCache(self):
+        """Clear the thumbnail cache."""
         self._pixmap = {}
         self._pixmapRect = None
         self._pixmapScaled = None
@@ -461,12 +482,15 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type image: QtGui.QImage
         :rtype: None  
         """
+        self.clearCache()
+
         pixmap = QtGui.QPixmap()
         pixmap.convertFromImage(image)
         icon = QtGui.QIcon(pixmap)
 
         self._thumbnailIcon = icon
-        self.itemsWidget().update()
+        if self.itemsWidget():
+            self.itemsWidget().update()
 
     def thumbnailIcon(self):
         """
@@ -481,11 +505,14 @@ class Item(QtWidgets.QTreeWidgetItem):
             thumbnailPath = studiolibrary.resource().icon("thumbnail", color=color)
 
         if not self._thumbnailIcon:
+            if self.ENABLE_THUMBNAIL_THREAD and not self._workerStarted:
+                self._workerStarted = True
+                self._worker.setPath(thumbnailPath)
 
-            if self.ENABLE_THUMBNAIL_THREAD and not self._thread:
-                self._thread = IconThread(thumbnailPath)
-                self._thread.triggered.connect(self._thumbnailFromImage)
-                self._thread.start()
+                self.ThreadPool.start(self._worker)
+
+                color = self.textColor()
+                self._thumbnailIcon = studiolibrary.resource().icon("thumbnail", color=color)
             else:
                 self._thumbnailIcon = QtGui.QIcon(thumbnailPath)
 
