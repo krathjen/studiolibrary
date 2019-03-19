@@ -616,7 +616,7 @@ class OptionsWidget(QtWidgets.QFrame):
             state = self._validator(**options)
             self._setState(state)
         else:
-            logger.warning("No validator set.")
+            logger.debug("No validator set.")
 
     def value(self, name):
         """
@@ -683,6 +683,13 @@ class OptionsWidget(QtWidgets.QFrame):
             self._setState(options)
 
         self.validate()
+
+    def setStateFromOptions(self, options):
+        state = []
+        for option in options:
+            state.append({"name": option, "value": options[option]})
+
+        self._setState(state)
 
     def _setState(self, options):
         for widget in self._widgets:

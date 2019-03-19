@@ -62,6 +62,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self._item = None
         self._iconPath = ""
         self._scriptJob = None
+        self._optionsWidget = None
 
         self.setItem(item)
         self.loadSettings()
@@ -152,10 +153,32 @@ class BasePreviewWidget(QtWidgets.QWidget):
         """
         self._item = item
 
+        if hasattr(self.ui, "titleLabel"):
+            self.ui.titleLabel.setText(item.MenuName)
+
+        if hasattr(self.ui, "iconLabel"):
+            self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+
         if hasattr(self.ui, "infoFrame"):
             infoWidget = studiolibrary.widgets.OptionsWidget(self)
             infoWidget.setOptions(item.info())
             self.ui.infoFrame.layout().addWidget(infoWidget)
+
+        if hasattr(self.ui, "optionsFrame"):
+            optionsWidget = studiolibrary.widgets.OptionsWidget(self)
+
+            options = item.options()
+            if options:
+                optionsWidget.setOptions(item.options())
+                optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
+                optionsWidget.stateChanged.connect(self.optionsChanged)
+                self.ui.optionsFrame.layout().addWidget(optionsWidget)
+                self._optionsWidget = optionsWidget
+            else:
+                self.ui.optionsToggleBox.setVisible(False)
+
+    def optionsChanged(self):
+        self.item().optionsChanged(**self._optionsWidget.options())
 
     def iconPath(self):
         """
@@ -466,7 +489,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         :rtype: None
         """
         try:
-            self.item().load()
+            self.item().loadFromSettings()
         except Exception as error:
             self.item().showErrorDialog("Error while loading", str(error))
             raise

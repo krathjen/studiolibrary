@@ -65,7 +65,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="iconLabel">
        <property name="maximumSize">
         <size>
          <width>13</width>
@@ -84,17 +84,23 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="titleLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="font">
         <font>
-         <family>Arial</family>
          <pointsize>11</pointsize>
-         <weight>50</weight>
-         <bold>false</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font-size: 11pt;</string>
+       </property>
        <property name="text">
-        <string>Mirror Table</string>
+        <string>Title</string>
        </property>
       </widget>
      </item>
@@ -583,145 +589,34 @@ QPushButton:!Checked {
           <number>3</number>
          </property>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_19">
-           <property name="spacing">
-            <number>2</number>
+          <widget class="QFrame" name="optionsFrame">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="leftMargin">
-            <number>0</number>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
            </property>
-           <property name="topMargin">
-            <number>0</number>
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
            </property>
-           <item>
-            <widget class="QLabel" name="label_20">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>2</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="mirrorAnimationCheckBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>4</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Animation</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_16">
-           <property name="spacing">
-            <number>2</number>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
            </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="label_12">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>2</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>70</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Option</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="mirrorOptionComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>4</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>24</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <item>
-              <property name="text">
-               <string>swap</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>left to right</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>right to left</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>3</number>
+            </property>
+            <property name="margin">
+             <number>0</number>
+            </property>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>

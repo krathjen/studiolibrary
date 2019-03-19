@@ -123,6 +123,41 @@ class BaseItem(studiolibrary.LibraryItem):
             },
         ]
 
+    def optionsFromSettings(self):
+        """
+        Get the options from the user settings.
+        
+        :rtype: dict 
+        """
+        settings = self.settings()
+        settings = settings.get(self.__class__.__name__, {})
+        return settings.get("options", self.defaultOptions())
+
+    def optionsChanged(self, **options):
+        """
+        Triggered when the user changes the options.
+        
+        :type options: dict
+        """
+        settings = self.settings()
+        settings[self.__class__.__name__] = {"options": options}
+
+        data = studiolibrarymaya.settings()
+        studiolibrarymaya.saveSettings(data)
+
+    def defaultOptions(self):
+        """
+        Triggered when the user changes the options.
+        
+        :rtype: dict
+        """
+        options = {}
+
+        for option in self.options():
+            options[option.get('name')] = option.get('default')
+
+        return options
+
     def setTransferClass(self, classname):
         """
         Set the transfer class used to read and write the data.

@@ -94,23 +94,41 @@ class MirrorItem(baseitem.BaseItem):
 
         return info
 
+    def options(self):
+        """
+        Get the options for the item.
+        
+        :rtype: list[dict]
+        """
+        return [
+            {
+                "name": "animation",
+                "type": "bool",
+                "default": False
+            },
+            {
+                "name": "option",
+                "type": "enum",
+                "default": "swap",
+                "items": ["swap", "left to right", "right to left"],
+            },
+        ]
+
     def doubleClicked(self):
         """Overriding this method to load the item on double click."""
         self.loadFromSettings()
 
     def loadFromSettings(self):
         """Load the mirror table using the settings for this item."""
-        mirrorOption = self.settings().get("mirrorOption")
-        mirrorAnimation = self.settings().get("mirrorAnimation")
+        kwargs = self.optionsFromSettings()
         namespaces = self.namespaces()
         objects = maya.cmds.ls(selection=True) or []
 
         try:
             self.load(
                 objects=objects,
-                option=mirrorOption,
-                animation=mirrorAnimation,
                 namespaces=namespaces,
+                **kwargs
             )
         except Exception as error:
             self.showErrorDialog("Item Error", str(error))
@@ -128,6 +146,15 @@ class MirrorItem(baseitem.BaseItem):
         :type time: list[int]
         """
         objects = objects or []
+
+        if option.lower() == "swap":
+            option = 0
+        elif option.lower() == "left to right":
+            option = 1
+        elif option.lower() == "right to left":
+            option = 2
+        else:
+            raise Exception('Wrong value passed to load: option=' + str(option))
 
         self.transferObject().load(
             objects=objects,
@@ -256,71 +283,6 @@ class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
         )
 
 
-class MirrorPreviewWidget(basepreviewwidget.BasePreviewWidget):
-
-    def __init__(self, *args, **kwargs):
-        """
-        :type parent: QtWidgets.QWidget
-        :type item: MirrorItem
-        """
-        super(MirrorPreviewWidget, self).__init__(*args, **kwargs)
-
-        self.ui.mirrorAnimationCheckBox.stateChanged.connect(self.saveSettings)
-        self.ui.mirrorOptionComboBox.currentIndexChanged.connect(self.saveSettings)
-
-    def mirrorOption(self):
-        """
-        Return the current mirror option.
-
-        :rtype: str
-        """
-        text = self.ui.mirrorOptionComboBox.currentText()
-        return self.ui.mirrorOptionComboBox.findText(text, QtCore.Qt.MatchExactly)
-
-    def mirrorAnimation(self):
-        """
-        Return True if the animation should also be mirrored.
-
-        :rtype: bool
-        """
-        return self.ui.mirrorAnimationCheckBox.isChecked()
-
-    def settings(self):
-        """
-        Return the state of the preview widget.
-
-        :rtype: dict
-        """
-        settings = super(MirrorPreviewWidget, self).settings()
-
-        settings["mirrorOption"] = int(self.mirrorOption())
-        settings["mirrorAnimation"] = bool(self.mirrorAnimation())
-
-        return settings
-
-    def setSettings(self, settings):
-        """
-        Set the state of the preview widget.
-
-        :type settings: dict
-        """
-        super(MirrorPreviewWidget, self).setSettings(settings)
-
-        mirrorOption = int(settings.get("mirrorOption"))
-        mirrorAnimation = bool(settings.get("mirrorAnimation"))
-
-        self.ui.mirrorOptionComboBox.setCurrentIndex(mirrorOption)
-        self.ui.mirrorAnimationCheckBox.setChecked(mirrorAnimation)
-
-    def accept(self):
-        """
-        Called by the base class when the user clicks the apply button.
-
-        :rtype: None
-        """
-        self.item().loadFromSettings()
-
-
 # Register the mirror table item to the Studio Library
 iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
 
@@ -329,6 +291,6 @@ MirrorItem.MenuName = "Mirror Table"
 MirrorItem.MenuIconPath = iconPath
 MirrorItem.TypeIconPath = iconPath
 MirrorItem.CreateWidgetClass = MirrorCreateWidget
-MirrorItem.PreviewWidgetClass = MirrorPreviewWidget
+MirrorItem.PreviewWidgetClass = basepreviewwidget.BasePreviewWidget
 
 studiolibrary.registerItem(MirrorItem)
