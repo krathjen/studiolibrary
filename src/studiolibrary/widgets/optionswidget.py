@@ -377,6 +377,62 @@ class BoolOptionWidget(OptionWidget):
         super(BoolOptionWidget, self).setValue(value)
 
 
+class RangeOptionWidget(OptionWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(RangeOptionWidget, self).__init__(*args, **kwargs)
+
+        widget = QtWidgets.QFrame(self)
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(3)
+        widget.setLayout(layout)
+
+        self._minwidget = QtWidgets.QSpinBox(self)
+        self._minwidget.valueChanged.connect(self.emitValueChanged)
+        widget.layout().addWidget(self._minwidget)
+
+        self._maxwidget = QtWidgets.QSpinBox(self)
+        self._maxwidget.valueChanged.connect(self.emitValueChanged)
+        widget.layout().addWidget(self._maxwidget)
+
+        self.setWidget(widget)
+
+    def value(self):
+        """
+        Get the current range.
+        
+        :rtype: list[int] 
+        """
+        return int(self._minwidget.value()), int(self._maxwidget.value())
+
+    def setValue(self, value):
+        """
+        Set the current range.
+        
+        :type value: list[int] 
+        """
+        minValue, maxValue = value
+
+        self._minwidget.setValue(minValue)
+        self._maxwidget.setValue(maxValue)
+
+        super(RangeOptionWidget, self).setValue(value)
+
+    def setOption(self, state):
+        """
+        Overriding this method to set the range on the spin boxes.
+        
+        :type: dict
+        """
+        super(RangeOptionWidget, self).setOption(state)
+
+        minValue, maxValue = self.default()
+
+        self._minwidget.setRange(minValue, maxValue)
+        self._maxwidget.setRange(minValue, maxValue)
+
+
 class EnumOptionWidget(OptionWidget):
 
     def __init__(self, *args, **kwargs):
@@ -467,6 +523,7 @@ class OptionsWidget(QtWidgets.QFrame):
         "bool": BoolOptionWidget,
         "enum": EnumOptionWidget,
         "label": LabelOptionWidget,
+        "range": RangeOptionWidget,
         "separator": SeparatorOptionWidget
     }
 
