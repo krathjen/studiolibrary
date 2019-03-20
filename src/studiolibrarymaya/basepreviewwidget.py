@@ -74,10 +74,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
         except NameError as error:
             logger.exception(error)
 
-        path = self.item().thumbnailPath()
-        if os.path.exists(path):
-            self.setIconPath(path)
-
+        self.createSequenceWidget()
         self.updateThumbnailSize()
         self.setupConnections()
 
@@ -103,6 +100,27 @@ class BasePreviewWidget(QtWidgets.QWidget):
         self.ui.infoToggleBoxButton.toggled[bool].connect(self.ui.infoToggleBoxFrame.setVisible)
         self.ui.optionsToggleBoxButton.toggled[bool].connect(self.ui.optionsToggleBoxFrame.setVisible)
         self.ui.namespaceToggleBoxButton.toggled[bool].connect(self.ui.namespaceToggleBoxFrame.setVisible)
+
+    def createSequenceWidget(self):
+        """
+        Create a sequence widget to replace the static thumbnail widget.
+
+        :rtype: None
+        """
+        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
+        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
+        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+        self.ui.thumbnailButton.hide()
+        self.ui.thumbnailButton = self.ui.sequenceWidget
+
+        path = self.item().thumbnailPath()
+        if os.path.exists(path):
+            self.setIconPath(path)
+
+        if self.item().imageSequencePath():
+            self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
 
     def isEditable(self):
         """
@@ -165,10 +183,10 @@ class BasePreviewWidget(QtWidgets.QWidget):
             self.ui.infoFrame.layout().addWidget(infoWidget)
 
         if hasattr(self.ui, "optionsFrame"):
-            optionsWidget = studiolibrary.widgets.OptionsWidget(self)
 
             options = item.options()
             if options:
+                optionsWidget = studiolibrary.widgets.OptionsWidget(self)
                 optionsWidget.setOptions(item.options())
                 optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
                 optionsWidget.stateChanged.connect(self.optionsChanged)
