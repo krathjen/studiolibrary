@@ -131,7 +131,20 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         settings = self.settings()
         settings = settings.get(self.__class__.__name__, {})
-        return settings.get("options", self.defaultOptions())
+
+        options = settings.get("options", {})
+
+        # Remove options from the user settings that are not persistent
+        if options:
+            for option in self.options():
+                name = option.get("name")
+                persistent = option.get("persistent", True)
+                if not persistent and name in options:
+                    del options[name]
+        else:
+            options = self.defaultOptions()
+
+        return options
 
     def optionsChanged(self, **options):
         """
