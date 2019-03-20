@@ -135,8 +135,7 @@ class LibraryWindow(QtWidgets.QWidget):
     def destroyInstances():
         """Delete all library widget instances."""
         for widget in LibraryWindow.instances():
-            widget.hide()
-            widget.close()
+            widget.destroy()
 
         LibraryWindow._instances = {}
 
@@ -460,6 +459,14 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
+
+    def destroy(self):
+        """Destroy the current library window instance."""
+        self.hide()
+        self.close()
+        self.itemsWidget().clear()
+        self.library().clear()
+        super(LibraryWindow, self).destroy()
 
     def setKwargs(self, kwargs):
         """

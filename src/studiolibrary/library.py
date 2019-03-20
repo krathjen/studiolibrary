@@ -276,6 +276,13 @@ class Library(QtCore.QObject):
         else:
             logger.info('No path set for saving the data to disc.')
 
+    def clear(self):
+        """Clear all the item data."""
+        self._items = []
+        self._results = []
+        self._groupedResults = {}
+        self.dataChanged.emit()
+
     def sync(self):
         """Sync the file system with the database."""
         if not self.path():
