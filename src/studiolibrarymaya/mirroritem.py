@@ -291,6 +291,5 @@ MirrorItem.MenuName = "Mirror Table"
 MirrorItem.MenuIconPath = iconPath
 MirrorItem.TypeIconPath = iconPath
 MirrorItem.CreateWidgetClass = MirrorCreateWidget
-MirrorItem.PreviewWidgetClass = basepreviewwidget.BasePreviewWidget
 
 studiolibrary.registerItem(MirrorItem)

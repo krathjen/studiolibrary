@@ -19,6 +19,9 @@ import studioqt
 import studiolibrary
 import studiolibrarymaya
 
+from studiolibrarymaya import basecreatewidget
+from studiolibrarymaya import basepreviewwidget
+
 try:
     import mutils
     import mutils.gui
@@ -43,6 +46,8 @@ class NamespaceOption:
 class BaseItem(studiolibrary.LibraryItem):
 
     """Base class for anim, pose, mirror and sets transfer items."""
+    CreateWidgetClass = basecreatewidget.BaseCreateWidget
+    PreviewWidgetClass = basepreviewwidget.BasePreviewWidget
 
     @classmethod
     def showCreateWidget(cls, libraryWindow):

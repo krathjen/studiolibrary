@@ -104,6 +104,5 @@ SetsItem.MenuName = "Selection Set"
 SetsItem.MenuIconPath = iconPath
 SetsItem.TypeIconPath = iconPath
 SetsItem.CreateWidgetClass = SetsCreateWidget
-SetsItem.PreviewWidgetClass = basepreviewwidget.BasePreviewWidget
 
 studiolibrary.registerItem(SetsItem)
