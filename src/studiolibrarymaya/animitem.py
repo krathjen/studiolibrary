@@ -47,7 +47,6 @@ import shutil
 import logging
 
 from studioqt import QtGui
-from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studioqt
@@ -57,13 +56,11 @@ import studiolibrary.widgets
 
 from studiolibrarymaya import baseitem
 from studiolibrarymaya import basecreatewidget
-from studiolibrarymaya import basepreviewwidget
 
 try:
     import mutils
     import mutils.gui
     import maya.cmds
-    PasteOption = mutils.PasteOption
 except ImportError as error:
     print(error)
 
@@ -72,7 +69,6 @@ __all__ = [
     "AnimItem",
     "AnimItemError",
     "AnimCreateWidget",
-    "AnimPreviewWidget",
 ]
 
 logger = logging.getLogger(__name__)
@@ -121,18 +117,65 @@ class AnimItem(baseitem.BaseItem):
 
         return info
 
-    def previewWidget(self, libraryWindow):
+    def options(self):
         """
-        Return the widget to be shown when the user clicks on the item.
-
-        Overriding this method to add support for loading many animations.
-
-        :type libraryWindow: studiolibrary.LibraryWindow
-        :rtype: AnimationPreviewWidget
+        Get the options for the item.
+        
+        :rtype: list[dict]
         """
-        items = libraryWindow.selectedItems()
-        self.setItems(items)
-        return AnimPreviewWidget(parent=None, item=self)
+        startFrame = self.startFrame() or 0
+        endFrame = self.endFrame() or 0
+
+        return [
+            {
+                "name": "connect",
+                "type": "bool",
+                "default": False
+            },
+            {
+                "name": "currentTime",
+                "type": "bool",
+                "default": True
+            },
+            {
+                "name": "source",
+                "type": "range",
+                "default": [startFrame, endFrame],
+                "persistent": False,
+            },
+            {
+                "name": "option",
+                "type": "enum",
+                "default": "replace all",
+                "items": ["replace", "replace all", "insert", "merge"],
+            },
+        ]
+
+    def optionsChanged(self, **options):
+        """
+        Triggered when the user changes options.
+        
+        This method is not yet used. It will be used to change the state of 
+        the options widget. For example the help image.
+        
+        :type options: dict
+        """
+        super(AnimItem, self).optionsChanged(**options)
+
+        option = options.get("option")
+        connect = options.get("connect")
+
+        if option == "replace all":
+            basename = "replaceCompletely"
+            # self.ui.connectCheckBox.setEnabled(False)
+        else:
+            basename = option
+            # self.ui.connectCheckBox.setEnabled(True)
+
+        if connect and basename != "replaceCompletely":
+            basename += "Connect"
+
+        logger.debug(basename)
 
     def imageSequencePath(self):
         """
@@ -142,18 +185,6 @@ class AnimItem(baseitem.BaseItem):
         """
         return self.path() + "/sequence"
 
-    def items(self):
-        """
-        :rtype: list[AnimItem]
-        """
-        return self._items
-
-    def setItems(self, items):
-        """
-        :type items: list[AnimItem]
-        """
-        self._items = items
-
     def startFrame(self):
         """Return the start frame for the animation."""
         return self.transferObject().startFrame()
@@ -162,47 +193,13 @@ class AnimItem(baseitem.BaseItem):
         """Return the end frame for the animation."""
         return self.transferObject().endFrame()
 
-    def doubleClicked(self):
-        """Overriding this method to load the animation on double click."""
-        self.loadFromSettings()
-
-    def loadFromSettings(self, sourceStart=None, sourceEnd=None):
-        """
-        Load the animation using the settings for this item.
-
-        :type sourceStart: int
-        :type sourceEnd: int
-        """
-        objects = maya.cmds.ls(selection=True) or []
-        namespaces = self.namespaces()
-
-        settings = self.settings()
-        option = str(settings.get("pasteOption"))
-        connect = bool(settings.get("connectOption"))
-        currentTime = bool(settings.get("currentTime"))
-
-        try:
-            self.load(
-                objects=objects,
-                option=option,
-                connect=connect,
-                namespaces=namespaces,
-                currentTime=currentTime,
-                sourceStart=sourceStart,
-                sourceEnd=sourceEnd,
-            )
-
-        except Exception as error:
-            self.showErrorDialog("Item Error", str(error))
-            raise
-
+    @mutils.showWaitCursor
     def load(
         self,
         objects=None,
         namespaces=None,
         startFrame=None,
-        sourceStart=None,
-        sourceEnd=None,
+        source=None,
         option=None,
         connect=None,
         currentTime=False,
@@ -211,8 +208,7 @@ class AnimItem(baseitem.BaseItem):
         :type objects: list[str]
         :type namespaces: list[str]
         :type startFrame: bool
-        :type sourceStart: int
-        :type sourceEnd: int
+        :type source: int
         :type option: PasteOption or str
         :type connect: bool
         :type currentTime: bool
@@ -222,42 +218,29 @@ class AnimItem(baseitem.BaseItem):
 
         objects = objects or []
 
+        if option.lower() == "replace all":
+            option = "replaceCompletely"
+
+        if source and source != [0, 0]:
+            sourceStart, sourceEnd = source
+        else:
+            sourceStart, sourceEnd = (None, None)
+
         if sourceStart is None:
             sourceStart = self.startFrame()
 
         if sourceEnd is None:
             sourceEnd = self.endFrame()
 
-        items = self.items()
-
-        if len(items) > 1:
-
-            paths = []
-            for item in items:
-                path = item.transferObject().path()
-                paths.append(path)
-
-            mutils.loadAnims(
-                paths=paths,
-                spacing=5,
-                objects=objects,
-                namespaces=namespaces,
-                currentTime=currentTime,
-                option=option,
-                connect=connect,
-                startFrame=startFrame,
-                showDialog=True,
-            )
-        else:
-            self.transferObject().load(
-                objects=objects,
-                namespaces=namespaces,
-                currentTime=currentTime,
-                connect=connect,
-                option=option,
-                startFrame=startFrame,
-                sourceTime=(sourceStart, sourceEnd)
-            )
+        self.transferObject().load(
+            objects=objects,
+            namespaces=namespaces,
+            currentTime=currentTime,
+            connect=connect,
+            option=option,
+            startFrame=startFrame,
+            sourceTime=(sourceStart, sourceEnd)
+        )
 
         logger.info(u'Loaded: {0}'.format(self.path()))
 
@@ -620,160 +603,6 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
             startFrame=startFrame,
             bakeConnected=bakeConnected,
             metadata=metadata
-        )
-
-
-class AnimPreviewWidget(basepreviewwidget.BasePreviewWidget):
-
-    def __init__(self, *args, **kwargs):
-        """
-        :type item: AnimItem
-        :type libraryWindow: studiolibrary.LibraryWindow
-        """
-        super(AnimPreviewWidget, self).__init__(*args, **kwargs)
-
-        self._items = []
-
-        self.createSequenceWidget()
-
-        self.connect(self.ui.currentTime, QtCore.SIGNAL("stateChanged(int)"), self.saveSettings)
-        self.connect(self.ui.helpCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.showHelpImage)
-        self.connect(self.ui.connectCheckBox, QtCore.SIGNAL('stateChanged(int)'), self.connectChanged)
-        self.connect(self.ui.option, QtCore.SIGNAL('currentIndexChanged(const QString&)'), self.optionChanged)
-
-    def createSequenceWidget(self):
-        """
-        Create a sequence widget to replace the static thumbnail widget.
-
-        :rtype: None
-        """
-        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
-        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
-        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
-        self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
-
-        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
-        self.ui.thumbnailButton.hide()
-        self.ui.thumbnailButton = self.ui.sequenceWidget
-
-    def setItem(self, item):
-        """
-        :type item: AnimItem
-        :rtype: None
-        """
-        super(AnimPreviewWidget, self).setItem(item)
-
-        startFrame = str(item.startFrame())
-        endFrame = str(item.endFrame())
-
-        self.ui.sourceStartEdit.setText(startFrame)
-        self.ui.sourceEndEdit.setText(endFrame)
-
-    def setItems(self, items):
-        """
-        :rtype: list[AnimItem]
-        """
-        self._items = items
-
-    def sourceStart(self):
-        """
-        :rtype int
-        """
-        return int(self.ui.sourceStartEdit.text())
-
-    def sourceEnd(self):
-        """
-        :rtype int
-        """
-        return int(self.ui.sourceEndEdit.text())
-
-    def showHelpImage(self, value, save=True):
-        """
-        :type value:
-        :type save:
-        """
-        if value:
-            self.ui.helpImage.show()
-        else:
-            self.ui.helpImage.hide()
-
-        if save:
-            self.saveSettings()
-
-    def settings(self):
-        """
-        :rtype: dict
-        """
-        settings = super(AnimPreviewWidget, self).settings()
-
-        settings["pasteOption"] = str(self.ui.option.currentText())
-        settings["currentTime"] = bool(self.ui.currentTime.isChecked())
-        settings["showHelpImage"] = bool(self.ui.helpCheckBox.isChecked())
-        settings["connectOption"] = float(self.ui.connectCheckBox.isChecked())
-
-        return settings
-
-    def setSettings(self, settings):
-        """
-        :type settings: dict
-        """
-        connect = settings.get("connectOption")
-        pasteOption = settings.get("pasteOption")
-        currentTime = settings.get("currentTime")
-        showHelpImage = settings.get("showHelpImage")
-
-        self.ui.currentTime.setChecked(currentTime)
-        self.ui.connectCheckBox.setChecked(bool(connect))
-        self.ui.helpCheckBox.setChecked(showHelpImage)
-
-        self.optionChanged(pasteOption, save=False)
-        self.showHelpImage(showHelpImage, save=False)
-
-        super(AnimPreviewWidget, self).setSettings(settings)
-
-    def connectChanged(self, value):
-        """
-        :type value: bool
-        """
-        self.optionChanged(str(self.ui.option.currentText()))
-
-    def optionChanged(self, text, save=True):
-        """
-        :type text: str
-        :type save: bool
-        """
-        imageText = text
-
-        if text == "replace all":
-            imageText = "replaceCompletely"
-            self.ui.connectCheckBox.setEnabled(False)
-        else:
-            self.ui.connectCheckBox.setEnabled(True)
-
-        connect = ""
-        if self.ui.connectCheckBox.isChecked() and text != "replace all":
-            connect = "Connect"
-
-        basename = "{0}{1}".format(imageText, connect)
-        imageIcon = studiolibrarymaya.resource().icon(basename)
-
-        self.ui.helpImage.setIcon(imageIcon)
-        index = self.ui.option.findText(text)
-        if index:
-            self.ui.option.setCurrentIndex(index)
-        if save:
-            self.saveSettings()
-
-    def accept(self):
-        """
-        :rtype: None
-        """
-        sourceStart = self.sourceStart()
-        sourceEnd = self.sourceEnd()
-
-        self.item().loadFromSettings(
-            sourceStart=sourceStart,
-            sourceEnd=sourceEnd
         )
 
 
