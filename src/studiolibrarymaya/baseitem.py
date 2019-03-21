@@ -84,6 +84,8 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         studiolibrary.LibraryItem.__init__(self, *args, **kwargs)
 
+        self._currentOptions = []
+
         self._namespaces = []
         self._namespaceOption = NamespaceOption.FromSelection
 
@@ -138,6 +140,7 @@ class BaseItem(studiolibrary.LibraryItem):
         settings = settings.get(self.__class__.__name__, {})
 
         options = settings.get("options", {})
+        defaultOptions = self.defaultOptions()
 
         # Remove options from the user settings that are not persistent
         if options:
@@ -145,9 +148,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 name = option.get("name")
                 persistent = option.get("persistent", True)
                 if not persistent and name in options:
-                    del options[name]
-        else:
-            options = self.defaultOptions()
+                    options[name] = defaultOptions[name]
 
         return options
 
@@ -160,8 +161,18 @@ class BaseItem(studiolibrary.LibraryItem):
         settings = self.settings()
         settings[self.__class__.__name__] = {"options": options}
 
+        self._currentOptions = options
+
         data = studiolibrarymaya.settings()
         studiolibrarymaya.saveSettings(data)
+
+    def currentOptions(self):
+        """
+        Get the current options set by the user.
+        
+        :rtype: dict 
+        """
+        return self._currentOptions or self.optionsFromSettings()
 
     def defaultOptions(self):
         """
@@ -486,7 +497,39 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: None
         """
-        self.load()
+        self.loadFromCurrentOptions()
+
+    def loadFromSettings(self):
+        """Load the mirror table using the settings for this item."""
+        kwargs = self.optionsFromSettings()
+        namespaces = self.namespaces()
+        objects = maya.cmds.ls(selection=True) or []
+
+        try:
+            self.load(
+                objects=objects,
+                namespaces=namespaces,
+                **kwargs
+            )
+        except Exception as error:
+            self.showErrorDialog("Item Error", str(error))
+            raise
+
+    def loadFromCurrentOptions(self):
+        """Load the mirror table using the settings for this item."""
+        kwargs = self.currentOptions()
+        namespaces = self.namespaces()
+        objects = maya.cmds.ls(selection=True) or []
+
+        try:
+            self.load(
+                objects=objects,
+                namespaces=namespaces,
+                **kwargs
+            )
+        except Exception as error:
+            self.showErrorDialog("Item Error", str(error))
+            raise
 
     def load(self, objects=None, namespaces=None, **kwargs):
         """
