@@ -27,8 +27,8 @@ import studiolibrary
 
 class LibrariesMenu(QtWidgets.QMenu):
 
-    def __init__(self, parent=None, libraryWindow=None):
-        super(LibrariesMenu, self).__init__(parent)
+    def __init__(self, libraryWindow=None):
+        super(LibrariesMenu, self).__init__(libraryWindow)
 
         self.setTitle('Libraries')
 
