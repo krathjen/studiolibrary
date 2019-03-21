@@ -318,7 +318,7 @@ QComboBox::drop-down {
     /*background-color: rgb(255, 255, 255, 0);*/
 /*}*/
 
-QComboBox, QLineEdit, QComboBox QAbstractItemView:item {
+QComboBox, QSpinBox, QLineEdit, QComboBox QAbstractItemView:item {
 	height: 25px;
 	padding: 0 4px;
 	/*font-size: 14px;*/
@@ -779,7 +779,7 @@ OptionWidget {
 
 OptionWidget > #label {
     margin-right: 4px;
-    min-width: 64px;
+    min-width: 72px;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
 }
 
