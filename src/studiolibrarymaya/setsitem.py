@@ -16,17 +16,17 @@ import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
-from studiolibrarymaya import basecreatewidget
 
 
-__all__ = [
-    "SetsItem",
-    "SetsCreateWidget",
-    "SetsPreviewWidget",
-]
+iconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
 
 
 class SetsItem(baseitem.BaseItem):
+
+    Extensions = [".set"]
+    MenuName = "Selection Set"
+    MenuIconPath = iconPath
+    TypeIconPath = iconPath
 
     def __init__(self, *args, **kwargs):
         """
@@ -81,24 +81,5 @@ class SetsItem(baseitem.BaseItem):
         super(SetsItem, self).save(path, contents=contents, **kwargs)
 
 
-class SetsCreateWidget(basecreatewidget.BaseCreateWidget):
-
-    def __init__(self, item=None, parent=None):
-        """
-        :type parent: QtWidgets.QWidget
-        :type item: SelectionSetItem
-        """
-        item = item or SetsItem()
-        super(SetsCreateWidget, self).__init__(item, parent=parent)
-
-
 # Register the selection set item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
-
-SetsItem.Extensions = [".set"]
-SetsItem.MenuName = "Selection Set"
-SetsItem.MenuIconPath = iconPath
-SetsItem.TypeIconPath = iconPath
-SetsItem.CreateWidgetClass = SetsCreateWidget
-
 studiolibrary.registerItem(SetsItem)
