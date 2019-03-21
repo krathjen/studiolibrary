@@ -506,8 +506,4 @@ class BasePreviewWidget(QtWidgets.QWidget):
         
         :rtype: None
         """
-        try:
-            self.item().loadFromCurrentOptions()
-        except Exception as error:
-            self.item().showErrorDialog("Error while loading", str(error))
-            raise
+        self.item().loadFromCurrentOptions()
