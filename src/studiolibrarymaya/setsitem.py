@@ -17,7 +17,7 @@ import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
 from studiolibrarymaya import basecreatewidget
-from studiolibrarymaya import basepreviewwidget
+
 
 __all__ = [
     "SetsItem",
@@ -37,11 +37,7 @@ class SetsItem(baseitem.BaseItem):
         self.setTransferBasename("set.json")
         self.setTransferClass(mutils.SelectionSet)
 
-    def doubleClicked(self):
-        """Overriding this method to load the item on double click."""
-        self.loadFromSettings()
-
-    def loadFromSettings(self):
+    def loadFromCurrentOptions(self):
         """Load the selection set using the settings for this item."""
         namespaces = self.namespaces()
         self.load(namespaces=namespaces)

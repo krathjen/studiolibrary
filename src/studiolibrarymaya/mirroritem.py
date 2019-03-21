@@ -114,26 +114,6 @@ class MirrorItem(baseitem.BaseItem):
             },
         ]
 
-    def doubleClicked(self):
-        """Overriding this method to load the item on double click."""
-        self.loadFromSettings()
-
-    def loadFromSettings(self):
-        """Load the mirror table using the settings for this item."""
-        kwargs = self.optionsFromSettings()
-        namespaces = self.namespaces()
-        objects = maya.cmds.ls(selection=True) or []
-
-        try:
-            self.load(
-                objects=objects,
-                namespaces=namespaces,
-                **kwargs
-            )
-        except Exception as error:
-            self.showErrorDialog("Item Error", str(error))
-            raise
-
     @mutils.showWaitCursor
     def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):
         """
