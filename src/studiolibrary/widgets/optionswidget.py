@@ -48,15 +48,22 @@ class OptionWidget(QtWidgets.QFrame):
     """
     valueChanged = QtCore.Signal()
 
-    def __init__(self, *args, **kwargs):
-        super(OptionWidget, self).__init__(*args, **kwargs)
+    def __init__(self, parent=None, options=None):
+        super(OptionWidget, self).__init__(parent)
 
-        self._option = {}
+        self._option = options or {}
         self._widget = None
         self._default = None
         self._required = None
 
-        layout = QtWidgets.QHBoxLayout(self)
+        direction = self._option.get("layout", "horizontal")
+        self.setProperty("layout", direction)
+
+        if direction == "vertical":
+            layout = QtWidgets.QVBoxLayout(self)
+        else:
+            layout = QtWidgets.QHBoxLayout(self)
+
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
@@ -65,14 +72,19 @@ class OptionWidget(QtWidgets.QFrame):
 
         self._label = QtWidgets.QLabel(self)
         self._label.setObjectName('label')
-        self._label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self._label.setSizePolicy(
             QtWidgets.QSizePolicy.Preferred,
             QtWidgets.QSizePolicy.Preferred,
         )
 
         layout.addWidget(self._label)
-        layout.setStretchFactor(self._label, 2)
+
+        if direction == "vertical":
+            self._label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        else:
+            layout.setStretchFactor(self._label, 2)
+
+            self._label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
     def label(self):
         """
@@ -298,6 +310,30 @@ class OptionWidget(QtWidgets.QFrame):
         self.setStyleSheet(self.styleSheet())
 
 
+class Label(QtWidgets.QLabel):
+
+    """A custom label which supports elide right."""
+
+    def __init__(self, *args):
+        super(Label, self).__init__(*args)
+        self._text = ''
+
+    def setText(self, text):
+        """
+        Overriding this method to store the original text.
+        
+        :type text: str
+        """
+        self._text = text
+        QtWidgets.QLabel.setText(self, text)
+
+    def resizeEvent(self, event):
+        """Overriding this method to modify the text with elided text."""
+        metrics = QtGui.QFontMetrics(self.font())
+        elided = metrics.elidedText(self._text, QtCore.Qt.ElideRight, self.width())
+        QtWidgets.QLabel.setText(self, elided)
+
+
 class LabelOptionWidget(OptionWidget):
 
     def __init__(self, *args, **kwargs):
@@ -325,28 +361,58 @@ class LabelOptionWidget(OptionWidget):
         super(LabelOptionWidget, self).setValue(value)
 
 
-class Label(QtWidgets.QLabel):
+class StringOptionWidget(OptionWidget):
 
-    """A custom label which supports elide right."""
+    def __init__(self, *args, **kwargs):
+        super(StringOptionWidget, self).__init__(*args, **kwargs)
 
-    def __init__(self, *args):
-        super(Label, self).__init__(*args)
-        self._text = ''
+        widget = QtWidgets.QLineEdit(self)
+        widget.textChanged.connect(self.emitValueChanged)
+        self.setWidget(widget)
 
-    def setText(self, text):
+    def value(self):
         """
-        Overriding this method to store the original text.
+        Get the value of the widget.
         
-        :type text: str
+        :rtype: str 
         """
-        self._text = text
-        QtWidgets.QLabel.setText(self, text)
+        return str(self.widget().text())
 
-    def resizeEvent(self, event):
-        """Overriding this method to modify the text with elided text."""
-        metrics = QtGui.QFontMetrics(self.font())
-        elided = metrics.elidedText(self._text, QtCore.Qt.ElideRight, self.width())
-        QtWidgets.QLabel.setText(self, elided)
+    def setValue(self, value):
+        """
+        Set the string value for the widget.
+        
+        :type value: str 
+        """
+        self.widget().setText(value)
+        super(StringOptionWidget, self).setValue(value)
+
+
+class TextOptionWidget(OptionWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(TextOptionWidget, self).__init__(*args, **kwargs)
+
+        widget = QtWidgets.QTextEdit(self)
+        widget.textChanged.connect(self.emitValueChanged)
+        self.setWidget(widget)
+
+    def value(self):
+        """
+        Get the text value of the text edit.
+        
+        :rtype: str 
+        """
+        return str(self.widget().toPlainText())
+
+    def setValue(self, value):
+        """
+        Set the text value for the text edit.
+        
+        :type value: str 
+        """
+        self.widget().setText(value)
+        super(TextOptionWidget, self).setValue(value)
 
 
 class BoolOptionWidget(OptionWidget):
@@ -522,8 +588,10 @@ class OptionsWidget(QtWidgets.QFrame):
     OptionWidgetMap = {
         "bool": BoolOptionWidget,
         "enum": EnumOptionWidget,
+        "text": TextOptionWidget,
         "label": LabelOptionWidget,
         "range": RangeOptionWidget,
+        "string": StringOptionWidget,
         "separator": SeparatorOptionWidget
     }
 
@@ -627,7 +695,7 @@ class OptionsWidget(QtWidgets.QFrame):
                 logger.warning("Cannot find widget for %s", option)
                 continue
 
-            widget = cls()
+            widget = cls(options=option)
             widget.setOption(option)
 
             value = option.get('value')
