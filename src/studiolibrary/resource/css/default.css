@@ -767,6 +767,9 @@ SeparatorOptionWidget > #widget {
     border-bottom: 1px solid rgb(255, 255, 255, 20);
 }
 
+TextOptionWidget QTextEdit {
+    max-height: 96px;
+}
 
 OptionsWidget QWidget {
     /*font-size: 12px;*/
@@ -774,12 +777,14 @@ OptionsWidget QWidget {
 }
 
 OptionWidget {
+    min-height: 24px;
     margin-bottom: 3px;
 }
 
 OptionWidget > #label {
     margin-right: 4px;
     min-width: 72px;
+    min-height: 24px;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
 }
 
