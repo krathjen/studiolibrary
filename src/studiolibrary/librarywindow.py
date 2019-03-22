@@ -463,6 +463,7 @@ class LibraryWindow(QtWidgets.QWidget):
     def destroy(self):
         """Destroy the current library window instance."""
         self.hide()
+        self.closePreviewWidget()
         self.close()
         self.itemsWidget().clear()
         self.library().clear()
