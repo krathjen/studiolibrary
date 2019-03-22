@@ -55,6 +55,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self._iconPath = ""
         self._scriptJob = None
         self._focusWidget = None
+        self._optionsWidget = None
         self._libraryWindow = None
 
         text = "Click to capture a thumbnail from the current model panel.\n" \
@@ -111,6 +112,17 @@ class BaseCreateWidget(QtWidgets.QWidget):
         :type item: studiolibrarymaya.BaseItem
         """
         self._item = item
+
+        if hasattr(self.ui, "optionsFrame"):
+            options = item.options()
+            if options:
+                optionsWidget = studiolibrary.widgets.OptionsWidget(self)
+                optionsWidget.setOptions(item.saveOptions())
+                optionsWidget.setValidator(item.saveValidator)
+                self.ui.optionsFrame.layout().addWidget(optionsWidget)
+                self._optionsWidget = optionsWidget
+            else:
+                self.ui.optionsFrame.setVisible(False)
 
     def iconPath(self):
         """
@@ -237,9 +249,10 @@ class BaseCreateWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        count = self.objectCount()
-        plural = "s" if count > 1 else ""
-        self.ui.contains.setText(str(count) + " Object" + plural)
+        if hasattr(self.ui, "contains"):
+            count = self.objectCount()
+            plural = "s" if count > 1 else ""
+            self.ui.contains.setText(str(count) + " Object" + plural)
 
     def objectCount(self):
         """
@@ -315,6 +328,9 @@ class BaseCreateWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.updateContains()
+
+        if self._optionsWidget:
+            self._optionsWidget.validate()
 
     def _thumbnailCaptured(self, path):
         """
