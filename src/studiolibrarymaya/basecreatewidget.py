@@ -113,6 +113,12 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         self._item = item
 
+        if hasattr(self.ui, "titleLabel"):
+            self.ui.titleLabel.setText(item.MenuName)
+
+        if hasattr(self.ui, "iconLabel"):
+            self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+
         if hasattr(self.ui, "optionsFrame"):
             options = item.options()
             if options:

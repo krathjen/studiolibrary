@@ -357,14 +357,6 @@ class PoseItem(baseitem.BaseItem):
         logger.info(u'Saved: {0}'.format(path))
 
 
-class PoseCreateWidget(basecreatewidget.BaseCreateWidget):
-
-    def __init__(self, item=None, parent=None):
-        """"""
-        item = item or PoseItem()
-        super(PoseCreateWidget, self).__init__(item, parent=parent)
-
-
 class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
 
     def __init__(self, *args, **kwargs):
@@ -478,7 +470,6 @@ PoseItem.MenuName = "Pose"
 PoseItem.MenuOrder = 4
 PoseItem.MenuIconPath = iconPath
 PoseItem.TypeIconPath = iconPath
-PoseItem.CreateWidgetClass = PoseCreateWidget
 PoseItem.PreviewWidgetClass = PosePreviewWidget
 
 studiolibrary.registerItem(PoseItem)
