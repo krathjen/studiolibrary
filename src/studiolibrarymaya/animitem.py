@@ -345,7 +345,7 @@ class AnimCreateWidget(basecreatewidget.BaseCreateWidget):
 
         :rtype: None
         """
-        self.ui.sequenceWidget = studioqt.ImageSequenceWidget(self)
+        self.ui.sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self)
         self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
         self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
 

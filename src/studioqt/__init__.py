@@ -24,4 +24,3 @@ from studioqt.decorators import showWaitCursor
 from studioqt.decorators import showArrowCursor
 
 from studioqt.imagesequence import ImageSequence
-from studioqt.imagesequence import ImageSequenceWidget

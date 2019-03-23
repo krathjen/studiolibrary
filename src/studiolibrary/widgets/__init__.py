@@ -30,3 +30,4 @@ from .librariesmenu import LibrariesMenu
 from .slideraction import SliderAction
 from .separatoraction import SeparatorAction
 from .colorpicker import ColorPickerAction, ColorPickerWidget
+from .sequencewidget import ImageSequenceWidget
