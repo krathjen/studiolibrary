@@ -120,7 +120,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
             self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
         if hasattr(self.ui, "optionsFrame"):
-            options = item.options()
+            options = item.saveOptions()
             if options:
                 optionsWidget = studiolibrary.widgets.OptionsWidget(self)
                 optionsWidget.setOptions(item.saveOptions())

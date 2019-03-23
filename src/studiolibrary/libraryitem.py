@@ -173,9 +173,17 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return []
 
-    def options(self, *args, **kwargs):
+    def loadOptions(self):
         """
-        Get the options to pass to the load method.
+        Get the options used to load the item.
+        
+        :rtype: list[dict]
+        """
+        return []
+
+    def saveOptions(self):
+        """
+        Get the options used to save the item.
         
         :rtype: list[dict]
         """

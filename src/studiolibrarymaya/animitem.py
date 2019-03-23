@@ -117,7 +117,7 @@ class AnimItem(baseitem.BaseItem):
 
         return info
 
-    def options(self):
+    def loadOptions(self):
         """
         Get the options for the item.
         

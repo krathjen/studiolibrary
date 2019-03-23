@@ -42,14 +42,6 @@ class FolderItem(studiolibrary.LibraryItem):
         if os.path.isdir(path):
             return True
 
-    def options(self):
-        """
-        Get the options used for loading.
-        
-        :rtype: list[dict] 
-        """
-        return []
-
     def info(self):
         """
         Get the info to display to user.

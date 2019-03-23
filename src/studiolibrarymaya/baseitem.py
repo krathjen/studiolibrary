@@ -144,7 +144,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         # Remove options from the user settings that are not persistent
         if options:
-            for option in self.options():
+            for option in self.loadOptions():
                 name = option.get("name")
                 persistent = option.get("persistent", True)
                 if not persistent and name in options:
@@ -182,10 +182,26 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         options = {}
 
-        for option in self.options():
+        for option in self.loadOptions():
             options[option.get('name')] = option.get('default')
 
         return options
+
+    def loadOptions(self):
+        """
+        Get the options used to load the item.
+        
+        :rtype: list[dict]
+        """
+        return []
+
+    def saveOptions(self):
+        """
+        Get the options used to save the item.
+        
+        :rtype: list[dict]
+        """
+        return []
 
     def setTransferClass(self, classname):
         """

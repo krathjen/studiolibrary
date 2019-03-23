@@ -184,10 +184,10 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
         if hasattr(self.ui, "optionsFrame"):
 
-            options = item.options()
+            options = item.loadOptions()
             if options:
                 optionsWidget = studiolibrary.widgets.OptionsWidget(self)
-                optionsWidget.setOptions(item.options())
+                optionsWidget.setOptions(item.loadOptions())
                 optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
                 optionsWidget.stateChanged.connect(self.optionsChanged)
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
