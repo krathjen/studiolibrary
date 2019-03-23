@@ -415,6 +415,42 @@ class TextOptionWidget(OptionWidget):
         super(TextOptionWidget, self).setValue(value)
 
 
+class IntOptionWidget(OptionWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(IntOptionWidget, self).__init__(*args, **kwargs)
+
+        validator = QtGui.QIntValidator(-50000000, 50000000, self)
+
+        widget = QtWidgets.QLineEdit(self)
+        widget.setValidator(validator)
+        widget.textChanged.connect(self.emitValueChanged)
+        self.setWidget(widget)
+
+    def value(self):
+        """
+        Get the int value for the widget.
+        
+        :rtype: int 
+        """
+        value = self.widget().text()
+        if value.strip() == '':
+            value = self.default()
+
+        return int(str(value))
+
+    def setValue(self, value):
+        """
+        Set the int value for the widget.
+        
+        :type value: int
+        """
+        if value == '':
+            value = self.default()
+
+        self.widget().setText(str(int(value)))
+
+
 class BoolOptionWidget(OptionWidget):
 
     def __init__(self, *args, **kwargs):
@@ -586,6 +622,7 @@ class OptionsWidget(QtWidgets.QFrame):
     stateChanged = QtCore.Signal()
 
     OptionWidgetMap = {
+        "int": IntOptionWidget,
         "bool": BoolOptionWidget,
         "enum": EnumOptionWidget,
         "text": TextOptionWidget,

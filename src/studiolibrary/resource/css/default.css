@@ -803,17 +803,16 @@ OptionsWidget #optionsFrame {
     margin: 2px;
 }
 
-
-OptionWidget[default=true] QLineEdit,
-OptionWidget[default=true] QTextEdit {
-    border: 1px solid rgb(240, 150, 0, 255);
-    background-color: rgb(240, 150, 0, 100);
-}
-
 OptionWidget QComboBox {
     border: 1px solid transparent;
 }
 /*
+OptionWidget[default=false] QLineEdit,
+OptionWidget[default=false] QTextEdit {
+    border: 1px solid rgb(240, 150, 0, 255);
+    background-color: rgb(240, 150, 0, 100);
+}
+
 OptionWidget[default=true] QComboBox {
     border-radius: 2px;
     border: 1px solid rgb(150, 150, 150, 100);
