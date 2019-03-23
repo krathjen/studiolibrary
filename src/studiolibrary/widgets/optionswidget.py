@@ -296,6 +296,43 @@ class OptionWidget(QtWidgets.QFrame):
         self.layout().addWidget(self._widget)
         self.layout().setStretchFactor(self._widget, 4)
 
+        self.createMenuButton()
+
+    def createMenuButton(self):
+        """Create the menu button to show the actions."""
+        menu = self.option().get("menu", {})
+        actions = self.option().get("actions", {})
+
+        if menu or actions:
+
+            name = menu.get("name", "...")
+            callback = menu.get("callback", self.showMenu)
+
+            button = QtWidgets.QPushButton(name)
+            button.setObjectName("menuButton")
+            button.clicked.connect(callback)
+
+            self.layout().addWidget(button)
+
+    def showMenu(self):
+        """Show the menu using the actions from the options."""
+        menu = QtWidgets.QMenu(self)
+        actions = self.option().get("actions", [])
+
+        for action in actions:
+
+            name = action.get("name", "No name found")
+            callback = action.get("callback")
+
+            action = menu.addAction(name)
+            action.triggered.connect(callback)
+
+        point = QtGui.QCursor.pos()
+        point.setX(point.x() + 3)
+        point.setY(point.y() + 3)
+
+        menu.exec_(point)
+
     def widget(self,):
         """
         Get the widget used to set and get the option value.

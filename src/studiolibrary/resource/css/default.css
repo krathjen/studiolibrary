@@ -781,6 +781,15 @@ OptionWidget {
     margin-bottom: 3px;
 }
 
+OptionWidget #menuButton {
+    margin-left: 4px;
+    border-radius: 2px;
+    min-width: 25px;
+    max-height: 25px;
+    text-align: center;
+    background-color: rgb(0,0,0,20);
+}
+
 OptionWidget > #label {
     margin-right: 4px;
     min-width: 72px;
