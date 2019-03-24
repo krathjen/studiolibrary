@@ -151,7 +151,7 @@ class AnimItem(baseitem.BaseItem):
             },
         ]
 
-    def optionsChanged(self, **options):
+    def loadValidator(self, **options):
         """
         Triggered when the user changes options.
         
@@ -176,6 +176,8 @@ class AnimItem(baseitem.BaseItem):
             basename += "Connect"
 
         logger.debug(basename)
+
+        return []
 
     def imageSequencePath(self):
         """

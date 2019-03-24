@@ -813,7 +813,9 @@ class OptionsWidget(QtWidgets.QFrame):
         if self._validator:
             options = self.options()
             state = self._validator(**options)
-            self._setState(state)
+
+            if state is not None:
+                self._setState(state)
         else:
             logger.debug("No validator set.")
 

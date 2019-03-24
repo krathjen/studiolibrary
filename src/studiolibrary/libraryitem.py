@@ -181,10 +181,28 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return []
 
+    def loadValidator(self, **options):
+        """
+        Validate the current load options.
+        
+        :type options: dict
+        :rtype: list[dict]
+        """
+        return []
+
     def saveOptions(self):
         """
         Get the options used to save the item.
         
+        :rtype: list[dict]
+        """
+        return []
+
+    def saveValidator(self, **options):
+        """
+        Validate the current save options.
+        
+        :type options: dict
         :rtype: list[dict]
         """
         return []

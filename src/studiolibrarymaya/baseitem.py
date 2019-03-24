@@ -187,22 +187,6 @@ class BaseItem(studiolibrary.LibraryItem):
 
         return options
 
-    def loadOptions(self):
-        """
-        Get the options used to load the item.
-        
-        :rtype: list[dict]
-        """
-        return []
-
-    def saveOptions(self):
-        """
-        Get the options used to save the item.
-        
-        :rtype: list[dict]
-        """
-        return []
-
     def setTransferClass(self, classname):
         """
         Set the transfer class used to read and write the data.
