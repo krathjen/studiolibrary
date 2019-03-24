@@ -55,6 +55,7 @@ class OptionWidget(QtWidgets.QFrame):
         self._widget = None
         self._default = None
         self._required = None
+        self._actionResult = None
 
         direction = self._option.get("layout", "horizontal")
         self.setProperty("layout", direction)
@@ -314,6 +315,14 @@ class OptionWidget(QtWidgets.QFrame):
 
             self.layout().addWidget(button)
 
+    def actionCallback(self, callback):
+        """
+        Wrap schema callback to get the return value.
+        
+        :type callback: func 
+        """
+        self._actionResult = callback()
+
     def showMenu(self):
         """Show the menu using the actions from the options."""
         menu = QtWidgets.QMenu(self)
@@ -324,14 +333,22 @@ class OptionWidget(QtWidgets.QFrame):
             name = action.get("name", "No name found")
             callback = action.get("callback")
 
+            func = functools.partial(self.actionCallback, callback)
+
             action = menu.addAction(name)
-            action.triggered.connect(callback)
+            action.triggered.connect(func)
 
         point = QtGui.QCursor.pos()
         point.setX(point.x() + 3)
         point.setY(point.y() + 3)
 
+        # Reset the action results
+        self._actionResult = None
+
         menu.exec_(point)
+
+        if self._actionResult is not None:
+            self.setValue(self._actionResult)
 
     def widget(self,):
         """
