@@ -10,47 +10,13 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-#---------------------------------------------------------------------------
-# Saving a mirror table item
-#---------------------------------------------------------------------------
-
-from studiolibrarymaya import mirroritem
-
-path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
-objects = maya.cmds.ls(selection=True) or []
-leftSide = "Lf"
-rightSide = "Rf"
-
-item = mirroritem.MirrorItem(path)
-item.save(objects=objects, leftSide=leftSide, rightSide=rightSide)
-
-#---------------------------------------------------------------------------
-# Loading a mirror table item
-#---------------------------------------------------------------------------
-
-from studiolibrarymaya import mirroritem
-
-path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
-objects = maya.cmds.ls(selection=True) or []
-namespaces = []
-
-item = mirroritem.MirrorItem(path)
-item.load(objects=objects, namespaces=namespaces, animation=True, time=None)
-"""
-
 import logging
-
-from studioqt import QtCore
 
 import mutils
 import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
-from studiolibrarymaya import basecreatewidget
-from studiolibrarymaya import basepreviewwidget
-
 
 try:
     import maya.cmds
@@ -58,16 +24,18 @@ except ImportError as error:
     print(error)
 
 
-__all__ = [
-    "MirrorItem",
-    "MirrorCreateWidget",
-    "MirrorPreviewWidget",
-]
-
 logger = logging.getLogger(__name__)
+
+# Register the mirror table item to the Studio Library
+iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
 
 
 class MirrorItem(baseitem.BaseItem):
+
+    Extensions = [".mirror"]
+    MenuName = "Mirror Table"
+    MenuIconPath = iconPath
+    TypeIconPath = iconPath
 
     def __init__(self, *args, **kwargs):
         """
@@ -75,6 +43,8 @@ class MirrorItem(baseitem.BaseItem):
         :type kwargs: dict
         """
         super(MirrorItem, self).__init__(*args, **kwargs)
+
+        self._validateObjects = []
 
         self.setTransferBasename("mirrortable.json")
         self.setTransferClass(mutils.MirrorTable)
@@ -144,29 +114,106 @@ class MirrorItem(baseitem.BaseItem):
             time=time,
         )
 
-    def save(
-            self,
-            objects,
-            leftSide,
-            rightSide,
-            path="",
-            iconPath="",
-            metadata=None,
-            **kwargs):
+    def saveOptions(self):
+        """
+        Get the fields used to save the item.
+        
+        :rtype: list[dict]
+        """
+        return [
+            {
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "left",
+                "type": "string",
+                "menu": {
+                    "name": "0"
+                }
+            },
+            {
+                "name": "right",
+                "type": "string",
+                "menu": {
+                    "name": "0"
+                }
+            },
+            {
+                "name": "contains",
+                "type": "label"
+            },
+            {
+                "name": "comment",
+                "type": "text",
+                "layout": "vertical"
+            }
+        ]
+
+    def saveValidator(self, **options):
+        """
+        The save validator is called when an input field has changed.
+        
+        :type options: dict 
+        :rtype: list[dict] 
+        """
+        objects = maya.cmds.ls(selection=True) or []
+        if self._validateObjects != objects:
+            self._validateObjects = objects
+
+            left = options.get("left")
+            if not left:
+                left = mutils.MirrorTable.findLeftSide(objects)
+
+            right = options.get("right")
+            if not right:
+                right = mutils.MirrorTable.findRightSide(objects)
+
+            leftSide = str(left)
+            rightSide = str(right)
+
+            mt = mutils.MirrorTable.fromObjects(
+                    [],
+                    leftSide=leftSide,
+                    rightSide=rightSide
+            )
+
+            return [
+                {
+                    "name": "left",
+                    "value": leftSide,
+                    "menu": {
+                        "name": str(mt.leftCount(objects))
+                    }
+                },
+                {
+                    "name": "right",
+                    "value": rightSide,
+                    "menu": {
+                        "name": str(mt.rightCount(objects))
+                    }
+                },
+            ]
+
+    @mutils.showWaitCursor
+    def save(self, objects, path="", iconPath="", **options):
         """
         Save the given objects to the location of the current mirror table.
 
         :type objects: list[str]
-        :type leftSide: str
-        :type rightSide: str
         :type path: str
         :type iconPath: str
-        :type metadata: None or dict
+        :type options: dict
         """
         if path and not path.endswith(".mirror"):
             path += ".mirror"
 
         logger.info("Saving: %s" % self.transferPath())
+
+        # Mapping new option names to legacy names for now
+        leftSide = options.get("left")
+        rightSide = options.get("right")
+        metadata = {"description": options.get("comment", "")}
 
         # Remove and create a new temp directory
         tempPath = mutils.createTempPath() + "/" + self.transferBasename()
@@ -181,95 +228,7 @@ class MirrorItem(baseitem.BaseItem):
         )
 
         # Move the mirror table to the given path using the base class
-        contents = [tempPath, iconPath]
-        super(MirrorItem, self).save(path, contents=contents, **kwargs)
+        super(MirrorItem, self).save(path, contents=[tempPath, iconPath])
 
-
-class MirrorCreateWidget(basecreatewidget.BaseCreateWidget):
-
-    def __init__(self, item=None, parent=None):
-        """
-        :type parent: QtWidgets.QWidget
-        :type item: MirrorItem
-        """
-        item = item or MirrorItem()
-        super(MirrorCreateWidget, self).__init__(item, parent=parent)
-
-    def leftText(self):
-        """
-        Return the naming convention for the left side.
-
-        :rtype: str
-        """
-        return str(self.ui.left.text()).strip()
-
-    def rightText(self):
-        """
-        Return the naming convention for the right side.
-
-        :rtype: str
-        """
-        return str(self.ui.right.text()).strip()
-
-    def selectionChanged(self):
-        """
-        Triggered when the user changes the Maya object selection.
-
-        :rtype: None
-        """
-        objects = maya.cmds.ls(selection=True) or []
-
-        if not self.ui.left.text():
-            self.ui.left.setText(mutils.MirrorTable.findLeftSide(objects))
-
-        if not self.ui.right.text():
-            self.ui.right.setText(mutils.MirrorTable.findRightSide(objects))
-
-        leftSide = str(self.ui.left.text())
-        rightSide = str(self.ui.right.text())
-
-        mt = mutils.MirrorTable.fromObjects(
-                [],
-                leftSide=leftSide,
-                rightSide=rightSide
-        )
-
-        self.ui.leftCount.setText(str(mt.leftCount(objects)))
-        self.ui.rightCount.setText(str(mt.rightCount(objects)))
-
-        super(MirrorCreateWidget, self).selectionChanged()
-
-    def save(self, objects, path, iconPath, metadata):
-        """
-        Called by the base class when the user clicks the save button.
-
-        :type objects: list[str]
-        :type path: str
-        :type iconPath: str
-        :type metadata: None or dict
-        :rtype: None
-        """
-        iconPath = self.iconPath()
-        leftSide = self.leftText()
-        rightSide = self.rightText()
-
-        self.item().save(
-            path=path,
-            objects=objects,
-            iconPath=iconPath,
-            metadata=metadata,
-            leftSide=leftSide,
-            rightSide=rightSide,
-        )
-
-
-# Register the mirror table item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
-
-MirrorItem.Extensions = [".mirror"]
-MirrorItem.MenuName = "Mirror Table"
-MirrorItem.MenuIconPath = iconPath
-MirrorItem.TypeIconPath = iconPath
-MirrorItem.CreateWidgetClass = MirrorCreateWidget
 
 studiolibrary.registerItem(MirrorItem)

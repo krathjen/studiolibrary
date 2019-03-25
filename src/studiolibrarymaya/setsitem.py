@@ -60,6 +60,7 @@ class SetsItem(baseitem.BaseItem):
         if path and not path.endswith(".set"):
             path += ".set"
 
+        # Mapping new option names to legacy names for now
         metadata = {"description": options.get("comment", "")}
 
         # Remove and create a new temp directory

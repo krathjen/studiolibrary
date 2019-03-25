@@ -10,33 +10,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-#---------------------------------------------------------------------------
-# Saving a pose item
-#---------------------------------------------------------------------------
-
-from studiolibrarymaya import poseitem
-
-path = "/AnimLibrary/Characters/Malcolm/malcolm.pose"
-objects = maya.cmds.ls(selection=True) or []
-
-item = poseitem.PoseItem(path)
-item.save(objects=objects)
-
-#---------------------------------------------------------------------------
-# Loading a pose item
-#---------------------------------------------------------------------------
-
-from studiolibrarymaya import poseitem
-
-path = "/AnimLibrary/Characters/Malcolm/malcolm.pose"
-objects = maya.cmds.ls(selection=True) or []
-namespaces = []
-
-item = poseitem.PoseItem(path)
-item.load(objects=objects, namespaces=namespaces, key=True, mirror=False)
-"""
-
 import logging
 
 from studioqt import QtCore
@@ -45,7 +18,6 @@ import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
-from studiolibrarymaya import basecreatewidget
 from studiolibrarymaya import basepreviewwidget
 
 try:
@@ -57,7 +29,6 @@ except ImportError as error:
 
 __all__ = [
     "PoseItem",
-    "PoseCreateWidget",
     "PosePreviewWidget"
 ]
 
@@ -340,6 +311,7 @@ class PoseItem(baseitem.BaseItem):
 
         logger.info(u'Saving: {0}'.format(path))
 
+        # Mapping new option names to legacy names for now
         metadata = {"description": options.get("comment", "")}
 
         # Remove and create a new temp directory
