@@ -48,6 +48,8 @@ class OptionWidget(QtWidgets.QFrame):
     """
     valueChanged = QtCore.Signal()
 
+    DefaultLayout = "horizontal"
+
     def __init__(self, parent=None, options=None):
         super(OptionWidget, self).__init__(parent)
 
@@ -57,7 +59,7 @@ class OptionWidget(QtWidgets.QFrame):
         self._required = None
         self._actionResult = None
 
-        direction = self._option.get("layout", "horizontal")
+        direction = self._option.get("layout", self.DefaultLayout)
         self.setProperty("layout", direction)
 
         if direction == "vertical":
@@ -443,6 +445,8 @@ class StringOptionWidget(OptionWidget):
 
 
 class TextOptionWidget(OptionWidget):
+
+    DefaultLayout = "Vertical"
 
     def __init__(self, *args, **kwargs):
         super(TextOptionWidget, self).__init__(*args, **kwargs)

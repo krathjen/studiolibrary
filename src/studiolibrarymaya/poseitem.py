@@ -326,19 +326,21 @@ class PoseItem(baseitem.BaseItem):
 
         logger.debug(u'Loaded: {0}'.format(self.path()))
 
-    def save(self, objects, path="", iconPath="", metadata=None, **kwargs):
+    def save(self, objects, path="", iconPath="", **options):
         """
         Save all the given object data to the given path on disc.
 
         :type objects: list[str]
         :type path: str
         :type iconPath: str
-        :type metadata: None or dict
+        :type options: dict
         """
         if path and not path.endswith(".pose"):
             path += ".pose"
 
         logger.info(u'Saving: {0}'.format(path))
+
+        metadata = {"description": options.get("comment", "")}
 
         # Remove and create a new temp directory
         tempPath = mutils.createTempPath() + "/" + self.transferBasename()
@@ -350,9 +352,8 @@ class PoseItem(baseitem.BaseItem):
             metadata=metadata
         )
 
-        # Move the mirror table to the given path using the base class
-        contents = [tempPath, iconPath]
-        super(PoseItem, self).save(path, contents=contents, **kwargs)
+        # Move the pose to the given path using the base class
+        super(PoseItem, self).save(path, contents=[tempPath, iconPath])
 
         logger.info(u'Saved: {0}'.format(path))
 

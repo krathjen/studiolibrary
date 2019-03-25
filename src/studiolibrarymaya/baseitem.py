@@ -63,11 +63,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         path = libraryWindow.selectedFolderPath()
 
-        if path:
-            widget.folderFrame().hide()
-        else:
-            path = libraryWindow.path()
-
+        widget.folderFrame().hide()
         widget.setFolderPath(path)
         widget.setLibraryWindow(libraryWindow)
 
@@ -85,6 +81,7 @@ class BaseItem(studiolibrary.LibraryItem):
         studiolibrary.LibraryItem.__init__(self, *args, **kwargs)
 
         self._currentOptions = []
+        self._currentSaveOptions = []
 
         self._namespaces = []
         self._namespaceOption = NamespaceOption.FromSelection
@@ -129,6 +126,47 @@ class BaseItem(studiolibrary.LibraryItem):
                 "value": self.description() or "No comment",
             },
         ]
+
+    def saveOptions(self):
+
+        return [
+            {
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "contains",
+                "type": "label"
+            },
+            {
+                "name": "comment",
+                "type": "text",
+                "layout": "vertical"
+            }
+        ]
+
+    def saveValidator(self, **options):
+
+        self._currentSaveOptions = options
+
+        selection = maya.cmds.ls(selection=True) or []
+        count = len(selection)
+        plural = "s" if count > 1 else ""
+
+        return [
+            {
+                "name": "contains",
+                "value": (str(count) + " Object" + plural)
+            },
+        ]
+
+
+    # def save(self, objects, path="", iconPath="", **options):
+    #     print(objects, path, iconPath, options)
+    #     super(BaseItem, self).save(objects, path, iconPath)
+
+
+
 
     def optionsFromSettings(self):
         """

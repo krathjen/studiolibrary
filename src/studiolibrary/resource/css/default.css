@@ -781,6 +781,14 @@ OptionWidget {
     margin-bottom: 3px;
 }
 
+OptionWidget[layout=vertical] #label {
+    margin-bottom: 4px;
+}
+
+OptionWidget[layout=horizontal] #label {
+    margin-left: 4px;
+}
+
 OptionWidget #menuButton {
     margin-left: 4px;
     border-radius: 2px;
@@ -790,8 +798,7 @@ OptionWidget #menuButton {
     background-color: rgb(0,0,0,20);
 }
 
-OptionWidget > #label {
-    margin-right: 4px;
+OptionWidget #label {
     min-width: 72px;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
 }

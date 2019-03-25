@@ -48,23 +48,19 @@ class SetsItem(baseitem.BaseItem):
         """
         self.selectContent(namespaces=namespaces)
 
-    def save(
-            self,
-            objects,
-            path="",
-            iconPath="",
-            metadata=None,
-            **kwargs):
+    def save(self, objects, path="", iconPath="", **options):
         """
         Save all the given object data to the given path on disc.
 
         :type objects: list[str]
         :type path: str
         :type iconPath: str
-        :type metadata: None or dict
+        :type options: dict
         """
         if path and not path.endswith(".set"):
             path += ".set"
+
+        metadata = {"description": options.get("comment", "")}
 
         # Remove and create a new temp directory
         tempPath = mutils.createTempPath() + "/" + self.transferBasename()
@@ -77,8 +73,7 @@ class SetsItem(baseitem.BaseItem):
         )
 
         # Move the selection set to the given path using the base class
-        contents = [tempPath, iconPath]
-        super(SetsItem, self).save(path, contents=contents, **kwargs)
+        super(SetsItem, self).save(path, contents=[tempPath, iconPath])
 
 
 # Register the selection set item to the Studio Library

@@ -127,6 +127,8 @@ class BaseCreateWidget(QtWidgets.QWidget):
                 optionsWidget.setValidator(item.saveValidator)
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
                 self._optionsWidget = optionsWidget
+
+                optionsWidget.validate()
             else:
                 self.ui.optionsFrame.setVisible(False)
 
@@ -409,8 +411,10 @@ class BaseCreateWidget(QtWidgets.QWidget):
     def accept(self):
         """Triggered when the user clicks the save button."""
         try:
-            name = self.name()
             path = self.folderPath()
+
+            options = self._optionsWidget.options()
+            name = options.get("name")
 
             objects = maya.cmds.ls(selection=True) or []
 
@@ -429,15 +433,12 @@ class BaseCreateWidget(QtWidgets.QWidget):
                     return
 
             path += "/" + name
-
             iconPath = self.iconPath()
-            metadata = {"description": self.description()}
 
             self.save(
                 objects,
                 path=path,
                 iconPath=iconPath,
-                metadata=metadata,
             )
 
         except Exception as e:
@@ -445,22 +446,24 @@ class BaseCreateWidget(QtWidgets.QWidget):
             studiolibrary.widgets.MessageBox.critical(self.libraryWindow(), title, str(e))
             raise
 
-    def save(self, objects, path, iconPath, metadata):
+    def save(self, objects, path, iconPath):
         """
         Save the item with the given objects to the given disc location path.
 
         :type objects: list[str]
         :type path: str
         :type iconPath: str
-        :type metadata: None or dict
 
         :rtype: None
         """
         item = self.item()
+
+        options = self._optionsWidget.options()
+
         item.save(
             objects,
             path=path,
             iconPath=iconPath,
-            metadata=metadata,
+            **options
         )
         self.close()
