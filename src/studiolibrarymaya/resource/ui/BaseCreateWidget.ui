@@ -94,6 +94,9 @@ background-color: rgb(254, 255, 230, 200);
          <bold>false</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font-size: 11pt;</string>
+       </property>
        <property name="text">
         <string>Title</string>
        </property>

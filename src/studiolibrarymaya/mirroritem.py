@@ -74,13 +74,15 @@ class MirrorItem(baseitem.BaseItem):
             {
                 "name": "animation",
                 "type": "bool",
-                "default": False
+                "default": False,
+                "persistent": True
             },
             {
                 "name": "option",
                 "type": "enum",
                 "default": "swap",
                 "items": ["swap", "left to right", "right to left"],
+                "persistent": True
             },
         ]
 
@@ -157,6 +159,8 @@ class MirrorItem(baseitem.BaseItem):
         :type options: dict 
         :rtype: list[dict] 
         """
+        results = super(MirrorItem, self).saveValidator(**options)
+
         objects = maya.cmds.ls(selection=True) or []
         if self._validateObjects != objects:
             self._validateObjects = objects
@@ -178,7 +182,7 @@ class MirrorItem(baseitem.BaseItem):
                     rightSide=rightSide
             )
 
-            return [
+            results.extend([
                 {
                     "name": "left",
                     "value": leftSide,
@@ -193,7 +197,9 @@ class MirrorItem(baseitem.BaseItem):
                         "name": str(mt.rightCount(objects))
                     }
                 },
-            ]
+            ])
+
+        return results
 
     @mutils.showWaitCursor
     def save(self, objects, path="", iconPath="", **options):

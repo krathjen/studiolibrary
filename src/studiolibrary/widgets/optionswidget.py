@@ -57,6 +57,7 @@ class OptionWidget(QtWidgets.QFrame):
         self._widget = None
         self._default = None
         self._required = None
+        self._menuButton = None
         self._actionResult = None
 
         direction = self._option.get("layout", self.DefaultLayout)
@@ -167,6 +168,10 @@ class OptionWidget(QtWidgets.QFrame):
 
         if label is not None:
             self.setText(label)
+
+        text = state.get("menu", {}).get("name")
+        if text is not None:
+            self.setMenuText(text)
 
         self.refresh()
 
@@ -301,6 +306,9 @@ class OptionWidget(QtWidgets.QFrame):
 
         self.createMenuButton()
 
+    def setMenuText(self, text):
+        self._menuButton.setText(text)
+
     def createMenuButton(self):
         """Create the menu button to show the actions."""
         menu = self.option().get("menu", {})
@@ -311,11 +319,11 @@ class OptionWidget(QtWidgets.QFrame):
             name = menu.get("name", "...")
             callback = menu.get("callback", self.showMenu)
 
-            button = QtWidgets.QPushButton(name)
-            button.setObjectName("menuButton")
-            button.clicked.connect(callback)
+            self._menuButton = QtWidgets.QPushButton(name)
+            self._menuButton.setObjectName("menuButton")
+            self._menuButton.clicked.connect(callback)
 
-            self.layout().addWidget(button)
+            self.layout().addWidget(self._menuButton)
 
     def actionCallback(self, callback):
         """
@@ -548,12 +556,16 @@ class RangeOptionWidget(OptionWidget):
         layout.setSpacing(3)
         widget.setLayout(layout)
 
-        self._minwidget = QtWidgets.QSpinBox(self)
-        self._minwidget.valueChanged.connect(self.emitValueChanged)
+        validator = QtGui.QIntValidator(-50000000, 50000000, self)
+
+        self._minwidget = QtWidgets.QLineEdit(self)
+        self._minwidget.setValidator(validator)
+        self._minwidget.textChanged.connect(self.emitValueChanged)
         widget.layout().addWidget(self._minwidget)
 
-        self._maxwidget = QtWidgets.QSpinBox(self)
-        self._maxwidget.valueChanged.connect(self.emitValueChanged)
+        self._maxwidget = QtWidgets.QLineEdit(self)
+        self._maxwidget.setValidator(validator)
+        self._maxwidget.textChanged.connect(self.emitValueChanged)
         widget.layout().addWidget(self._maxwidget)
 
         self.setWidget(widget)
@@ -564,7 +576,10 @@ class RangeOptionWidget(OptionWidget):
         
         :rtype: list[int] 
         """
-        return int(self._minwidget.value()), int(self._maxwidget.value())
+        min = int(float(self._minwidget.text() or "0"))
+        max = int(float(self._maxwidget.text() or "0"))
+
+        return min, max
 
     def setValue(self, value):
         """
@@ -572,25 +587,12 @@ class RangeOptionWidget(OptionWidget):
         
         :type value: list[int] 
         """
-        minValue, maxValue = value
+        minValue, maxValue = int(value[0]), int(value[1])
 
-        self._minwidget.setValue(minValue)
-        self._maxwidget.setValue(maxValue)
+        self._minwidget.setText(str(minValue))
+        self._maxwidget.setText(str(maxValue))
 
         super(RangeOptionWidget, self).setValue(value)
-
-    def setOption(self, state):
-        """
-        Overriding this method to set the range on the spin boxes.
-        
-        :type: dict
-        """
-        super(RangeOptionWidget, self).setOption(state)
-
-        minValue, maxValue = self.default()
-
-        self._minwidget.setRange(minValue, maxValue)
-        self._maxwidget.setRange(minValue, maxValue)
 
 
 class EnumOptionWidget(OptionWidget):
@@ -832,8 +834,7 @@ class OptionsWidget(QtWidgets.QFrame):
     def validate(self):
         """Validate the current options using the validator."""
         if self._validator:
-            options = self.options()
-            state = self._validator(**options)
+            state = self._validator(**self.optionsToDict())
 
             if state is not None:
                 self._setState(state)
@@ -862,6 +863,12 @@ class OptionsWidget(QtWidgets.QFrame):
                 return widget
 
     def options(self):
+        options = []
+        for widget in self._widgets:
+            options.append(widget.option())
+        return options
+
+    def optionsToDict(self):
         """
         Get all the option data.
         
@@ -905,6 +912,19 @@ class OptionsWidget(QtWidgets.QFrame):
             self._setState(options)
 
         self.validate()
+
+    def optionsState(self):
+        state = {}
+        options = self.options()
+        values = self.optionsToDict()
+
+        for option in options:
+            name = option.get("name")
+            persistent = option.get("persistent")
+            if name and persistent:
+                state[name] = values[name]
+
+        return state
 
     def setStateFromOptions(self, options):
         state = []

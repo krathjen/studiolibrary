@@ -197,7 +197,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
                 self.ui.optionsToggleBox.setVisible(False)
 
     def optionsChanged(self):
-        self.item().optionsChanged(**self._optionsWidget.options())
+        self.item().optionsChanged(**self._optionsWidget.optionsToDict())
 
     def iconPath(self):
         """

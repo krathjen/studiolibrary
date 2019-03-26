@@ -90,7 +90,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         :type event: QtCore.QEvent
         :rtype: None
         """
-        if self.isControlModifier():
+        if self.isControlModifier() and self._imageSequence.frameCount() > 1:
             percent = 1.0 - (float(self.width() - event.pos().x()) / float(self.width()))
             frame = int(self._imageSequence.frameCount() * percent)
             self._imageSequence.jumpToFrame(frame)
@@ -136,7 +136,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         painter = QtGui.QPainter()
         painter.begin(self)
 
-        if self.currentFilename():
+        if self.currentFilename() and self._imageSequence.frameCount() > 1:
 
             r = event.rect()
 

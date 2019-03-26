@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shutil
 import logging
 from functools import partial
 
@@ -597,7 +598,14 @@ class LibraryItem(studiolibrary.widgets.Item):
         if os.path.exists(path):
             self.showAlreadyExistsDialog()
 
-        studiolibrary.movePaths(contents, path)
+        if len(contents) == 1:
+            src = contents[0]
+            if os.path.isdir(src):
+                shutil.move(src, path)
+            else:
+                studiolibrary.movePaths(contents, path)
+        else:
+            studiolibrary.movePaths(contents, path)
 
         self.saveItemData()
 

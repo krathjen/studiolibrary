@@ -57,6 +57,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self._focusWidget = None
         self._optionsWidget = None
         self._libraryWindow = None
+        self._sequencePath = None
 
         text = "Click to capture a thumbnail from the current model panel.\n" \
                "CTRL + Click to show the capture window for better framing."
@@ -76,9 +77,29 @@ class BaseCreateWidget(QtWidgets.QWidget):
         except NameError as error:
             logger.exception(error)
 
+        self.createSequenceWidget()
         self.setItem(item)
         self.updateContains()
         self.updateThumbnailSize()
+
+    def createSequenceWidget(self):
+        """
+        Create a sequence widget to replace the static thumbnail widget.
+
+        :rtype: None
+        """
+        self.ui.sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self)
+        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
+        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+
+        icon = studiolibrarymaya.resource().icon("thumbnail2")
+        self.ui.sequenceWidget.setIcon(icon)
+
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+        self.ui.thumbnailButton.hide()
+        self.ui.thumbnailButton = self.ui.sequenceWidget
+
+        self.ui.sequenceWidget.clicked.connect(self.thumbnailCapture)
 
     def setLibraryWindow(self, libraryWindow):
         """
@@ -125,12 +146,68 @@ class BaseCreateWidget(QtWidgets.QWidget):
                 optionsWidget = studiolibrary.widgets.OptionsWidget(self)
                 optionsWidget.setOptions(item.saveOptions())
                 optionsWidget.setValidator(item.saveValidator)
+                # optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
                 self._optionsWidget = optionsWidget
+                self.loadSettings()
 
+                optionsWidget.stateChanged.connect(self._optionsChanged)
                 optionsWidget.validate()
             else:
                 self.ui.optionsFrame.setVisible(False)
+
+    def _optionsChanged(self):
+        """
+        Get the options from the user settings.
+        
+        :rtype: dict 
+        """
+        self.saveSettings()
+
+        # settings = self.item().settings()
+        # settings = settings.get(self.__class__.__name__, {})
+        #
+        # options = settings.get("saveOptions", {})
+        #
+        # state = self._optionsWidget.options()
+        #
+        # for option in self.item().saveOptions():
+        #     name = option.get("name")
+        #     persistent = option.get("persistent", True)
+        #     if name in state and persistent:
+        #         options[name] = state[name]
+        #
+        # settings = self.settings()
+        # settings[self.__class__.__name__] = {"saveOptions": options}
+        #
+        # self._currentOptions = options
+        #
+        # data = studiolibrarymaya.settings()
+        # studiolibrarymaya.saveSettings(data)
+        # return options
+
+    def loadSettings(self):
+        """
+        Return the settings object for saving the state of the widget.
+
+        :rtype: studiolibrary.Settings
+        """
+        settings = studiolibrarymaya.settings()
+        settings = settings.get(self.item().__class__.__name__, {})
+        options = settings.get("saveOptions", {})
+        if options:
+            self._optionsWidget.setStateFromOptions(options)
+
+    def saveSettings(self):
+        """
+        Save the current state of the widget to disc.
+
+        :rtype: None
+        """
+        state = self._optionsWidget.optionsState()
+        settings = studiolibrarymaya.settings()
+        settings[self.item().__class__.__name__] = {"saveOptions": state}
+        studiolibrarymaya.saveSettings(settings)
 
     def iconPath(self):
         """
@@ -161,23 +238,6 @@ class BaseCreateWidget(QtWidgets.QWidget):
         self.ui.thumbnailButton.setIcon(icon)
         self.ui.thumbnailButton.setIconSize(QtCore.QSize(200, 200))
         self.ui.thumbnailButton.setText("")
-
-    def settings(self):
-        """
-        Return the settings object for saving the state of the widget.
-
-        :rtype: studiolibrary.Settings
-        """
-        return studiolibrarymaya.settings()
-
-    def saveSettings(self):
-        """
-        Save the current state of the widget to disc.
-
-        :rtype: None
-        """
-        data = self.settings()
-        studiolibrarymaya.saveSettings(data)
 
     def showSelectionSetsMenu(self):
         """
@@ -340,23 +400,99 @@ class BaseCreateWidget(QtWidgets.QWidget):
         if self._optionsWidget:
             self._optionsWidget.validate()
 
-    def _thumbnailCaptured(self, path):
+    def _thumbnailCaptured(self, playblastPath):
         """
         Triggered when the user captures a thumbnail/playblast.
+
+        :rtype: None
+        """
+        import shutil
+
+        thumbnailPath = mutils.gui.tempThumbnailPath()
+        shutil.copyfile(playblastPath, thumbnailPath)
+
+        print(playblastPath)
+        print(thumbnailPath)
+
+        self.setIconPath(thumbnailPath)
+        self.setSequencePath(playblastPath)
+
+    def sequencePath(self):
+        """
+        Return the playblast path.
+
+        :rtype: str
+        """
+        return self._sequencePath
+
+    def setSequencePath(self, path):
+        """
+        Set the disk location for the image sequence to be saved.
 
         :type path: str
         :rtype: None
         """
-        self.setIconPath(path)
+        self._sequencePath = path
+        self.ui.sequenceWidget.setDirname(os.path.dirname(path))
 
-    def thumbnailCapture(self):
+    def showByFrameDialog(self):
         """
-        Capture a playblast and save it to the temp thumbnail path.
+        Show the by frame dialog.
 
         :rtype: None
         """
-        path = mutils.gui.tempThumbnailPath()
-        mutils.gui.thumbnailCapture(path=path, captured=self._thumbnailCaptured)
+        text = 'To help speed up the playblast you can set the "by frame" ' \
+               'to a number greater than 1. For example if the "by frame" ' \
+               'is set to 2 it will playblast every second frame.'
+
+        options = self._optionsWidget.optionsToDict()
+        byFrame = options.get("byFrame", 1)
+        startFrame, endFrame = options.get("frameRange", [None, None])
+
+        duration = 1
+        if startFrame is not None and endFrame is not None:
+            duration = endFrame - startFrame
+
+        if duration > 100 and byFrame == 1:
+
+            buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel
+
+            result = studiolibrary.widgets.MessageBox.question(
+                self.libraryWindow(),
+                title="Anim Item Tip",
+                text=text,
+                buttons=buttons,
+                enableDontShowCheckBox=True,
+            )
+
+            if result != QtWidgets.QMessageBox.Ok:
+                raise Exception("Canceled!")
+
+    def thumbnailCapture(self):
+        """Capture a playblast and save it to the temp thumbnail path."""
+        options = self._optionsWidget.optionsToDict()
+        startFrame, endFrame = options.get("frameRange", [None, None])
+        step = options.get("byFrame", 1)
+
+        # Ignore the by frame dialog when the control modifier is pressed.
+        if not studioqt.isControlModifier():
+            self.showByFrameDialog()
+
+        try:
+            playblastPath = mutils.gui.tempPlayblastPath()
+            mutils.gui.thumbnailCapture(
+                path=playblastPath,
+                startFrame=startFrame,
+                endFrame=endFrame,
+                step=step,
+                clearCache=True,
+                captured=self._thumbnailCaptured,
+            )
+
+        except Exception as e:
+            title = "Error while capturing thumbnail"
+            QtWidgets.QMessageBox.critical(self.libraryWindow(), title, str(e))
+            raise
 
     def setCaptureMenuEnabled(self, enable):
         """
@@ -413,7 +549,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         try:
             path = self.folderPath()
 
-            options = self._optionsWidget.options()
+            options = self._optionsWidget.optionsToDict()
             name = options.get("name")
 
             objects = maya.cmds.ls(selection=True) or []
@@ -458,12 +594,17 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         item = self.item()
 
-        options = self._optionsWidget.options()
+        options = self._optionsWidget.optionsToDict()
+
+        sequencePath = self.sequencePath()
+        if sequencePath:
+            sequencePath = os.path.dirname(sequencePath)
 
         item.save(
             objects,
             path=path,
             iconPath=iconPath,
+            sequencePath=sequencePath,
             **options
         )
         self.close()

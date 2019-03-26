@@ -160,14 +160,6 @@ class BaseItem(studiolibrary.LibraryItem):
             },
         ]
 
-
-    # def save(self, objects, path="", iconPath="", **options):
-    #     print(objects, path, iconPath, options)
-    #     super(BaseItem, self).save(objects, path, iconPath)
-
-
-
-
     def optionsFromSettings(self):
         """
         Get the options from the user settings.
@@ -184,7 +176,7 @@ class BaseItem(studiolibrary.LibraryItem):
         if options:
             for option in self.loadOptions():
                 name = option.get("name")
-                persistent = option.get("persistent", True)
+                persistent = option.get("persistent")
                 if not persistent and name in options:
                     options[name] = defaultOptions[name]
 
