@@ -80,8 +80,8 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         studiolibrary.LibraryItem.__init__(self, *args, **kwargs)
 
-        self._currentLoadOptions = []
-        self._currentSaveOptions = []
+        self._currentLoadSchema = []
+        self._currentSaveSchema = []
 
         self._namespaces = []
         self._namespaceOption = NamespaceOption.FromSelection
@@ -127,7 +127,7 @@ class BaseItem(studiolibrary.LibraryItem):
             },
         ]
 
-    def saveOptions(self):
+    def saveSchema(self):
 
         return [
             {
@@ -147,7 +147,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
     def saveValidator(self, **options):
 
-        self._currentSaveOptions = options
+        self._currentSaveSchema = options
 
         selection = maya.cmds.ls(selection=True) or []
         count = len(selection)
@@ -169,12 +169,12 @@ class BaseItem(studiolibrary.LibraryItem):
         settings = self.settings()
         settings = settings.get(self.__class__.__name__, {})
 
-        options = settings.get("options", {})
+        options = settings.get("loadOptions", {})
         defaultOptions = self.defaultOptions()
 
         # Remove options from the user settings that are not persistent
         if options:
-            for option in self.loadOptions():
+            for option in self.loadSchema():
                 name = option.get("name")
                 persistent = option.get("persistent")
                 if not persistent and name in options:
@@ -189,20 +189,20 @@ class BaseItem(studiolibrary.LibraryItem):
         :type options: dict
         """
         settings = self.settings()
-        settings[self.__class__.__name__] = {"options": options}
+        settings[self.__class__.__name__] = {"loadOptions": options}
 
-        self._currentLoadOptions = options
+        self._currentLoadSchema = options
 
         data = studiolibrarymaya.settings()
         studiolibrarymaya.saveSettings(data)
 
-    def currentLoadOptions(self):
+    def currentLoadSchema(self):
         """
         Get the current options set by the user.
         
         :rtype: dict 
         """
-        return self._currentLoadOptions or self.optionsFromSettings()
+        return self._currentLoadSchema or self.optionsFromSettings()
 
     def defaultOptions(self):
         """
@@ -212,7 +212,7 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         options = {}
 
-        for option in self.loadOptions():
+        for option in self.loadSchema():
             options[option.get('name')] = option.get('default')
 
         return options
@@ -547,7 +547,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
     def loadFromCurrentOptions(self):
         """Load the mirror table using the settings for this item."""
-        kwargs = self.currentLoadOptions()
+        kwargs = self.currentLoadSchema()
         namespaces = self.namespaces()
         objects = maya.cmds.ls(selection=True) or []
 

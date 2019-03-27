@@ -39,7 +39,7 @@ class PreviewWidget(QtWidgets.QWidget):
         self._optionsWidget.setTitle("OPTIONS")
         self._optionsWidget.stateChanged.connect(self._stateChanged)
 
-        options = item.loadOptions()
+        options = item.loadSchema()
         if options:
             self._optionsWidget.setOptions(options)
             self._optionsWidget.setTitleVisible(True)

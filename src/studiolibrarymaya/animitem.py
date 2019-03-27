@@ -89,7 +89,7 @@ class AnimItem(baseitem.BaseItem):
 
         return info
 
-    def loadOptions(self):
+    def loadSchema(self):
         """
         Get the options for the item.
         
@@ -201,7 +201,7 @@ class AnimItem(baseitem.BaseItem):
 
         logger.info(u'Loaded: {0}'.format(self.path()))
 
-    def saveOptions(self):
+    def saveSchema(self):
         """
         Get the anim save schema.
         

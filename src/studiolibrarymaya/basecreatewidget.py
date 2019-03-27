@@ -141,10 +141,10 @@ class BaseCreateWidget(QtWidgets.QWidget):
             self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
         if hasattr(self.ui, "optionsFrame"):
-            options = item.saveOptions()
+            options = item.saveSchema()
             if options:
                 optionsWidget = studiolibrary.widgets.OptionsWidget(self)
-                optionsWidget.setOptions(item.saveOptions())
+                optionsWidget.setOptions(item.saveSchema())
                 optionsWidget.setValidator(item.saveValidator)
                 # optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
@@ -163,28 +163,6 @@ class BaseCreateWidget(QtWidgets.QWidget):
         :rtype: dict 
         """
         self.saveSettings()
-
-        # settings = self.item().settings()
-        # settings = settings.get(self.__class__.__name__, {})
-        #
-        # options = settings.get("saveOptions", {})
-        #
-        # state = self._optionsWidget.options()
-        #
-        # for option in self.item().saveOptions():
-        #     name = option.get("name")
-        #     persistent = option.get("persistent", True)
-        #     if name in state and persistent:
-        #         options[name] = state[name]
-        #
-        # settings = self.settings()
-        # settings[self.__class__.__name__] = {"saveOptions": options}
-        #
-        # self._currentOptions = options
-        #
-        # data = studiolibrarymaya.settings()
-        # studiolibrarymaya.saveSettings(data)
-        # return options
 
     def loadSettings(self):
         """

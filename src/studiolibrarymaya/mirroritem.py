@@ -64,7 +64,7 @@ class MirrorItem(baseitem.BaseItem):
 
         return info
 
-    def loadOptions(self):
+    def loadSchema(self):
         """
         Get the options for the item.
         
@@ -116,7 +116,7 @@ class MirrorItem(baseitem.BaseItem):
             time=time,
         )
 
-    def saveOptions(self):
+    def saveSchema(self):
         """
         Get the fields used to save the item.
         

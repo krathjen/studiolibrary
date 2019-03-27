@@ -174,7 +174,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return []
 
-    def loadOptions(self):
+    def loadSchema(self):
         """
         Get the options used to load the item.
         
@@ -191,7 +191,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return []
 
-    def saveOptions(self):
+    def saveSchema(self):
         """
         Get the options used to save the item.
         
