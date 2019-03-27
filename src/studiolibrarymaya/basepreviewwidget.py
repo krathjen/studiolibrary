@@ -193,6 +193,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
                 optionsWidget.stateChanged.connect(self.optionsChanged)
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
                 self._optionsWidget = optionsWidget
+                optionsWidget.validate()
             else:
                 self.ui.optionsToggleBox.setVisible(False)
 
