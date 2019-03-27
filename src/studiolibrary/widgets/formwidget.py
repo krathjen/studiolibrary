@@ -783,7 +783,7 @@ class FormWidget(QtWidgets.QFrame):
             widget.reset()
         self.validate()
 
-    def setOptions(self, options):
+    def setSchema(self, options):
         """Set the options for the widget."""
         self._options = options
 
@@ -1040,7 +1040,7 @@ OptionWidget QTextEdit:disabled {
 
 def example1():
 
-    options = [
+    schema = [
         {
             'name': 'name',
             'value': 'Face.anim',
@@ -1059,7 +1059,7 @@ def example1():
     ]
 
     w = FormWidget()
-    w.setOptions(options)
+    w.setSchema(schema)
     w.setStyleSheet(STYLE)
 
     return w

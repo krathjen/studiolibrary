@@ -30,7 +30,7 @@ class PreviewWidget(QtWidgets.QWidget):
         self._infoWidget = studiolibrary.widgets.FormWidget(self)
         self._infoWidget.setTitle("INFO")
         self._infoWidget.setTitleVisible(True)
-        self._infoWidget.setOptions(item.info())
+        self._infoWidget.setSchema(item.info())
         self._infoWidget.stateChanged.connect(self._stateChanged)
 
         self.ui.infoFrame.layout().addWidget(self._infoWidget)
@@ -41,7 +41,7 @@ class PreviewWidget(QtWidgets.QWidget):
 
         options = item.loadSchema()
         if options:
-            self._optionsWidget.setOptions(options)
+            self._optionsWidget.setSchema(options)
             self._optionsWidget.setTitleVisible(True)
 
         self.ui.optionsFrame.layout().addWidget(self._optionsWidget)

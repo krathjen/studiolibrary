@@ -144,7 +144,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
             options = item.saveSchema()
             if options:
                 optionsWidget = studiolibrary.widgets.FormWidget(self)
-                optionsWidget.setOptions(item.saveSchema())
+                optionsWidget.setSchema(item.saveSchema())
                 optionsWidget.setValidator(item.saveValidator)
                 # optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)

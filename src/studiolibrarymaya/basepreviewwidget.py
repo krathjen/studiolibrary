@@ -179,7 +179,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
         if hasattr(self.ui, "infoFrame"):
             infoWidget = studiolibrary.widgets.FormWidget(self)
-            infoWidget.setOptions(item.info())
+            infoWidget.setSchema(item.info())
             self.ui.infoFrame.layout().addWidget(infoWidget)
 
         if hasattr(self.ui, "optionsFrame"):
@@ -187,7 +187,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
             options = item.loadSchema()
             if options:
                 optionsWidget = studiolibrary.widgets.FormWidget(self)
-                optionsWidget.setOptions(item.loadSchema())
+                optionsWidget.setSchema(item.loadSchema())
                 optionsWidget.setValidator(item.loadValidator)
                 optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
                 optionsWidget.stateChanged.connect(self.optionsChanged)
