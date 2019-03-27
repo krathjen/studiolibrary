@@ -80,7 +80,7 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         studiolibrary.LibraryItem.__init__(self, *args, **kwargs)
 
-        self._currentOptions = []
+        self._currentLoadOptions = []
         self._currentSaveOptions = []
 
         self._namespaces = []
@@ -191,18 +191,18 @@ class BaseItem(studiolibrary.LibraryItem):
         settings = self.settings()
         settings[self.__class__.__name__] = {"options": options}
 
-        self._currentOptions = options
+        self._currentLoadOptions = options
 
         data = studiolibrarymaya.settings()
         studiolibrarymaya.saveSettings(data)
 
-    def currentOptions(self):
+    def currentLoadOptions(self):
         """
         Get the current options set by the user.
         
         :rtype: dict 
         """
-        return self._currentOptions or self.optionsFromSettings()
+        return self._currentLoadOptions or self.optionsFromSettings()
 
     def defaultOptions(self):
         """
@@ -547,7 +547,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
     def loadFromCurrentOptions(self):
         """Load the mirror table using the settings for this item."""
-        kwargs = self.currentOptions()
+        kwargs = self.currentLoadOptions()
         namespaces = self.namespaces()
         objects = maya.cmds.ls(selection=True) or []
 
