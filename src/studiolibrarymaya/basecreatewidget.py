@@ -143,7 +143,7 @@ class BaseCreateWidget(QtWidgets.QWidget):
         if hasattr(self.ui, "optionsFrame"):
             options = item.saveSchema()
             if options:
-                optionsWidget = studiolibrary.widgets.OptionsWidget(self)
+                optionsWidget = studiolibrary.widgets.FormWidget(self)
                 optionsWidget.setOptions(item.saveSchema())
                 optionsWidget.setValidator(item.saveValidator)
                 # optionsWidget.setStateFromOptions(self.item().optionsFromSettings())

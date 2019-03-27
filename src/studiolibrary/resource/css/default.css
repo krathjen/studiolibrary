@@ -771,7 +771,7 @@ TextOptionWidget QTextEdit {
     max-height: 96px;
 }
 
-OptionsWidget QWidget {
+FormWidget QWidget {
     /*font-size: 12px;*/
     text-align: left;
 }
@@ -803,7 +803,7 @@ OptionWidget #label {
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
 }
 
-OptionsWidget #titleWidget {
+FormWidget #titleWidget {
     font-size: 12px;
     padding: 2px;
     padding-left: 5px;
@@ -811,11 +811,11 @@ OptionsWidget #titleWidget {
     border-bottom: 0px solid rgb(255, 255, 255, 20);
 }
 
-OptionsWidget #titleWidget:checked {
+FormWidget #titleWidget:checked {
     background-color: rgb(255, 255, 255, 5);
 }
 
-OptionsWidget #optionsFrame {
+FormWidget #optionsFrame {
     margin: 2px;
 }
 

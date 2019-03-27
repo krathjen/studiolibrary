@@ -178,7 +178,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
             self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
         if hasattr(self.ui, "infoFrame"):
-            infoWidget = studiolibrary.widgets.OptionsWidget(self)
+            infoWidget = studiolibrary.widgets.FormWidget(self)
             infoWidget.setOptions(item.info())
             self.ui.infoFrame.layout().addWidget(infoWidget)
 
@@ -186,7 +186,7 @@ class BasePreviewWidget(QtWidgets.QWidget):
 
             options = item.loadSchema()
             if options:
-                optionsWidget = studiolibrary.widgets.OptionsWidget(self)
+                optionsWidget = studiolibrary.widgets.FormWidget(self)
                 optionsWidget.setOptions(item.loadSchema())
                 optionsWidget.setValidator(item.loadValidator)
                 optionsWidget.setStateFromOptions(self.item().optionsFromSettings())

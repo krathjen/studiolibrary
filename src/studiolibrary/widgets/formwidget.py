@@ -18,7 +18,7 @@ from studioqt import QtGui, QtCore, QtWidgets
 
 
 __all__ = [
-    'OptionsWidget'
+    'FormWidget'
 ]
 
 
@@ -679,7 +679,7 @@ class SeparatorOptionWidget(OptionWidget):
         return self.widget().text()
 
 
-class OptionsWidget(QtWidgets.QFrame):
+class FormWidget(QtWidgets.QFrame):
 
     accepted = QtCore.Signal(object)
     stateChanged = QtCore.Signal()
@@ -696,7 +696,7 @@ class OptionsWidget(QtWidgets.QFrame):
     }
 
     def __init__(self, *args, **kwargs):
-        super(OptionsWidget, self).__init__(*args, **kwargs)
+        super(FormWidget, self).__init__(*args, **kwargs)
 
         self._widgets = []
         self._options = []
@@ -824,7 +824,7 @@ class OptionsWidget(QtWidgets.QFrame):
         self.emitAcceptedCallback()
 
     def closeEvent(self, event):
-        super(OptionsWidget, self).closeEvent(event)
+        super(FormWidget, self).closeEvent(event)
 
     def setValidator(self, validator):
         """
@@ -1058,7 +1058,7 @@ def example1():
         },
     ]
 
-    w = OptionsWidget()
+    w = FormWidget()
     w.setOptions(options)
     w.setStyleSheet(STYLE)
 

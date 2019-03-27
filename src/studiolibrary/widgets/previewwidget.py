@@ -27,7 +27,7 @@ class PreviewWidget(QtWidgets.QWidget):
         pixmap.setColor('rgb(255,255,255,20)')
         self.ui.thumbnailLabel.setPixmap(pixmap)
 
-        self._infoWidget = studiolibrary.widgets.OptionsWidget(self)
+        self._infoWidget = studiolibrary.widgets.FormWidget(self)
         self._infoWidget.setTitle("INFO")
         self._infoWidget.setTitleVisible(True)
         self._infoWidget.setOptions(item.info())
@@ -35,7 +35,7 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self.ui.infoFrame.layout().addWidget(self._infoWidget)
 
-        self._optionsWidget = studiolibrary.widgets.OptionsWidget(self)
+        self._optionsWidget = studiolibrary.widgets.FormWidget(self)
         self._optionsWidget.setTitle("OPTIONS")
         self._optionsWidget.stateChanged.connect(self._stateChanged)
 

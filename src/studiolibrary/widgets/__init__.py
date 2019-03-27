@@ -17,7 +17,6 @@ from .messagebox import MessageBox, createMessageBox
 from .toastwidget import ToastWidget
 from .searchwidget import SearchWidget
 from .statuswidget import StatusWidget
-from .optionswidget import OptionsWidget
 from .previewwidget import PreviewWidget
 from .menubarwidget import MenuBarWidget
 from .sidebarwidget import SidebarWidget
@@ -31,3 +30,4 @@ from .slideraction import SliderAction
 from .separatoraction import SeparatorAction
 from .colorpicker import ColorPickerAction, ColorPickerWidget
 from .sequencewidget import ImageSequenceWidget
+from .formwidget import FormWidget
