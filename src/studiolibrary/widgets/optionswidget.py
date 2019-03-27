@@ -162,6 +162,9 @@ class OptionWidget(QtWidgets.QFrame):
         annotation = state.get('annotation', '')
         self.setToolTip(annotation)
 
+        toolTip = state.get('toolTip', '')
+        self.setToolTip(toolTip)
+
         label = state.get('label')
         if label is None:
             label = state.get('name')
@@ -859,7 +862,7 @@ class OptionsWidget(QtWidgets.QFrame):
         :rtype: OptionWidget 
         """
         for widget in self._widgets:
-            if widget.options().get('name') == name:
+            if widget.option().get('name') == name:
                 return widget
 
     def options(self):
