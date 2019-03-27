@@ -579,7 +579,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
                 self.setColumnHidden(column, hidden)
             else:
                 msg = 'Cannot set the column setting for the header label "%s"'
-                logger.warning(msg, label)
+                logger.debug(msg, label)
 
     def createHideColumnMenu(self):
         """
