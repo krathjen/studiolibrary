@@ -507,6 +507,10 @@ class Animation(mutils.Pose):
         mutils.Pose.read(self, path=path)
         logger.debug("Reading Done")
 
+    def isAscii(self, s):
+        """Check if the given string is a valid ascii string."""
+        return all(ord(c) < 128 for c in s)
+
     @mutils.unifyUndo
     @mutils.restoreSelection
     def open(self):
@@ -516,6 +520,10 @@ class Animation(mutils.Pose):
         referenced animation curves is only supported in Maya 2014+
         """
         self.close()  # Make sure everything is cleaned before importing
+
+        if not self.isAscii(self.mayaPath()):
+            msg = "Cannot load animation using non-ascii paths."
+            raise IOError(msg)
 
         nodes = maya.cmds.file(
             self.mayaPath(),
