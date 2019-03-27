@@ -164,6 +164,19 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         self.saveSettings()
 
+    def defaultValues(self):
+        """
+        Get all the default values for the save fields.
+        
+        :rtype: dict
+        """
+        values = {}
+
+        for option in self.item().saveSchema():
+            values[option.get('name')] = option.get('default')
+
+        return values
+
     def loadSettings(self):
         """
         Return the settings object for saving the state of the widget.
@@ -172,8 +185,18 @@ class BaseCreateWidget(QtWidgets.QWidget):
         """
         settings = studiolibrarymaya.settings()
         settings = settings.get(self.item().__class__.__name__, {})
+
         options = settings.get("saveOptions", {})
+        values = self.defaultValues()
+
+        # Only include the persistent fields
         if options:
+            for option in self.item().saveSchema():
+                name = option.get("name")
+                persistent = option.get("persistent")
+                if not persistent and name in options:
+                    options[name] = values[name]
+
             self._optionsWidget.setStateFromOptions(options)
 
     def saveSettings(self):
