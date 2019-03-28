@@ -646,14 +646,14 @@ class SeparatorFieldWidget(FieldWidget):
     def __init__(self, *args, **kwargs):
         super(SeparatorFieldWidget, self).__init__(*args, **kwargs)
 
-        separator = QtWidgets.QLabel(self)
-        separator.setObjectName('widget')
-        separator.setSizePolicy(
+        widget = QtWidgets.QLabel(self)
+        widget.setObjectName('widget')
+        widget.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding,
             QtWidgets.QSizePolicy.Preferred
         )
 
-        self.setWidget(separator)
+        self.setWidget(widget)
 
         self.label().hide()
 
@@ -673,3 +673,35 @@ class SeparatorFieldWidget(FieldWidget):
         """
         return self.widget().text()
 
+
+class SliderFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(SliderFieldWidget, self).__init__(*args, **kwargs)
+
+        widget = QtWidgets.QSlider(self)
+        widget.setOrientation(QtCore.Qt.Horizontal)
+        widget.setObjectName('widget')
+        widget.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred
+        )
+        widget.valueChanged.connect(self.emitValueChanged)
+
+        self.setWidget(widget)
+
+    def setValue(self, value):
+        """
+        Set the current value for the slider.
+        
+        :type value: str 
+        """
+        self.widget().setValue(value)
+
+    def value(self):
+        """
+        Get the current value for the slider.
+        
+        :rtype: str 
+        """
+        return self.widget().value()

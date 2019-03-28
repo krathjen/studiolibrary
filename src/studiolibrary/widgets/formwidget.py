@@ -46,6 +46,7 @@ class FormWidget(QtWidgets.QFrame):
         "label": fieldwidgets.LabelFieldWidget,
         "range": fieldwidgets.RangeFieldWidget,
         "string": fieldwidgets.StringFieldWidget,
+        "slider": fieldwidgets.SliderFieldWidget,
         "separator": fieldwidgets.SeparatorFieldWidget
     }
 
@@ -383,6 +384,10 @@ def example():
             "type": "separator",
         },
         {
+            "name": "blend",
+            "type": "slider",
+        },
+        {
             "name": "Bake",
             "type": "bool",
         },
@@ -403,7 +408,11 @@ def example():
         },
     ]
 
+    def validator(**fields):
+        print(fields)
+
     w = FormWidget()
+    w.setValidator(validator)
     w.setSchema(schema)
     w.setStyleSheet(STYLE)
     w.show()
