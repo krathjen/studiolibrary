@@ -35,6 +35,7 @@ FIELD_WIDGET_REGISTRY = {
     "text": fieldwidgets.TextFieldWidget,
     "label": fieldwidgets.LabelFieldWidget,
     "range": fieldwidgets.RangeFieldWidget,
+    "color": fieldwidgets.ColorFieldWidget,
     "string": fieldwidgets.StringFieldWidget,
     "slider": fieldwidgets.SliderFieldWidget,
     "separator": fieldwidgets.SeparatorFieldWidget
@@ -393,6 +394,10 @@ def example():
         {
             "name": "sep1",
             "type": "separator",
+        },
+        {
+            "name": "color",
+            "type": "color",
         },
         {
             "name": "blend",

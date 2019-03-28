@@ -16,6 +16,8 @@ import functools
 
 from studioqt import QtGui, QtCore, QtWidgets
 
+import studioqt
+
 
 logger = logging.getLogger(__name__)
 
@@ -705,3 +707,78 @@ class SliderFieldWidget(FieldWidget):
         :rtype: str 
         """
         return self.widget().value()
+
+
+class ColorFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(ColorFieldWidget, self).__init__(*args, **kwargs)
+
+        self._value = "rgb(100,100,100)"
+
+        widget = QtWidgets.QPushButton(self)
+        widget.setObjectName('widget')
+        widget.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred
+        )
+
+        widget.clicked.connect(self.browseColor)
+        self.setWidget(widget)
+
+    @QtCore.Slot()
+    def blankSlot(self):
+        """Blank slot to fix an issue with PySide2.QColorDialog.open()"""
+        pass
+
+    def _colorChanged(self, color):
+        """
+        Triggered when the color changes from the color browser.
+        
+        :type color: QtGui.QColor
+        """
+        colorString = studioqt.Color(color).toString()
+        self.setValue(colorString)
+        self.emitValueChanged()
+
+    def browseColor(self):
+        """Show the color dialog for changing the current color."""
+        color = self.color()
+
+        d = QtWidgets.QColorDialog(self)
+        d.setCurrentColor(color)
+        d.currentColorChanged.connect(self._colorChanged)
+
+        # PySide2 doesn't support d.open(), so we need to pass a blank slot.
+        d.open(self, QtCore.SLOT("blankSlot()"))
+
+        if d.exec_():
+            self._colorChanged(d.selectedColor())
+        else:
+            self._colorChanged(color)
+
+    def color(self):
+        """
+        Get the current color object.
+        
+        :rtype: studioqt.Color
+        """
+        return studioqt.Color.fromString(self._value)
+
+    def setValue(self, value):
+        """
+        Set the current value for the slider.
+        
+        :type value: str 
+        """
+        value = value.replace(" ", "")
+        self.widget().setStyleSheet("background-color: {0};".format(value))
+        self._value = value
+
+    def value(self):
+        """
+        Get the current value for the slider.
+        
+        :rtype: str 
+        """
+        return self._value
