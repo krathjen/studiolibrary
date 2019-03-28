@@ -134,27 +134,24 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         self._item = item
 
-        if hasattr(self.ui, "titleLabel"):
-            self.ui.titleLabel.setText(item.MenuName)
+        self.ui.titleLabel.setText(item.MenuName)
+        self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
-        if hasattr(self.ui, "iconLabel"):
-            self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+        schema = item.saveSchema()
 
-        if hasattr(self.ui, "optionsFrame"):
-            options = item.saveSchema()
-            if options:
-                optionsWidget = studiolibrary.widgets.FormWidget(self)
-                optionsWidget.setSchema(item.saveSchema())
-                optionsWidget.setValidator(item.saveValidator)
-                # optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
-                self.ui.optionsFrame.layout().addWidget(optionsWidget)
-                self._optionsWidget = optionsWidget
-                self.loadSettings()
+        if schema:
+            optionsWidget = studiolibrary.widgets.FormWidget(self)
+            optionsWidget.setSchema(schema)
+            optionsWidget.setValidator(item.saveValidator)
 
-                optionsWidget.stateChanged.connect(self._optionsChanged)
-                optionsWidget.validate()
-            else:
-                self.ui.optionsFrame.setVisible(False)
+            self.ui.optionsFrame.layout().addWidget(optionsWidget)
+            self._optionsWidget = optionsWidget
+            self.loadSettings()
+
+            optionsWidget.stateChanged.connect(self._optionsChanged)
+            optionsWidget.validate()
+        else:
+            self.ui.optionsFrame.setVisible(False)
 
     def _optionsChanged(self):
         """
