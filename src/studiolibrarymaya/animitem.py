@@ -273,43 +273,28 @@ class AnimItem(baseitem.BaseItem):
         """
         Save animation on the given objects to the given path.
         
+        :type objects: list[str]
         :type path: str
-        :type objects: list[str] or None
         :type iconPath: str
+        :type sequencePath: str
         """
         if not path.endswith(".anim"):
             path += ".anim"
 
         logger.info(u'Saving: {0}'.format(path))
 
-        # Mapping new option names to legacy names for now
-        metadata = {"description": options.get("comment", "")}
-
-        fileType = options.get("fileType")
-        frameRange = options.get("frameRange")
-        bakeConnected = options.get("bake")
-
         # Remove and create a new temp directory
-        tempDir = mutils.TempDir("Transfer", clean=True)
-        tempPath = tempDir.path() + "/transfer"
-        os.makedirs(tempPath)
+        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
 
-        # Copy the icon path to the temp location
-        if iconPath:
-            shutil.copyfile(iconPath, tempPath + "/thumbnail.jpg")
-
-        # Copy the sequence path to the temp location
-        if sequencePath:
-            shutil.move(sequencePath, tempPath + "/sequence")
-
-        # Save the animation to the temp location
-        anim = self.transferClass().fromObjects(objects)
-        anim.updateMetadata(metadata)
-        anim.save(
+        mutils.saveAnim(
+            objects,
             tempPath,
-            fileType=fileType,
-            time=frameRange,
-            bakeConnected=bakeConnected,
+            time=options.get("frameRange"),
+            fileType=options.get("fileType"),
+            iconPath=iconPath,
+            metadata={"description": options.get("comment", "")},
+            sequencePath=sequencePath,
+            bakeConnected=options.get("bake")
         )
 
         super(AnimItem, self).save(path, contents=[tempPath])

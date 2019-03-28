@@ -79,12 +79,15 @@ def validateAnimLayers():
 
 
 def saveAnim(
-    path,
-    objects=None,
-    time=None,
-    sampleBy=1,
-    metadata=None,
-    bakeConnected=False
+        objects,
+        path,
+        time=None,
+        sampleBy=1,
+        fileType="",
+        metadata=None,
+        iconPath="",
+        sequencePath="",
+        bakeConnected=True
 ):
     """
     Save the anim data for the given objects.
@@ -93,67 +96,42 @@ def saveAnim(
         import mutils
         mutils.saveAnim(
             path="c:/example.anim", 
+            objects=["control1", "control2"]
             time=(1, 20),
             metadata={'description': 'Example anim'}
             )
             
     :type path: str
     :type objects: None or list[str]
-    :type time: None or int
+    :type time: (int, int) or None
+    :type fileType: str or None
     :type sampleBy: int
+    :type iconPath: str
+    :type sequencePath: str
     :type metadata: dict or None
     :type bakeConnected: bool
     
     :rtype: mutils.Animation
     """
-    step = 1
-    objects = objects or maya.cmds.ls(selection=True) or []
-
-    if os.path.exists(path):
-        raise Exception("Cannot override an existing path. " + path)
-
-    if not objects:
-        raise Exception(
-            "No objects selected. Please select at least one object."
-        )
-
-    if not time:
-        time = mutils.selectedObjectsFrameRange(objects)
-
-    start, end = time
-
-    if start >= end:
-        msg = "The start frame cannot be greater than or equal to the end frame!"
-        raise AnimationTransferError(msg)
-
-    tmpPath = mutils.TempDir("anim", clean=True).path()
-
-    os.makedirs(tmpPath + '/sequence')
-
-    iconPath = tmpPath + "/thumbnail.jpg"
-    sequencePath = tmpPath + "/sequence/thumbnail.jpg"
-
-    window = mutils.gui.thumbnailCapture(
-        path=sequencePath,
-        startFrame=start,
-        endFrame=end,
-        step=step,
-        modifier=False,
-    )
-
+    # Copy the icon path to the temp location
     if iconPath:
-        shutil.copyfile(window.capturedPath(), iconPath)
+        shutil.copyfile(iconPath, path + "/thumbnail.jpg")
 
+    # Copy the sequence path to the temp location
+    if sequencePath:
+        shutil.move(sequencePath, path + "/sequence")
+
+    # Save the animation to the temp location
     anim = mutils.Animation.fromObjects(objects)
-
-    if metadata:
-        anim.updateMetadata(metadata)
-
-    anim.save(tmpPath, time=time, bakeConnected=bakeConnected, sampleBy=sampleBy)
-
-    shutil.copytree(tmpPath, path)
-
-    return mutils.Animation.fromPath(path)
+    anim.updateMetadata(metadata)
+    anim.save(
+        path,
+        time=time,
+        sampleBy=sampleBy,
+        fileType=fileType,
+        bakeConnected=bakeConnected
+    )
+    return anim
 
 
 def clampRange(srcTime, dstTime):
