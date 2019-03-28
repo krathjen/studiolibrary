@@ -782,3 +782,61 @@ class ColorFieldWidget(FieldWidget):
         :rtype: str 
         """
         return self._value
+
+
+class ImageFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(ImageFieldWidget, self).__init__(*args, **kwargs)
+
+        self._value = ""
+        self._pixmap = None
+
+        widget = QtWidgets.QLabel(self)
+        self.setStyleSheet("min-height: 32px;")
+        widget.setScaledContents(False)
+        widget.setObjectName('widget')
+        widget.setAlignment(QtCore.Qt.AlignHCenter)
+
+        self.setWidget(widget)
+        self.layout().addStretch()
+
+    def setValue(self, value):
+        """
+        Set the path on disc for the image.
+
+        :type value: str 
+        """
+        self._value = value
+        self._pixmap = QtGui.QPixmap(value)
+        self.update()
+
+    def value(self):
+        """
+        Get the path on disc for the image.
+
+        :rtype: str 
+        """
+        return self._value
+
+    def resizeEvent(self, event):
+        """
+        Called when the field widget is resizing.
+
+        :type event: QtCore.QEvent
+        """
+        self.update()
+
+    def update(self):
+        """Update the image depending on the size."""
+        if self._pixmap:
+            width = self.widget().height()
+            transformation = QtCore.Qt.SmoothTransformation
+
+            if self.widget().width() > self.widget().height():
+                pixmap = self._pixmap.scaledToWidth(width, transformation)
+            else:
+                pixmap = self._pixmap.scaledToHeight(width, transformation)
+
+            self.widget().setPixmap(pixmap)
+            self.widget().setAlignment(QtCore.Qt.AlignLeft)

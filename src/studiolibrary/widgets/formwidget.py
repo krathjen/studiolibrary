@@ -33,6 +33,7 @@ FIELD_WIDGET_REGISTRY = {
     "bool": fieldwidgets.BoolFieldWidget,
     "enum": fieldwidgets.EnumFieldWidget,
     "text": fieldwidgets.TextFieldWidget,
+    "image": fieldwidgets.ImageFieldWidget,
     "label": fieldwidgets.LabelFieldWidget,
     "range": fieldwidgets.RangeFieldWidget,
     "color": fieldwidgets.ColorFieldWidget,
@@ -380,6 +381,9 @@ def example():
     import studiolibrary
     studiolibrary.widgets.formwidget.example()
     """
+    import studiolibrary
+    image = studiolibrary.resource().get("icons", "icon.png")
+
     schema = [
         {
             "name": "name",
@@ -408,11 +412,16 @@ def example():
             "type": "bool",
         },
         {
+            "name": "image",
+            "type": "image",
+            "value": image
+        },
+        {
             "name": "frameRange",
             "type": "range"
         },
         {
-            "name": "frameRange",
+            "name": "option",
             "type": "enum",
             "items": ["Test1", "Test2", "Test4"]
         },
