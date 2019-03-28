@@ -758,7 +758,7 @@ LabelOption > #widget {
 
 
 /* --- Separator --- */
-SeparatorOptionWidget > #widget {
+SeparatorFieldWidget > #widget {
     min-height: 18px;
     max-height: 18px;
     font: bold;
@@ -767,7 +767,7 @@ SeparatorOptionWidget > #widget {
     border-bottom: 1px solid rgb(255, 255, 255, 20);
 }
 
-TextOptionWidget QTextEdit {
+TextFieldWidget QTextEdit {
     max-height: 96px;
 }
 
@@ -776,20 +776,20 @@ FormWidget QWidget {
     text-align: left;
 }
 
-OptionWidget {
+FieldWidget {
     min-height: 16px;
     margin-bottom: 3px;
 }
 
-OptionWidget[layout=vertical] #label {
+FieldWidget[layout=vertical] #label {
     margin-bottom: 4px;
 }
 
-OptionWidget[layout=horizontal] #label {
+FieldWidget[layout=horizontal] #label {
     margin-left: 4px;
 }
 
-OptionWidget #menuButton {
+FieldWidget #menuButton {
     margin-left: 4px;
     border-radius: 2px;
     min-width: 25px;
@@ -798,7 +798,7 @@ OptionWidget #menuButton {
     background-color: rgb(0,0,0,20);
 }
 
-OptionWidget #label {
+FieldWidget #label {
     min-width: 72px;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
 }
@@ -819,46 +819,46 @@ FormWidget #optionsFrame {
     margin: 2px;
 }
 
-OptionWidget QComboBox {
+FieldWidget QComboBox {
     border: 1px solid transparent;
 }
 /*
-OptionWidget[default=false] QLineEdit,
-OptionWidget[default=false] QTextEdit {
+FieldWidget[default=false] QLineEdit,
+FieldWidget[default=false] QTextEdit {
     border: 1px solid rgb(240, 150, 0, 255);
     background-color: rgb(240, 150, 0, 100);
 }
 
-OptionWidget[default=true] QComboBox {
+FieldWidget[default=true] QComboBox {
     border-radius: 2px;
     border: 1px solid rgb(150, 150, 150, 100);
 }
 
-OptionWidget[default=false] QComboBox {
+FieldWidget[default=false] QComboBox {
     border-radius: 2px;
     border: 1px solid rgb(240, 150, 0, 255);
     background-color: rgb(240, 150, 0, 100);
 }
 
-OptionWidget[default=false] QRadioButton:checked {
+FieldWidget[default=false] QRadioButton:checked {
     color: rgb(240, 150, 0);
 }
 
-OptionWidget[default=false] #label {
+FieldWidget[default=false] #label {
     color: rgb(240, 150, 0);
 }
 
-OptionWidget[error=true] QLineEdit,
-OptionWidget[error=true] QTextEdit {
+FieldWidget[error=true] QLineEdit,
+FieldWidget[error=true] QTextEdit {
     border: 1px solid rgb(240, 0, 0, 255);
     background-color: rgb(240, 0, 0, 100);
 }
 
-OptionWidget[error=true] QRadioButton:checked {
+FieldWidget[error=true] QRadioButton:checked {
     color: rgb(240, 0, 0);
 }
 
-OptionWidget[error=true] #label {
+FieldWidget[error=true] #label {
     color: rgb(240, 0, 0);
 }
 */
