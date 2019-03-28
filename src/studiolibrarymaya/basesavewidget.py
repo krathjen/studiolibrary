@@ -29,13 +29,13 @@ except ImportError as error:
     print(error)
 
 __all__ = [
-    "BaseCreateWidget",
+    "BaseSaveWidget",
 ]
 
 logger = logging.getLogger(__name__)
 
 
-class BaseCreateWidget(QtWidgets.QWidget):
+class BaseSaveWidget(QtWidgets.QWidget):
 
     """Base create widget for creating new maya items."""
 

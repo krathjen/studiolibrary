@@ -18,7 +18,7 @@ import studiolibrary
 import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
-from studiolibrarymaya import basepreviewwidget
+from studiolibrarymaya import baseloadwidget
 
 try:
     import mutils
@@ -29,7 +29,7 @@ except ImportError as error:
 
 __all__ = [
     "PoseItem",
-    "PosePreviewWidget"
+    "PoseLoadWidget"
 ]
 
 
@@ -330,13 +330,13 @@ class PoseItem(baseitem.BaseItem):
         logger.info(u'Saved: {0}'.format(path))
 
 
-class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
+class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
     def __init__(self, *args, **kwargs):
         """
         :rtype: None
         """
-        super(PosePreviewWidget, self).__init__(*args, **kwargs)
+        super(PoseLoadWidget, self).__init__(*args, **kwargs)
 
         self.ui.keyCheckBox.clicked.connect(self.saveSettings)
         self.ui.mirrorCheckBox.clicked.connect(self.saveSettings)
@@ -353,7 +353,7 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
         :type item: PoseItem
         :rtype: None
         """
-        super(PosePreviewWidget, self).setItem(item)
+        super(PoseLoadWidget, self).setItem(item)
 
         # Mirror check box
         mirrorTip = "Cannot find a mirror table!"
@@ -383,7 +383,7 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
         self.ui.keyCheckBox.setChecked(key)
         self.ui.mirrorCheckBox.setChecked(mirror)
 
-        super(PosePreviewWidget, self).setSettings(settings)
+        super(PoseLoadWidget, self).setSettings(settings)
 
     def settings(self):
         """
@@ -391,7 +391,7 @@ class PosePreviewWidget(basepreviewwidget.BasePreviewWidget):
 
         :rtype: dict
         """
-        settings = super(PosePreviewWidget, self).settings()
+        settings = super(PoseLoadWidget, self).settings()
 
         key = bool(self.ui.keyCheckBox.isChecked())
         mirror = bool(self.ui.mirrorCheckBox.isChecked())
@@ -443,6 +443,6 @@ PoseItem.MenuName = "Pose"
 PoseItem.MenuOrder = 4
 PoseItem.MenuIconPath = iconPath
 PoseItem.TypeIconPath = iconPath
-PoseItem.PreviewWidgetClass = PosePreviewWidget
+PoseItem.PreviewWidgetClass = PoseLoadWidget
 
 studiolibrary.registerItem(PoseItem)

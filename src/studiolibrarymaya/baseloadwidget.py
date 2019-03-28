@@ -31,7 +31,7 @@ except ImportError as error:
 
 
 __all__ = [
-    "BasePreviewWidget",
+    "BaseLoadWidget",
 ]
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class NamespaceOption:
     FromSelection = "selection"
 
 
-class BasePreviewWidget(QtWidgets.QWidget):
+class BaseLoadWidget(QtWidgets.QWidget):
 
     """Base widget for creating and previewing transfer items."""
 

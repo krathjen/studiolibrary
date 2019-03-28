@@ -19,8 +19,8 @@ import studioqt
 import studiolibrary
 import studiolibrarymaya
 
-from studiolibrarymaya import basecreatewidget
-from studiolibrarymaya import basepreviewwidget
+from studiolibrarymaya import basesavewidget
+from studiolibrarymaya import baseloadwidget
 
 try:
     import mutils
@@ -46,8 +46,8 @@ class NamespaceOption:
 class BaseItem(studiolibrary.LibraryItem):
 
     """Base class for anim, pose, mirror and sets transfer items."""
-    CreateWidgetClass = basecreatewidget.BaseCreateWidget
-    PreviewWidgetClass = basepreviewwidget.BasePreviewWidget
+    CreateWidgetClass = basesavewidget.BaseSaveWidget
+    PreviewWidgetClass = baseloadwidget.BaseLoadWidget
 
     @classmethod
     def showCreateWidget(cls, libraryWindow):
