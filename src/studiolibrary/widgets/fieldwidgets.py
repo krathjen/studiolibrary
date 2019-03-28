@@ -28,34 +28,34 @@ def toTitle(name):
 
 class FieldWidget(QtWidgets.QFrame):
 
-    """The base widget for all option widgets.
+    """The base widget for all field widgets.
     
     Examples:
         
-        option = {
+        data = {
             'name': 'startFrame',
             'type': 'int'
             'value': 1,
         }
         
-        optionWidget = FieldWidget(option)
+        fieldWidget = FieldWidget(data)
         
     """
     valueChanged = QtCore.Signal()
 
     DefaultLayout = "horizontal"
 
-    def __init__(self, parent=None, options=None):
+    def __init__(self, parent=None, data=None):
         super(FieldWidget, self).__init__(parent)
 
-        self._option = options or {}
+        self._data = data or {}
         self._widget = None
         self._default = None
         self._required = None
         self._menuButton = None
         self._actionResult = None
 
-        direction = self._option.get("layout", self.DefaultLayout)
+        direction = self._data.get("layout", self.DefaultLayout)
         self.setProperty("layout", direction)
 
         if direction == "vertical":
@@ -95,31 +95,31 @@ class FieldWidget(QtWidgets.QFrame):
 
     def state(self):
         """
-        Get the current state of the option.
+        Get the current state of the data.
         
         :rtype: dict
         """
         return {
-            "name": self._option["name"],
+            "name": self._data["name"],
             "value": self.value()
         }
 
-    def option(self):
+    def data(self):
         """
-        Get the option data for the widget.
+        Get the data for the widget.
         
         :rtype: dict 
         """
-        return self._option
+        return self._data
 
-    def setOption(self, state):
+    def setData(self, data):
         """
-        Set the current state of the option widget using a dictionary.
+        Set the current state of the field widget using a dictionary.
         
-        :type state: dict
+        :type data: dict
         """
-        self._option.update(state)
-        state = self._option
+        self._data.update(data)
+        state = self._data
 
         self.blockSignals(True)
 
@@ -177,7 +177,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def setError(self, message):
         """
-        Set the error message to be displayed for the options widget.
+        Set the error message to be displayed for the field widget.
         
         :type message: str
         """
@@ -186,14 +186,14 @@ class FieldWidget(QtWidgets.QFrame):
         if error:
             self.setToolTip(message)
         else:
-            self.setToolTip(self.option().get('annotation'))
+            self.setToolTip(self.data().get('annotation'))
 
         self.setProperty('error', error)
         self.setStyleSheet(self.styleSheet())
 
     def setText(self, text):
         """
-        Set the label text for the option.
+        Set the label text for the field widget.
         
         :type text: str 
         """
@@ -207,7 +207,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def setValue(self, value):
         """
-        Set the value of the option widget.
+        Set the value of the field widget.
         
         Will emit valueChanged() if the new value is different from the old one.
         
@@ -217,7 +217,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def value(self):
         """
-        Get the value of the option widget.
+        Get the value of the field widget.
         
         :rtype: object
         """
@@ -225,19 +225,19 @@ class FieldWidget(QtWidgets.QFrame):
 
     def setItems(self, items):
         """
-        Set the items for the options widget.
+        Set the items for the field widget.
         
         :type items: list[str]
         """
         raise NotImplementedError('The method "setItems" needs to be implemented')
 
     def reset(self):
-        """Reset the option widget back to the defaults."""
-        self.setState(self._option)
+        """Reset the field widget back to the defaults."""
+        self.setState(self._data)
 
     def setRequired(self, required):
         """
-        Set True if a value is required for this option.
+        Set True if a value is required for this field.
         
         :type required: bool
         """
@@ -247,7 +247,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def isRequired(self):
         """
-        Check if a value is required for the option widget.
+        Check if a value is required for the field widget.
         
         :rtype: bool
         """
@@ -255,7 +255,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def setDefault(self, default):
         """
-        Set the default value for the option widget.
+        Set the default value for the field widget.
         
         :type default: object
         """
@@ -263,7 +263,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def default(self):
         """
-        Get the default value for the option widget.
+        Get the default value for the field widget.
         
         :rtype: object
         """
@@ -288,7 +288,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def setWidget(self, widget):
         """
-        Set the widget used to set and get the option value.
+        Set the widget used to set and get the field value.
         
         :type widget: QtWidgets.QWidget
         """
@@ -309,8 +309,8 @@ class FieldWidget(QtWidgets.QFrame):
 
     def createMenuButton(self):
         """Create the menu button to show the actions."""
-        menu = self.option().get("menu", {})
-        actions = self.option().get("actions", {})
+        menu = self.data().get("menu", {})
+        actions = self.data().get("actions", {})
 
         if menu or actions:
 
@@ -332,9 +332,9 @@ class FieldWidget(QtWidgets.QFrame):
         self._actionResult = callback()
 
     def showMenu(self):
-        """Show the menu using the actions from the options."""
+        """Show the menu using the actions from the data."""
         menu = QtWidgets.QMenu(self)
-        actions = self.option().get("actions", [])
+        actions = self.data().get("actions", [])
 
         for action in actions:
 
@@ -360,7 +360,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     def widget(self,):
         """
-        Get the widget used to set and get the option value.
+        Get the widget used to set and get the field value.
         
         :rtype: QtWidgets.QWidget
         """

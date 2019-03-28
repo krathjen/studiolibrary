@@ -20,11 +20,25 @@ from . import fieldwidgets
 
 
 __all__ = [
-    "FormWidget"
+    "FormWidget",
+    "FIELD_WIDGET_REGISTRY"
 ]
 
 
 logger = logging.getLogger(__name__)
+
+
+FIELD_WIDGET_REGISTRY = {
+    "int": fieldwidgets.IntFieldWidget,
+    "bool": fieldwidgets.BoolFieldWidget,
+    "enum": fieldwidgets.EnumFieldWidget,
+    "text": fieldwidgets.TextFieldWidget,
+    "label": fieldwidgets.LabelFieldWidget,
+    "range": fieldwidgets.RangeFieldWidget,
+    "string": fieldwidgets.StringFieldWidget,
+    "slider": fieldwidgets.SliderFieldWidget,
+    "separator": fieldwidgets.SeparatorFieldWidget
+}
 
 
 def toTitle(name):
@@ -38,23 +52,11 @@ class FormWidget(QtWidgets.QFrame):
     accepted = QtCore.Signal(object)
     stateChanged = QtCore.Signal()
 
-    FieldWidgetMap = {
-        "int": fieldwidgets.IntFieldWidget,
-        "bool": fieldwidgets.BoolFieldWidget,
-        "enum": fieldwidgets.EnumFieldWidget,
-        "text": fieldwidgets.TextFieldWidget,
-        "label": fieldwidgets.LabelFieldWidget,
-        "range": fieldwidgets.RangeFieldWidget,
-        "string": fieldwidgets.StringFieldWidget,
-        "slider": fieldwidgets.SliderFieldWidget,
-        "separator": fieldwidgets.SeparatorFieldWidget
-    }
-
     def __init__(self, *args, **kwargs):
         super(FormWidget, self).__init__(*args, **kwargs)
 
+        self._schema = []
         self._widgets = []
-        self._options = []
         self._validator = None
 
         layout = QtWidgets.QVBoxLayout(self)
@@ -138,23 +140,27 @@ class FormWidget(QtWidgets.QFrame):
             widget.reset()
         self.validate()
 
-    def setSchema(self, options):
-        """Set the options for the widget."""
-        self._options = options
+    def setSchema(self, schema):
+        """
+        Set the schema for the widget.
+        
+        :type schema: list[dict]
+        """
+        self._schema = schema
 
-        for option in options:
+        for data in schema:
 
-            cls = self.FieldWidgetMap.get(option.get("type", "label"))
+            cls = FIELD_WIDGET_REGISTRY.get(data.get("type", "label"))
 
             if not cls:
-                logger.warning("Cannot find widget for %s", option)
+                logger.warning("Cannot find widget for %s", data)
                 continue
 
-            widget = cls(options=option)
-            widget.setOption(option)
+            widget = cls(data=data)
+            widget.setData(data)
 
-            value = option.get("value")
-            default = option.get("default")
+            value = data.get("value")
+            default = data.get("default")
             if value is None and default is not None:
                 widget.setValue(default)
 
@@ -217,13 +223,13 @@ class FormWidget(QtWidgets.QFrame):
         :rtype: FieldWidget 
         """
         for widget in self._widgets:
-            if widget.option().get("name") == name:
+            if widget.data().get("name") == name:
                 return widget
 
     def options(self):
         options = []
         for widget in self._widgets:
-            options.append(widget.option())
+            options.append(widget.data())
         return options
 
     def optionsToDict(self):
@@ -234,7 +240,7 @@ class FormWidget(QtWidgets.QFrame):
         """
         options = {}
         for widget in self._widgets:
-            options[widget.option().get("name")] = widget.value()
+            options[widget.data().get("name")] = widget.value()
         return options
 
     def state(self):
@@ -291,14 +297,19 @@ class FormWidget(QtWidgets.QFrame):
 
         self._setState(state)
 
-    def _setState(self, options):
+    def _setState(self, state):
+        """
+        Set the state.
+        
+        :type state: list[dict]
+        """
         for widget in self._widgets:
             widget.blockSignals(True)
 
         for widget in self._widgets:
-            for option in options:
-                if option.get("name") == widget.option().get("name"):
-                    widget.setOption(option)
+            for data in state:
+                if data.get("name") == widget.data().get("name"):
+                    widget.setData(data)
 
         for widget in self._widgets:
             widget.blockSignals(False)
