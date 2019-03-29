@@ -27,7 +27,7 @@ except ImportError as error:
 logger = logging.getLogger(__name__)
 
 # Register the mirror table item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "mirrorTable.png")
+iconPath = studiolibrarymaya.resource().get("icons", "mirrortable.png")
 
 
 class MirrorItem(baseitem.BaseItem):
