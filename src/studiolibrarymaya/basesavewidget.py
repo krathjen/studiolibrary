@@ -79,7 +79,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         self.createSequenceWidget()
         self.setItem(item)
-        self.updateContains()
         self.updateThumbnailSize()
 
     def createSequenceWidget(self):
@@ -309,32 +308,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
             self.ui.thumbnailButton.setMaximumSize(size)
             self.ui.thumbnailFrame.setMaximumSize(size)
 
-    def updateContains(self):
-        """
-        Triggered when the users selection has changed.
-
-        :rtype: None
-        """
-        if hasattr(self.ui, "contains"):
-            count = self.objectCount()
-            plural = "s" if count > 1 else ""
-            self.ui.contains.setText(str(count) + " Object" + plural)
-
-    def objectCount(self):
-        """
-        Return the number of selected objects in the Maya scene.
-
-        :rtype: int
-        """
-        selection = []
-
-        try:
-            selection = maya.cmds.ls(selection=True) or []
-        except NameError as error:
-            logger.exception(error)
-
-        return len(selection)
-
     def name(self):
         """
         Return the str from the name field.
@@ -393,8 +366,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        self.updateContains()
-
         if self._optionsWidget:
             self._optionsWidget.validate()
 
