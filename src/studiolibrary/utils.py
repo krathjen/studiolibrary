@@ -19,6 +19,7 @@ import shutil
 import locale
 import logging
 import getpass
+import tempfile
 import platform
 import threading
 import collections
@@ -66,6 +67,7 @@ __all__ = [
     "removePath",
     "renamePath",
     "formatPath",
+    "createTempPath",
     "renamePathInFile",
     "walkup",
     "generateUniquePath",
@@ -183,6 +185,30 @@ def clearRegisteredItems():
     """
     global _itemClasses
     _itemClasses = collections.OrderedDict()
+
+
+def createTempPath(name, clean=True, makedirs=True):
+    """
+    Create a temp directory with the given name.
+    
+    :type name: str
+    :type clean: bool
+    :type makedirs: bool 
+    
+    :rtype: bool 
+    """
+    user = getpass.getuser().lower()
+    tempdir = tempfile.gettempdir().replace("\\", "/")
+    path = os.path.join(tempdir, "StudioLibrary", user, name)
+
+    if clean and os.path.exists(path):
+        if os.path.exists(path):
+            shutil.rmtree(path)
+
+    if makedirs and not os.path.exists(path):
+            os.makedirs(path)
+
+    return path
 
 
 def itemFromPath(path, **kwargs):
