@@ -96,6 +96,9 @@
          <bold>false</bold>
         </font>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font-size: 11pt;</string>
+       </property>
        <property name="text">
         <string>Pose</string>
        </property>
