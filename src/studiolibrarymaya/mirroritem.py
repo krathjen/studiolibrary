@@ -9,7 +9,7 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-
+import shutil
 import logging
 
 import mutils
@@ -33,6 +33,7 @@ iconPath = studiolibrarymaya.resource().get("icons", "mirrortable.png")
 class MirrorItem(baseitem.BaseItem):
 
     Extensions = [".mirror"]
+    Extension = ".mirror"
     MenuName = "Mirror Table"
     MenuIconPath = iconPath
     TypeIconPath = iconPath
@@ -201,40 +202,27 @@ class MirrorItem(baseitem.BaseItem):
 
         return results
 
-    @mutils.showWaitCursor
-    def save(self, objects, path="", iconPath="", **options):
+    def write(self, path, objects, iconPath="", **options):
         """
-        Save the given objects to the location of the current mirror table.
+        Write the given objects to the given path on disc.
 
-        :type objects: list[str]
         :type path: str
+        :type objects: list[str]
         :type iconPath: str
         :type options: dict
         """
-        if path and not path.endswith(".mirror"):
-            path += ".mirror"
+        # Copy the icon path to the given path
+        if iconPath:
+            shutil.copyfile(iconPath, path + "/thumbnail.jpg")
 
-        logger.info("Saving: %s" % self.transferPath())
-
-        # Mapping new option names to legacy names for now
-        leftSide = options.get("left")
-        rightSide = options.get("right")
-        metadata = {"description": options.get("comment", "")}
-
-        # Remove and create a new temp directory
-        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
-
-        # Save the mirror table to the temp location
+        # Save the mirror table to the given location
         mutils.saveMirrorTable(
-            tempPath,
+            path + "/mirrortable.json",
             objects,
-            metadata=metadata,
-            leftSide=leftSide,
-            rightSide=rightSide,
+            metadata={"description": options.get("comment", "")},
+            leftSide=options.get("left"),
+            rightSide=options.get("right"),
         )
-
-        # Move the mirror table to the given path using the base class
-        super(MirrorItem, self).save(path, contents=[tempPath, iconPath])
 
 
 studiolibrary.registerItem(MirrorItem)

@@ -9,7 +9,7 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-
+import shutil
 import logging
 
 from studioqt import QtCore
@@ -42,6 +42,8 @@ class PoseItemSignals(QtCore.QObject):
 
 
 class PoseItem(baseitem.BaseItem):
+
+    Extension = ".pose"
 
     _poseItemSignals = PoseItemSignals()
     mirrorChanged = _poseItemSignals.mirrorChanged
@@ -297,37 +299,25 @@ class PoseItem(baseitem.BaseItem):
 
         logger.debug(u'Loaded: {0}'.format(self.path()))
 
-    def save(self, objects, path="", iconPath="", **options):
+    def write(self, path, objects, iconPath="", **options):
         """
-        Save all the given object data to the given path on disc.
+        Write all the given object data to the given path on disc.
 
-        :type objects: list[str]
         :type path: str
+        :type objects: list[str]
         :type iconPath: str
         :type options: dict
         """
-        if path and not path.endswith(".pose"):
-            path += ".pose"
-
-        logger.info(u'Saving: {0}'.format(path))
-
-        # Mapping new option names to legacy names for now
-        metadata = {"description": options.get("comment", "")}
-
-        # Remove and create a new temp directory
-        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
+        # Copy the icon path to the given path
+        if iconPath:
+            shutil.copyfile(iconPath, path + "/thumbnail.jpg")
 
         # Save the pose to the temp location
         mutils.savePose(
-            tempPath,
+            path + "/pose.json",
             objects,
-            metadata=metadata
+            metadata={"description": options.get("comment", "")}
         )
-
-        # Move the pose to the given path using the base class
-        super(PoseItem, self).save(path, contents=[tempPath, iconPath])
-
-        logger.info(u'Saved: {0}'.format(path))
 
 
 class PoseLoadWidget(baseloadwidget.BaseLoadWidget):

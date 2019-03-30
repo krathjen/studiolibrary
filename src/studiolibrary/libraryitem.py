@@ -57,6 +57,7 @@ class LibraryItem(studiolibrary.widgets.Item):
     EnableDelete = False
     EnableNestedItems = False
 
+    Extension = ""
     Extensions = []
 
     MenuName = ""
@@ -185,23 +186,6 @@ class LibraryItem(studiolibrary.widgets.Item):
     def loadValidator(self, **options):
         """
         Validate the current load options.
-        
-        :type options: dict
-        :rtype: list[dict]
-        """
-        return []
-
-    def saveSchema(self):
-        """
-        Get the options used to save the item.
-        
-        :rtype: list[dict]
-        """
-        return []
-
-    def saveValidator(self, **options):
-        """
-        Validate the current save options.
         
         :type options: dict
         :rtype: list[dict]
@@ -578,16 +562,34 @@ class LibraryItem(studiolibrary.widgets.Item):
         logger.debug(u'Loading kwargs {0}'.format(kwargs))
         LibraryItem.loaded.emit(self)
 
-    def save(self, path=None, contents=None):
+    def saveSchema(self):
         """
-        Save the item to the given path.
+        Get the schema used for saving the item.
+        
+        :rtype: list[dict]
+        """
+        return []
 
-        :type path: str or None
-        :type contents: list[str] or None
-        :rtype: None
+    def saveValidator(self, **fields):
+        """
+        Validate the given save fields.
+        
+        :type fields: dict
+        :rtype: list[dict]
+        """
+        return []
+
+    @studioqt.showWaitCursor
+    def save(self, path, *args, **kwargs):
+        """
+        Submit the item for saving.
+
+        :type path: str
         """
         path = path or self.path()
-        contents = contents or []
+
+        if path and not path.endswith(self.Extension):
+            path += self.Extension
 
         self.setPath(path)
         path = self.path()
@@ -598,14 +600,11 @@ class LibraryItem(studiolibrary.widgets.Item):
         if os.path.exists(path):
             self.showAlreadyExistsDialog()
 
-        if len(contents) == 1:
-            src = contents[0]
-            if os.path.isdir(src):
-                shutil.move(src, path)
-            else:
-                studiolibrary.movePaths(contents, path)
-        else:
-            studiolibrary.movePaths(contents, path)
+        tempPath = studiolibrary.createTempPath(self.__class__.__name__)
+
+        self.write(tempPath, *args, **kwargs)
+
+        shutil.move(tempPath, path)
 
         self.saveItemData()
 
@@ -614,6 +613,14 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         self.saved.emit(self)
         logger.debug(u'Item Saved: {0}'.format(self.path()))
+
+    def write(self, path, *args, **kwargs):
+        """
+        Write the item io data to the given path.
+
+        :type path: str
+        """
+        raise NotImplementedError("The write method has not been implemented!")
 
     # -----------------------------------------------------------------
     # Support for copy and rename
@@ -767,7 +774,11 @@ class LibraryItem(studiolibrary.widgets.Item):
         buttons = QtWidgets.QMessageBox.Yes | \
                   QtWidgets.QMessageBox.Cancel
 
-        button = self.libraryWindow().showQuestionDialog(title, text, buttons)
+        try:
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.ArrowCursor)
+            button = self.libraryWindow().showQuestionDialog(title, text, buttons)
+        finally:
+             QtWidgets.QApplication.restoreOverrideCursor()
 
         if button == QtWidgets.QMessageBox.Yes:
             library = self.library()

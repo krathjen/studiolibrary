@@ -40,6 +40,7 @@ iconPath = studiolibrarymaya.resource().get("icons", "animation.png")
 class AnimItem(baseitem.BaseItem):
 
     Extensions = [".anim"]
+    Extension = ".anim"
     MenuName = "Animation"
     MenuIconPath = iconPath
     TypeIconPath = iconPath
@@ -268,27 +269,19 @@ class AnimItem(baseitem.BaseItem):
             }
         ]
 
-    @mutils.showWaitCursor
-    def save(self, objects, path, iconPath="", sequencePath="", **options):
+    def write(self, path, objects, iconPath="", sequencePath="", **options):
         """
-        Save animation on the given objects to the given path.
+        Write the animation on the given objects to the given path.
         
         :type objects: list[str]
         :type path: str
         :type iconPath: str
         :type sequencePath: str
         """
-        if not path.endswith(".anim"):
-            path += ".anim"
-
-        logger.info(u'Saving: {0}'.format(path))
-
-        # Remove and create a new temp directory
-        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
-
+        # Save the animation to the given path location on disc
         mutils.saveAnim(
             objects,
-            tempPath,
+            path,
             time=options.get("frameRange"),
             fileType=options.get("fileType"),
             iconPath=iconPath,
@@ -296,8 +289,6 @@ class AnimItem(baseitem.BaseItem):
             sequencePath=sequencePath,
             bakeConnected=options.get("bake")
         )
-
-        super(AnimItem, self).save(path, contents=[tempPath])
 
 
 studiolibrary.registerItem(AnimItem)

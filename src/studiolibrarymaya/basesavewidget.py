@@ -570,8 +570,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
             sequencePath = os.path.dirname(sequencePath)
 
         item.save(
+            path,
             objects,
-            path=path,
             iconPath=iconPath,
             sequencePath=sequencePath,
             **options

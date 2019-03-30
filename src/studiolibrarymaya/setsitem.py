@@ -10,6 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import shutil
 import mutils
 
 import studiolibrary
@@ -24,6 +25,7 @@ iconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
 class SetsItem(baseitem.BaseItem):
 
     Extensions = [".set"]
+    Extension = ".set"
     MenuName = "Selection Set"
     MenuIconPath = iconPath
     TypeIconPath = iconPath
@@ -48,33 +50,25 @@ class SetsItem(baseitem.BaseItem):
         """
         self.selectContent(namespaces=namespaces)
 
-    def save(self, objects, path="", iconPath="", **options):
+    def write(self, path, objects, iconPath="", **options):
         """
-        Save all the given object data to the given path on disc.
+        Write all the given object data to the given path on disc.
 
-        :type objects: list[str]
         :type path: str
+        :type objects: list[str]
         :type iconPath: str
         :type options: dict
         """
-        if path and not path.endswith(".set"):
-            path += ".set"
+        # Copy the icon path to the given path
+        if iconPath:
+            shutil.copyfile(iconPath, path + "/thumbnail.jpg")
 
-        # Mapping new option names to legacy names for now
-        metadata = {"description": options.get("comment", "")}
-
-        # Remove and create a new temp directory
-        tempPath = mutils.createTempPath() + "/" + self.transferBasename()
-
-        # Save the selection set to the temp location
+        # Save the selection set to the given path
         mutils.saveSelectionSet(
-            tempPath,
+            path + "/set.json",
             objects,
-            metadata=metadata
+            metadata={"description": options.get("comment", "")}
         )
-
-        # Move the selection set to the given path using the base class
-        super(SetsItem, self).save(path, contents=[tempPath, iconPath])
 
 
 # Register the selection set item to the Studio Library

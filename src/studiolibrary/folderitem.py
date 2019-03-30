@@ -94,31 +94,25 @@ class FolderItem(studiolibrary.LibraryItem):
             path = os.path.join(path, name)
 
             item = cls(path, libraryWindow=libraryWindow)
-            item.save()
+            item.save(path)
+
+            if libraryWindow:
+                libraryWindow.refresh()
+                libraryWindow.selectFolderPath(path)
 
     def createItemData(self):
         """Overriding this method to force the item type to Folder"""
         itemData = super(FolderItem, self).createItemData()
-
         itemData['type'] = "Folder"
-
         return itemData
 
     def doubleClicked(self):
         """Overriding this method to show the items contained in the folder."""
         self.libraryWindow().selectFolderPath(self.path())
 
-    def save(self, *args, **kwargs):
-        """
-        Create a new folder on disc at the given path.
-
-        :rtype: str
-        """
-        super(FolderItem, self).save(*args, **kwargs)
-
-        if self.libraryWindow():
-            self.libraryWindow().refresh()
-            self.libraryWindow().selectFolderPath(self.path())
+    def write(self, *args, **kwargs):
+        """Adding this method to avoid NotImpementedError."""
+        pass
 
 
 studiolibrary.registerItem(FolderItem)
