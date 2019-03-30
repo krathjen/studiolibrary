@@ -10,6 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+from .lightbox import Lightbox
 from .sortbymenu import SortByMenu
 from .groupbymenu import GroupByMenu
 from .filterbymenu import FilterByMenu
