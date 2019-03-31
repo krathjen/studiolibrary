@@ -1375,6 +1375,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
             self.refresh()
             self.selectItems(movedItems)
+            self.scrollToSelectedItem()
 
     # -----------------------------------------------------------------------
     # Support for search
