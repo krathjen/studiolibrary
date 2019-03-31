@@ -55,6 +55,7 @@ __all__ = [
     "replaceJson",
     "relPath",
     "absPath",
+    "tempPath",
     "realPath",
     "normPath",
     "normPaths",
@@ -187,6 +188,16 @@ def clearRegisteredItems():
     _itemClasses = collections.OrderedDict()
 
 
+def tempPath(*args):
+    """
+    Get the temp directory set in the config.
+    
+    :rtype: str 
+    """
+    temp = studiolibrary.config().get("tempPath")
+    return normPath(os.path.join(formatPath(temp), *args))
+
+
 def createTempPath(name, clean=True, makedirs=True):
     """
     Create a temp directory with the given name.
@@ -197,9 +208,7 @@ def createTempPath(name, clean=True, makedirs=True):
     
     :rtype: bool 
     """
-    user = getpass.getuser().lower()
-    tempdir = tempfile.gettempdir().replace("\\", "/")
-    path = os.path.join(tempdir, "StudioLibrary", user, name)
+    path = tempPath(name)
 
     if clean and os.path.exists(path):
         if os.path.exists(path):
@@ -431,6 +440,10 @@ def formatPath(formatString, path="", **kwargs):
 
     dirname, name, extension = splitPath(path)
 
+    temp = tempfile.gettempdir()
+    if temp:
+        temp = temp.decode(locale.getpreferredencoding())
+
     local = os.getenv('APPDATA') or os.getenv('HOME')
     # Environment variables return raw strings so we need to convert them to
     # unicode using system encoding
@@ -444,6 +457,7 @@ def formatPath(formatString, path="", **kwargs):
         "path": path,
         "root": path,  # legacy
         "user": user(),
+        "temp": temp,
         "home": local,  # legacy
         "local": local,
         "dirname": dirname,
@@ -456,7 +470,7 @@ def formatPath(formatString, path="", **kwargs):
 
     logger.debug("Resolved String: %s", resolvedString)
 
-    return resolvedString
+    return normPath(resolvedString)
 
 def copyPath(src, dst):
     """
@@ -1321,8 +1335,13 @@ def testRelativePaths():
     assert result == path, msg
 
 
-if __name__ == "__main__":
+def runTests():
+    """Run all the tests for this file."""
     testUpdate()
     testSplitPath()
     testFormatPath()
     testRelativePaths()
+
+
+if __name__ == "__main__":
+    runTests()

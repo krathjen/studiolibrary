@@ -15,6 +15,9 @@
   // You can use environment variables within the path. eg: {HOME}
   "databasePath": "{root}/.studiolibrary/database.json",
 
+  // The temp location used for saving out items and thumbnails
+  "tempPath": "{temp}/StudioLibrary/{user}",
+
   // The metadata path used for each item. Used for tags, item color etc
   // eg: /library/data/animation/nemo/.metadata
   "metadataPath": "{path}/.metadata",

@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shutil
 import logging
 
 from studioqt import QtGui
@@ -375,13 +376,11 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        import shutil
-
-        thumbnailPath = mutils.gui.tempThumbnailPath()
+        thumbnailPath = studiolibrary.tempPath("thumbnail.jpg")
         shutil.copyfile(playblastPath, thumbnailPath)
 
-        print(playblastPath)
-        print(thumbnailPath)
+        logger.info(playblastPath)
+        logger.info(thumbnailPath)
 
         self.setIconPath(thumbnailPath)
         self.setSequencePath(playblastPath)
@@ -448,9 +447,9 @@ class BaseSaveWidget(QtWidgets.QWidget):
             self.showByFrameDialog()
 
         try:
-            playblastPath = mutils.gui.tempPlayblastPath()
+            path = studiolibrary.tempPath("sequence", "thumbnail.jpg")
             mutils.gui.thumbnailCapture(
-                path=playblastPath,
+                path=path,
                 startFrame=startFrame,
                 endFrame=endFrame,
                 step=step,
@@ -460,7 +459,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         except Exception as e:
             title = "Error while capturing thumbnail"
-            QtWidgets.QMessageBox.critical(self.libraryWindow(), title, str(e))
+            studiolibrary.widgets.MessageBox.critical(self.libraryWindow(), title, str(e))
             raise
 
     def setCaptureMenuEnabled(self, enable):
@@ -469,15 +468,16 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :type enable: bool
         :rtype: None 
+        
         """
         logger.info("Setting capture menu to %s", enable)
 
         if enable:
             parent = self.parent()
-            iconPath = mutils.gui.tempThumbnailPath()
+            path = studiolibrary.tempPath("thumbnail.jpg")
 
             menu = mutils.gui.ThumbnailCaptureMenu(
-                iconPath,
+                path,
                 force=True,
                 parent=parent
             )

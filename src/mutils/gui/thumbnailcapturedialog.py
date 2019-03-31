@@ -37,31 +37,7 @@ from studioqt import QtWidgets
 __all__ = [
     "thumbnailCapture",
     "ThumbnailCaptureDialog",
-    "tempPlayblastPath",
-    "tempThumbnailPath",
     ]
-
-
-def tempThumbnailPath(clean=False):
-    """
-    Return the temp thumbnail location on disc.
-
-    :type clean: bool
-    :rtype: str
-    """
-    tempDir = mutils.TempDir("icon", clean=clean)
-    return tempDir.path() + "/thumbnail.jpg"
-
-
-def tempPlayblastPath(clean=False):
-    """
-    Return the temp playblast location on disc.
-
-    :type clean: bool
-    :rtype: str
-    """
-    tempDir = mutils.TempDir("sequence", clean=clean)
-    return tempDir.path() + "/thumbnail.jpg"
 
 
 _instance = None
