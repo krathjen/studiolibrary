@@ -53,7 +53,7 @@ def playblast(filename, modelPanel, startFrame, endFrame, width, height, step=1)
     :type step: list[int]
     :rtype: str
     """
-    logger.info("Playblasting '{filename}'".format(filename=filename))
+    logger.info(u"Playblasting '{filename}'".format(filename=filename))
 
     if startFrame == endFrame and os.path.exists(filename):
         os.remove(filename)
@@ -103,5 +103,5 @@ def playblast(filename, modelPanel, startFrame, endFrame, width, height, step=1)
         os.rename(src, dst)
         src = dst
 
-    logger.info("Playblasted '%s'" % src)
+    logger.info(u"Playblasted '%s'" % src)
     return src

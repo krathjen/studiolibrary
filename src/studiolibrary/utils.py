@@ -440,15 +440,22 @@ def formatPath(formatString, path="", **kwargs):
 
     dirname, name, extension = splitPath(path)
 
+    encoding = locale.getpreferredencoding()
+
+    # Environment variables return raw strings so we need to convert them to
+    # unicode using the preferred system encoding
+
     temp = tempfile.gettempdir()
     if temp:
-        temp = temp.decode(locale.getpreferredencoding())
+        temp = temp.decode(encoding)
+
+    username = user()
+    if username:
+        username = username.decode(encoding)
 
     local = os.getenv('APPDATA') or os.getenv('HOME')
-    # Environment variables return raw strings so we need to convert them to
-    # unicode using system encoding
     if local:
-        local = local.decode(locale.getpreferredencoding())
+        local = local.decode(encoding)
 
     kwargs.update(os.environ)
 
@@ -456,7 +463,7 @@ def formatPath(formatString, path="", **kwargs):
         "name": name,
         "path": path,
         "root": path,  # legacy
-        "user": user(),
+        "user": username,
         "temp": temp,
         "home": local,  # legacy
         "local": local,

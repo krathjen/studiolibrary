@@ -29,9 +29,9 @@ import os
 import abc
 import json
 import time
+import locale
 import getpass
 import logging
-
 
 import mutils
 
@@ -326,7 +326,11 @@ class TransferObject(object):
         """
         logger.info("Saving pose: %s" % path)
 
+        encoding = locale.getpreferredencoding()
         user = getpass.getuser()
+        if user:
+            user = user.decode(encoding)
+
         ctime = str(time.time()).split(".")[0]
 
         self.setMetadata("user", user)
