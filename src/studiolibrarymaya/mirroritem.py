@@ -126,31 +126,37 @@ class MirrorItem(baseitem.BaseItem):
         return [
             {
                 "name": "name",
-                "type": "string"
+                "type": "string",
+                "layout": "vertical"
             },
             {
-                "name": "left",
+                "name": "leftSide",
                 "type": "string",
+                "layout": "vertical",
                 "menu": {
                     "name": "0"
                 }
             },
             {
-                "name": "right",
+                "name": "rightSide",
                 "type": "string",
+                "layout": "vertical",
                 "menu": {
                     "name": "0"
                 }
-            },
-            {
-                "name": "contains",
-                "type": "label"
             },
             {
                 "name": "comment",
                 "type": "text",
                 "layout": "vertical"
-            }
+            },
+            {
+                "name": "contains",
+                "type": "label",
+                "label": {
+                    "visible": False
+                }
+            },
         ]
 
     def saveValidator(self, **options):
@@ -166,11 +172,11 @@ class MirrorItem(baseitem.BaseItem):
         if self._validateObjects != objects:
             self._validateObjects = objects
 
-            left = options.get("left")
+            left = options.get("leftSide")
             if not left:
                 left = mutils.MirrorTable.findLeftSide(objects)
 
-            right = options.get("right")
+            right = options.get("rightSide")
             if not right:
                 right = mutils.MirrorTable.findRightSide(objects)
 
@@ -185,14 +191,14 @@ class MirrorItem(baseitem.BaseItem):
 
             results.extend([
                 {
-                    "name": "left",
+                    "name": "leftSide",
                     "value": leftSide,
                     "menu": {
                         "name": str(mt.leftCount(objects))
                     }
                 },
                 {
-                    "name": "right",
+                    "name": "rightSide",
                     "value": rightSide,
                     "menu": {
                         "name": str(mt.rightCount(objects))
@@ -220,8 +226,8 @@ class MirrorItem(baseitem.BaseItem):
             path + "/mirrortable.json",
             objects,
             metadata={"description": options.get("comment", "")},
-            leftSide=options.get("left"),
-            rightSide=options.get("right"),
+            leftSide=options.get("leftSide"),
+            rightSide=options.get("rightSide"),
         )
 
 

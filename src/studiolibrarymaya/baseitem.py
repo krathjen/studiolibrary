@@ -132,17 +132,19 @@ class BaseItem(studiolibrary.LibraryItem):
         return [
             {
                 "name": "name",
-                "type": "string"
-            },
-            {
-                "name": "contains",
-                "type": "label"
+                "type": "string",
+                "layout": "vertical",
             },
             {
                 "name": "comment",
                 "type": "text",
                 "layout": "vertical"
-            }
+            },
+            {
+                "name": "contains",
+                "type": "label",
+                "label": {"visible": False}
+            },
         ]
 
     def saveValidator(self, **options):
@@ -153,10 +155,13 @@ class BaseItem(studiolibrary.LibraryItem):
         count = len(selection)
         plural = "s" if count > 1 else ""
 
+        msg = "{0} object{1} selected for saving"
+        msg = msg.format(str(count), plural)
+
         return [
             {
                 "name": "contains",
-                "value": (str(count) + " Object" + plural)
+                "value": msg
             },
         ]
 

@@ -749,17 +749,13 @@ Lightbox {
     background-color: rgb(0, 0, 0, 100);
 }
 
+
+
 /*
 ---------------------------
-Options Widget
+Form Widget
 ---------------------------
 */
-
-/* --- Label --- */
-LabelOption > #widget {
-    color: rgb(255, 255, 255, 200);
-}
-
 
 /* --- Separator --- */
 SeparatorFieldWidget > #widget {
@@ -772,7 +768,8 @@ SeparatorFieldWidget > #widget {
 }
 
 TextFieldWidget QTextEdit {
-    max-height: 96px;
+    min-height: 42px;
+    max-height: 92px;
 }
 
 FormWidget QWidget {
@@ -780,17 +777,20 @@ FormWidget QWidget {
     text-align: left;
 }
 
-FieldWidget {
-    min-height: 16px;
+FieldWidget[layout="vertical"] {
     margin-bottom: 3px;
 }
 
-FieldWidget[layout=vertical] #label {
-    margin-bottom: 4px;
+FieldWidget[layout="vertical"] #label {
+    margin-bottom: 2px;
 }
 
-FieldWidget[layout=horizontal] #label {
-    margin-left: 4px;
+FieldWidget[layout="horizontal"] {
+    margin-bottom: 2px;
+}
+
+FieldWidget[layout="horizontal"] #label {
+    margin-right: 4px;
 }
 
 FieldWidget #menuButton {
@@ -826,6 +826,38 @@ FormWidget #optionsFrame {
 FieldWidget QComboBox {
     border: 1px solid transparent;
 }
+
+BaseSaveWidget #fieldWidget {
+    margin-top: 4px;
+}
+
+
+BaseLoadWidget QLineEdit,
+BaseLoadWidget QTextEdit,
+BaseLoadWidget QComboBox,
+BaseLoadWidget #thumbnailButton,
+BaseSaveWidget QLineEdit,
+BaseSaveWidget QTextEdit,
+BaseSaveWidget QComboBox,
+BaseSaveWidget #thumbnailButton {
+    border-radius: 2px;
+}
+
+BaseSaveWidget #acceptButton,
+BaseLoadWidget #acceptButton {
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+BaseSaveWidget #selectionSetButton,
+BaseLoadWidget #selectionSetButton {
+    margin-left: 1px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+
+
+
 /*
 FieldWidget[default=false] QLineEdit,
 FieldWidget[default=false] QTextEdit {

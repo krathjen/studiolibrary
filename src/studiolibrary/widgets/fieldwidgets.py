@@ -57,8 +57,9 @@ class FieldWidget(QtWidgets.QFrame):
         self._menuButton = None
         self._actionResult = None
 
+        self.setObjectName("fieldWidget")
+
         direction = self._data.get("layout", self.DefaultLayout)
-        self.setProperty("layout", direction)
 
         if direction == "vertical":
             layout = QtWidgets.QVBoxLayout(self)
@@ -80,11 +81,12 @@ class FieldWidget(QtWidgets.QFrame):
 
         layout.addWidget(self._label)
 
+        self._layout2 = QtWidgets.QHBoxLayout(self)
+        layout.addLayout(self._layout2)
+
         if direction == "vertical":
             self._label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         else:
-            layout.setStretchFactor(self._label, 2)
-
             self._label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
     def label(self):
@@ -114,6 +116,23 @@ class FieldWidget(QtWidgets.QFrame):
         """
         return self._data
 
+    def title(self):
+        """
+        Get the title to be displayed for the field.
+        
+        :rtype: str 
+        """
+        data = self.data()
+
+        title = data.get("title", "") or data.get("name", "")
+        if title:
+            title = toTitle(title)
+
+        if self.isRequired():
+            title += '*'
+
+        return title
+
     def setData(self, data):
         """
         Set the current state of the field widget using a dictionary.
@@ -139,7 +158,10 @@ class FieldWidget(QtWidgets.QFrame):
             self.setDefault(value)
 
         if value is not None:
-            self.setValue(value)
+            try:
+                self.setValue(value)
+            except TypeError as error:
+                logger.exception(error)
 
         enabled = state.get('enabled')
         if enabled is not None:
@@ -162,12 +184,23 @@ class FieldWidget(QtWidgets.QFrame):
         toolTip = state.get('toolTip', '')
         self.setToolTip(toolTip)
 
-        label = state.get('label')
-        if label is None:
-            label = state.get('name')
+        style = state.get("style")
+        if style:
+            self.setStyleSheet(style)
 
-        if label is not None:
-            self.setText(label)
+        title = self.title() or ""
+        self.setText(title)
+
+        label = state.get('label', {})
+        if label:
+
+            text = label.get("name")
+            if text is not None:
+                self.setText(text)
+
+            visible = label.get('visible')
+            if visible is not None:
+                self.label().setVisible(visible)
 
         text = state.get("menu", {}).get("name")
         if text is not None:
@@ -199,13 +232,7 @@ class FieldWidget(QtWidgets.QFrame):
         
         :type text: str 
         """
-        if text:
-            text = toTitle(text)
-
-            if self.isRequired():
-                text += '*'
-
-            self._label.setText(text)
+        self._label.setText(text)
 
     def setValue(self, value):
         """
@@ -295,14 +322,14 @@ class FieldWidget(QtWidgets.QFrame):
         :type widget: QtWidgets.QWidget
         """
         self._widget = widget
+        self._widget.setParent(self)
         self._widget.setObjectName('widget')
         self._widget.setSizePolicy(
-            QtWidgets.QSizePolicy.Ignored,
+            QtWidgets.QSizePolicy.Expanding,
             QtWidgets.QSizePolicy.Preferred,
         )
 
-        self.layout().addWidget(self._widget)
-        self.layout().setStretchFactor(self._widget, 4)
+        self._layout2.addWidget(self._widget)
 
         self.createMenuButton()
 
@@ -323,7 +350,7 @@ class FieldWidget(QtWidgets.QFrame):
             self._menuButton.setObjectName("menuButton")
             self._menuButton.clicked.connect(callback)
 
-            self.layout().addWidget(self._menuButton)
+            self._layout2.addWidget(self._menuButton)
 
     def actionCallback(self, callback):
         """
@@ -370,7 +397,11 @@ class FieldWidget(QtWidgets.QFrame):
 
     def refresh(self):
         """Refresh the style properties."""
+        direction = self._data.get("layout", self.DefaultLayout)
+
+        self.setProperty("layout", direction)
         self.setProperty('default', self.isDefault())
+
         self.setStyleSheet(self.styleSheet())
 
 
@@ -526,6 +557,11 @@ class BoolFieldWidget(FieldWidget):
         widget.stateChanged.connect(self.emitValueChanged)
 
         self.setWidget(widget)
+
+        inline = self.data().get("inline")
+        if inline:
+            self.label().setText("")
+            self.widget().setText(self.title())
 
     def value(self):
         """

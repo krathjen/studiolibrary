@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>160</width>
-    <height>540</height>
+    <height>609</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -463,9 +463,9 @@ QPushButton:!Checked {
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QVBoxLayout" name="verticalLayout_14">
             <property name="spacing">
-             <number>3</number>
+             <number>0</number>
             </property>
             <property name="margin">
              <number>0</number>
@@ -490,7 +490,7 @@ QPushButton:!Checked {
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_10">
+     <layout class="QVBoxLayout" name="verticalLayout_15">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -498,7 +498,7 @@ QPushButton:!Checked {
        <number>0</number>
       </property>
       <item>
-       <widget class="QFrame" name="optionsToggleBoxHeading">
+       <widget class="QFrame" name="info2ToggleBoxHeading">
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -508,7 +508,7 @@ QPushButton:!Checked {
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_11">
+        <layout class="QVBoxLayout" name="verticalLayout_19">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -558,7 +558,7 @@ QPushButton:!Checked {
       <item>
        <widget class="QFrame" name="optionsToggleBoxFrame">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -572,7 +572,7 @@ QPushButton:!Checked {
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_12">
+        <layout class="QVBoxLayout" name="verticalLayout_20">
          <property name="spacing">
           <number>3</number>
          </property>
@@ -608,9 +608,9 @@ QPushButton:!Checked {
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <layout class="QVBoxLayout" name="verticalLayout_21">
             <property name="spacing">
-             <number>3</number>
+             <number>0</number>
             </property>
             <property name="margin">
              <number>0</number>
@@ -954,7 +954,7 @@ QPushButton:!Checked {
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <property name="spacing">
-       <number>1</number>
+       <number>0</number>
       </property>
       <item>
        <spacer name="horizontalSpacer_3">
@@ -1066,19 +1066,6 @@ QPushButton:!Checked {
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="labelSpacer">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="text">
-      <string/>
      </property>
     </widget>
    </item>

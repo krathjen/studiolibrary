@@ -89,6 +89,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.ui.sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self)
+        self.ui.sequenceWidget.setObjectName("thumbnailButton")
         self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
         self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
 

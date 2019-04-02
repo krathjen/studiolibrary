@@ -1123,7 +1123,7 @@ QPushButton:!Checked {
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <property name="spacing">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="topMargin">
          <number>0</number>

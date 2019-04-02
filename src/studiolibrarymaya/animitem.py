@@ -104,13 +104,17 @@ class AnimItem(baseitem.BaseItem):
                 "name": "connect",
                 "type": "bool",
                 "default": False,
-                "persistent": True
+                "persistent": True,
+                "inline": True,
+                "label": {"name": ""}
             },
             {
                 "name": "currentTime",
                 "type": "bool",
                 "default": True,
-                "persistent": True
+                "persistent": True,
+                "inline": True,
+                "label": {"name": ""}
             },
             {
                 "name": "source",
@@ -218,11 +222,13 @@ class AnimItem(baseitem.BaseItem):
         return [
             {
                 "name": "name",
-                "type": "string"
+                "type": "string",
+                "layout": "vertical"
             },
             {
                 "name": "fileType",
                 "type": "enum",
+                "layout": "vertical",
                 "default": "mayaAscii",
                 "items": ["mayaAscii", "mayaBinary"],
                 "persistent": True
@@ -230,6 +236,7 @@ class AnimItem(baseitem.BaseItem):
             {
                 "name": "frameRange",
                 "type": "range",
+                "layout": "vertical",
                 "default": [start, end],
                 "actions": [
                     {
@@ -250,23 +257,30 @@ class AnimItem(baseitem.BaseItem):
                 "name": "byFrame",
                 "type": "int",
                 "default": 1,
+                "layout": "vertical",
                 "persistent": True
-            },
-            {
-                "name": "bake",
-                "type": "bool",
-                "default": False,
-                "persistent": True
-            },
-            {
-                "name": "contains",
-                "type": "label"
             },
             {
                 "name": "comment",
                 "type": "text",
                 "layout": "vertical"
-            }
+            },
+            {
+                "name": "bakeConnected",
+                "type": "bool",
+                "default": False,
+                "layout": "vertical",
+                "persistent": True,
+                "inline": True,
+                "label": {"visible": False}
+            },
+            {
+                "name": "contains",
+                "type": "label",
+                "label": {
+                    "visible": False
+                }
+            },
         ]
 
     def write(self, path, objects, iconPath="", sequencePath="", **options):
