@@ -205,10 +205,11 @@ class Library(QtCore.QObject):
         items = self.createItems()
         for item in items:
             value = item.itemData().get(field)
-            results.setdefault(value, {'count': 0, 'name': value})
-            match = self.match(item.itemData(), queries)
-            if match:
-                results[value]['count'] += 1
+            if value:
+                results.setdefault(value, {'count': 0, 'name': value})
+                match = self.match(item.itemData(), queries)
+                if match:
+                    results[value]['count'] += 1
 
         def sortKey(facet):
             return facet.get(sortBy)
