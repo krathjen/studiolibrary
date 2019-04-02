@@ -469,15 +469,15 @@ class StringFieldWidget(FieldWidget):
         """
         Get the value of the widget.
         
-        :rtype: str 
+        :rtype: unicode 
         """
-        return str(self.widget().text())
+        return unicode(self.widget().text())
 
     def setValue(self, value):
         """
         Set the string value for the widget.
         
-        :type value: str 
+        :type value: unicode 
         """
         self.widget().setText(value)
         super(StringFieldWidget, self).setValue(value)
@@ -498,15 +498,15 @@ class TextFieldWidget(FieldWidget):
         """
         Get the text value of the text edit.
         
-        :rtype: str 
+        :rtype: unicode 
         """
-        return str(self.widget().toPlainText())
+        return unicode(self.widget().toPlainText())
 
     def setValue(self, value):
         """
         Set the text value for the text edit.
         
-        :type value: str 
+        :type value: unicode 
         """
         self.widget().setText(value)
         super(TextFieldWidget, self).setValue(value)
@@ -645,9 +645,9 @@ class EnumFieldWidget(FieldWidget):
         """
         Get the value of the combobox.
         
-        :rtype: str 
+        :rtype: unicode 
         """
-        return str(self.widget().currentText())
+        return unicode(self.widget().currentText())
 
     def setState(self, state):
         """
@@ -665,7 +665,7 @@ class EnumFieldWidget(FieldWidget):
         """
         Set the current value of the combobox.
         
-        :type item: str 
+        :type item: unicode 
         """
         self.widget().setCurrentText(item)
 
@@ -673,7 +673,7 @@ class EnumFieldWidget(FieldWidget):
         """
         Set the current items of the combobox.
         
-        :type items: list[str]
+        :type items: list[unicode]
         """
         self.widget().clear()
         self.widget().addItems(items)
@@ -699,7 +699,7 @@ class SeparatorFieldWidget(FieldWidget):
         """
         Set the current text of the separator.
         
-        :type value: str 
+        :type value: unicode 
         """
         self.widget().setText(value)
 
@@ -707,7 +707,7 @@ class SeparatorFieldWidget(FieldWidget):
         """
         Get the current text of the combobox.
         
-        :rtype: str 
+        :rtype: unicode 
         """
         return self.widget().text()
 
@@ -732,7 +732,7 @@ class SliderFieldWidget(FieldWidget):
         """
         Set the current value for the slider.
         
-        :type value: str 
+        :type value: int 
         """
         self.widget().setValue(value)
 
@@ -740,7 +740,7 @@ class SliderFieldWidget(FieldWidget):
         """
         Get the current value for the slider.
         
-        :rtype: str 
+        :rtype: int
         """
         return self.widget().value()
 
