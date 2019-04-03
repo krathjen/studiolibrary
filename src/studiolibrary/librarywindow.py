@@ -1604,15 +1604,6 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         self.setSettings(self.DEFAULT_SETTINGS)
 
-    def settingsPath(self):
-        """
-        Return the settings path for the LibraryWindow.
-
-        :rtype: str
-        """
-        formatString = studiolibrary.config().get('settingsPath')
-        return studiolibrary.formatPath(formatString)
-
     def geometrySettings(self):
         """
         Return the geometry values as a list.
@@ -1778,12 +1769,12 @@ class LibraryWindow(QtWidgets.QWidget):
 
     def showSettings(self):
         """Show the settings file."""
-        path = self.settingsPath()
+        path = studiolibrary.settingsPath()
         studiolibrary.showInFolder(path)
 
     def saveSettings(self, settings=None):
         """
-        Save the settings to the self.settingsPath() as a json format.
+        Save the settings to the settings path set in the config.
 
         :type settings: dict or None
         :rtype: None
@@ -1791,18 +1782,17 @@ class LibraryWindow(QtWidgets.QWidget):
         settings = settings or self.settings()
 
         key = self.name()
-        path = self.settingsPath()
-
-        data = studiolibrary.readJson(path)
+        data = studiolibrary.readSettings()
         data[key] = settings
 
-        logger.debug("Saving settings {path}".format(path=path))
-        studiolibrary.saveJson(path, data)
+        studiolibrary.saveSettings(data)
+
+        self.showToastMessage("Saved")
 
     @studioqt.showWaitCursor
     def loadSettings(self):
         """
-        Load the settings
+        Load the user settings from disc.
 
         :rtype: None
         """
@@ -1812,21 +1802,12 @@ class LibraryWindow(QtWidgets.QWidget):
 
     def readSettings(self):
         """
-        Read the settings from the self.settingsPath().
+        Get the user settings from disc.
 
         :rtype: dict
         """
         key = self.name()
-        path = self.settingsPath()
-        data = {}
-
-        logger.debug(u"Reading settings {path}".format(path=path))
-
-        try:
-            data = studiolibrary.readJson(path)
-        except Exception as error:
-            logging.exception(error)
-
+        data = studiolibrary.readSettings()
         return data.get(key, {})
 
     def isLoaded(self):

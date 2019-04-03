@@ -53,6 +53,9 @@ __all__ = [
     "readJson",
     "updateJson",
     "replaceJson",
+    "readSettings",
+    "saveSettings",
+    "settingsPath",
     "relPath",
     "absPath",
     "tempPath",
@@ -758,6 +761,52 @@ def readJson(path):
     data = json.loads(data)
 
     return data
+
+
+def settingsPath():
+    """
+    Get the settings path from the config file.
+    
+    :rtype: str 
+    """
+    formatString = studiolibrary.config().get('settingsPath')
+    return studiolibrary.formatPath(formatString)
+
+
+def readSettings():
+    """
+    Get all the user settings.
+    
+    :rtype: dict 
+    """
+    path = settingsPath()
+
+    logger.debug(u'Reading settings from "%s"', path)
+
+    data = {}
+
+    try:
+        data = studiolibrary.readJson(path)
+    except Exception as error:
+        logger.exception('Cannot read settings from "%s"', path)
+
+    return data
+
+
+def saveSettings(data):
+    """
+    Save the given data to the settings path.
+    
+    :type data:  
+    """
+    path = settingsPath()
+
+    logger.debug(u'Saving settings to "%s"', path)
+
+    try:
+        studiolibrary.saveJson(path, data)
+    except Exception:
+        logger.exception(u'Cannot save settings to "%s"', path)
 
 
 def replaceJson(path, old, new, count=-1):

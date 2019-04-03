@@ -32,7 +32,7 @@ class LibrariesMenu(QtWidgets.QMenu):
 
         self.setTitle('Libraries')
 
-        libraries = self.libraries()
+        libraries = studiolibrary.readSettings()
 
         for name in libraries:
 
@@ -60,23 +60,3 @@ class LibrariesMenu(QtWidgets.QMenu):
         :type kwargs: dict 
         """
         studiolibrary.main(name, path, **kwargs)
-
-    def settingsPath(self):
-        """
-        Get the settings path for the LibraryWindow.
-
-        :rtype: str
-        """
-        formatString = studiolibrary.config().get('settingsPath')
-        return studiolibrary.formatPath(formatString)
-
-    def libraries(self):
-        """
-        Get all the libraries as a dictionary indexed by name.
-        
-        :rtype: dict 
-        """
-        path = self.settingsPath()
-        data = studiolibrary.readJson(path)
-
-        return data
