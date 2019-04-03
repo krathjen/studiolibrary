@@ -9,15 +9,118 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
+import copy
 
 from studioqt import QtGui
 from studioqt import QtCore
-from studioqt import QtWidgets
+
 
 import studioqt
 
 
 class Icon(QtGui.QIcon):
+
+    @classmethod
+    def fa(cls, path, **kwargs):
+        """
+        Create a new icon with the given path, options and state.
+        
+        Example:
+            icon = studioqt.Icon.fa(
+                path,
+                color="rgb(255,255,255)"
+                color_disabled="rgb(0,200,200,20)",
+            )
+
+        :type path: str
+        :type kwargs: dict
+        
+        :rtype: studioqt.Icon 
+        """
+        color = kwargs.get('color', QtGui.QColor(0, 0, 0))
+
+        pixmap = studioqt.Pixmap(path)
+        pixmap.setColor(color)
+
+        valid_options = [
+            'active',
+            'selected',
+            'disabled',
+            'on',
+            'off',
+            'on_active',
+            'on_selected',
+            'on_disabled',
+            'off_active',
+            'off_selected',
+            'off_disabled',
+            'color',
+            'color_on',
+            'color_off',
+            'color_active',
+            'color_selected',
+            'color_disabled',
+            'color_on_selected',
+            'color_on_active',
+            'color_on_disabled',
+            'color_off_selected',
+            'color_off_active',
+            'color_off_disabled',
+        ]
+
+        default = {
+            "on_active": kwargs.get("active", studioqt.Pixmap(path)),
+            "off_active": kwargs.get("active", studioqt.Pixmap(path)),
+            "on_disabled": kwargs.get("disabled", studioqt.Pixmap(path)),
+            "off_disabled": kwargs.get("disabled", studioqt.Pixmap(path)),
+            "on_selected": kwargs.get("selected", studioqt.Pixmap(path)),
+            "off_selected": kwargs.get("selected", studioqt.Pixmap(path)),
+            "color_on_active": kwargs.get("color_active", color),
+            "color_off_active": kwargs.get("color_active", color),
+            "color_on_disabled": kwargs.get("color_disabled", color),
+            "color_off_disabled": kwargs.get("color_disabled", color),
+            "color_on_selected": kwargs.get("color_selected", color),
+            "color_off_selected": kwargs.get("color_selected", color),
+        }
+
+        default.update(kwargs)
+        kwargs = copy.copy(default)
+
+        for option in valid_options:
+            if 'color' in option:
+                kwargs[option] = kwargs.get(option, color)
+            else:
+                svg_path = kwargs.get(option, path)
+                kwargs[option] = studioqt.Pixmap(svg_path)
+
+        options = {
+            QtGui.QIcon.On: {
+                QtGui.QIcon.Normal: (kwargs['color_on'], kwargs['on']),
+                QtGui.QIcon.Active: (kwargs['color_on_active'], kwargs['on_active']),
+                QtGui.QIcon.Disabled: (kwargs['color_on_disabled'], kwargs['on_disabled']),
+                QtGui.QIcon.Selected: (kwargs['color_on_selected'], kwargs['on_selected'])
+            },
+
+            QtGui.QIcon.Off: {
+                QtGui.QIcon.Normal: (kwargs['color_off'], kwargs['off']),
+                QtGui.QIcon.Active: (kwargs['color_off_active'], kwargs['off_active']),
+                QtGui.QIcon.Disabled: (kwargs['color_off_disabled'], kwargs['off_disabled']),
+                QtGui.QIcon.Selected: (kwargs['color_off_selected'], kwargs['off_selected'])
+            }
+        }
+
+        icon = cls(pixmap)
+
+        for state in options:
+            for mode in options[state]:
+                color, pixmap = options[state][mode]
+
+                pixmap = studioqt.Pixmap(pixmap)
+                pixmap.setColor(color)
+
+                icon.addPixmap(pixmap, mode, state)
+
+        return icon
 
     def setColor(self, color, size=None):
         """
