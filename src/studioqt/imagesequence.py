@@ -40,6 +40,15 @@ class ImageSequence(QtCore.QObject):
         if path:
             self.setDirname(path)
 
+    def setPath(self, path):
+        """
+        Set a single frame image sequence.
+        
+        :type path: str
+        """
+        self._frame = 0
+        self._frames = [path]
+
     def setDirname(self, dirname):
         """
         Set the location to the image sequence.
