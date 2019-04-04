@@ -217,9 +217,7 @@ class MirrorItem(baseitem.BaseItem):
         :type iconPath: str
         :type options: dict
         """
-        # Copy the icon path to the given path
-        if iconPath:
-            shutil.copyfile(iconPath, path + "/thumbnail.jpg")
+        super(MirrorItem, self).write(path, objects, iconPath, **options)
 
         # Save the mirror table to the given location
         mutils.saveMirrorTable(

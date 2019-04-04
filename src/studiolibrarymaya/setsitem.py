@@ -59,9 +59,7 @@ class SetsItem(baseitem.BaseItem):
         :type iconPath: str
         :type options: dict
         """
-        # Copy the icon path to the given path
-        if iconPath:
-            shutil.copyfile(iconPath, path + "/thumbnail.jpg")
+        super(SetsItem, self).write(path, objects, iconPath, **options)
 
         # Save the selection set to the given path
         mutils.saveSelectionSet(

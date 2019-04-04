@@ -308,9 +308,7 @@ class PoseItem(baseitem.BaseItem):
         :type iconPath: str
         :type options: dict
         """
-        # Copy the icon path to the given path
-        if iconPath:
-            shutil.copyfile(iconPath, path + "/thumbnail.jpg")
+        super(PoseItem, self).write(path, objects, iconPath, **options)
 
         # Save the pose to the temp location
         mutils.savePose(

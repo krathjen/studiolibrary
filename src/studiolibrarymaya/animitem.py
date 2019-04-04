@@ -292,6 +292,8 @@ class AnimItem(baseitem.BaseItem):
         :type iconPath: str
         :type sequencePath: str
         """
+        super(AnimItem, self).write(path, objects, iconPath, **options)
+
         # Save the animation to the given path location on disc
         mutils.saveAnim(
             objects,
