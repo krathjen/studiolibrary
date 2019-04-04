@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import shutil
 import logging
 
 from studioqt import QtGui
@@ -165,6 +166,20 @@ class BaseItem(studiolibrary.LibraryItem):
             },
         ]
 
+    def write(self, path, objects, iconPath="", **options):
+        """
+        Write all the given object data to the given path on disc.
+
+        :type path: str
+        :type objects: list[str]
+        :type iconPath: str
+        :type options: dict
+        """
+        # Copy the icon path to the given path
+        if iconPath:
+            basename = os.path.basename(iconPath)
+            shutil.copyfile(iconPath, path + "/" + basename)
+
     def optionsFromSettings(self):
         """
         Get the options from the user settings.
@@ -275,14 +290,6 @@ class BaseItem(studiolibrary.LibraryItem):
             path = self.transferPath()
             self._transferObject = self.transferClass().fromPath(path)
         return self._transferObject
-
-    def thumbnailPath(self):
-        """
-        Return the thumbnail location on disc to be displayed for the item.
-
-        :rtype: str
-        """
-        return self.path() + "/thumbnail.jpg"
 
     def settings(self):
         """

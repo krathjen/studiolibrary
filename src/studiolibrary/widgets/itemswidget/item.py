@@ -68,6 +68,7 @@ class Item(QtWidgets.QTreeWidgetItem):
     DataRole = "DataRole"
 
     ThreadPool = QtCore.QThreadPool()
+    DefaultThumbnailPath = ""
 
     MAX_ICON_SIZE = 256
 
@@ -492,6 +493,22 @@ class Item(QtWidgets.QTreeWidgetItem):
         if self.itemsWidget():
             self.itemsWidget().update()
 
+    def defaultThumbnailPath(self):
+        """
+        Get the default thumbnail path.
+        
+        :rtype: str 
+        """
+        return self.DefaultThumbnailPath
+
+    def defaultThumbnailIcon(self):
+        """
+        Get the default thumbnail icon.
+        
+        :rtype: QtGui.QIcon 
+        """
+        return QtGui.QIcon(self.defaultThumbnailPath())
+
     def thumbnailIcon(self):
         """
         Return the thumbnail icon.
@@ -500,10 +517,6 @@ class Item(QtWidgets.QTreeWidgetItem):
         """
         thumbnailPath = self.thumbnailPath()
 
-        if not os.path.exists(thumbnailPath):
-            color = self.textColor()
-            thumbnailPath = studiolibrary.resource().icon("thumbnail", color=color)
-
         if not self._thumbnailIcon:
             if self.ENABLE_THUMBNAIL_THREAD and not self._workerStarted:
                 self._workerStarted = True
@@ -511,8 +524,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
                 self.ThreadPool.start(self._worker)
 
-                color = self.textColor()
-                self._thumbnailIcon = studiolibrary.resource().icon("thumbnail", color=color)
+                self._thumbnailIcon = self.defaultThumbnailIcon()
             else:
                 self._thumbnailIcon = QtGui.QIcon(thumbnailPath)
 

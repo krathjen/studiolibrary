@@ -63,7 +63,7 @@ class LibraryItem(studiolibrary.widgets.Item):
     MenuName = ""
     MenuOrder = 10
     MenuIconPath = ""
-    ThumbnailPath = studiolibrary.resource().get("icons", "thumbnail.png")
+    DefaultThumbnailPath = studiolibrary.resource().get("icons", "thumbnail.png")
 
     RegisterOrder = 10
     TypeIconPath = ""
@@ -268,7 +268,15 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :rtype: str
         """
-        return self.ThumbnailPath
+        thumbnailPath = self.path() + "/thumbnail.jpg"
+        if os.path.exists(thumbnailPath):
+            return thumbnailPath
+
+        thumbnailPath = thumbnailPath.replace(".jpg", ".png")
+        if os.path.exists(thumbnailPath):
+            return thumbnailPath
+
+        return self.DefaultThumbnailPath
 
     def showPreviewWidget(self, libraryWindow):
         """
