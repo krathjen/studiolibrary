@@ -28,8 +28,8 @@ class FolderItem(studiolibrary.LibraryItem):
     MenuName = "Folder"
     MenuOrder = 1
     MenuIconPath = studiolibrary.resource().get("icons/folder.png")
-    ThumbnailPath = studiolibrary.resource().get("icons/folder_item.png")
     PreviewWidgetClass = studiolibrary.widgets.PreviewWidget
+    DefaultThumbnailPath = studiolibrary.resource().get("icons/folder_item.png")
 
     @classmethod
     def match(cls, path):
