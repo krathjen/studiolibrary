@@ -70,8 +70,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self.ui.browseFolderButton.clicked.connect(self.browseFolder)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
-        self.setCaptureMenuEnabled(True)
-
         try:
             self.selectionChanged()
             self.setScriptJobEnabled(True)
@@ -88,19 +86,42 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        self.ui.sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self)
-        self.ui.sequenceWidget.setObjectName("thumbnailButton")
-        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
-        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+        sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self)
+        sequenceWidget.setObjectName("thumbnailButton")
+        sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
+        sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+
+        path = studiolibrary.resource().get('icons/fa/camera.svg')
+        sequenceWidget.addAction(
+            path,
+            "Capture new image",
+            "Capture new image",
+            self.thumbnailCapture
+        )
+
+        path = studiolibrary.resource().get('icons/fa/expand.svg')
+        sequenceWidget.addAction(
+            path,
+            "Show Capture window",
+            "Show Capture window",
+            self.showCaptureWindow
+        )
+
+        path = studiolibrary.resource().get('icons/fa/folder.svg')
+        sequenceWidget.addAction(
+            path,
+            "Load image from disk",
+            "Load image from disk",
+            self.showBrowseImageDialog
+        )
 
         icon = studiolibrarymaya.resource().icon("thumbnail2")
-        self.ui.sequenceWidget.setIcon(icon)
+        sequenceWidget.setIcon(icon)
 
-        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+        self.ui.thumbnailFrame.layout().insertWidget(0, sequenceWidget)
         self.ui.thumbnailButton.hide()
-        self.ui.thumbnailButton = self.ui.sequenceWidget
-
-        self.ui.sequenceWidget.clicked.connect(self.thumbnailCapture)
+        self.ui.thumbnailButton = sequenceWidget
+        self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
 
     def setLibraryWindow(self, libraryWindow):
         """
@@ -215,18 +236,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         :rtype str
         """
         return self._iconPath
-
-    def setIconPath(self, path):
-        """
-        Set the icon path to be used for the thumbnail.
-
-        :type path: str
-        :rtype: None
-        """
-        self._iconPath = path
-        icon = QtGui.QIcon(QtGui.QPixmap(path))
-        self.setIcon(icon)
-        self.updateThumbnailSize()
 
     def setIcon(self, icon):
         """
@@ -371,21 +380,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         if self._optionsWidget:
             self._optionsWidget.validate()
 
-    def _thumbnailCaptured(self, playblastPath):
-        """
-        Triggered when the user captures a thumbnail/playblast.
-
-        :rtype: None
-        """
-        thumbnailPath = studiolibrary.tempPath("thumbnail.jpg")
-        shutil.copyfile(playblastPath, thumbnailPath)
-
-        logger.info(playblastPath)
-        logger.info(thumbnailPath)
-
-        self.setIconPath(thumbnailPath)
-        self.setSequencePath(playblastPath)
-
     def sequencePath(self):
         """
         Return the playblast path.
@@ -402,7 +396,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self._sequencePath = path
-        self.ui.sequenceWidget.setDirname(os.path.dirname(path))
+        self.ui.thumbnailButton.setDirname(os.path.dirname(path))
 
     def showByFrameDialog(self):
         """
@@ -437,7 +431,50 @@ class BaseSaveWidget(QtWidgets.QWidget):
             if result != QtWidgets.QMessageBox.Ok:
                 raise Exception("Canceled!")
 
-    def thumbnailCapture(self):
+    def showBrowseImageDialog(self):
+        """Show a file dialog for choosing an image from disc."""
+        fileDialog = QtWidgets.QFileDialog(
+            self,
+            caption="Open Image",
+            filter="Image Files (*.png *.jpg)"
+        )
+
+        fileDialog.fileSelected.connect(self.setThumbnail)
+        fileDialog.exec_()
+
+    def showCaptureWindow(self):
+        """Show the capture window for framing."""
+        self.thumbnailCapture(show=True)
+
+    def setSequence(self, src):
+        """
+        Set the sequence path for the thumbnail widget.
+        
+        :type src: str 
+        """
+        self.setThumbnail(src, sequence=True)
+
+    def setThumbnail(self, src, sequence=False):
+        """
+        Triggered when the user captures a thumbnail/playblast.
+
+        :rtype: None
+        """
+        filename, extension = os.path.splitext(src)
+
+        dst = studiolibrary.tempPath("thumbnail" + extension)
+        shutil.copyfile(src, dst)
+
+        logger.info(src)
+        logger.info(dst)
+
+        self._iconPath = dst
+        self.ui.thumbnailButton.setPath(dst)
+
+        if sequence:
+            self.setSequencePath(src)
+
+    def thumbnailCapture(self, show=False):
         """Capture a playblast and save it to the temp thumbnail path."""
         options = self._optionsWidget.optionsToDict()
         startFrame, endFrame = options.get("frameRange", [None, None])
@@ -450,43 +487,19 @@ class BaseSaveWidget(QtWidgets.QWidget):
         try:
             path = studiolibrary.tempPath("sequence", "thumbnail.jpg")
             mutils.gui.thumbnailCapture(
+                show=show,
                 path=path,
                 startFrame=startFrame,
                 endFrame=endFrame,
                 step=step,
                 clearCache=True,
-                captured=self._thumbnailCaptured,
+                captured=self.setSequence,
             )
 
         except Exception as e:
             title = "Error while capturing thumbnail"
             studiolibrary.widgets.MessageBox.critical(self.libraryWindow(), title, str(e))
             raise
-
-    def setCaptureMenuEnabled(self, enable):
-        """
-        Enable the capture menu for creating the thumbnail.
-
-        :type enable: bool
-        :rtype: None 
-        
-        """
-        logger.info("Setting capture menu to %s", enable)
-
-        if enable:
-            parent = self.parent()
-            path = studiolibrary.tempPath("thumbnail.jpg")
-
-            menu = mutils.gui.ThumbnailCaptureMenu(
-                path,
-                force=True,
-                parent=parent
-            )
-            menu.captured.connect(self._thumbnailCaptured)
-
-            self.ui.thumbnailButton.setMenu(menu)
-        else:
-            self.ui.thumbnailButton.setMenu(QtWidgets.QMenu(self))
 
     def showThumbnailCaptureDialog(self):
         """

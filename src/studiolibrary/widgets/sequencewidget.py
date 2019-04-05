@@ -15,9 +15,23 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 from studioqt import ImageSequence
+import studioqt
 
 
 __all__ = ['ImageSequenceWidget']
+
+
+STYLE = """
+QToolBar {
+    border: 0px solid black; 
+    border-radius:2px;
+    background-color: rgb(0,0,0,100);
+}
+
+QToolButton {
+    background-color: transparent;
+}
+"""
 
 
 class ImageSequenceWidget(QtWidgets.QToolButton):
@@ -26,16 +40,104 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
 
     def __init__(self,  *args):
         QtWidgets.QToolButton.__init__(self, *args)
-        self.setStyleSheet('border: 0px solid rgb(0, 0, 0, 20);')
 
         self._imageSequence = ImageSequence("")
         self._imageSequence.frameChanged.connect(self._frameChanged)
 
+        self._toolBar = QtWidgets.QToolBar(self)
+        self._toolBar.setStyleSheet(STYLE)
+
+        studioqt.fadeOut(self._toolBar, duration=0)
+
+        spacer = QtWidgets.QWidget()
+        spacer.setMaximumWidth(4)
+        spacer.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred
+        )
+        self._toolBar.addWidget(spacer)
+
+        spacer = QtWidgets.QWidget()
+        spacer.setMaximumWidth(4)
+        spacer.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred
+        )
+        self._firstSpacer = self._toolBar.addWidget(spacer)
+
         self.setSize(150, 150)
         self.setMouseTracking(True)
 
+    def addAction(self, path, text, tip, callback):
+        """
+        Add an action to the tool bar.
+        
+        :type path: str 
+        :type text: str
+        :type tip: str
+        :type callback: func
+        
+        :rtype: QtWidgets.QAction
+        """
+        icon = studioqt.Icon.fa(
+            path,
+            color="rgb(250,250,250,160)",
+            color_active="rgb(250,250,250,250)",
+            color_disabled="rgb(0,0,0,20)"
+        )
+
+        action = QtWidgets.QAction(icon, text, self._toolBar)
+        action.setToolTip(tip)
+        # action.setStatusTip(tip)
+        # action.setWhatsThis(tip)
+
+        self._toolBar.insertAction(self._firstSpacer, action)
+        action.triggered.connect(callback)
+
+        return action
+
+    def actions(self):
+        """
+        Get all the actions that are a child of the ToolBar.
+
+        :rtype: list[QtWidgets.QAction] 
+        """
+        actions = []
+
+        for child in self._toolBar.children():
+            if isinstance(child, QtWidgets.QAction):
+                actions.append(child)
+
+        return actions
+
+    def resizeEvent(self, event):
+        """
+        Called when the widget is resized.
+        
+        :type event: QtWidgets.QResizeEvent 
+        """
+        self.updateToolBar()
+
+    def updateToolBar(self):
+        """Update the tool bar size depending on the number of actions."""
+
+        self._toolBar.setIconSize(QtCore.QSize(16, 16))
+
+        count = (len(self.actions())) - 3
+        width = (26 * count)
+
+        self._toolBar.setGeometry(0, 0, width, 25)
+
+        x = self.rect().center().x() - (self._toolBar.width()/2)
+        y = self.height() - self._toolBar.height() - 12
+        width = self._toolBar.width()
+
+        self._toolBar.setGeometry(x, y,  width,  self._toolBar.height())
+
     def isControlModifier(self):
         """
+        Check if the the control modifier is active.
+        
         :rtype: bool
         """
         modifiers = QtWidgets.QApplication.keyboardModifiers()
@@ -53,6 +155,15 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         self.setIconSize(self._size)
         self.setFixedSize(self._size)
 
+    def setPath(self, path):
+        """
+        Set a single frame image sequence.
+        
+        :type path: str
+        """
+        self._imageSequence.setPath(path)
+        self.updateIcon()
+
     def setDirname(self, dirname):
         """
         Set the location to the image sequence.
@@ -61,6 +172,10 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         :rtype: None
         """
         self._imageSequence.setDirname(dirname)
+        self.updateIcon()
+
+    def updateIcon(self):
+        """Update the icon for the current frame."""
         if self._imageSequence.frames():
             icon = self._imageSequence.currentIcon()
             self.setIcon(icon)
@@ -73,6 +188,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         :rtype: None
         """
         self._imageSequence.start()
+        studioqt.fadeIn(self._toolBar, duration=300)
 
     def leaveEvent(self, event):
         """
@@ -82,6 +198,7 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         :rtype: None
         """
         self._imageSequence.pause()
+        studioqt.fadeOut(self._toolBar, duration=300)
 
     def mouseMoveEvent(self, event):
         """
