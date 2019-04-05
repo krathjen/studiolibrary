@@ -159,13 +159,12 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         """
         filters = []
 
-        if self.isRecursive():
-            condition = 'startswith'
-        else:
-            condition = 'is'
-
         for path in self.selectedPaths():
-            filter_ = ('folder', condition, path)
+            if self.isRecursive():
+                filter_ = ('folder', 'startswith', path + "/")
+                filters.append(filter_)
+
+            filter_ = ('folder', 'is', path)
             filters.append(filter_)
 
         uniqueName = 'sidebarwidget_' + str(id(self))
