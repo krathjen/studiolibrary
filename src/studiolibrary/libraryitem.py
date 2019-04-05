@@ -701,9 +701,6 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         self.renamed.emit(self, src, dst)
 
-        if self.libraryWindow():
-            self.libraryWindow().refresh()
-
     def showRenameDialog(self, parent=None):
         """
         Show the rename dialog.

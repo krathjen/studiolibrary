@@ -246,6 +246,7 @@ class LibraryWindow(QtWidgets.QWidget):
         # --------------------------------------------------------------------
 
         library = self.LIBRARY_CLASS(libraryWindow=self)
+        library.dataChanged.connect(self.refresh)
         library.searchTimeFinished.connect(self._searchFinished)
 
         self._sidebarFrame = SidebarFrame(self)
