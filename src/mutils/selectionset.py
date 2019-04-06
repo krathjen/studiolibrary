@@ -59,6 +59,8 @@ class SelectionSet(mutils.TransferObject):
         dstObjects = objects
         srcObjects = self.objects()
 
+        self.validate(namespaces=namespaces)
+
         matches = mutils.matchNames(
                 srcObjects,
                 dstObjects=dstObjects,

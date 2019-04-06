@@ -661,6 +661,8 @@ class MirrorTable(mutils.TransferObject):
         :type animation: bool
         :type time: None or list[int]
         """
+        self.validate(namespaces=namespaces)
+
         results = {}
         foundObject = False
         srcObjects = self.objects().keys()

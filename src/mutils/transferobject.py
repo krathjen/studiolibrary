@@ -157,6 +157,22 @@ class TransferObject(object):
 
         self._path = path
 
+    def validate(self, **kwargs):
+        """
+        Validate the given kwargs for the current IO object.
+        
+        :type kwargs: dict 
+        """
+        namespaces = kwargs.get("namespaces")
+        if namespaces is not None:
+            sceneNamespaces = mutils.namespace.getAll()
+            for namespace in namespaces:
+                if namespace and namespace not in sceneNamespaces:
+                    msg = 'The namespace "{0}" does not exist in the scene! ' \
+                          "Please choose a namespace which exists."
+                    msg = msg.format(namespace)
+                    raise ValueError(msg)
+
     def mtime(self):
         """
         Return the modification datetime of self.path().

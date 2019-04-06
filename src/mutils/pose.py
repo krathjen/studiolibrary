@@ -448,6 +448,9 @@ class Pose(mutils.TransferObject):
             str(maya.cmds.currentTime(query=True))
 
         if self._cacheKey != cacheKey or clearCache:
+
+            self.validate(namespaces=namespaces)
+
             self._cache = []
             self._cacheKey = cacheKey
 

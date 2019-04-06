@@ -452,15 +452,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        IGNORE_NAMESPACES = ['UI', 'shared']
-
-        if studiolibrary.isMaya():
-            namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True)
-        else:
-            namespaces = []
-
-        namespaces = list(set(namespaces) - set(IGNORE_NAMESPACES))
-        namespaces = sorted(namespaces)
+        namespaces = mutils.namespace.getAll()
 
         text = self.ui.namespaceComboBox.currentText()
 

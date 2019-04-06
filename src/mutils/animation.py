@@ -712,6 +712,8 @@ class Animation(mutils.Pose):
         """
         connect = bool(connect)  # Make false if connect is None
 
+        self.validate(namespaces=namespaces)
+
         if option is None or option == PasteOption.ReplaceAll:
             option = PasteOption.ReplaceCompletely
 

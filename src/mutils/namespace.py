@@ -19,6 +19,7 @@ except ImportError:
 
 
 __all__ = [
+    "getAll",
     "getFromDagPath",
     "getFromDagPaths",
     "getFromSelection",
@@ -55,3 +56,18 @@ def getFromSelection():
     """
     dagPaths = maya.cmds.ls(selection=True)
     return getFromDagPaths(dagPaths)
+
+
+def getAll():
+    """
+    Get all the available namespaces in the scene
+    
+    :rtype: list[str] 
+    """
+    IGNORE_NAMESPACES = ['UI', 'shared']
+
+    namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True)
+    namespaces = list(set(namespaces) - set(IGNORE_NAMESPACES))
+    namespaces = sorted(namespaces)
+
+    return namespaces
