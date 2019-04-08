@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import copy
 import time
 import logging
 import collections
@@ -376,6 +377,8 @@ class Library(QtCore.QObject):
         """
         fields = []
         results = []
+
+        queries = copy.copy(queries)
         queries.extend(self._globalQueries.values())
 
         logger.debug("Search queries:")
