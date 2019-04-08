@@ -707,7 +707,11 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :type parent: QtWidgets.QWidget
         """
-        parent = parent or self.libraryWindow()
+        select = False
+
+        if self.libraryWindow():
+            parent = parent or self.libraryWindow()
+            select = self.libraryWindow().selectedFolderPath() == self.path()
 
         name, button = studiolibrary.widgets.MessageBox.input(
             parent,
@@ -719,6 +723,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         if button == QtWidgets.QDialogButtonBox.Ok:
             try:
                 self.rename(name)
+
+                if select:
+                    self.libraryWindow().selectFolderPath(self.path())
+
             except Exception as error:
                 self.showExceptionDialog("Rename Error", error)
                 raise
