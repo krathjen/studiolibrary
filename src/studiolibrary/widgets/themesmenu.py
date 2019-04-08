@@ -254,6 +254,9 @@ class Theme(QtCore.QObject):
 
     updated = QtCore.Signal()
 
+    DEFAULT_DARK_COLOR = QtGui.QColor(60, 60, 60)
+    DEFAULT_LIGHT_COLOR = QtGui.QColor(220, 220, 220)
+
     DEFAULT_ACCENT_COLOR = QtGui.QColor(0, 175, 255)
     DEFAULT_BACKGROUND_COLOR = QtGui.QColor(60, 60, 80)
 
@@ -365,7 +368,7 @@ class Theme(QtCore.QObject):
         
         :rtype: None 
         """
-        self.setBackgroundColor(ThemesMenu.DEFAULT_DARK_COLOR)
+        self.setBackgroundColor(self.DEFAULT_DARK_COLOR)
 
     def setLight(self):
         """
@@ -373,7 +376,7 @@ class Theme(QtCore.QObject):
 
         :rtype: None 
         """
-        self.setBackgroundColor(ThemesMenu.DEFAULT_LIGHT_COLOR)
+        self.setBackgroundColor(self.DEFAULT_LIGHT_COLOR)
 
     def iconColor(self):
         """

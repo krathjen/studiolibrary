@@ -9,8 +9,9 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-
+import time
 import logging
+import collections
 
 from studioqt import QtGui
 from studioqt import QtCore
@@ -26,27 +27,25 @@ __all__ = ["SidebarWidget"]
 logger = logging.getLogger(__name__)
 
 
-SPLIT_TOKEN = "/"
+DEFAULT_SEPARATOR = "/"
 
 
-def pathsToDict(paths, root="", split=None):
+def pathsToDict(paths, root="", separator=None):
     """
     Return the given paths as a nested dict.
 
     Example:
-
-    paths = ["/fruit/apple", "/fruit/orange"]
-    print pathsToDict(paths)
-    # Result: {"fruit" : {"apple":{}}, {"orange":{}}}
+        paths = ["/fruit/apple", "/fruit/orange"]
+        print pathsToDict(paths)
+        # Result: {"fruit" : {"apple":{}}, {"orange":{}}}
 
     :type paths: list[str]
     :type root: str
-    :type split: str
-
+    :type separator: str or None
     :rtype: dict
     """
-    split = split or SPLIT_TOKEN
-    results = {}
+    separator = separator or DEFAULT_SEPARATOR
+    results = collections.OrderedDict()
 
     for path in paths:
         p = results
@@ -54,15 +53,55 @@ def pathsToDict(paths, root="", split=None):
         # This is to add support for grouping by the given root path.
         if root and root in path:
             path = path.replace(root, "")
-            p = p.setdefault(root, {})
+            p = p.setdefault(root, collections.OrderedDict())
 
-        keys = path.split(split)[0:]
+        keys = path.split(separator)[0:]
 
         for key in keys:
             if key:
-                p = p.setdefault(key, {})
+                p = p.setdefault(key, collections.OrderedDict())
 
     return results
+
+
+def findRoot(paths, separator=None):
+    """
+    Find the common path for the given paths.
+    
+    Example:
+        paths = [
+            '/fruit/apple',
+            '/fruit/orange',
+            '/fruit/banana'
+        ]
+        print(findRoot(paths))
+        # '/fruit'
+    
+    :type paths: list[str]
+    :type separator: str
+    :rtype: str 
+    """
+    path = paths[0]  # Only need one from the list to verify the common path.
+    result = None
+    separator = separator or DEFAULT_SEPARATOR
+
+    tokens = path.split(separator)
+
+    for i, token in enumerate(tokens):
+        root = separator.join(tokens[:i+1])
+        match = True
+
+        for path in paths:
+            if not path.startswith(root + separator):
+                match = False
+                break
+
+        if not match:
+            break
+
+        result = root
+
+    return result
 
 
 class SidebarWidget(QtWidgets.QTreeWidget):
@@ -76,9 +115,19 @@ class SidebarWidget(QtWidgets.QTreeWidget):
 
         self._dpi = 1
         self._items = []
+        self._index = {}
         self._locked = False
         self._dataset = None
         self._recursive = True
+        self._options = {
+                'field': 'path',
+                'separator': '/',
+                'recursive': True,
+                'autoRootPath': True,
+                'rootText': 'FOLDERS',
+                'sortBy': None,
+                'queries': [{'filters': [('type', 'is', 'Folder')]}]
+            }
 
         self.itemExpanded.connect(self.update)
         self.itemCollapsed.connect(self.update)
@@ -91,6 +140,12 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         self.setSelectionMode(QtWidgets.QTreeWidget.ExtendedSelection)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
+
+    def clear(self):
+        """Clear all the items from the tree widget."""
+        self._items = []
+        self._index = {}
+        super(SidebarWidget, self).clear()
 
     def selectionChanged(self, *args):
         """Triggered the current selection has changed."""
@@ -113,17 +168,54 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         """
         return self._recursive
 
+    def sortBy(self):
+        """
+        Get the sortby field.
+        
+        :rtype: str 
+        """
+        return self._options.get('sortBy', [self.field()])
+
+    def field(self):
+        """
+        Get the field.
+        
+        :rtype: str 
+        """
+        return self._options.get('field', '')
+
+    def rootText(self):
+        """
+        Get the root text.
+        
+        :rtype: str 
+        """
+        return self._options.get('rootText')
+
+    def separator(self):
+        """
+        Get the separator used in the fields to separate level values.
+
+        :rtype: str 
+        """
+        return self._options.get('separator', DEFAULT_SEPARATOR)
+
     def _dataChanged(self):
         """Triggered when the data set has changed."""
         pass
-    #     paths = collections.OrderedDict()
-    #
-    #     for value in self.dataset().values(self.field(), self.sortBy()):
-    #         paths[value] = collections.OrderedDict()
-    #
-    #     if paths:
-    #         root = findRoot(paths.keys(), separator=self.separator())
-    #         self.setPaths(paths, root=root)
+        # data = collections.OrderedDict()
+        # queries = self._options.get("queries")
+        #
+        # items = self.dataset().findItems(queries)
+        #
+        # for item in items:
+        #     itemData = item.itemData()
+        #     value = itemData.get(self.field())
+        #     data[value] = {'iconPath': itemData.get('iconPath')}
+        #
+        # if data:
+        #     root = findRoot(data.keys(), separator=self.separator())
+        #     self.setPaths(data, root=root)
 
     def setDataset(self, dataset):
         """
@@ -167,7 +259,7 @@ class SidebarWidget(QtWidgets.QTreeWidget):
             filter_ = ('folder', 'is', path)
             filters.append(filter_)
 
-        uniqueName = 'sidebarwidget_' + str(id(self))
+        uniqueName = 'sidebar_widget_' + str(id(self))
         return {'name': uniqueName, 'operator': 'or', 'filters': filters}
 
     def setLocked(self, locked):
@@ -299,9 +391,7 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         :type path: str
         :rtype: NavigationWidgetItem
         """
-        for item in self.items():
-            if path == item.path():
-                return item
+        return self._index.get(path)
 
     def settings(self):
         """
@@ -487,12 +577,20 @@ class SidebarWidget(QtWidgets.QTreeWidget):
     def normPaths(self, paths):
         return [path.replace("\\", "/") for path in paths]
 
-    def setPaths(self, paths, root="", split=None):
+    def setPaths(self, *args, **kwargs):
+        """
+        This method has been deprecated.
+        """
+        logger.warning("This method has been deprecated!")
+        self.setData(*args, **kwargs)
+
+    def setData(self, data, root="", split=None):
         """
         Set the items to the given items.
 
-        :type paths: list[str]
+        :type data: list[str]
         :type root: str
+        :type split: str
         :rtype: None
         """
         settings = self.settings()
@@ -500,7 +598,11 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         self.blockSignals(True)
 
         self.clear()
-        self.addPaths(paths, root=root, split=split)
+
+        if not root:
+            root = findRoot(data.keys(), self.separator())
+
+        self.addPaths(data, root=root, split=split)
 
         self.setSettings(settings)
 
@@ -513,10 +615,8 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         :type paths: list[str]
         :type root: str or None
         :type split: str or None
-
-        :rtype: None
         """
-        data = pathsToDict(paths, root=root, split=split)
+        data = pathsToDict(paths, root=root, separator=split)
         self.createItems(data, split=split)
 
         if isinstance(paths, dict):
@@ -531,7 +631,9 @@ class SidebarWidget(QtWidgets.QTreeWidget):
 
         :rtype: None
         """
-        split = split or SPLIT_TOKEN
+        split = split or DEFAULT_SEPARATOR
+
+        self._index = {}
 
         for key in data:
 
@@ -540,6 +642,13 @@ class SidebarWidget(QtWidgets.QTreeWidget):
             item = SidebarWidgetItem(self)
             item.setText(0, unicode(key))
             item.setPath(path)
+            self._index[path] = item
+
+            if self.rootText():
+                item.setText(0, self.rootText())
+                item.setBold(True)
+                item.setIconPath('none')
+                item.setExpanded(True)
 
             def _recursive(parent, children, split=None):
                 for text, val in sorted(children.iteritems()):
@@ -552,6 +661,7 @@ class SidebarWidget(QtWidgets.QTreeWidget):
                     child.setPath(path)
 
                     parent.addChild(child)
+                    self._index[path] = child
 
                     _recursive(child, val, split=split)
 
@@ -565,14 +675,14 @@ class ExampleWindow(QtWidgets.QWidget):
     def __init__(self, *args):
         QtWidgets.QWidget.__init__(self, *args)
 
-        layout = QtGui.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
         self.setLayout(layout)
 
-        self._lineEdit = QtGui.QLineEdit()
+        self._lineEdit = QtWidgets.QLineEdit()
         self._lineEdit.textChanged.connect(self.searchChanged)
         self._treeWidget = SidebarWidget(self)
 
-        self._slider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self._slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self._slider.valueChanged.connect(self._valueChanged)
         self._slider.setRange(50, 200)
         self._slider.setValue(100)
@@ -585,19 +695,25 @@ class ExampleWindow(QtWidgets.QWidget):
         self._treeWidget.itemClicked.connect(self.itemClicked)
         self._treeWidget.itemSelectionChanged.connect(self.selectionChanged)
 
-    def _valueChanged(self, value):
+        self.update()
 
+    def _valueChanged(self, value):
+        self.update()
+
+    def update(self):
+        import studiolibrary
+
+        value = self._slider.value()
         value = value / 100.0
 
-        theme = studioqt.Theme()
+        theme = studiolibrary.widgets.Theme()
         theme.setDpi(value)
-        theme.setLight()
 
         self._treeWidget.setDpi(value)
         self._treeWidget.setStyleSheet(theme.styleSheet())
 
-    def setData(self, data):
-        self._treeWidget.setPaths(data)
+    def setData(self, *args, **kwargs):
+        self._treeWidget.setData(*args, **kwargs)
 
     def itemClicked(self):
         print("ITEM CLICKED")
@@ -615,16 +731,62 @@ class ExampleWindow(QtWidgets.QWidget):
 
         items = self._treeWidget.items()
 
-        for item in items:
-            item.setHidden(True)
-            item.setExpanded(False)
+        t = time.time()
+
+        self._treeWidget.expandAll()
 
         for item in items:
-            if text in item.path():
+            if text.lower() in item.text(0).lower():
+                item.setHidden(False)
                 for parent in item.parents():
                     parent.setHidden(False)
-                    parent.setExpanded(True)
-                    parent.setSelected(True)
+            else:
+                item.setHidden(True)
+
+        print time.time() - t
+
+
+def runTests():
+
+    paths = [
+        '/fruit/apple',
+        '/fruit/orange',
+        '/fruit/banana'
+    ]
+
+    assert findRoot(paths) == '/fruit'
+
+    paths = [
+        '/fruit/apple',
+        '/fruit/orange',
+        '/fruit/banana',
+        '/tesla/cars'
+    ]
+
+    assert findRoot(paths) == ''
+
+    data = pathsToDict(paths)
+
+    assert 'fruit' in data
+    assert 'apple' in data.get('fruit')
+    assert 'orange' in data.get('fruit')
+    assert 'banana' in data.get('fruit')
+    assert 'cars' in data.get('tesla')
+
+    paths = [
+        '>tesla>car>modelS',
+        '>tesla>car>modelX',
+        '>tesla>car>model3',
+    ]
+
+    assert findRoot(paths, separator='>') == '>tesla>car'
+
+    data = pathsToDict(paths, separator='>')
+
+    assert 'tesla' in data
+    assert 'modelS' in data.get('tesla').get('car')
+    assert 'modelX' in data.get('tesla').get('car')
+    assert 'model3' in data.get('tesla').get('car')
 
 
 def showExampleWindow():
@@ -657,6 +819,11 @@ def showExampleWindow():
         "props/car/color/yellow": {},
         "props/plane/color/blue": {},
         "props/plane/color/green": {},
+
+        "/": {},
+        "/Hello": {},
+        "/Hello/World": {},
+        "/Test/World": {},
 
         "tags": {
             "text": "TAGS",

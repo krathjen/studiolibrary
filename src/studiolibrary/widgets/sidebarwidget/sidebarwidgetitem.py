@@ -314,15 +314,16 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         if iconColor:
             self.setIconColor(iconColor)
 
-        isSelected = settings.get("selected", False)
-        self.setSelected(isSelected)
+        isSelected = settings.get("selected")
+        if isSelected is not None:
+            self.setSelected(isSelected)
 
-        isExpanded = settings.get("expanded", False)
-        if self.childCount() > 0:
+        isExpanded = settings.get("expanded")
+        if isExpanded is not None and self.childCount() > 0:
             self.setExpanded(isExpanded)
 
-        bold = settings.get("bold", False)
-        if bold:
+        bold = settings.get("bold")
+        if bold is not None:
             self.setBold(bold)
 
         textColor = settings.get("textColor")

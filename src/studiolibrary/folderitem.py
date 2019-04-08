@@ -30,6 +30,7 @@ class FolderItem(studiolibrary.LibraryItem):
     MenuIconPath = studiolibrary.resource().get("icons/folder.png")
     PreviewWidgetClass = studiolibrary.widgets.PreviewWidget
     DefaultThumbnailPath = studiolibrary.resource().get("icons/folder_item.png")
+    TrashIconPath = studiolibrary.resource().get("icons", "delete_96.png")
 
     @classmethod
     def match(cls, path):
@@ -105,6 +106,15 @@ class FolderItem(studiolibrary.LibraryItem):
         itemData = super(FolderItem, self).createItemData()
         itemData['type'] = "Folder"
         return itemData
+
+    def itemData(self):
+        """Overriding this method to set the trash icon"""
+        data = super(FolderItem, self).itemData()
+
+        if data.get('path').endswith('Trash'):
+            data['iconPath'] = self.TrashIconPath
+
+        return data
 
     def doubleClicked(self):
         """Overriding this method to show the items contained in the folder."""

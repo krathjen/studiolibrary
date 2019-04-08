@@ -760,16 +760,8 @@ class LibraryWindow(QtWidgets.QWidget):
         
         :rtype: None 
         """
-        rootPath = self.path()
-
-        data = {
-            rootPath: {
-                "iconPath": "none",
-                "bold": True,
-                "text": "FOLDERS",
-                "expanded": True,
-            }
-        }
+        data = {}
+        root = self.path()
 
         queries = [{'filters': [('type', 'is', 'Folder')]}]
 
@@ -784,7 +776,7 @@ class LibraryWindow(QtWidgets.QWidget):
             else:
                 data[path] = {}
 
-        self.sidebarWidget().setPaths(data, root=rootPath)
+        self.sidebarWidget().setData(data, root=root)
 
     def createFolderContextMenu(self):
         """
@@ -2521,7 +2513,7 @@ class LibraryWindow(QtWidgets.QWidget):
         if self._filterByMenu.isActive():
             icon = studiolibrary.resource().icon("filter")
             icon.setColor(self.iconColor())
-            icon.setBadge(14, 1, 13, 13, color=self.ICON_BADGE_COLOR)
+            icon.setBadge(18, 1, 9, 9, color=self.ICON_BADGE_COLOR)
         else:
             icon = studiolibrary.resource().icon("filter")
             icon.setColor(self.iconColor())
