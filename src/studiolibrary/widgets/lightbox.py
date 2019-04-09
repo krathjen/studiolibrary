@@ -64,6 +64,14 @@ class Lightbox(QtWidgets.QFrame):
         parent = self.parent()
         parent.installEventFilter(self)
 
+    def widget(self):
+        """
+        Get the current widget for the light box.
+        
+        :rtype: QtWidgets.QWidget 
+        """
+        return self._widget
+
     def setWidget(self, widget):
         """
         Set the widget for the lightbox.
@@ -74,6 +82,9 @@ class Lightbox(QtWidgets.QFrame):
             self.layout().removeWidget(self._widget)
 
         widget.setParent(self)
+        widget.accept = self.accept
+        widget.reject = self.reject
+
         self.layout().addWidget(widget, 1, 1)
 
         self._widget = widget
@@ -84,7 +95,8 @@ class Lightbox(QtWidgets.QFrame):
         
         :type event: QEvent 
         """
-        self.reject()
+        if not self.widget().underMouse():
+            self.reject()
 
     def eventFilter(self, object, event):
         """

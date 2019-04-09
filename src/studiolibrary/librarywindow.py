@@ -1026,6 +1026,35 @@ class LibraryWindow(QtWidgets.QWidget):
 
         return menu
 
+    def showSettingDialog(self):
+
+        widget = studiolibrary.widgets.FormDialog()
+
+        settings = {
+            "title": "Settings",
+            "description": "Your local settings",
+            "layout": "vertical",
+            "schema": [
+                {"name": "test", "type": "string"},
+                {"name": "test2", "type": "string"},
+                {"name": "test3", "type": "string"},
+            ]
+        }
+
+        widget.setSettings(settings)
+
+        # widget.setText("Hello")
+        # widget.setStyleSheet("border-radius:3px;background-color:white;")
+        widget.setMinimumWidth(300)
+        widget.setMinimumHeight(300)
+        widget.setMaximumWidth(400)
+        widget.setMaximumHeight(400)
+        # widget.setDefaultButton(QtWidgets.QPushButton("Yes"))
+
+        lightbox = studiolibrary.widgets.Lightbox(self)
+        lightbox.setWidget(widget)
+        lightbox.show()
+
     def createSettingsMenu(self):
         """
         Return the settings menu for changing the library widget.
@@ -1034,6 +1063,9 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         menu = studioqt.Menu("", self)
         menu.setTitle("Settings")
+
+        action = menu.addAction("Settings")
+        action.triggered.connect(self.showSettingDialog)
 
         action = menu.addAction("Sync")
         action.triggered.connect(self.sync)

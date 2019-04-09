@@ -857,6 +857,51 @@ BaseLoadWidget #selectionSetButton {
 }
 
 
+FormDialog {
+    padding: 5px;
+    border-radius:3px;
+}
+
+FormDialog #title {
+    padding: 4px;
+    font-size: 18px;
+}
+
+FormDialog #description {
+    padding: 4px;
+    padding-bottom: 9px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    border-bottom: 1px solid rgb(100,100,100,50);
+
+}
+
+FormDialog #acceptButton,
+FormDialog #rejectButton {
+    margin: 2px;
+    font-size: 14px;
+    padding: 4px;
+    min-width: 72px;
+    min-height: 24px;
+    border-radius: 2px;
+}
+
+FormDialog #acceptButton,
+FormDialog #rejectButton {
+    background-color: rgb(0,0,0,0);
+}
+
+FormDialog #acceptButton:hover {
+    background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 220);
+}
+
+FormDialog #acceptButton:pressed {
+    background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 220);
+}
+
+FormDialog #rejectButton:hover {
+    background-color: rgb(220,220,220,50);
+}
 
 /*
 FieldWidget[default=false] QLineEdit,

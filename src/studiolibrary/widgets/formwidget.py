@@ -21,6 +21,7 @@ from . import fieldwidgets
 
 __all__ = [
     "FormWidget",
+    "FormDialog",
     "FIELD_WIDGET_REGISTRY"
 ]
 
@@ -142,7 +143,7 @@ class FormWidget(QtWidgets.QFrame):
             widget.reset()
         self.validate()
 
-    def setSchema(self, schema):
+    def setSchema(self, schema, layout=None):
         """
         Set the schema for the widget.
         
@@ -157,6 +158,9 @@ class FormWidget(QtWidgets.QFrame):
             if not cls:
                 logger.warning("Cannot find widget for %s", data)
                 continue
+
+            if layout and not data.get("layout"):
+                data["layout"] = layout
 
             widget = cls(data=data)
             widget.setData(data)
@@ -316,6 +320,82 @@ class FormWidget(QtWidgets.QFrame):
         for widget in self._widgets:
             widget.blockSignals(False)
 
+
+class FormDialog(QtWidgets.QFrame):
+
+    accepted = QtCore.Signal(object)
+
+    def __init__(self, *args, **kwargs):
+        super(FormDialog, self).__init__(*args, **kwargs)
+
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.setLayout(layout)
+
+        self._widgets = []
+        self._validator = None
+
+        self._title = QtWidgets.QLabel(self)
+        self._title.setObjectName('title')
+        self._title.setText('FORM')
+        self.layout().addWidget(self._title)
+
+        self._description = QtWidgets.QLabel(self)
+        self._description.setObjectName('description')
+        self.layout().addWidget(self._description)
+
+        self._formWidget = FormWidget(self)
+        self._formWidget.setObjectName("formWidget")
+        self.layout().addWidget(self._formWidget)
+
+        self.layout().addStretch(1)
+
+        buttonLayout = QtWidgets.QHBoxLayout(self)
+        buttonLayout.setContentsMargins(0, 0, 0, 0)
+        buttonLayout.setSpacing(0)
+
+        self.layout().addLayout(buttonLayout)
+
+        buttonLayout.addStretch(1)
+
+        self._acceptButton = QtWidgets.QPushButton(self)
+        self._acceptButton.setObjectName('acceptButton')
+        self._acceptButton.setText('Submit')
+        self._acceptButton.clicked.connect(self.accept)
+
+        self._rejectButton = QtWidgets.QPushButton(self)
+        self._rejectButton.setObjectName('rejectButton')
+        self._rejectButton.setText('Cancel')
+        self._rejectButton.clicked.connect(self.reject)
+
+        buttonLayout.addWidget(self._acceptButton)
+        buttonLayout.addWidget(self._rejectButton)
+
+        # buttonLayout.addStretch(1)
+
+    def setSettings(self, settings):
+
+        title = settings.get("title")
+        if title is not None:
+            self._title.setText(title)
+
+        description = settings.get("description")
+        if description is not None:
+            self._description.setText(description)
+
+        layout = settings.get("layout")
+
+        schema = settings.get("schema")
+        if schema is not None:
+            self._formWidget.setSchema(schema, layout=layout)
+
+    def accept(self):
+        self.close()
+
+    def reject(self):
+        self.close()
 
 STYLE = """
 

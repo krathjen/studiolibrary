@@ -31,4 +31,4 @@ from .slideraction import SliderAction
 from .separatoraction import SeparatorAction
 from .colorpicker import ColorPickerAction, ColorPickerWidget
 from .sequencewidget import ImageSequenceWidget
-from .formwidget import FormWidget
+from .formwidget import FormWidget, FormDialog
