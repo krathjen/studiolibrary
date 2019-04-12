@@ -64,6 +64,8 @@ class ItemsWidget(QtWidgets.QWidget):
         w, h = self.DEFAULT_ZOOM_AMOUNT, self.DEFAULT_ZOOM_AMOUNT
 
         self._iconSize = QtCore.QSize(w, h)
+        self._itemSizeHint = QtCore.QSize(w, h)
+
         self._zoomAmount = self.DEFAULT_ZOOM_AMOUNT
         self._isItemTextVisible = True
 
@@ -819,6 +821,15 @@ class ItemsWidget(QtWidgets.QWidget):
 
         self.showToastMessage("Spacing: " + str(spacing))
 
+    def itemSizeHint(self, index=None):
+        """
+        Get the item size hint.
+        
+        :type index: QtWidgets.QModelIndex
+        :rtype: QtCore.QSize
+        """
+        return self._itemSizeHint
+
     def iconSize(self):
         """
         Return the icon size for the views.
@@ -835,6 +846,14 @@ class ItemsWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self._iconSize = size
+
+        if self.isItemTextVisible():
+            w = size.width()
+            h = size.width() + self.itemTextHeight()
+            self._itemSizeHint = QtCore.QSize(w, h)
+        else:
+            self._itemSizeHint = size
+
         self._listView.setIconSize(size)
         self._treeWidget.setIconSize(size)
 

@@ -14,6 +14,8 @@ from studioqt import QtWidgets
 
 import studioqt
 
+from .groupitem import GroupItem
+
 
 class ItemDelegate(QtWidgets.QStyledItemDelegate):
 
@@ -50,9 +52,13 @@ class ItemDelegate(QtWidgets.QStyledItemDelegate):
         :type index: QtCore.QModelIndex
         :rtype: QtCore.QSize
         """
-        # This will be called for each row.
+        #This will be called for each row.
         item = self.itemsWidget().itemFromIndex(index)
-        return item.sizeHint(0)
+
+        if isinstance(item, GroupItem):
+            return item.sizeHint()
+
+        return self.itemsWidget().itemSizeHint(index)
 
     def paint(self, painter, option, index):
         """
