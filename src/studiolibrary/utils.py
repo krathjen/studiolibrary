@@ -1189,12 +1189,24 @@ def sendAnalytics(
     :type tid: str
     :rtype: None
     """
+    def _send(url):
+        try:
+            url = url.replace(" ", "")
+            f = urllib.request.urlopen(url)
+        except Exception:
+            pass
+
     if not studiolibrary.config().get('analyticsEnabled'):
         return
 
     tid = tid or studiolibrary.config().get('analyticsId')
     cid = userUuid()
 
+    ul, _ = locale.getdefaultlocale()
+    ul = ul.replace("_", "-").lower()
+
+    # -- Legacy begin --
+    # This can be removed after October 2019
     url = "http://www.google-analytics.com/collect?" \
           "v=1" \
           "&ul=en-us" \
@@ -1218,12 +1230,31 @@ def sendAnalytics(
         name=name,
     )
 
-    def _send(url):
-        try:
-            url = url.replace(" ", "")
-            f = urllib.request.urlopen(url)
-        except Exception:
-            pass
+    t = threading.Thread(target=_send, args=(url,))
+    t.start()
+    # -- Legacy end --
+
+    # Page View
+    tid = "UA-50172384-3"
+    url = "https://www.google-analytics.com/collect?" \
+          "v=1" \
+          "&ul={ul}" \
+          "&tid={tid}" \
+          "&an={an}" \
+          "&av={av}" \
+          "&cid={cid}" \
+          "&t=pageview" \
+          "&dp=/{name}" \
+          "&dt={av}" \
+
+    url = url.format(
+        tid=tid,
+        an=an,
+        av=version,
+        cid=cid,
+        name=name,
+        ul=ul,
+    )
 
     t = threading.Thread(target=_send, args=(url,))
     t.start()
