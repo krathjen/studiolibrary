@@ -63,11 +63,7 @@ class StatusWidget(QtWidgets.QFrame):
         self.setFixedHeight(19)
         self.setMinimumWidth(5)
 
-        QtCore.QObject.connect(
-            self._timer,
-            QtCore.SIGNAL("timeout()"),
-            self.reset
-        )
+        self._timer.timeout.connect(self.reset)
 
     def isBlocking(self):
         """

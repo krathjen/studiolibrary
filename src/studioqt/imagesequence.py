@@ -86,7 +86,7 @@ class ImageSequence(QtCore.QObject):
         if not self._timer:
             self._timer = QtCore.QTimer(self.parent())
             self._timer.setSingleShot(False)
-            self.connect(self._timer, QtCore.SIGNAL('timeout()'), self._frameChanged)
+            self._timer.timeout.connect(self._frameChanged)
 
         if not self._paused:
             self._frame = 0

@@ -18,7 +18,7 @@ import contextlib
 
 import studioqt
 from studioqt import QtCore
-from studioqt import QtUiTools
+from studioqt import QtCompat
 from studioqt import QtWidgets
 
 
@@ -128,33 +128,12 @@ def loadUi(widget, path=None):
     if not path:
         path = uiPath(widget.__class__)
 
-    loadUiPySide(widget, path)
-
-
-def loadUiPySide(widget, path=None):
-    """
-    :type widget: QtWidgets.QWidget
-    :type path: str
-    :rtype: None
-    """
-    loader = QtUiTools.QUiLoader()
-    loader.setWorkingDirectory(os.path.dirname(path))
-
-    f = QtCore.QFile(path)
-    f.open(QtCore.QFile.ReadOnly)
-    widget.ui = loader.load(path, widget)
-    f.close()
-
-    layout = QtWidgets.QVBoxLayout()
-    layout.setObjectName("uiLayout")
-    layout.addWidget(widget.ui)
-    widget.setLayout(layout)
-    layout.setContentsMargins(0, 0, 0, 0)
-
-    widget.setMinimumWidth(widget.ui.minimumWidth())
-    widget.setMinimumHeight(widget.ui.minimumHeight())
-    widget.setMaximumWidth(widget.ui.maximumWidth())
-    widget.setMaximumHeight(widget.ui.maximumHeight())
+    cwd = os.getcwd()
+    try:
+        os.chdir(os.path.dirname(path))
+        widget.ui = QtCompat.loadUi(path, widget)
+    finally:
+        os.chdir(cwd)
 
 
 def isModifier():
