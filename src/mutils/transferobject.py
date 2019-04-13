@@ -348,10 +348,12 @@ class TransferObject(object):
             user = user.decode(encoding)
 
         ctime = str(time.time()).split(".")[0]
+        references = mutils.getReferenceData(self.objects())
 
         self.setMetadata("user", user)
         self.setMetadata("ctime", ctime)
         self.setMetadata("version", "1.0.0")
+        self.setMetadata("references", references)
         self.setMetadata("mayaVersion", maya.cmds.about(v=True))
         self.setMetadata("mayaSceneFile", maya.cmds.file(q=True, sn=True))
 

@@ -377,3 +377,40 @@ def getDurationFromNodes(objects):
         return last - first
     else:
         return 0
+
+
+def getReferencePaths(objects, withoutCopyNumber=False):
+    """
+    Get the reference paths for the given objects.
+
+    :type objects: list[str]
+    :type withoutCopyNumber: bool
+    :rtype: list[str]
+    """
+    paths = []
+    for obj in objects:
+        if maya.cmds.referenceQuery(obj, isNodeReferenced=True):
+            paths.append(maya.cmds.referenceQuery(obj, f=True, wcn=withoutCopyNumber))
+
+    return list(set(paths))
+
+
+def getReferenceData(objects):
+    """
+    Get the reference paths for the given objects.
+
+    :type objects: list[str]
+    :rtype: list[dict]
+    """
+    data = []
+    paths = getReferencePaths(objects)
+
+    for path in paths:
+        data.append({
+            "filename": path,
+            "unresolved": maya.cmds.referenceQuery(path, filename=True, withoutCopyNumber=True),
+            "namespace": maya.cmds.referenceQuery(path, namespace=True),
+            "node": maya.cmds.referenceQuery(path, referenceNode=True)
+        })
+
+    return data
