@@ -1,6 +1,6 @@
 How to install the Studio Library.
 
-1. Drag and drop the "install.py" file onto the Maya viewport.
+1. Drag and drop the "install.mel" file onto the Maya viewport.
 
 2. Click the Studio Library icon on the shelf to run.
 
