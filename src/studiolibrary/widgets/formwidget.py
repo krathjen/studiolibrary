@@ -313,6 +313,7 @@ class FormWidget(QtWidgets.QFrame):
             widget.blockSignals(True)
 
         for widget in self._widgets:
+            widget.setError("")
             for data in state:
                 if data.get("name") == widget.data().get("name"):
                     widget.setData(data)
@@ -325,8 +326,8 @@ class FormDialog(QtWidgets.QFrame):
 
     accepted = QtCore.Signal(object)
 
-    def __init__(self, *args, **kwargs):
-        super(FormDialog, self).__init__(*args, **kwargs)
+    def __init__(self, parent=None, form=None):
+        super(FormDialog, self).__init__(parent)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -373,6 +374,8 @@ class FormDialog(QtWidgets.QFrame):
         buttonLayout.addWidget(self._acceptButton)
         buttonLayout.addWidget(self._rejectButton)
 
+        if form:
+            self.setSettings(form)
         # buttonLayout.addStretch(1)
 
     def setSettings(self, settings):
@@ -385,6 +388,10 @@ class FormDialog(QtWidgets.QFrame):
         if description is not None:
             self._description.setText(description)
 
+        validator = settings.get("validator")
+        if validator is not None:
+            self._formWidget.setValidator(validator)
+
         layout = settings.get("layout")
 
         schema = settings.get("schema")
@@ -396,6 +403,7 @@ class FormDialog(QtWidgets.QFrame):
 
     def reject(self):
         self.close()
+
 
 STYLE = """
 

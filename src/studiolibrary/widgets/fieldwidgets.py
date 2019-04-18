@@ -157,7 +157,7 @@ class FieldWidget(QtWidgets.QFrame):
         else:
             self.setDefault(value)
 
-        if value is not None:
+        if value is not None and value != self.value():
             try:
                 self.setValue(value)
             except TypeError as error:
@@ -175,8 +175,8 @@ class FieldWidget(QtWidgets.QFrame):
         if required is not None:
             self.setRequired(required)
 
-        message = state.get('error', '')
-        self.setError(message)
+        error = state.get('error', '')
+        self.setError(error)
 
         annotation = state.get('annotation', '')
         self.setToolTip(annotation)
@@ -217,6 +217,8 @@ class FieldWidget(QtWidgets.QFrame):
         :type message: str
         """
         error = True if message else False
+
+        self._data["error"] = message
 
         if error:
             self.setToolTip(message)
