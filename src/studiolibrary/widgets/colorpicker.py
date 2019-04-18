@@ -126,9 +126,13 @@ class ColorPickerWidget(QtWidgets.QFrame):
         """
         self.deleteButtons()
 
-        self.layout().addStretch()
+        first = True
+        last = False
 
-        for color in colors:
+        for i, color in enumerate(colors):
+
+            if i == len(colors)-1:
+                last = True
 
             if not isinstance(color, str):
                 color = studioqt.Color(color)
@@ -141,22 +145,27 @@ class ColorPickerWidget(QtWidgets.QFrame):
             button.setObjectName('colorButton')
             button.setStyleSheet(css)
             button.setSizePolicy(
-                QtWidgets.QSizePolicy.Preferred,
+                QtWidgets.QSizePolicy.Expanding,
                 QtWidgets.QSizePolicy.Preferred
             )
+
+            button.setProperty("first", first)
+            button.setProperty("last", last)
+
             button.clicked.connect(callback)
             self.layout().addWidget(button)
+
+            first = False
 
         button = QtWidgets.QPushButton("...", self)
         button.setObjectName('browseColorButton')
         button.setSizePolicy(
-            QtWidgets.QSizePolicy.Preferred,
+            QtWidgets.QSizePolicy.Expanding,
             QtWidgets.QSizePolicy.Preferred
         )
 
         button.clicked.connect(self.browseColor)
         self.layout().addWidget(button)
-        self.layout().addStretch()
 
     def setBrowserColors(self, colors):
         """
@@ -205,9 +214,6 @@ class ColorPickerWidget(QtWidgets.QFrame):
                     d.setStandardColor(index, standardColor)
 
         d.currentColorChanged.connect(self._colorChanged)
-
-        # PySide2 doesn't support d.open(), so we need to pass a blank slot.
-        d.open(self, QtCore.SLOT("blankSlot()"))
 
         if d.exec_():
             self._colorChanged(d.selectedColor())
