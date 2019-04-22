@@ -85,6 +85,7 @@ class LibraryWindow(QtWidgets.QWidget):
     }
 
     TRASH_ENABLED = True
+    SETTINGS_DIALOG_ENABLED = False  # Still in development
     RECURSIVE_SEARCH_ENABLED = False
 
     # Still in development
@@ -1026,30 +1027,85 @@ class LibraryWindow(QtWidgets.QWidget):
 
         return menu
 
+    def settingsValidator(self, **kwargs):
+        """
+        The validator used for the settings dialog.
+
+        :type kwargs: dict
+        """
+        state = []
+
+        color = kwargs.get("accentColor")
+        if self.theme().accentColor().toString() != color:
+            self.theme().setAccentColor(color)
+
+        color = kwargs.get("backgroundColor")
+        if self.theme().backgroundColor().toString() != color:
+            self.theme().setBackgroundColor(color)
+
+        path = kwargs.get("path")
+        if not os.path.exists(path):
+            state.append(
+                {
+                    "name": "path",
+                    "value": path,
+                    "error": "Path does not exists!"
+                }
+            )
+
+        return state
+
     def showSettingDialog(self):
+        """Show the settings dialog."""
+        accentColor = self.theme().accentColor().toString()
+        backgroundColor = self.theme().backgroundColor().toString()
 
-        widget = studiolibrary.widgets.FormDialog()
-
-        settings = {
+        form = {
             "title": "Settings",
             "description": "Your local settings",
             "layout": "vertical",
             "schema": [
-                {"name": "test", "type": "string"},
-                {"name": "test2", "type": "string"},
-                {"name": "test3", "type": "string"},
-            ]
+                {"name": "name", "type": "string", "default": self.name()},
+                {"name": "path", "type": "string", "value": self.path()},
+                {
+                    "name": "accentColor",
+                    "type": "color",
+                    "value": accentColor,
+                    "colors": [
+                        "rgb(230, 80, 80, 255)",
+                        "rgb(230, 125, 100, 255)",
+                        "rgb(230, 120, 40)",
+                        "rgb(240, 180, 0, 255)",
+                        "rgb(80, 200, 140, 255)",
+                        "rgb(50, 180, 240, 255)",
+                        "rgb(110, 110, 240, 255)",
+                    ]
+                },
+                {
+                    "name": "backgroundColor",
+                    "type": "color",
+                    "value": backgroundColor,
+                    "colors": [
+                        "rgb(40, 40, 40)",
+                        "rgb(68, 68, 68)",
+                        "rgb(80, 60, 80)",
+                        "rgb(85, 60, 60)",
+                        "rgb(60, 75, 75)",
+                        "rgb(60, 64, 79)",
+                        "rgb(245, 245, 255)",
+                    ]
+                },
+            ],
+            "validator": self.settingsValidator,
         }
 
-        widget.setSettings(settings)
+        widget = studiolibrary.widgets.FormDialog(form=form)
 
-        # widget.setText("Hello")
-        # widget.setStyleSheet("border-radius:3px;background-color:white;")
         widget.setMinimumWidth(300)
         widget.setMinimumHeight(300)
         widget.setMaximumWidth(400)
         widget.setMaximumHeight(400)
-        # widget.setDefaultButton(QtWidgets.QPushButton("Yes"))
+        widget.acceptButton().setText("Save")
 
         lightbox = studiolibrary.widgets.Lightbox(self)
         lightbox.setWidget(widget)
@@ -1064,8 +1120,9 @@ class LibraryWindow(QtWidgets.QWidget):
         menu = studioqt.Menu("", self)
         menu.setTitle("Settings")
 
-        action = menu.addAction("Settings")
-        action.triggered.connect(self.showSettingDialog)
+        if self.SETTINGS_DIALOG_ENABLED:
+            action = menu.addAction("Settings")
+            action.triggered.connect(self.showSettingDialog)
 
         action = menu.addAction("Sync")
         action.triggered.connect(self.sync)
