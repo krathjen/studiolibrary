@@ -201,10 +201,18 @@ class FormWidget(QtWidgets.QFrame):
         """
         self._validator = validator
 
+    def validator(self):
+        """
+        Return the validator for the form.
+
+        :rtype: func
+        """
+        return self._validator
+
     def validate(self):
         """Validate the current options using the validator."""
         if self._validator:
-            state = self._validator(**self.optionsToDict())
+            state = self._validator(**self.values())
 
             if state is not None:
                 self._setState(state)
@@ -240,14 +248,33 @@ class FormWidget(QtWidgets.QFrame):
 
     def optionsToDict(self):
         """
-        Get all the option data.
-        
-        :rtype: dict 
+        This method is deprecated.
+
+        :rtype: dict
         """
-        options = {}
+        return self.values()
+
+    def values(self):
+        """
+        Get the all the field values indexed by the field name.
+
+        :rtype: dict
+        """
+        values = {}
         for widget in self._widgets:
-            options[widget.data().get("name")] = widget.value()
-        return options
+            values[widget.data().get("name")] = widget.value()
+        return values
+
+    def defaultValues(self):
+        """
+        Get the all the default field values indexed by the field name.
+
+        :rtype: dict
+        """
+        values = {}
+        for widget in self._widgets:
+            values[widget.data().get("name")] = widget.default()
+        return values
 
     def state(self):
         """
@@ -285,8 +312,8 @@ class FormWidget(QtWidgets.QFrame):
 
     def optionsState(self):
         state = {}
+        values = self.values()
         options = self.options()
-        values = self.optionsToDict()
 
         for option in options:
             name = option.get("name")
@@ -325,6 +352,7 @@ class FormWidget(QtWidgets.QFrame):
 class FormDialog(QtWidgets.QFrame):
 
     accepted = QtCore.Signal(object)
+    rejected = QtCore.Signal(object)
 
     def __init__(self, parent=None, form=None):
         super(FormDialog, self).__init__(parent)
@@ -378,11 +406,53 @@ class FormDialog(QtWidgets.QFrame):
             self.setSettings(form)
         # buttonLayout.addStretch(1)
 
+    def acceptButton(self):
+        """
+        Return the accept button.
+
+        :rtype: QWidgets.QPushButton
+        """
+        return self._acceptButton
+
+    def rejectButton(self):
+        """
+        Return the reject button.
+
+        :rtype: QWidgets.QPushButton
+        """
+        return self._rejectButton
+
+    def validateAccepted(self, **kwargs):
+        """
+        Triggered when the accept button has been clicked.
+
+        :type kwargs: The values of the fields
+        """
+        self._formWidget.validator()(**kwargs)
+
+    def validateRejected(self, **kwargs):
+        """
+        Triggered when the reject button has been clicked.
+
+        :type kwargs: The default values of the fields
+        """
+        self._formWidget.validator()(**kwargs)
+
     def setSettings(self, settings):
+
+        self._settings = settings
 
         title = settings.get("title")
         if title is not None:
             self._title.setText(title)
+
+        callback = settings.get("accepted")
+        if not callback:
+            self._settings["accepted"] = self.validateAccepted
+
+        callback = settings.get("rejected")
+        if not callback:
+            self._settings["rejected"] = self.validateRejected
 
         description = settings.get("description")
         if description is not None:
@@ -399,9 +469,17 @@ class FormDialog(QtWidgets.QFrame):
             self._formWidget.setSchema(schema, layout=layout)
 
     def accept(self):
+        """Call this method to accept the dialog."""
+        callback = self._settings.get("accepted")
+        if callback:
+            callback(**self._formWidget.values())
         self.close()
 
     def reject(self):
+        """Call this method to rejected the dialog."""
+        callback = self._settings.get("rejected")
+        if callback:
+            callback(**self._formWidget.defaultValues())
         self.close()
 
 
