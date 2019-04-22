@@ -184,9 +184,9 @@ def fadeIn(widget, duration=200, onFinished=None):
     :type onFinished: func
     :rtype: QtCore.QPropertyAnimation 
     """
-    effect = QtWidgets.QGraphicsOpacityEffect(widget)
-    widget.setGraphicsEffect(effect)
-    animation = QtCore.QPropertyAnimation(effect, "opacity")
+    widget._effect_ = QtWidgets.QGraphicsOpacityEffect(widget)
+    widget.setGraphicsEffect(widget._effect_)
+    animation = QtCore.QPropertyAnimation(widget._effect_, "opacity")
     animation.setDuration(duration)
     animation.setStartValue(0.0)
     animation.setEndValue(1.0)
