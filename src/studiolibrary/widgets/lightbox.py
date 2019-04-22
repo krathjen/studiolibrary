@@ -193,8 +193,8 @@ class Lightbox(QtWidgets.QFrame):
 
         :rtype: None 
         """
+        self.widget().__class__.accept(self.widget())
         self.close()
-        # self.accept()
 
     def _rejectAnimationFinished(self):
         """
@@ -202,8 +202,8 @@ class Lightbox(QtWidgets.QFrame):
 
         :rtype: None 
         """
+        self.widget().__class__.reject(self.widget())
         self.close()
-        # self.reject()
 
 
 def example():
