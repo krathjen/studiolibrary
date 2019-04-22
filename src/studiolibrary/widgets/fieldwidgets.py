@@ -672,7 +672,19 @@ class EnumFieldWidget(FieldWidget):
         
         :type item: unicode 
         """
-        self.widget().setCurrentText(item)
+        self.setCurrentText(item)
+
+    def setCurrentText(self, text):
+        """
+        This method supports Qt4 and Qt5 when settings the current text.
+
+        :type text: str
+        """
+        index = self.widget().findText(text, QtCore.Qt.MatchExactly)
+        if index != -1:
+            self.widget().setCurrentIndex(index)
+        else:
+            logger.warning("Cannot set the value for field %s", self.name())
 
     def setItems(self, items):
         """
