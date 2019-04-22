@@ -711,37 +711,34 @@ PreviewFrame QPushButton:hover {
 }
 
 
-ColorPickerWidget {
-   margin: 10px;
-}
-
-ColorPickerWidget {
-   padding: 10px;
-   margin-left: 20px;
-   margin-right: 20px;
+ColorFieldWidget ColorPickerWidget {
+   margin: 0px;
+   padding: 3px;
+   max-height: 22px;
+   min-height: 22px;
    border-radius: 4px;
-   background-color: rgb(0, 0, 0, 10);
-}
-
-ColorPickerWidget #colorButton,
-ColorPickerWidget #browseColorButton{
-    min-width: 18px;
-    min-height: 18px;
-    max-height: 18px;
-    max-width: 18px;
 }
 
 ColorPickerWidget #colorButton:hover,
 ColorPickerWidget #browseColorButton:hover {
-    border: 2px solid rgb(255, 255, 255, 155);
+    border: 2px solid rgb(255, 255, 255);
 }
 
-ColorPickerWidget #browseColorButton {
-    min-width: 18px;
-    min-height: 18px;
-    max-height: 18px;
-    max-width: 18px;
-    background-color: rgb(120, 120, 120);
+ColorFieldWidget #colorButton[first=true] {
+   border-top-left-radius: 2px;
+   border-bottom-left-radius: 2px;
+}
+
+ColorFieldWidget #colorButton[last=true] {
+   border-top-right-radius: 2px;
+   border-bottom-right-radius: 2px;
+}
+
+ColorFieldWidget #browseColorButton {
+    margin-left: 15px;
+    border-radius: 2px;
+    text-align: center;
+    background-color: rgb(0, 0, 0, 50);
 }
 
 
@@ -764,7 +761,7 @@ SeparatorFieldWidget > #widget {
     font: bold;
     margin: 2px;
     background-color: transparent;
-    border-bottom: 1px solid rgb(255, 255, 255, 20);
+    border-bottom: 1px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
 }
 
 TextFieldWidget QTextEdit {
@@ -811,8 +808,8 @@ FormWidget #titleWidget {
     font-size: 12px;
     padding: 2px;
     padding-left: 5px;
-    background-color: rgb(255, 255, 255, 20);
-    border-bottom: 0px solid rgb(255, 255, 255, 20);
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
+    border-bottom: 0px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
 }
 
 FormWidget #titleWidget:checked {
@@ -830,7 +827,6 @@ FieldWidget QComboBox {
 BaseSaveWidget #fieldWidget {
     margin-top: 4px;
 }
-
 
 BaseLoadWidget QLineEdit,
 BaseLoadWidget QTextEdit,
@@ -867,12 +863,20 @@ FormDialog #title {
     font-size: 18px;
 }
 
+FormDialog FieldWidget QLabel {
+    background-color: rgb(200,200,100, 0);
+}
+
+FormDialog FieldWidget {
+    padding-bottom: 10px;
+}
+
 FormDialog #description {
     padding: 4px;
     padding-bottom: 9px;
     margin-bottom: 10px;
     font-size: 12px;
-    border-bottom: 1px solid rgb(100,100,100,50);
+    border-bottom: 1px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B,15);
 
 }
 
@@ -900,8 +904,23 @@ FormDialog #acceptButton:pressed {
 }
 
 FormDialog #rejectButton:hover {
-    background-color: rgb(220,220,220,50);
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B,50);
 }
+
+FormDialog FieldWidget QLineEdit,
+FormDialog FieldWidget QTextEdit {
+    border-radius: 3px;
+    min-height: 32px;
+    max-height: 32px;
+}
+
+
+FieldWidget[error=true] QLineEdit,
+FieldWidget[error=true] QTextEdit {
+
+    background-color: rgb(230, 0, 0, 100);
+}
+
 
 /*
 FieldWidget[default=false] QLineEdit,
@@ -929,11 +948,6 @@ FieldWidget[default=false] #label {
     color: rgb(240, 150, 0);
 }
 
-FieldWidget[error=true] QLineEdit,
-FieldWidget[error=true] QTextEdit {
-    border: 1px solid rgb(240, 0, 0, 255);
-    background-color: rgb(240, 0, 0, 100);
-}
 
 FieldWidget[error=true] QRadioButton:checked {
     color: rgb(240, 0, 0);
