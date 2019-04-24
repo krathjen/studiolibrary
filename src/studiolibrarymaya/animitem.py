@@ -139,7 +139,7 @@ class AnimItem(baseitem.BaseItem):
         
         :type options: list[dict]
         """
-        super(AnimItem, self).optionsChanged(**options)
+        super(AnimItem, self).loadValidator(**options)
 
         option = options.get("option")
         connect = options.get("connect")
