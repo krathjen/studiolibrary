@@ -72,7 +72,7 @@ class FieldWidget(QtWidgets.QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self.setLayout(layout)
+        # self.setLayout(layout)
         self.setContentsMargins(0, 0, 0, 0)
 
         self._label = QtWidgets.QLabel(self)

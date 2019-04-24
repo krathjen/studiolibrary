@@ -29,7 +29,6 @@ try:
 except ImportError as error:
     print(error)
 
-
 __all__ = [
     "BaseLoadWidget",
 ]
@@ -44,7 +43,6 @@ class NamespaceOption:
 
 
 class BaseLoadWidget(QtWidgets.QWidget):
-
     """Base widget for creating and previewing transfer items."""
 
     stateChanged = QtCore.Signal(object)
@@ -163,6 +161,13 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """
         return self._item
 
+    def _itemValueChanged(self, field, value):
+        """
+        :type field: str
+        :type value: object
+        """
+        self._optionsWidget.setValue(field, value)
+
     def setItem(self, item):
         """
         Set the item for the preview widget.
@@ -186,6 +191,8 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
             options = item.loadSchema()
             if options:
+                item.loadValueChanged.connect(self._itemValueChanged)
+
                 optionsWidget = studiolibrary.widgets.FormWidget(self)
                 optionsWidget.setSchema(item.loadSchema())
                 optionsWidget.setValidator(item.loadValidator)
@@ -349,7 +356,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def namespaceOption(self):
         """
         Get the current namespace option.
-        
+
         :rtype: NamespaceOption
         """
         if self.ui.useFileNamespace.isChecked():
@@ -364,7 +371,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def setNamespaceOption(self, namespaceOption):
         """
         Set the current namespace option.
-        
+
         :type namespaceOption: NamespaceOption
         """
         if namespaceOption == NamespaceOption.FromFile:
@@ -377,7 +384,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def setSettings(self, settings):
         """
         Set the state of the widget.
-        
+
         :type settings: dict
         """
         namespaces = settings.get("namespaces", [])
@@ -405,7 +412,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def settings(self):
         """
         Get the current state of the widget.
-        
+
         :rtype: dict
         """
         settings = {}
@@ -423,7 +430,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def loadSettings(self):
         """
         Load the user settings from disc.
-        
+
         :rtype: None
         """
         data = studiolibrarymaya.settings()
@@ -432,7 +439,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def saveSettings(self):
         """
         Save the user settings to disc.
-        
+
         :rtype: None
         """
         data = self.settings()
@@ -441,7 +448,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def selectionChanged(self):
         """
         Triggered when the users Maya selection has changed.
-        
+
         :rtype: None
         """
         self.updateNamespaceEdit()
@@ -469,7 +476,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def updateNamespaceEdit(self):
         """
         Update the namespace edit.
-        
+
         :rtype: None
         """
         logger.debug('Updating namespace edit')
@@ -497,7 +504,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def accept(self):
         """
         Called when the user clicks the apply button.
-        
+
         :rtype: None
         """
         self.item().loadFromCurrentOptions()

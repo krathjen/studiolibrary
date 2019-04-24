@@ -9,7 +9,6 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-import shutil
 import logging
 
 from studioqt import QtCore
@@ -36,17 +35,9 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class PoseItemSignals(QtCore.QObject):
-    """Signals need to be attached to a QObject"""
-    mirrorChanged = QtCore.Signal(bool)
-
-
 class PoseItem(baseitem.BaseItem):
 
     Extension = ".pose"
-
-    _poseItemSignals = PoseItemSignals()
-    mirrorChanged = _poseItemSignals.mirrorChanged
 
     def __init__(self, *args, **kwargs):
         """
@@ -59,64 +50,31 @@ class PoseItem(baseitem.BaseItem):
         super(PoseItem, self).__init__(*args, **kwargs)
 
         self._options = None
-        self._isLoading = False
 
         self.setBlendingEnabled(True)
         self.setTransferClass(mutils.Pose)
         self.setTransferBasename("pose.json")
 
-    def isLoading(self):
+    def loadSchema(self):
         """
-        Return True if the item is loading.
-        
-        :rtype: bool
-        """
-        return self._isLoading
+        Get the schema used for creating the load options.
 
-    def toggleMirror(self):
+        :rtype: list[dict]
         """
-        Toggle the mirror setting.
-        
-        :rtype: None
-        """
-        mirror = self.isMirrorEnabled()
-        mirror = False if mirror else True
-        self.setMirrorEnabled(mirror)
-
-    def isMirrorEnabled(self):
-        """
-        Return True if the mirror setting is enabled.
-        
-        :rtype: bool
-        """
-        return self.settings().get("mirrorEnabled")
-
-    def setMirrorEnabled(self, value):
-        """
-        Set the user mirror setting.
-        
-        :type value: bool
-        """
-        logger.info("Set mirror enabled: %s", value)
-        self.settings()["mirrorEnabled"] = value
-        self.mirrorChanged.emit(bool(value))
-
-    def isKeyEnabled(self):
-        """
-        Return True if the pose should be keyed after loading.
-        
-        :rtype: bool
-        """
-        return self.settings().get("keyEnabled")
-
-    def setKeyEnabled(self, value):
-        """
-        if enabled, key the objects after the pose item has been loaded.
-        
-        :type value: bool
-        """
-        logger.info("Set key enabled: %s", value)
-        self.settings()["keyEnabled"] = value
+        return [
+            {
+                "name": "key",
+                "type": "bool",
+                "default": False,
+                "persistent": True,
+            },
+            {
+                "name": "mirror",
+                "type": "bool",
+                "default": False,
+                "persistent": True,
+            },
+        ]
 
     def keyPressEvent(self, event):
         """
@@ -129,7 +87,7 @@ class PoseItem(baseitem.BaseItem):
         if not event.isAutoRepeat():
             if event.key() == QtCore.Qt.Key_M:
 
-                self.toggleMirror()
+                self.emitLoadValueChanged("mirror", not self._mirror)
 
                 blend = self.blendValue()
 
@@ -156,28 +114,16 @@ class PoseItem(baseitem.BaseItem):
             self.loadFromSettings(blend=self.blendValue(), refresh=False)
 
     def doubleClicked(self):
-        """
-        Triggered when the user double clicks the item.
-
-        :rtype: None
-        """
+        """Triggered when the user double clicks the item."""
         self.loadFromSettings(clearSelection=False)
 
     def selectionChanged(self):
-        """
-        Triggered when the item is selected or deselected.
-
-        :rtype: None
-        """
+        """Triggered when the item is selected or deselected."""
         self._transferObject = None
         baseitem.BaseItem.selectionChanged(self)
 
     def stopBlending(self):
-        """
-        This method is called from the base class to stop blending.
-
-        :rtype: None
-        """
+        """This method is called from the base class to stop blending."""
         self._options = None
         baseitem.BaseItem.stopBlending(self)
 
@@ -187,7 +133,6 @@ class PoseItem(baseitem.BaseItem):
 
         :type value: float
         :type load: bool
-        :rtype: None
         """
         super(PoseItem, self).setBlendValue(value)
 
@@ -217,7 +162,7 @@ class PoseItem(baseitem.BaseItem):
         """
         if self._options is None:
             self._options = dict()
-            self._options["key"] = self.isKeyEnabled()
+            self._options["key"] = self.currentLoadValue("key")
             self._options['namespaces'] = self.namespaces()
             self._options['mirrorTable'] = self.mirrorTable()
             self._options['objects'] = maya.cmds.ls(selection=True) or []
@@ -268,7 +213,7 @@ class PoseItem(baseitem.BaseItem):
         # The mirror option can change during blending, so we always get
         # the value instead of caching it. This might make blending slower.
         if mirror is None:
-            mirror = self.isMirrorEnabled()
+            mirror = self.currentLoadValue("mirror")
 
         self.setBlendValue(blend, load=False)
 
@@ -326,68 +271,10 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
         """
         super(PoseLoadWidget, self).__init__(*args, **kwargs)
 
-        self.ui.keyCheckBox.clicked.connect(self.saveSettings)
-        self.ui.mirrorCheckBox.clicked.connect(self.saveSettings)
         self.ui.blendSlider.sliderMoved.connect(self.sliderMoved)
         self.ui.blendSlider.sliderReleased.connect(self.sliderReleased)
 
         self.item().blendChanged.connect(self.updateSlider)
-        self.item().mirrorChanged.connect(self.updateMirror)
-
-    def setItem(self, item):
-        """
-        Set the current pose item for the preview widget.
-
-        :type item: PoseItem
-        :rtype: None
-        """
-        super(PoseLoadWidget, self).setItem(item)
-
-        # Mirror check box
-        mirrorTip = "Cannot find a mirror table!"
-        mirrorTable = item.mirrorTable()
-        if mirrorTable:
-            mirrorTip = "Using mirror table: %s" % mirrorTable.path()
-
-        self.ui.mirrorCheckBox.setToolTip(mirrorTip)
-        self.ui.mirrorCheckBox.setEnabled(mirrorTable is not None)
-
-    def updateMirror(self, mirror):
-        """
-        Triggered when the user changes the mirror option for the item.
-
-        :type mirror: bool
-        """
-        if mirror:
-            self.ui.mirrorCheckBox.setCheckState(QtCore.Qt.Checked)
-        else:
-            self.ui.mirrorCheckBox.setCheckState(QtCore.Qt.Unchecked)
-
-    def setSettings(self, settings):
-        """Set the current state of the widget with a dictionary."""
-        key = settings.get("keyEnabled")
-        mirror = settings.get("mirrorEnabled")
-
-        self.ui.keyCheckBox.setChecked(key)
-        self.ui.mirrorCheckBox.setChecked(mirror)
-
-        super(PoseLoadWidget, self).setSettings(settings)
-
-    def settings(self):
-        """
-        Return the current state of the widget as a dictionary.
-
-        :rtype: dict
-        """
-        settings = super(PoseLoadWidget, self).settings()
-
-        key = bool(self.ui.keyCheckBox.isChecked())
-        mirror = bool(self.ui.mirrorCheckBox.isChecked())
-
-        settings["keyEnabled"] = key
-        settings["mirrorEnabled"] = mirror
-
-        return settings
 
     def updateSlider(self, value):
         """
