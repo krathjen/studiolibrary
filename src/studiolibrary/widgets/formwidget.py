@@ -219,6 +219,16 @@ class FormWidget(QtWidgets.QFrame):
         else:
             logger.debug("No validator set.")
 
+    def setValue(self, name, value):
+        """
+        Set the value for the given field name and value
+
+        :type name: str
+        :type value: object
+        """
+        widget = self.widget(name)
+        widget.setValue(value)
+
     def value(self, name):
         """
         Get the value for the given widget name.
