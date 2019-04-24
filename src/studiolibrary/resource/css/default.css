@@ -176,11 +176,11 @@ QScrollBar::sub-page:horizontal, QScrollBar::sub-page:vertical {
 
 /* style the sort indicator */
  QHeaderView::up-arrow {
-     image: url(RESOURCE_DIRNAME/icons/up_arrow.png);
+     image: url("RESOURCE_DIRNAME/icons/up_arrow.png");
  }
 
 QHeaderView::down-arrow {
-     image: url(RESOURCE_DIRNAME/icons/down_arrow.png);
+     image: url("RESOURCE_DIRNAME/icons/down_arrow.png");
  }
 
 QAbstractItemView::separator{
@@ -237,13 +237,13 @@ QTreeView::item:focus{
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
     border-image: none;
-    image: url(RESOURCE_DIRNAME/icons/branch_closed_DARKNESS.png);
+    image: url("RESOURCE_DIRNAME/icons/branch_closed_DARKNESS.png");
 }
 
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
     border-image: none;
-    image: url(RESOURCE_DIRNAME/icons/branch_open_DARKNESS.png);
+    image: url("RESOURCE_DIRNAME/icons/branch_open_DARKNESS.png");
 }
 
 QMenu::separator, QListView::item:hover,
@@ -271,23 +271,23 @@ QCheckBox::indicator, QRadioButton::indicator  {
 }
 
 QRadioButton::indicator:checked {
-    image: url(RESOURCE_DIRNAME/icons/radio_button_checked_DARKNESS.png)
+    image: url("RESOURCE_DIRNAME/icons/radio_button_checked_DARKNESS.png");
 }
 
 QRadioButton::indicator:unchecked {
-    image: url(RESOURCE_DIRNAME/icons/radio_button_unchecked_DARKNESS.png)
+    image: url("RESOURCE_DIRNAME/icons/radio_button_unchecked_DARKNESS.png");
 }
 
 QCheckBox::indicator:checked, QMenu::indicator:non-exclusive:checked {
-    image: url(RESOURCE_DIRNAME/icons/check_box_checked_DARKNESS.png)
+    image: url("RESOURCE_DIRNAME/icons/check_box_checked_DARKNESS.png");
 }
 
 QCheckBox::indicator:unchecked, QMenu::indicator:non-exclusive:unchecked  {
-    image: url(RESOURCE_DIRNAME/icons/check_box_unchecked_DARKNESS.png)
+    image: url("RESOURCE_DIRNAME/icons/check_box_unchecked_DARKNESS.png");
 }
 
 QCheckBox::indicator:disabled, QMenu::indicator:non-exclusive:disabled  {
-    image: url(RESOURCE_DIRNAME/icons/check_box_unchecked_DARKNESS.png)
+    image: url("RESOURCE_DIRNAME/icons/check_box_unchecked_DARKNESS.png");
 }
 
 
@@ -309,12 +309,12 @@ QComboBox::drop-down {
 	border: 0px;
 	padding-top: 2px;
 	background-color: rgb(255, 255, 255, 0);
-	image: url(RESOURCE_DIRNAME/icons/drop_arrow_DARKNESS.png);
+	image: url("RESOURCE_DIRNAME/icons/drop_arrow_DARKNESS.png");
 }
 
 /*QComboBox::down-arrow {*/
     /*width: 1px;*/
-	/*image: url(RESOURCE_DIRNAME/icons/null.png);*/
+	/*image: url("RESOURCE_DIRNAME/icons/null.png");*/
     /*background-color: rgb(255, 255, 255, 0);*/
 /*}*/
 
@@ -655,23 +655,23 @@ PreviewFrame QPushButton:hover {
 }
 
 #messageBox QRadioButton::indicator:checked {
-    image: url(RESOURCE_DIRNAME/icons/radio_button_checked_black.png)
+    image: url("RESOURCE_DIRNAME/icons/radio_button_checked_black.png");
 }
 
 #messageBox QRadioButton::indicator:unchecked {
-    image: url(RESOURCE_DIRNAME/icons/radio_button_unchecked_black.png)
+    image: url("RESOURCE_DIRNAME/icons/radio_button_unchecked_black.png");
 }
 
 #messageBox QCheckBox::indicator:checked {
-    image: url(RESOURCE_DIRNAME/icons/check_box_checked_black.png)
+    image: url("RESOURCE_DIRNAME/icons/check_box_checked_black.png");
 }
 
 #messageBox QCheckBox::indicator:unchecked {
-    image: url(RESOURCE_DIRNAME/icons/check_box_unchecked_black.png)
+    image: url("RESOURCE_DIRNAME/icons/check_box_unchecked_black.png");
 }
 
 #messageBox QCheckBox::indicator:disabled {
-    image: url(RESOURCE_DIRNAME/icons/check_box_unchecked_black.png)
+    image: url("RESOURCE_DIRNAME/icons/check_box_unchecked_black.png");
 }
 
 #messageBoxFrame {
