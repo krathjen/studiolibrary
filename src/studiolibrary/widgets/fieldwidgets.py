@@ -181,11 +181,9 @@ class FieldWidget(QtWidgets.QFrame):
         error = state.get('error', '')
         self.setError(error)
 
-        annotation = state.get('annotation', '')
-        self.setToolTip(annotation)
-
         toolTip = state.get('toolTip', '')
         self.setToolTip(toolTip)
+        self.setStatusTip(toolTip)
 
         style = state.get("style")
         if style:
