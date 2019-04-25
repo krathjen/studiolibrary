@@ -33,11 +33,64 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
+iconPath = studiolibrarymaya.resource().get("icons", "pose.png")
+
+
+class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
+
+    def __init__(self, *args, **kwargs):
+        """
+        Using a custom load widget to support nicer blending.
+        """
+        super(PoseLoadWidget, self).__init__(*args, **kwargs)
+
+        self.ui.blendSlider.sliderMoved.connect(self.sliderMoved)
+        self.ui.blendSlider.sliderReleased.connect(self.sliderReleased)
+
+        self.item().blendChanged.connect(self.setSliderValue)
+
+    def setSliderValue(self, value):
+        """
+        Trigger when the item changes blend value.
+
+        :type value: int
+        """
+        self.ui.blendSlider.setValue(value)
+
+    def sliderReleased(self):
+        """Triggered when the user releases the slider handle."""
+        self.item().loadFromSettings(
+            blend=self.ui.blendSlider.value(),
+            refresh=False,
+            showBlendMessage=True
+        )
+
+    def sliderMoved(self, value):
+        """
+        Triggered when the user moves the slider handle.
+
+        :type value: float
+        """
+        self.item().loadFromSettings(
+            blend=value,
+            batchMode=True,
+            showBlendMessage=True
+        )
+
+    def accept(self):
+        """Triggered when the user clicks the apply button."""
+        self.item().loadFromSettings(clearSelection=False)
 
 
 class PoseItem(baseitem.BaseItem):
 
     Extension = ".pose"
+    Extensions = [".pose"]
+    MenuName = "Pose"
+    MenuOrder = 4
+    MenuIconPath = iconPath
+    TypeIconPath = iconPath
+    PreviewWidgetClass = PoseLoadWidget
 
     def __init__(self, *args, **kwargs):
         """
@@ -54,6 +107,29 @@ class PoseItem(baseitem.BaseItem):
         self.setBlendingEnabled(True)
         self.setTransferClass(mutils.Pose)
         self.setTransferBasename("pose.json")
+
+    def loadValidator(self, **values):
+        """
+        Using the validator to change the state of the mirror option.
+
+        :type values: dict
+        :rtype: list[dict]
+        """
+        super(PoseItem, self).loadValidator(**values)
+
+        # Mirror check box
+        mirrorTip = "Cannot find a mirror table!"
+        mirrorTable = self.mirrorTable()
+        if mirrorTable:
+            mirrorTip = "Using mirror table: %s" % mirrorTable.path()
+
+        return [
+            {
+                "name": "mirror",
+                "toolTip": mirrorTip,
+                "enabled": mirrorTable is not None,
+            }
+        ]
 
     def loadSchema(self):
         """
@@ -262,62 +338,5 @@ class PoseItem(baseitem.BaseItem):
             metadata={"description": options.get("comment", "")}
         )
 
-
-class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
-
-    def __init__(self, *args, **kwargs):
-        """
-        :rtype: None
-        """
-        super(PoseLoadWidget, self).__init__(*args, **kwargs)
-
-        self.ui.blendSlider.sliderMoved.connect(self.sliderMoved)
-        self.ui.blendSlider.sliderReleased.connect(self.sliderReleased)
-
-        self.item().blendChanged.connect(self.updateSlider)
-
-    def updateSlider(self, value):
-        """
-        Trigger when the item changes blend value.
-
-        :type value: int
-        """
-        self.ui.blendSlider.setValue(value)
-
-    def sliderReleased(self):
-        """Triggered when the user releases the slider handle."""
-        blend = self.ui.blendSlider.value()
-        self.item().loadFromSettings(
-            blend=blend,
-            refresh=False,
-            showBlendMessage=True
-        )
-
-    def sliderMoved(self, value):
-        """
-        Triggered when the user moves the slider handle.
-
-        :type value: float
-        """
-        self.item().loadFromSettings(
-            blend=value,
-            batchMode=True,
-            showBlendMessage=True
-        )
-
-    def accept(self):
-        """Triggered when the user clicks the apply button."""
-        self.item().loadFromSettings(clearSelection=False)
-
-
-# Register the pose item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "pose.png")
-
-PoseItem.Extensions = [".pose"]
-PoseItem.MenuName = "Pose"
-PoseItem.MenuOrder = 4
-PoseItem.MenuIconPath = iconPath
-PoseItem.TypeIconPath = iconPath
-PoseItem.PreviewWidgetClass = PoseLoadWidget
 
 studiolibrary.registerItem(PoseItem)
