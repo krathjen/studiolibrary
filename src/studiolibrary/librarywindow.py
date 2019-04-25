@@ -1594,6 +1594,12 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         self.setPreviewWidgetVisible(True)
         self.itemsWidget().clearSelection()
+
+        # Force the preview pane to expand when creating a new item.
+        fsize, rsize, psize = self._splitter.sizes()
+        if psize < 150:
+            self.setSizes((fsize, rsize, 180))
+
         self.setPreviewWidget(widget)
 
     def clearPreviewWidget(self):
