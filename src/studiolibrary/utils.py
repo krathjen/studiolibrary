@@ -146,6 +146,8 @@ def reload():
         import studiolibrary
         studiolibrary.main()
     """
+    os.environ["STUDIO_LIBRARY_RELOADED"] = "1"
+
     import studiolibrary
     studiolibrary.LibraryWindow.destroyInstances()
 
@@ -1195,6 +1197,10 @@ def sendAnalytics(
             f = urllib.request.urlopen(url)
         except Exception:
             pass
+
+    # Ignore analytics when reloading
+    if os.environ.get("STUDIO_LIBRARY_RELOADED") == "1":
+        return
 
     if not studiolibrary.config().get('analyticsEnabled'):
         return
