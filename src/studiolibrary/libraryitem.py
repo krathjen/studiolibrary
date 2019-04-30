@@ -562,7 +562,8 @@ class LibraryItem(studiolibrary.widgets.Item):
     def saveItemData(self):
         """Sync the item data to the database """
         self.updateItemData()
-        self.library().updateItem(self)
+        if self.library():
+            self.library().updateItem(self)
 
     def load(self, *args, **kwargs):
         """Reimplement this method for loading any item data."""
@@ -588,11 +589,11 @@ class LibraryItem(studiolibrary.widgets.Item):
         return []
 
     @studioqt.showWaitCursor
-    def save(self, path, *args, **kwargs):
+    def save(self, path=None, *args, **kwargs):
         """
         Submit the item for saving.
 
-        :type path: str
+        :type path: str or None
         """
         path = path or self.path()
 
