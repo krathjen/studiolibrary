@@ -228,7 +228,6 @@ class FormWidget(QtWidgets.QFrame):
             fields = self._validator(**self.values())
             if fields is not None:
                 self._setState(fields)
-            print(fields)
 
             self.validated.emit()
 

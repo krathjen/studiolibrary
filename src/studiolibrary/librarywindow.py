@@ -225,6 +225,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._previewWidget = None
         self._currentItem = None
         self._library = None
+        self._lightbox = None
         self._refreshEnabled = False
 
         self._superusers = None
@@ -1033,19 +1034,19 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :type kwargs: dict
         """
-        state = []
+        fields = []
 
         color = kwargs.get("accentColor")
-        if self.theme().accentColor().toString() != color:
+        if color and self.theme().accentColor().toString() != color:
             self.theme().setAccentColor(color)
 
         color = kwargs.get("backgroundColor")
-        if self.theme().backgroundColor().toString() != color:
+        if color and self.theme().backgroundColor().toString() != color:
             self.theme().setBackgroundColor(color)
 
-        path = kwargs.get("path")
+        path = kwargs.get("path", "")
         if not os.path.exists(path):
-            state.append(
+            fields.append(
                 {
                     "name": "path",
                     "value": path,
@@ -1053,7 +1054,17 @@ class LibraryWindow(QtWidgets.QWidget):
                 }
             )
 
-        return state
+        return fields
+
+    def settingsAccepted(self, **kwargs):
+        """
+        Called when the user has accepted the changes in the settings dialog.
+
+        :type kwargs: dict
+        """
+        path = kwargs.get("path")
+        if path and path != self.path():
+            self.setPath(path)
 
     def showSettingDialog(self):
         """Show the settings dialog."""
@@ -1066,7 +1077,7 @@ class LibraryWindow(QtWidgets.QWidget):
             "layout": "vertical",
             "schema": [
                 {"name": "name", "type": "string", "default": self.name()},
-                {"name": "path", "type": "string", "value": self.path()},
+                {"name": "path", "type": "path", "value": self.path()},
                 {
                     "name": "accentColor",
                     "type": "color",
@@ -1097,6 +1108,7 @@ class LibraryWindow(QtWidgets.QWidget):
                 },
             ],
             "validator": self.settingsValidator,
+            "accepted": self.settingsAccepted,
         }
 
         widget = studiolibrary.widgets.FormDialog(form=form)
@@ -1107,9 +1119,9 @@ class LibraryWindow(QtWidgets.QWidget):
         widget.setMaximumHeight(400)
         widget.acceptButton().setText("Save")
 
-        lightbox = studiolibrary.widgets.Lightbox(self)
-        lightbox.setWidget(widget)
-        lightbox.show()
+        self._lightbox = studiolibrary.widgets.Lightbox(self)
+        self._lightbox.setWidget(widget)
+        self._lightbox.show()
 
     def createSettingsMenu(self):
         """
