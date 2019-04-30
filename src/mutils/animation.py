@@ -606,7 +606,7 @@ class Animation(mutils.Pose):
         validCurves = []
         deleteObjects = []
 
-        msg = "Animation.save(path={0}, time={1}, bakeConnections={2}, sampleBy={3})"
+        msg = u"Animation.save(path={0}, time={1}, bakeConnections={2}, sampleBy={3})"
         msg = msg.format(path, str(time), str(bakeConnected), str(sampleBy))
         logger.debug(msg)
 
