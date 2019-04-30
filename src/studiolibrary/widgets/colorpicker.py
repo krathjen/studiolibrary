@@ -158,7 +158,7 @@ class ColorPickerWidget(QtWidgets.QFrame):
             first = False
 
         button = QtWidgets.QPushButton("...", self)
-        button.setObjectName('browseColorButton')
+        button.setObjectName('menuButton')
         button.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding,
             QtWidgets.QSizePolicy.Preferred
