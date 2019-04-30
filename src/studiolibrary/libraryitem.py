@@ -329,10 +329,20 @@ class LibraryItem(studiolibrary.widgets.Item):
         action.triggered.connect(self.showInFolder)
         menu.addAction(action)
 
+        action = QtWidgets.QAction("Copy Path", menu)
+        action.triggered.connect(self.copyPathToClipboard)
+        menu.addAction(action)
+
         if self.libraryWindow():
             action = QtWidgets.QAction("Select Folder", menu)
             action.triggered.connect(self.selectFolder)
             menu.addAction(action)
+
+    def copyPathToClipboard(self):
+        """Copy the item path to the system clipboard."""
+        cb = QtWidgets.QApplication.clipboard()
+        cb.clear(mode=cb.Clipboard)
+        cb.setText(self.path(), mode=cb.Clipboard)
 
     def contextMenu(self, menu, items=None):
         """
