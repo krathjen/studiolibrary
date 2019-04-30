@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import shutil
 import logging
 
 import studiolibrarymaya
@@ -23,6 +21,9 @@ try:
     import mutils
     import mutils.gui
     import maya.cmds
+    # Wrapping the following constant for convenience.
+    # This also used in the readme.md
+    PasteOption = mutils.PasteOption
 except ImportError as error:
     print(error)
 
