@@ -34,6 +34,7 @@ FIELD_WIDGET_REGISTRY = {
     "bool": fieldwidgets.BoolFieldWidget,
     "enum": fieldwidgets.EnumFieldWidget,
     "text": fieldwidgets.TextFieldWidget,
+    "path": fieldwidgets.PathFieldWidget,
     "image": fieldwidgets.ImageFieldWidget,
     "label": fieldwidgets.LabelFieldWidget,
     "range": fieldwidgets.RangeFieldWidget,
@@ -54,6 +55,7 @@ class FormWidget(QtWidgets.QFrame):
 
     accepted = QtCore.Signal(object)
     stateChanged = QtCore.Signal()
+    validated = QtCore.Signal()
 
     def __init__(self, *args, **kwargs):
         super(FormWidget, self).__init__(*args, **kwargs)
@@ -183,7 +185,6 @@ class FormWidget(QtWidgets.QFrame):
         
         :type widget: FieldWidget 
         """
-        self.stateChanged.emit()
         self.validate()
 
     def accept(self):
@@ -192,6 +193,17 @@ class FormWidget(QtWidgets.QFrame):
 
     def closeEvent(self, event):
         super(FormWidget, self).closeEvent(event)
+
+    def hasErrors(self):
+        """
+        Return True if the form contains any errors.
+
+        :rtype: bool
+        """
+        for widget in self._widgets:
+            if widget.data().get("error"):
+                return True
+        return False
 
     def setValidator(self, validator):
         """
@@ -212,10 +224,14 @@ class FormWidget(QtWidgets.QFrame):
     def validate(self):
         """Validate the current options using the validator."""
         if self._validator:
-            state = self._validator(**self.values())
 
-            if state is not None:
-                self._setState(state)
+            fields = self._validator(**self.values())
+            if fields is not None:
+                self._setState(fields)
+            print(fields)
+
+            self.validated.emit()
+
         else:
             logger.debug("No validator set.")
 
@@ -340,23 +356,25 @@ class FormWidget(QtWidgets.QFrame):
 
         self._setState(state)
 
-    def _setState(self, state):
+    def _setState(self, fields):
         """
         Set the state.
         
-        :type state: list[dict]
+        :type fields: list[dict]
         """
         for widget in self._widgets:
             widget.blockSignals(True)
 
         for widget in self._widgets:
             widget.setError("")
-            for data in state:
-                if data.get("name") == widget.data().get("name"):
-                    widget.setData(data)
+            for field in fields:
+                if field.get("name") == widget.data().get("name"):
+                    widget.setData(field)
 
         for widget in self._widgets:
             widget.blockSignals(False)
+
+        self.stateChanged.emit()
 
 
 class FormDialog(QtWidgets.QFrame):
@@ -387,6 +405,7 @@ class FormDialog(QtWidgets.QFrame):
 
         self._formWidget = FormWidget(self)
         self._formWidget.setObjectName("formWidget")
+        self._formWidget.validated.connect(self._validated)
         self.layout().addWidget(self._formWidget)
 
         self.layout().addStretch(1)
@@ -415,6 +434,10 @@ class FormDialog(QtWidgets.QFrame):
         if form:
             self.setSettings(form)
         # buttonLayout.addStretch(1)
+
+    def _validated(self):
+        """Triggered when the form has been validated"""
+        self._acceptButton.setEnabled(not self._formWidget.hasErrors())
 
     def acceptButton(self):
         """
