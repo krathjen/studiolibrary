@@ -66,7 +66,7 @@ def getAll():
     """
     IGNORE_NAMESPACES = ['UI', 'shared']
 
-    namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True)
+    namespaces = maya.cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True)
     namespaces = list(set(namespaces) - set(IGNORE_NAMESPACES))
     namespaces = sorted(namespaces)
 
