@@ -184,9 +184,9 @@ def fadeIn(widget, duration=200, onFinished=None):
     :type onFinished: func
     :rtype: QtCore.QPropertyAnimation 
     """
-    widget._effect_ = QtWidgets.QGraphicsOpacityEffect(widget)
-    widget.setGraphicsEffect(widget._effect_)
-    animation = QtCore.QPropertyAnimation(widget._effect_, "opacity")
+    widget._fadeInEffect_ = QtWidgets.QGraphicsOpacityEffect()
+    widget.setGraphicsEffect(widget._fadeInEffect_)
+    animation = QtCore.QPropertyAnimation(widget._fadeInEffect_, "opacity")
     animation.setDuration(duration)
     animation.setStartValue(0.0)
     animation.setEndValue(1.0)
@@ -210,9 +210,9 @@ def fadeOut(widget, duration=200, onFinished=None):
     :type onFinished: func
     :rtype: QtCore.QPropertyAnimation 
     """
-    effect = QtWidgets.QGraphicsOpacityEffect(widget)
-    widget.setGraphicsEffect(effect)
-    animation = QtCore.QPropertyAnimation(effect, "opacity")
+    widget._fadeOutEffect_ = QtWidgets.QGraphicsOpacityEffect()
+    widget.setGraphicsEffect(widget._fadeOutEffect_)
+    animation = QtCore.QPropertyAnimation(widget._fadeOutEffect_, "opacity")
     animation.setDuration(duration)
     animation.setStartValue(1.0)
     animation.setEndValue(0.0)
