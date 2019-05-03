@@ -1208,7 +1208,9 @@ def sendAnalytics(
     tid = tid or studiolibrary.config().get('analyticsId')
     cid = userUuid()
 
+    # In python 2.7 the getdefaultlocale function could return a None "ul"
     ul, _ = locale.getdefaultlocale()
+    ul = ul or ""
     ul = ul.replace("_", "-").lower()
 
     # -- Legacy begin --
