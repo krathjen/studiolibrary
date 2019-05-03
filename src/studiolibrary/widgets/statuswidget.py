@@ -53,17 +53,30 @@ class StatusWidget(QtWidgets.QFrame):
         self._button.setMaximumSize(QtCore.QSize(17, 17))
         self._button.setIconSize(QtCore.QSize(17, 17))
 
+        self._progressBar = QtWidgets.QProgressBar(self)
+        self._progressBar.setRange(0, 100)
+        self._progressBar.hide()
+
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(1, 0, 0, 0)
 
         layout.addWidget(self._button)
         layout.addWidget(self._label)
+        layout.addWidget(self._progressBar)
 
         self.setLayout(layout)
         self.setFixedHeight(19)
         self.setMinimumWidth(5)
 
         self._timer.timeout.connect(self.reset)
+
+    def progressBar(self):
+        """
+        Get the progress widget
+
+        rtype: QtWidgets.QProgressBar
+        """
+        return self._progressBar
 
     def isBlocking(self):
         """

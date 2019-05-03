@@ -85,8 +85,10 @@ class LibraryWindow(QtWidgets.QWidget):
     }
 
     TRASH_ENABLED = True
+    PROGRESS_BAR_VISIBLE = False
     SETTINGS_DIALOG_ENABLED = False  # Still in development
     RECURSIVE_SEARCH_ENABLED = False
+
 
     # Still in development
     DPI_ENABLED = False
@@ -227,7 +229,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._library = None
         self._lightbox = None
         self._refreshEnabled = False
-
+        self._progressBar = None
         self._superusers = None
         self._lockRegExp = None
         self._unlockRegExp = None
@@ -670,15 +672,42 @@ class LibraryWindow(QtWidgets.QWidget):
         
         :rtype: None 
         """
-        elapsedTime = time.time()
-        self.library().sync()
-        self.showToastMessage("Synced")
-        elapsedTime = time.time() - elapsedTime
+        progressBar = self.statusWidget().progressBar()
 
-        msg = "Synced items in {0:.3f} seconds."
-        msg = msg.format(elapsedTime)
+        @studioqt.showWaitCursor
+        def _sync():
+            elapsedTime = time.time()
+            self.library().sync(percentCallback=self.setProgressBarValue)
 
-        self.statusWidget().showInfoMessage(msg)
+            elapsedTime = time.time() - elapsedTime
+
+            msg = "Synced items in {0:.3f} seconds."
+            msg = msg.format(elapsedTime)
+
+            self.statusWidget().showInfoMessage(msg)
+            self.setProgressBarValue("Done")
+
+            studioqt.fadeOut(progressBar, duration=500, onFinished=progressBar.close)
+
+        self.setProgressBarValue("Syncing")
+        studioqt.fadeIn(progressBar, duration=1, onFinished=_sync)
+
+        if self.PROGRESS_BAR_VISIBLE:
+            progressBar.show()
+
+    def setProgressBarValue(self, label, value=-1):
+        """Set the progress bar label and value"""
+
+        progressBar = self.statusWidget().progressBar()
+
+        if value == -1:
+            self.statusWidget().progressBar().reset()
+            progressBar.setValue(100)
+            progressBar.setFormat(label)
+        else:
+            percent = value * 100.0
+            progressBar.setValue(percent)
+            progressBar.setFormat("{0} {1}%".format(label, int(value)))
 
     def refresh(self):
         """

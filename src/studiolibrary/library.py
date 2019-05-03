@@ -285,11 +285,13 @@ class Library(QtCore.QObject):
         self._groupedResults = {}
         self.dataChanged.emit()
 
-    def sync(self):
+    def sync(self, percentCallback=None):
         """Sync the file system with the database."""
         if not self.path():
             logger.info('No path set for syncing data')
             return
+
+        percentCallback("Syncing", -1)
 
         data = self.read()
 
@@ -303,7 +305,14 @@ class Library(QtCore.QObject):
             depth=depth,
         )
 
-        for item in items:
+        items = list(items)
+        count = len(items)
+
+        for i, item in enumerate(items):
+            percent = (float(i+1)/float(count))
+            if percentCallback:
+                percentCallback("", percent)
+
             path = item.path()
 
             itemData = data.get(path, {})
@@ -311,8 +320,10 @@ class Library(QtCore.QObject):
 
             data[path] = itemData
 
+        percentCallback("Post Sync", -1)
         self.postSync(data)
 
+        percentCallback("Saving Cache", -1)
         self.save(data)
 
         self.dataChanged.emit()
