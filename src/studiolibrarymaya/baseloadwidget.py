@@ -197,15 +197,11 @@ class BaseLoadWidget(QtWidgets.QWidget):
                 optionsWidget.setSchema(item.loadSchema())
                 optionsWidget.setValidator(item.loadValidator)
                 optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
-                optionsWidget.stateChanged.connect(self.optionsChanged)
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
                 self._optionsWidget = optionsWidget
                 optionsWidget.validate()
             else:
                 self.ui.optionsToggleBox.setVisible(False)
-
-    def optionsChanged(self):
-        self.item().optionsChanged(**self._optionsWidget.optionsToDict())
 
     def iconPath(self):
         """
@@ -274,6 +270,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         :rtype: None
         """
         self.setScriptJobEnabled(False)
+        self.item().saveOptions(**self._optionsWidget.optionsToDict())
         QtWidgets.QWidget.close(self)
 
     def scriptJob(self):
