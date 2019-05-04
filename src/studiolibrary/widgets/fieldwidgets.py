@@ -143,8 +143,7 @@ class FieldWidget(QtWidgets.QFrame):
         
         :type data: dict
         """
-        self._data.update(data)
-        state = self._data
+        state = data
 
         self.blockSignals(True)
 
@@ -158,7 +157,7 @@ class FieldWidget(QtWidgets.QFrame):
         # Must set the default before value
         if default is not None:
             self.setDefault(default)
-        else:
+        elif value is not None:
             self.setDefault(value)
 
         if value is not None and value != self.value():
@@ -170,6 +169,7 @@ class FieldWidget(QtWidgets.QFrame):
         enabled = state.get('enabled')
         if enabled is not None:
             self.setEnabled(enabled)
+            self._label.setEnabled(enabled)
 
         hidden = state.get('hidden')
         if hidden is not None:
@@ -179,22 +179,25 @@ class FieldWidget(QtWidgets.QFrame):
         if required is not None:
             self.setRequired(required)
 
-        error = state.get('error', '')
-        self.setError(error)
+        error = state.get('error')
+        if error is not None:
+            self.setError(error)
 
-        toolTip = state.get('toolTip', '')
-        self.setToolTip(toolTip)
-        self.setStatusTip(toolTip)
+        toolTip = state.get('toolTip')
+        if toolTip is not None:
+            self.setToolTip(toolTip)
+            self.setStatusTip(toolTip)
 
         style = state.get("style")
-        if style:
+        if style is not None:
             self.setStyleSheet(style)
 
         title = self.title() or ""
         self.setText(title)
 
-        label = state.get('label', {})
-        if label:
+        label = state.get('label')
+        if label is not None:
+
             text = label.get("name")
             if text is not None:
                 self.setText(text)
@@ -204,19 +207,21 @@ class FieldWidget(QtWidgets.QFrame):
                 self.label().setVisible(visible)
 
         # Menu Items
-        actions = state.get('actions', {})
-        if actions:
+        actions = state.get('actions')
+        if actions is not None:
             self._menuButton.setVisible(True)
 
         # Menu Button
-        menu = state.get('menu', {})
-        if menu:
+        menu = state.get('menu')
+        if menu is not None:
             text = menu.get("name")
             if text is not None:
                 self._menuButton.setText(text)
 
             visible = menu.get("visible", True)
             self._menuButton.setVisible(visible)
+
+        self._data.update(data)
 
         self.refresh()
 
@@ -367,7 +372,7 @@ class FieldWidget(QtWidgets.QFrame):
         layout.setSpacing(0)
 
         self._errorLabel = QtWidgets.QLabel(self)
-        self._errorLabel.setHidden(False)
+        self._errorLabel.setHidden(True)
         self._errorLabel.setObjectName("errorLabel")
         self._errorLabel.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding,

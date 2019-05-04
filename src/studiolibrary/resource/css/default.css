@@ -849,6 +849,10 @@ FieldWidget #label {
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
 }
 
+FieldWidget #label:disabled {
+    color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 25);
+}
+
 FormWidget #titleWidget {
     font-size: 12px;
     padding: 2px;
