@@ -106,7 +106,6 @@ class AnimItem(baseitem.BaseItem):
                 "type": "bool",
                 "default": False,
                 "persistent": True,
-                "inline": True,
                 "label": {"name": ""}
             },
             {
@@ -114,7 +113,6 @@ class AnimItem(baseitem.BaseItem):
                 "type": "bool",
                 "default": True,
                 "persistent": True,
-                "inline": True,
                 "label": {"name": ""}
             },
             {
