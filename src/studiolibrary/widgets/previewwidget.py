@@ -31,13 +31,11 @@ class PreviewWidget(QtWidgets.QWidget):
         self._infoWidget.setTitle("INFO")
         self._infoWidget.setTitleVisible(True)
         self._infoWidget.setSchema(item.info())
-        self._infoWidget.stateChanged.connect(self._stateChanged)
 
         self.ui.infoFrame.layout().addWidget(self._infoWidget)
 
         self._optionsWidget = studiolibrary.widgets.FormWidget(self)
         self._optionsWidget.setTitle("OPTIONS")
-        self._optionsWidget.stateChanged.connect(self._stateChanged)
 
         options = item.loadSchema()
         if options:
@@ -52,9 +50,10 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self.loadSettings()
 
-    def _stateChanged(self):
+    def close(self):
         """Triggered when the user changes the options."""
         self.saveSettings()
+        super(PreviewWidget, self).close()
 
     def settingsPath(self):
         """
