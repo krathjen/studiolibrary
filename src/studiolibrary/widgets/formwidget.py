@@ -90,7 +90,7 @@ class FormWidget(QtWidgets.QFrame):
 
     def _titleClicked(self, toggle):
         """Triggered when the user clicks the title widget."""
-        self.setExpanded(not toggle)
+        self.setExpanded(toggle)
         self.stateChanged.emit()
 
     def titleWidget(self):
@@ -118,7 +118,7 @@ class FormWidget(QtWidgets.QFrame):
         self._titleWidget.blockSignals(True)
 
         try:
-            self._titleWidget.setChecked(not expand)
+            self._titleWidget.setChecked(expand)
             self._optionsFrame.setVisible(expand)
         finally:
             self._titleWidget.blockSignals(False)
@@ -129,7 +129,7 @@ class FormWidget(QtWidgets.QFrame):
         
         :rtype: bool
         """
-        return self._optionsFrame.isVisible()
+        return self._titleWidget.isChecked()
 
     def setTitleVisible(self, visible):
         """
