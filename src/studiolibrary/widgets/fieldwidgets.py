@@ -347,7 +347,7 @@ class FieldWidget(QtWidgets.QFrame):
         self._widget.setObjectName('widget')
         self._widget.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding,
-            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred,
         )
 
         self._menuButton = QtWidgets.QPushButton("...")
