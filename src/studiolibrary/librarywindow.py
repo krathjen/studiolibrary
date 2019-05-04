@@ -703,11 +703,12 @@ class LibraryWindow(QtWidgets.QWidget):
         if value == -1:
             self.statusWidget().progressBar().reset()
             progressBar.setValue(100)
-            progressBar.setFormat(label)
+            progressBar.setText(label)
         else:
             percent = value * 100.0
+            text = "{0} {1:.0f}%".format(label, percent)
             progressBar.setValue(percent)
-            progressBar.setFormat("{0} {1}%".format(label, int(value)))
+            progressBar.setText(text)
 
     def refresh(self):
         """
@@ -1667,6 +1668,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._currentItem = item
 
         if item:
+            self.closePreviewWidget()
             try:
                 item.showPreviewWidget(self)
             except Exception as error:
@@ -1708,9 +1710,6 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :rtype: None
         """
-        if self._previewWidget:
-            self._previewWidget.close()
-
         layout = self._previewFrame.layout()
 
         while layout.count():
