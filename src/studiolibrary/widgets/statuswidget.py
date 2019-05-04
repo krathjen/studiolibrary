@@ -16,6 +16,66 @@ from studioqt import QtCore
 import studioqt
 import studiolibrary
 
+
+class ProgressBar(QtWidgets.QFrame):
+
+    def __init__(self, *args):
+        QtWidgets.QFrame.__init__(self, *args)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self._label = QtWidgets.QLabel("", self)
+        self._label.setSizePolicy(
+            QtWidgets.QSizePolicy.Preferred,
+            QtWidgets.QSizePolicy.Preferred
+        )
+
+        layout.addWidget(self._label)
+
+        self._progressBar = QtWidgets.QProgressBar(self)
+        self._progressBar.setFormat("")
+        self._progressBar.setRange(0, 100)
+        self._progressBar.setSizePolicy(
+            QtWidgets.QSizePolicy.Preferred,
+            QtWidgets.QSizePolicy.Preferred
+        )
+
+        layout.addWidget(self._progressBar)
+
+        self.setLayout(layout)
+
+    def reset(self):
+        """Reimplementing for convenience"""
+        self._progressBar.reset()
+
+    def setText(self, text):
+        """
+        Reimplementing for convenience
+
+        :type text: str
+        """
+        self._label.setText(text)
+
+    def setValue(self, value):
+        """
+        Reimplementing for convenience
+
+        :type value: float or int
+        """
+        self._progressBar.setValue(value)
+
+    def setRange(self, min_, max_):
+        """
+        Reimplementing for convenience
+
+        :type min_: int
+        :type max_: int
+        """
+        self._progressBar.setRange(min_, max_)
+
+
 class StatusWidget(QtWidgets.QFrame):
 
     DEFAULT_DISPLAY_TIME = 10000  # Milliseconds, 15 secs
@@ -53,8 +113,7 @@ class StatusWidget(QtWidgets.QFrame):
         self._button.setMaximumSize(QtCore.QSize(17, 17))
         self._button.setIconSize(QtCore.QSize(17, 17))
 
-        self._progressBar = QtWidgets.QProgressBar(self)
-        self._progressBar.setRange(0, 100)
+        self._progressBar = ProgressBar(self)
         self._progressBar.hide()
 
         layout = QtWidgets.QHBoxLayout(self)

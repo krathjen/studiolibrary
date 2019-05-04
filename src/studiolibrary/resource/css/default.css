@@ -618,21 +618,30 @@ PROGRESS WIDGET
 --------------------------------------------------------------------------
 */
 
-QProgressBar{
-    font-size: 9px;
-    margin: 3px;
+ProgressBar QLabel {
+    font-size: 10px;
+    margin: 0px;
+    padding: 0px;
+    padding-left: 1px;
+}
+
+ProgressBar QProgressBar{
+    margin: 2px;
     max-width: 200px;
+    min-width: 150px;
+    max-height: 3px;
     padding: 0px;
     color: rgb(0,0,0,200);
-    text-align: center;
-    border-radius: 2px;
+    border-radius: 1px;
     background-color: rgb(250,250,250,50);
 }
 
-QProgressBar::chunk {
+ProgressBar QProgressBar::chunk {
+    color: white;
     background-color: white;
     margin: 0px;
-    border-radius: 2px;
+    max-height: 5px;
+    border-radius: 1px;
 }
 
 
