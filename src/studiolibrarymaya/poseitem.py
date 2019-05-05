@@ -163,7 +163,9 @@ class PoseItem(baseitem.BaseItem):
         if not event.isAutoRepeat():
             if event.key() == QtCore.Qt.Key_M:
 
-                self.emitLoadValueChanged("mirror", not self._mirror)
+                # Toggle the value of the mirror option
+                mirror = self.currentLoadValue("mirror")
+                self.emitLoadValueChanged("mirror", not mirror)
 
                 blend = self.blendValue()
 
