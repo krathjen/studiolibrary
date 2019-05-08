@@ -678,7 +678,7 @@ class LibraryWindow(QtWidgets.QWidget):
         @studioqt.showWaitCursor
         def _sync():
             elapsedTime = time.time()
-            self.library().sync(percentCallback=self.setProgressBarValue)
+            self.library().sync(progressCallback=self.setProgressBarValue)
 
             elapsedTime = time.time() - elapsedTime
 
@@ -703,13 +703,12 @@ class LibraryWindow(QtWidgets.QWidget):
 
         if value == -1:
             self.statusWidget().progressBar().reset()
-            progressBar.setValue(100)
-            progressBar.setText(label)
+            value = 100
         else:
-            percent = value * 100.0
-            text = "{0} {1:.0f}%".format(label, percent)
-            progressBar.setValue(percent)
-            progressBar.setText(text)
+            value *= 100.0
+
+        progressBar.setValue(value)
+        progressBar.setText(label)
 
     def refresh(self):
         """

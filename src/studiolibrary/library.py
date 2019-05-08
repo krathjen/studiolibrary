@@ -285,13 +285,15 @@ class Library(QtCore.QObject):
         self._groupedResults = {}
         self.dataChanged.emit()
 
-    def sync(self, percentCallback=lambda message, percent: None):
+
+    def sync(self, progressCallback=None):
         """Sync the file system with the database."""
         if not self.path():
             logger.info('No path set for syncing data')
             return
 
-        percentCallback("Syncing", -1)
+        if progressCallback:
+            progressCallback("Syncing")
 
         data = self.read()
 
@@ -310,7 +312,9 @@ class Library(QtCore.QObject):
 
         for i, item in enumerate(items):
             percent = (float(i+1)/float(count))
-            percentCallback("", percent)
+            if progressCallback:
+                label = "{0:.0f}%".format(percent)
+                progressCallback(label, percent)
 
             path = item.path()
 
@@ -319,10 +323,14 @@ class Library(QtCore.QObject):
 
             data[path] = itemData
 
-        percentCallback("Post Sync", -1)
+        if progressCallback:
+            progressCallback("Post Callbacks")
+
         self.postSync(data)
 
-        percentCallback("Saving Cache", -1)
+        if progressCallback:
+            progressCallback("Saving Cache")
+
         self.save(data)
 
         self.dataChanged.emit()
