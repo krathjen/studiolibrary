@@ -1162,12 +1162,13 @@ class LibraryWindow(QtWidgets.QWidget):
         menu = studioqt.Menu("", self)
         menu.setTitle("Settings")
 
-        if self.SETTINGS_DIALOG_ENABLED:
-            action = menu.addAction("Settings")
-            action.triggered.connect(self.showSettingDialog)
-
         action = menu.addAction("Sync")
         action.triggered.connect(self.sync)
+
+        if self.SETTINGS_DIALOG_ENABLED:
+            menu.addSeparator()
+            action = menu.addAction("Settings")
+            action.triggered.connect(self.showSettingDialog)
 
         menu.addSeparator()
 
@@ -1184,17 +1185,6 @@ class LibraryWindow(QtWidgets.QWidget):
         menu.addMenu(librariesMenu)
         menu.addSeparator()
 
-        action = QtWidgets.QAction("Change Root Path", menu)
-        action.triggered.connect(self.showChangePathDialog)
-        menu.addAction(action)
-
-        menu.addSeparator()
-        theme = self.theme()
-        themesMenu = studiolibrary.widgets.ThemesMenu(menu, theme)
-        themesMenu.triggered.connect(self.reloadStyleSheet)
-        menu.addMenu(themesMenu)
-
-        menu.addSeparator()
 
         action = QtWidgets.QAction("Show Menu", menu)
         action.setCheckable(True)
