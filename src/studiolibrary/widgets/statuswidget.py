@@ -13,7 +13,6 @@
 from studioqt import QtWidgets
 from studioqt import QtCore
 
-import studioqt
 import studiolibrary
 
 
@@ -84,20 +83,6 @@ class StatusWidget(QtWidgets.QFrame):
 
     DEFAULT_DISPLAY_TIME = 10000  # Milliseconds, 15 secs
 
-    INFO_CSS = """"""
-
-    ERROR_CSS = """
-        color: rgb(240, 240, 240);
-        background-color: rgb(220, 40, 40);
-        selection-color: rgb(220, 40, 40);
-        selection-background-color: rgb(240, 240, 240);
-    """
-
-    WARNING_CSS = """
-        color: rgb(240, 240, 240);
-        background-color: rgb(240, 170, 0);
-    """
-
     def __init__(self, *args):
         QtWidgets.QFrame.__init__(self, *args)
 
@@ -160,9 +145,19 @@ class StatusWidget(QtWidgets.QFrame):
         if self.isBlocking():
             return
 
+        self.setProperty("status", "info")
+
         icon = studiolibrary.resource().icon("info")
-        self.setStyleSheet(self.INFO_CSS)
         self.showMessage(message, icon, msecs)
+
+    def setProperty(self, *args):
+        """
+        Overriding this method to force the style sheet to reload.
+
+        :type args: list
+        """
+        super(StatusWidget, self).setProperty(*args)
+        self.setStyleSheet(self.styleSheet())
 
     def showErrorMessage(self, message, msecs=None):
         """
@@ -173,8 +168,9 @@ class StatusWidget(QtWidgets.QFrame):
         
         :rtype: None 
         """
+        self.setProperty("status", "error")
+
         icon = studiolibrary.resource().icon("error")
-        self.setStyleSheet(self.ERROR_CSS)
         self.showMessage(message, icon, msecs, blocking=True)
 
     def showWarningMessage(self, message, msecs=None):
@@ -189,8 +185,9 @@ class StatusWidget(QtWidgets.QFrame):
         if self.isBlocking():
             return
 
+        self.setProperty("status", "warning")
+
         icon = studiolibrary.resource().icon("warning")
-        self.setStyleSheet(self.WARNING_CSS)
         self.showMessage(message, icon, msecs)
 
     def showMessage(self, message, icon, msecs=None, blocking=False):
@@ -233,5 +230,5 @@ class StatusWidget(QtWidgets.QFrame):
         self._label.setText("")
         icon = studiolibrary.resource().icon("blank")
         self._button.setIcon(icon)
-        self.setStyleSheet("")
+        self.setProperty("status", "")
         self._blocking = False

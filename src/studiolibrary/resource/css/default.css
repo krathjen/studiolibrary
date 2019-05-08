@@ -463,7 +463,6 @@ SearchWidget QPushButton, SearchWidget QPushButton:hover {
  --------------------------------------------------------------------------
 */
 
-
 QSplitter {
 	background-color: BACKGROUND_COLOR;
 }
@@ -568,18 +567,10 @@ ToastWidget {
 /*}*/
 
 
-/*!**/
- /*--------------------------------------------------------------------------*/
- /*Status Widget*/
- /*--------------------------------------------------------------------------*/
-/**!*/
 
-/*
-StatusWidget{
-	color: rgb(255, 255, 255, 150);
-	background-color: rgb(60, 60, 60);
-}
-*/
+
+
+
 
 /*!**/
  /*--------------------------------------------------------------------------*/
@@ -615,9 +606,44 @@ PreviewFrame QPushButton:hover {
 
 /*
 --------------------------------------------------------------------------
+Status Widget
+--------------------------------------------------------------------------
+*/
+
+StatusWidget {
+    color: FOREGROUND_COLOR;
+    background-color: BACKGROUND_COLOR;
+    border-top: 1px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 10);
+}
+
+StatusWidget QLabel {
+    background-color: transparent;
+}
+
+StatusWidget[status="error"],
+StatusWidget[status="error"] QLabel {
+    color: rgb(240, 240, 240);
+    background-color: rgb(220, 40, 40);
+    selection-color: rgb(220, 40, 40);
+    selection-background-color: rgb(240, 240, 240);
+}
+
+StatusWidget[status="warning"] {
+    color: rgb(240, 240, 240);
+    background-color: rgb(240, 170, 0);
+}
+
+
+/*
+--------------------------------------------------------------------------
 PROGRESS WIDGET
 --------------------------------------------------------------------------
 */
+
+ProgressBar,
+ProgressBar QLabel {
+    background-color: transparent;
+}
 
 ProgressBar QLabel {
     margin: 0px;
