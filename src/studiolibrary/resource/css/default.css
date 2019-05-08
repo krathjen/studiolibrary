@@ -574,11 +574,12 @@ ToastWidget {
  /*--------------------------------------------------------------------------*/
 /**!*/
 
-/*StatusWidget{*/
-	/*color: rgb(255, 255, 255, 150);*/
-	/*background-color: rgb(60, 60, 60);*/
-/*}*/
-
+/*
+StatusWidget{
+	color: rgb(255, 255, 255, 150);
+	background-color: rgb(60, 60, 60);
+}
+*/
 
 /*!**/
  /*--------------------------------------------------------------------------*/
@@ -619,20 +620,19 @@ PROGRESS WIDGET
 */
 
 ProgressBar QLabel {
-    font-size: 10px;
     margin: 0px;
-    padding: 0px;
-    padding-left: 1px;
+    padding: 1px;
 }
 
 ProgressBar QProgressBar{
-    margin: 2px;
+    margin-top: 4px;
+    margin-right: 6px;
     max-width: 200px;
     min-width: 150px;
-    max-height: 3px;
+    max-height: 4px;
     padding: 0px;
     color: rgb(0,0,0,200);
-    border-radius: 1px;
+    border-radius: 2px;
     background-color: rgb(250,250,250,50);
 }
 
@@ -640,8 +640,8 @@ ProgressBar QProgressBar::chunk {
     color: white;
     background-color: white;
     margin: 0px;
-    max-height: 5px;
-    border-radius: 1px;
+    max-height: 4px;
+    border-radius: 2px;
 }
 
 

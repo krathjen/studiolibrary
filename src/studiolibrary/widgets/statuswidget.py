@@ -22,11 +22,15 @@ class ProgressBar(QtWidgets.QFrame):
     def __init__(self, *args):
         QtWidgets.QFrame.__init__(self, *args)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
 
         self._label = QtWidgets.QLabel("", self)
+        self._label.setAlignment(
+            QtCore.Qt.AlignRight |
+            QtCore.Qt.AlignVCenter
+        )
         self._label.setSizePolicy(
             QtWidgets.QSizePolicy.Preferred,
             QtWidgets.QSizePolicy.Preferred
