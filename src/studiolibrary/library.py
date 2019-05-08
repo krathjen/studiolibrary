@@ -313,13 +313,14 @@ class Library(QtCore.QObject):
         for i, item in enumerate(items):
             percent = (float(i+1)/float(count))
             if progressCallback:
+                percent *= 100
                 label = "{0:.0f}%".format(percent)
                 progressCallback(label, percent)
 
             path = item.path()
 
             itemData = data.get(path, {})
-            itemData.update(item.itemData())
+            itemData.update(item.createItemData())
 
             data[path] = itemData
 

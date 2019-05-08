@@ -704,8 +704,6 @@ class LibraryWindow(QtWidgets.QWidget):
         if value == -1:
             self.statusWidget().progressBar().reset()
             value = 100
-        else:
-            value *= 100.0
 
         progressBar.setValue(value)
         progressBar.setText(label)
@@ -1184,7 +1182,6 @@ class LibraryWindow(QtWidgets.QWidget):
         librariesMenu = studiolibrary.widgets.LibrariesMenu(libraryWindow=self)
         menu.addMenu(librariesMenu)
         menu.addSeparator()
-
 
         action = QtWidgets.QAction("Show Menu", menu)
         action.setCheckable(True)
