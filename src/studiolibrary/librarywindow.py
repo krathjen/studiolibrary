@@ -86,8 +86,8 @@ class LibraryWindow(QtWidgets.QWidget):
     }
 
     TRASH_ENABLED = True
-    PROGRESS_BAR_VISIBLE = False
-    SETTINGS_DIALOG_ENABLED = False  # Still in development
+    PROGRESS_BAR_VISIBLE = True
+    SETTINGS_DIALOG_ENABLED = True
     RECURSIVE_SEARCH_ENABLED = False
 
 
@@ -1107,7 +1107,7 @@ class LibraryWindow(QtWidgets.QWidget):
             "description": "Your local settings",
             "layout": "vertical",
             "schema": [
-                {"name": "name", "type": "string", "default": self.name()},
+                # {"name": "name", "type": "string", "default": self.name()},
                 {"name": "path", "type": "path", "value": self.path()},
                 {
                     "name": "accentColor",
