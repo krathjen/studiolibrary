@@ -551,11 +551,11 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         name = os.path.basename(path)
         category = os.path.basename(dirname)
-        # modified = ""
+        modified = ""
         # timeAgo = ""
 
-        # if os.path.exists(path):
-        #     modified = os.path.getmtime(path)
+        if os.path.exists(path):
+            modified = os.path.getmtime(path)
         #     timeAgo = studiolibrary.timeAgo(modified)
 
         itemData = {
@@ -564,7 +564,7 @@ class LibraryItem(studiolibrary.widgets.Item):
             "type": extension,
             "folder": dirname,
             "category": category,
-            # "modified": modified
+            "modified": modified
         }
 
         return itemData
