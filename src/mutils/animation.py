@@ -33,7 +33,7 @@ MAX_TIME_LIMIT = 100000
 DEFAULT_FILE_TYPE = "mayaBinary"  # "mayaAscii"
 
 # A feature flag that will be removed in the future.
-FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR = False
+FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR = True
 
 
 class PasteOption:
