@@ -35,8 +35,8 @@ except ImportError:
 
 import studiolibrary
 
-from studiolibrary.vendor import six
-from studiolibrary.vendor.six.moves import urllib
+from studiovendor import six
+from studiovendor.six.moves import urllib
 
 
 __all__ = [
@@ -151,7 +151,13 @@ def reload():
     import studiolibrary
     studiolibrary.LibraryWindow.destroyInstances()
 
-    names = ['studiolibrary', 'studioqt', 'studiolibrarymaya',  'mutils']
+    names = [
+        "studioqt",
+        "studiovendor"
+        "studiolibrary",
+        "studiolibrarymaya",
+        "mutils",
+    ]
 
     for mod in sys.modules.keys():
         for name in names:
