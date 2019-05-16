@@ -70,14 +70,14 @@ class FormWidget(QtWidgets.QFrame):
 
         self.setLayout(layout)
 
-        self._optionsFrame = QtWidgets.QFrame(self)
-        self._optionsFrame.setObjectName("optionsFrame")
+        self._fieldsFrame = QtWidgets.QFrame(self)
+        self._fieldsFrame.setObjectName("optionsFrame")
 
-        layout = QtWidgets.QVBoxLayout(self._optionsFrame)
+        layout = QtWidgets.QVBoxLayout(self._fieldsFrame)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self._optionsFrame.setLayout(layout)
+        self._fieldsFrame.setLayout(layout)
 
         self._titleWidget = QtWidgets.QPushButton(self)
         self._titleWidget.setCheckable(True)
@@ -86,7 +86,7 @@ class FormWidget(QtWidgets.QFrame):
         self._titleWidget.hide()
 
         self.layout().addWidget(self._titleWidget)
-        self.layout().addWidget(self._optionsFrame)
+        self.layout().addWidget(self._fieldsFrame)
 
     def _titleClicked(self, toggle):
         """Triggered when the user clicks the title widget."""
@@ -119,7 +119,7 @@ class FormWidget(QtWidgets.QFrame):
 
         try:
             self._titleWidget.setChecked(expand)
-            self._optionsFrame.setVisible(expand)
+            self._fieldsFrame.setVisible(expand)
         finally:
             self._titleWidget.blockSignals(False)
 
@@ -174,12 +174,12 @@ class FormWidget(QtWidgets.QFrame):
 
             self._widgets.append(widget)
 
-            callback = functools.partial(self._optionChanged, widget)
+            callback = functools.partial(self._fieldChanged, widget)
             widget.valueChanged.connect(callback)
 
-            self._optionsFrame.layout().addWidget(widget)
+            self._fieldsFrame.layout().addWidget(widget)
 
-    def _optionChanged(self, widget):
+    def _fieldChanged(self, widget):
         """
         Triggered when the given option widget changes value.
         
@@ -265,19 +265,27 @@ class FormWidget(QtWidgets.QFrame):
             if widget.data().get("name") == name:
                 return widget
 
-    def options(self):
-        options = []
-        for widget in self._widgets:
-            options.append(widget.data())
-        return options
-
-    def optionsToDict(self):
+    def fields(self):
         """
-        This method is deprecated.
+        Get all the field data for the form.
 
         :rtype: dict
         """
-        return self.values()
+        fields = []
+        for widget in self._widgets:
+            fields.append(widget.data())
+        return fields
+
+    def setValues(self, values):
+        """
+        Set the field values for the current form.
+
+        :type values: dict
+        """
+        state = []
+        for name in values:
+            state.append({"name": name, "value": values[name]})
+        self._setState(state)
 
     def values(self):
         """
@@ -301,19 +309,37 @@ class FormWidget(QtWidgets.QFrame):
             values[widget.data().get("name")] = widget.default()
         return values
 
+    def persistentValues(self):
+        """
+        Get all the persistent field values for the current form.
+
+        :rtype: dict
+        """
+        state = {}
+        values = self.values()
+        fields = self.fields()
+
+        for field in fields:
+            name = field.get("name")
+            persistent = field.get("persistent")
+            if name and persistent:
+                state[name] = values[name]
+
+        return state
+
     def state(self):
         """
         Get the current state.
         
         :rtype: dict 
         """
-        options = []
+        fields = []
 
         for widget in self._widgets:
-            options.append(widget.state())
+            fields.append(widget.state())
 
         state = {
-            "options": options,
+            "fields": fields,
             "expanded": self.isExpanded()
         }
 
@@ -329,35 +355,15 @@ class FormWidget(QtWidgets.QFrame):
         if expanded is not None:
             self.setExpanded(expanded)
 
-        options = state.get("options")
-        if options is not None:
-            self._setState(options)
+        fields = state.get("fields")
+        if fields is not None:
+            self._setState(fields)
 
         self.validate()
 
-    def optionsState(self):
-        state = {}
-        values = self.values()
-        options = self.options()
-
-        for option in options:
-            name = option.get("name")
-            persistent = option.get("persistent")
-            if name and persistent:
-                state[name] = values[name]
-
-        return state
-
-    def setStateFromOptions(self, options):
-        state = []
-        for option in options:
-            state.append({"name": option, "value": options[option]})
-
-        self._setState(state)
-
     def _setState(self, fields):
         """
-        Set the state.
+        Set the state while blocking all signals.
         
         :type fields: list[dict]
         """

@@ -104,5 +104,5 @@ class PreviewWidget(QtWidgets.QWidget):
 
     def accept(self):
         """Called when the user clicks the load button."""
-        kwargs = self._optionsWidget.options()
+        kwargs = self._optionsWidget.values()
         self._item.load(**kwargs)

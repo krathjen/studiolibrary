@@ -216,7 +216,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
                 if not persistent and name in options:
                     options[name] = values[name]
 
-            self._optionsWidget.setStateFromOptions(options)
+            self._optionsWidget.setValues(options)
 
     def saveSettings(self):
         """
@@ -224,7 +224,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        state = self._optionsWidget.optionsState()
+        state = self._optionsWidget.persistentValues()
         settings = studiolibrarymaya.settings()
         settings[self.item().__class__.__name__] = {"saveOptions": state}
         studiolibrarymaya.saveSettings(settings)
@@ -408,7 +408,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
                'to a number greater than 1. For example if the "by frame" ' \
                'is set to 2 it will playblast every second frame.'
 
-        options = self._optionsWidget.optionsToDict()
+        options = self._optionsWidget.values()
         byFrame = options.get("byFrame", 1)
         startFrame, endFrame = options.get("frameRange", [None, None])
 
@@ -476,7 +476,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def thumbnailCapture(self, show=False):
         """Capture a playblast and save it to the temp thumbnail path."""
-        options = self._optionsWidget.optionsToDict()
+        options = self._optionsWidget.values()
         startFrame, endFrame = options.get("frameRange", [None, None])
         step = options.get("byFrame", 1)
 
@@ -532,7 +532,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         try:
             path = self.folderPath()
 
-            options = self._optionsWidget.optionsToDict()
+            options = self._optionsWidget.values()
             name = options.get("name")
 
             objects = maya.cmds.ls(selection=True) or []
@@ -577,7 +577,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         item = self.item()
 
-        options = self._optionsWidget.optionsToDict()
+        options = self._optionsWidget.values()
 
         sequencePath = self.sequencePath()
         if sequencePath:

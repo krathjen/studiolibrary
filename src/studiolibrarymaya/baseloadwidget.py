@@ -196,7 +196,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
                 optionsWidget = studiolibrary.widgets.FormWidget(self)
                 optionsWidget.setSchema(item.loadSchema())
                 optionsWidget.setValidator(item.loadValidator)
-                optionsWidget.setStateFromOptions(self.item().optionsFromSettings())
+                optionsWidget.setValues(self.item().optionsFromSettings())
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
                 self._optionsWidget = optionsWidget
                 optionsWidget.validate()
@@ -272,7 +272,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self.setScriptJobEnabled(False)
 
         if self._optionsWidget:
-            self.item().saveOptions(**self._optionsWidget.optionsToDict())
+            self.item().saveOptions(**self._optionsWidget.values())
 
         QtWidgets.QWidget.close(self)
 
