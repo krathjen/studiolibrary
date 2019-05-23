@@ -207,6 +207,7 @@ Version 1.32.0 for Maya __2014__, __2015__.
 Version 1.6.14 for Maya __2011__, __2012__ and __2013__.
 
 [studiolibrary.1.6.14.zip](https://www.dropbox.com/s/ow968cm5su94ozb/studiolibrary.zip?dl=1) (Requires PyQt4 or PySide)
+
 [studiolibrary.1.6.14.exe](https://www.dropbox.com/s/fh4vl1fzsj1xv3o/studiolibrary.exe?dl=1) (Windows Installer) 
 
 #### Installation
