@@ -11,7 +11,6 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import sys
 import json
 
 
@@ -24,7 +23,6 @@ _resource = None
 PATH = os.path.abspath(__file__)
 DIRNAME = os.path.dirname(PATH)
 RESOURCE_PATH = os.path.join(DIRNAME, "resource")
-HELP_URL = "http://www.studiolibrary.com"
 
 
 class Config(dict):

@@ -2681,7 +2681,7 @@ class LibraryWindow(QtWidgets.QWidget):
         :rtype: None
         """
         import webbrowser
-        webbrowser.open(studiolibrary.HELP_URL)
+        webbrowser.open(studiolibrary.config().get("helpUrl"))
 
     def setDebugMode(self, value):
         """

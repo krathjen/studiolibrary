@@ -15,6 +15,9 @@
   // You can use environment variables within the path. eg: {HOME}
   "databasePath": "{root}/.studiolibrary/database.json",
 
+  // Default website url
+  "helpUrl": "http://www.studiolibrary.com",
+
   // The temp location used for saving out items and thumbnails
   "tempPath": "{temp}/StudioLibrary/{user}",
 
