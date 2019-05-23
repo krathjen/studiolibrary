@@ -15,6 +15,7 @@ import os
 import time
 import copy
 import logging
+import webbrowser
 from functools import partial
 
 from studioqt import QtGui
@@ -1263,6 +1264,10 @@ class LibraryWindow(QtWidgets.QWidget):
         action.setCheckable(True)
         action.setChecked(self.isDebug())
         action.triggered[bool].connect(self.setDebugMode)
+        menu.addAction(action)
+
+        action = QtWidgets.QAction("Report Issue", menu)
+        action.triggered.connect(self.reportIssue)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Help", menu)
@@ -2677,11 +2682,13 @@ class LibraryWindow(QtWidgets.QWidget):
 
     @staticmethod
     def help():
-        """
-        :rtype: None
-        """
-        import webbrowser
+        """Open the help url from the config file in a web browser."""
         webbrowser.open(studiolibrary.config().get("helpUrl"))
+
+    @staticmethod
+    def reportIssue():
+        """Open the report issue url and submit a new issue."""
+        webbrowser.open(studiolibrary.config().get("reportIssueUrl"))
 
     def setDebugMode(self, value):
         """
