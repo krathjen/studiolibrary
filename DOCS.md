@@ -16,6 +16,8 @@ Please feel free to improve this page as needed. Thank you.
 * [How to debug "No object match when loading data"](#zi20df5)
 * [How to fix a scene that has unknown nodes](#ufj2oi4)
 * [How to lock and unlock specific folders](#we7zm9m)
+* [How to install & run for Maya 2011-2015](#qiot1k3)
+
 
 ### FAQ
 
@@ -182,6 +184,57 @@ studiolibrary.main(name=name, path=path, superusers=superusers, lockFolder="Appr
 
 # This command will lock all folders except folders that contain the words "Users" or "Shared" in their path.
 studiolibrary.main(name=name, path=path, superusers=superusers, unlockFolder="Users|Shared")
+```
+
+[Top](#top)
+
+
+<br>
+
+
+### <a name="qiot1k3"></a> How to install & run for Maya 2011-2015
+
+
+#### Download
+
+1 . Download and unzip the following studiolibrary.zip file from the following link.
+
+Version 1.32.0 for Maya __2014__, __2015__.
+
+[studiolibrary.1.32.0.zip](https://github.com/krathjen/studiolibrary/releases/download/1.32.0/studiolibrary.zip)
+
+
+Version 1.6.14 for Maya __2011__, __2012__ and __2013__.
+
+[studiolibrary.1.6.14.zip](https://www.dropbox.com/s/ow968cm5su94ozb/studiolibrary.zip?dl=1) (Requires PyQt4 or PySide)
+[studiolibrary.1.6.14.exe](https://www.dropbox.com/s/fh4vl1fzsj1xv3o/studiolibrary.exe?dl=1) (Windows Installer) 
+
+#### Installation
+
+2 . Move the unzipped studiolibrary folder to the following path depending on your OS.
+
+
+##### Linux
+
+```~/maya/scripts```
+
+##### Windows
+
+```C:/Users/USERNAME/Documents/maya/scripts```
+
+##### OSX
+
+Use ⌘+Shift+G in the finder and copy the studiolibrary folder to
+
+```~/Library/Preferences/Autodesk/maya/scripts```
+
+#### Run
+
+3 . Start Maya and run the following code in the Python script editor.
+
+```
+import studiolibrary
+studiolibrary.main()
 ```
 
 [Top](#top)
