@@ -197,7 +197,7 @@ studiolibrary.main(name=name, path=path, superusers=superusers, unlockFolder="Us
 
 #### Download
 
-1 . Download and unzip the following studiolibrary.zip file from the following link.
+1 . Download and unzip the studiolibrary.zip file from the following link.
 
 Version 1.32.0 for Maya __2014__, __2015__.
 
