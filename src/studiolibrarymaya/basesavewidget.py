@@ -55,8 +55,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self._item = None
         self._iconPath = ""
         self._scriptJob = None
+        self._formWidget = None
         self._focusWidget = None
-        self._optionsWidget = None
         self._libraryWindow = None
         self._sequencePath = None
 
@@ -140,6 +140,14 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         return self.item().libraryWindow()
 
+    def formWidget(self):
+        """
+        Get the form widget instance.
+
+        :rtype: studiolibrary.widgets.formwidget.FormWidget
+        """
+        return self._formWidget
+
     def item(self):
         """
         Return the library item to be created.
@@ -162,16 +170,16 @@ class BaseSaveWidget(QtWidgets.QWidget):
         schema = item.saveSchema()
 
         if schema:
-            optionsWidget = studiolibrary.widgets.FormWidget(self)
-            optionsWidget.setSchema(schema)
-            optionsWidget.setValidator(item.saveValidator)
+            formWidget = studiolibrary.widgets.FormWidget(self)
+            formWidget.setSchema(schema)
+            formWidget.setValidator(item.saveValidator)
 
-            self.ui.optionsFrame.layout().addWidget(optionsWidget)
-            self._optionsWidget = optionsWidget
+            self.ui.optionsFrame.layout().addWidget(formWidget)
+            self._formWidget = formWidget
             self.loadSettings()
 
-            optionsWidget.stateChanged.connect(self._optionsChanged)
-            optionsWidget.validate()
+            formWidget.stateChanged.connect(self._optionsChanged)
+            formWidget.validate()
         else:
             self.ui.optionsFrame.setVisible(False)
 
@@ -216,7 +224,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
                 if not persistent and name in options:
                     options[name] = values[name]
 
-            self._optionsWidget.setValues(options)
+            self._formWidget.setValues(options)
 
     def saveSettings(self):
         """
@@ -224,7 +232,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        state = self._optionsWidget.persistentValues()
+        state = self._formWidget.persistentValues()
         settings = studiolibrarymaya.settings()
         settings[self.item().__class__.__name__] = {"saveOptions": state}
         studiolibrarymaya.saveSettings(settings)
@@ -377,8 +385,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        if self._optionsWidget:
-            self._optionsWidget.validate()
+        if self._formWidget:
+            self._formWidget.validate()
 
     def sequencePath(self):
         """
@@ -408,7 +416,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
                'to a number greater than 1. For example if the "by frame" ' \
                'is set to 2 it will playblast every second frame.'
 
-        options = self._optionsWidget.values()
+        options = self._formWidget.values()
         byFrame = options.get("byFrame", 1)
         startFrame, endFrame = options.get("frameRange", [None, None])
 
@@ -476,7 +484,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def thumbnailCapture(self, show=False):
         """Capture a playblast and save it to the temp thumbnail path."""
-        options = self._optionsWidget.values()
+        options = self._formWidget.values()
         startFrame, endFrame = options.get("frameRange", [None, None])
         step = options.get("byFrame", 1)
 
@@ -532,7 +540,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         try:
             path = self.folderPath()
 
-            options = self._optionsWidget.values()
+            options = self._formWidget.values()
             name = options.get("name")
 
             objects = maya.cmds.ls(selection=True) or []
@@ -577,7 +585,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         item = self.item()
 
-        options = self._optionsWidget.values()
+        options = self._formWidget.values()
 
         sequencePath = self.sequencePath()
         if sequencePath:
