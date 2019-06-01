@@ -59,7 +59,7 @@ class BaseItem(studiolibrary.LibraryItem):
     PreviewWidgetClass = baseloadwidget.BaseLoadWidget
 
     @classmethod
-    def showCreateWidget(cls, libraryWindow):
+    def showCreateWidget(cls, libraryWindow, item=None):
         """
         Overriding this method to set the destination location
         for the create widget.
@@ -67,8 +67,11 @@ class BaseItem(studiolibrary.LibraryItem):
         Triggered when the user clicks the item action in the new item menu.
 
         :type libraryWindow: studiolibrary.LibraryWindow
+        :type item: studiolibrary.LibraryItem or None
+
         """
-        widget = cls.CreateWidgetClass(item=cls(), parent=libraryWindow)
+        item = item or cls()
+        widget = cls.CreateWidgetClass(item=item, parent=libraryWindow)
 
         path = libraryWindow.selectedFolderPath()
 

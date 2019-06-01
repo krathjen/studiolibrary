@@ -101,13 +101,15 @@ class LibraryItem(studiolibrary.widgets.Item):
             return action
 
     @classmethod
-    def showCreateWidget(cls, libraryWindow):
+    def showCreateWidget(cls, libraryWindow, item=None):
         """
         Show the create widget for creating a new item.
 
         :type libraryWindow: studiolibrary.LibraryWindow
+        :type item: studiolibrary.LibraryItem or None
         """
-        widget = cls.CreateWidgetClass()
+        item = item or cls()
+        widget = cls.CreateWidgetClass(item=item)
         libraryWindow.setCreateWidget(widget)
 
     @classmethod
@@ -158,6 +160,9 @@ class LibraryItem(studiolibrary.widgets.Item):
         self._typePixmap = None
         self._libraryWindow = None
 
+        self._readOnly = False
+        self._ignoreExistsDialog = False
+
         if libraryWindow:
             self.setLibraryWindow(libraryWindow)
 
@@ -166,6 +171,54 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         if path:
             self.setPath(path)
+
+    def setReadOnly(self, readOnly):
+        """
+        Set the item to read only.
+
+        :type readOnly: bool
+        """
+        self._readOnly = readOnly
+
+    def isReadOnly(self):
+        """
+        Check if the item is read only.
+
+        :rtype: bool
+        """
+        if self.isLocked():
+            return True
+
+        return self._readOnly
+
+    def isLocked(self):
+        """
+        Check if the item has been locked by the window.
+
+        :rtype: bool
+        """
+        locked = False
+        if self.libraryWindow():
+            locked = self.libraryWindow().isLocked()
+        return locked
+
+    def isDeletable(self):
+        """
+        Check if the item is deletable.
+
+        :rtype: bool
+        """
+        if self.isLocked():
+            return False
+
+        return self.EnableDelete
+
+    def overwrite(self):
+        """
+        Show the save widget with the input fields populated.
+        """
+        self._ignoreExistsDialog = True
+        widget = self.showCreateWidget(self.libraryWindow(), item=self)
 
     def info(self):
         """
@@ -311,22 +364,12 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type items: list[LibraryItem]
         :rtype: None
         """
-        if self.EnableDelete:
-            action = QtWidgets.QAction("Delete", menu)
-            action.triggered.connect(self.showDeleteDialog)
-            menu.addAction(action)
-            menu.addSeparator()
-
         action = QtWidgets.QAction("Rename", menu)
         action.triggered.connect(self.showRenameDialog)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Move to", menu)
         action.triggered.connect(self.showMoveDialog)
-        menu.addAction(action)
-
-        action = QtWidgets.QAction("Show in Folder", menu)
-        action.triggered.connect(self.showInFolder)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Copy Path", menu)
@@ -336,6 +379,22 @@ class LibraryItem(studiolibrary.widgets.Item):
         if self.libraryWindow():
             action = QtWidgets.QAction("Select Folder", menu)
             action.triggered.connect(self.selectFolder)
+            menu.addAction(action)
+
+        action = QtWidgets.QAction("Show in Folder", menu)
+        action.triggered.connect(self.showInFolder)
+        menu.addAction(action)
+
+        if self.isDeletable():
+            menu.addSeparator()
+            action = QtWidgets.QAction("Delete", menu)
+            action.triggered.connect(self.showDeleteDialog)
+            menu.addAction(action)
+
+        if not self.isReadOnly():
+            menu.addSeparator()
+            action = QtWidgets.QAction("Overwrite", menu)
+            action.triggered.connect(self.overwrite)
             menu.addAction(action)
 
     def copyPathToClipboard(self):
@@ -617,7 +676,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         self.saving.emit(self)
 
         if os.path.exists(path):
-            self.showAlreadyExistsDialog()
+            if self._ignoreExistsDialog:
+                self._moveToTrash()
+            else:
+                self.showAlreadyExistsDialog()
 
         tempPath = studiolibrary.createTempPath(self.__class__.__name__)
 
@@ -789,8 +851,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         if not self.libraryWindow():
             raise ItemSaveError("Item already exists!")
 
-        path = self.path()
-
         title = "Item already exists"
         text = 'Would you like to move the existing item "{}" to the trash?'
         text = text.format(self.name())
@@ -805,10 +865,7 @@ class LibraryItem(studiolibrary.widgets.Item):
              QtWidgets.QApplication.restoreOverrideCursor()
 
         if button == QtWidgets.QMessageBox.Yes:
-            library = self.library()
-            item = studiolibrary.LibraryItem(path, library=library)
-            self.libraryWindow().moveItemsToTrash([item])
-            self.setPath(path)
+            self._moveToTrash()
         else:
             raise ItemSaveError("You cannot save over an existing item.")
 
@@ -817,6 +874,18 @@ class LibraryItem(studiolibrary.widgets.Item):
     # -----------------------------------------------------------------
     # Support for painting the type icon
     # -----------------------------------------------------------------
+
+    def _moveToTrash(self):
+        """
+        Move the current item to the trash.
+
+        This method should only be used when saving.
+        """
+        path = self.path()
+        library = self.library()
+        item = studiolibrary.LibraryItem(path, library=library)
+        self.libraryWindow().moveItemsToTrash([item])
+        self.setPath(path)
 
     def typePixmap(self):
         """

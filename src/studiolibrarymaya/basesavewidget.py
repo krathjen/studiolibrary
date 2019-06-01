@@ -169,10 +169,14 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         schema = item.saveSchema()
 
+        self.setThumbnail(item.thumbnailPath())
+
         if schema:
             formWidget = studiolibrary.widgets.FormWidget(self)
             formWidget.setSchema(schema)
             formWidget.setValidator(item.saveValidator)
+
+            formWidget.setValues({"name": item.name()})
 
             self.ui.optionsFrame.layout().addWidget(formWidget)
             self._formWidget = formWidget
