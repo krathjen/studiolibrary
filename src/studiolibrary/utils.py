@@ -153,7 +153,7 @@ def reload():
 
     names = [
         "studioqt",
-        "studiovendor"
+        "studiovendor",
         "studiolibrary",
         "studiolibrarymaya",
         "mutils",
