@@ -43,6 +43,14 @@ class FolderItem(studiolibrary.LibraryItem):
         if os.path.isdir(path):
             return True
 
+    def createOverwriteMenu(self, menu):
+        """
+        Overwriting this method to ignore/hide the overwrite menu action.
+
+        :type menu: QtWidgets.QMenu
+        """
+        pass
+
     def info(self):
         """
         Get the info to display to user.

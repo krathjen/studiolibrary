@@ -391,6 +391,14 @@ class LibraryItem(studiolibrary.widgets.Item):
             action.triggered.connect(self.showDeleteDialog)
             menu.addAction(action)
 
+        self.createOverwriteMenu(menu)
+
+    def createOverwriteMenu(self, menu):
+        """
+        Create a menu or action to trigger the overwrite method.
+
+        :type menu: QtWidgets.QMenu
+        """
         if not self.isReadOnly():
             menu.addSeparator()
             action = QtWidgets.QAction("Overwrite", menu)
