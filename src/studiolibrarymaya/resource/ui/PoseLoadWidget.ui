@@ -87,7 +87,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="titleLabel">
        <property name="font">
         <font>
          <family>Arial</family>
@@ -97,7 +97,7 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-size: 11pt;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Pose</string>

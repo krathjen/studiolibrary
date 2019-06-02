@@ -97,7 +97,7 @@
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">font-size: 11pt;</string>
+        <string notr="true"/>
        </property>
        <property name="text">
         <string>Title</string>

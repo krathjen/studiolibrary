@@ -318,11 +318,13 @@ QComboBox::drop-down {
     /*background-color: rgb(255, 255, 255, 0);*/
 /*}*/
 
-QComboBox, QSpinBox, QLineEdit, QComboBox QAbstractItemView:item {
+
+QSpinBox,
+QLineEdit,
+QComboBox,
+QComboBox QAbstractItemView:item {
 	height: 25px;
 	padding: 0 4px;
-	/*font-size: 14px;*/
-	font-size: 10pt;
 	border-radius: 0px;
 	background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 15);
 	border-bottom: 0px solid rgb(255, 255, 255, 50);
@@ -676,7 +678,7 @@ ProgressBar QProgressBar::chunk {
  /*--------------------------------------------------------------------------*/
 
 #messageBoxHeaderLabel {
-    font: 16pt;
+    font: 16px;
     color: rgb(255,255,255);
 }
 
@@ -699,12 +701,11 @@ ProgressBar QProgressBar::chunk {
 }
 
 #messageBoxBody QWidget {
-    font: 10pt;
     color: rgb(100,100,110);
 }
 
 #messageBox QPushButton {
-    font: 11pt;
+    font: 12*DPIpx;
     color: rgb(250, 250, 250, 250);
     min-width: 92px;
     min-height: 32px;
@@ -903,6 +904,12 @@ BaseSaveWidget #fieldWidget {
     margin-top: 4px;
 }
 
+
+BaseSaveWidget #titleLabel,
+BaseLoadWidget #titleLabel {
+    font-size: 14px;
+}
+
 BaseLoadWidget QLineEdit,
 BaseLoadWidget QTextEdit,
 BaseLoadWidget QComboBox,
@@ -974,7 +981,12 @@ FormDialog #rejectButton:disabled {
     color: rgb(250,250,250,50);
 }
 
+FormDialog #acceptButton {
+    color: FOREGROUND_COLOR;
+}
+
 FormDialog #acceptButton:hover {
+    color: ACCENT_FOREGROUND_COLOR;
     background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 220);
 }
 
