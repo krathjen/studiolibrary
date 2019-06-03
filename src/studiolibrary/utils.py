@@ -226,7 +226,7 @@ def createTempPath(name, clean=True, makedirs=True):
             shutil.rmtree(path)
 
     if makedirs and not os.path.exists(path):
-            os.makedirs(path)
+        os.makedirs(path)
 
     return path
 
@@ -490,12 +490,14 @@ def formatPath(formatString, path="", **kwargs):
 
     return normPath(resolvedString)
 
-def copyPath(src, dst):
+
+def copyPath(src, dst, force=False):
     """
     Make a copy of the given src path to the given destination path.
 
     :type src: str
     :type dst: str
+    :type force: bool
     :rtype: str
     """
     dirname = os.path.dirname(src)
@@ -506,18 +508,27 @@ def copyPath(src, dst):
     src = normPath(src)
     dst = normPath(dst)
 
+    logger.info(u'Copying path "{0}" -> "{1}"'.format(src, dst))
+
     if src == dst:
         msg = u'The source path and destination path are the same: {0}'
         raise IOError(msg.format(src))
 
-    if os.path.exists(dst):
+    if not force and os.path.exists(dst):
         msg = u'Cannot copy over an existing path: "{0}"'
         raise IOError(msg.format(dst))
+
+    # Make sure the destination directory exists
+    dstDir = os.path.dirname(dst)
+    if not os.path.exists(dstDir):
+        os.makedirs(dstDir)
 
     if os.path.isfile(src):
         shutil.copy(src, dst)
     else:
         shutil.copytree(src, dst)
+
+    logger.info("Copied path!")
 
     return dst
 
