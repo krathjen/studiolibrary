@@ -331,6 +331,14 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         return self.DefaultThumbnailPath
 
+    def isDefaultThumbnailPath(self):
+        """
+        Check if the thumbnail path is the default path.
+
+        :rtype: bool
+        """
+        return self.thumbnailPath() == self.DefaultThumbnailPath
+
     def showPreviewWidget(self, libraryWindow):
         """
         Show the preview Widget for the item instance.

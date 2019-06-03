@@ -169,7 +169,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         schema = item.saveSchema()
 
-        self.setThumbnail(item.thumbnailPath())
+        if not item.isDefaultThumbnailPath():
+            self.setThumbnail(item.thumbnailPath())
 
         if schema:
             formWidget = studiolibrary.widgets.FormWidget(self)
@@ -475,10 +476,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
         filename, extension = os.path.splitext(src)
 
         dst = studiolibrary.tempPath("thumbnail" + extension)
-        shutil.copyfile(src, dst)
 
-        logger.info(src)
-        logger.info(dst)
+        studiolibrary.copyPath(src, dst, force=True)
 
         self._iconPath = dst
         self.ui.thumbnailButton.setPath(dst)
