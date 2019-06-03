@@ -89,7 +89,7 @@ class LibraryWindow(QtWidgets.QWidget):
     PROGRESS_BAR_VISIBLE = True
     SETTINGS_DIALOG_ENABLED = True
     RECURSIVE_SEARCH_ENABLED = False
-
+    TEMP_PATH_MENU_ENABLED = False
 
     # Still in development
     DPI_ENABLED = False
@@ -1213,13 +1213,18 @@ class LibraryWindow(QtWidgets.QWidget):
         action.triggered.connect(self.saveSettings)
         menu.addAction(action)
 
-        action = QtWidgets.QAction("Show Settings", menu)
-        action.triggered.connect(self.showSettings)
-        menu.addAction(action)
-
         action = QtWidgets.QAction("Reset Settings", menu)
         action.triggered.connect(self.resetSettings)
         menu.addAction(action)
+
+        action = QtWidgets.QAction("Open Settings", menu)
+        action.triggered.connect(self.openSettings)
+        menu.addAction(action)
+
+        if self.TEMP_PATH_MENU_ENABLED:
+            action = QtWidgets.QAction("Open Temp Path", menu)
+            action.triggered.connect(self.openTempPath)
+            menu.addAction(action)
 
         menu.addSeparator()
 
@@ -1886,8 +1891,13 @@ class LibraryWindow(QtWidgets.QWidget):
         data.update(settings)
         self.saveSettings(data)
 
-    def showSettings(self):
-        """Show the settings file."""
+    def openTempPath(self):
+        """Launch the system explorer to the temp directory."""
+        path = studiolibrary.tempPath()
+        studiolibrary.showInFolder(path)
+
+    def openSettings(self):
+        """Launch the system explorer to the open directory."""
         path = studiolibrary.settingsPath()
         studiolibrary.showInFolder(path)
 
