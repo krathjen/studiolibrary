@@ -281,6 +281,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
+        self.saveSettings()
         self.setScriptJobEnabled(False)
         QtWidgets.QWidget.close(self)
 
