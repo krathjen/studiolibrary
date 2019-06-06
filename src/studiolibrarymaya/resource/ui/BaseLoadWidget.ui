@@ -166,7 +166,7 @@ QPushButton:!Checked {
 }</string>
            </property>
            <property name="text">
-            <string>ICON</string>
+            <string>Icon</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -394,7 +394,7 @@ QPushButton:!Checked {
 }</string>
            </property>
            <property name="text">
-            <string>INFO</string>
+            <string>Info</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -542,7 +542,7 @@ QPushButton:!Checked {
 }</string>
            </property>
            <property name="text">
-            <string>OPTIONS</string>
+            <string>Options</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -690,7 +690,7 @@ QPushButton:!Checked {
 }</string>
            </property>
            <property name="text">
-            <string>NAMESPACE</string>
+            <string>Namespace</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
