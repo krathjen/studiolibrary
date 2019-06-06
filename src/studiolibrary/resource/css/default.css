@@ -1014,6 +1014,31 @@ FieldWidget[error=true] QTextEdit {
 }
 
 
+ButtonGroupFieldWidget QPushButton {
+    height: 24px;
+    margin: 1px;
+    text-align: center;
+    color: FOREGROUND_COLOR;
+}
+
+ButtonGroupFieldWidget QPushButton[first=true] {
+    background-color: rgb(0, 0, 0, 30);
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+ButtonGroupFieldWidget QPushButton[last=true] {
+    background-color: rgb(0, 0, 0, 30);
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+
+ButtonGroupFieldWidget QPushButton:checked {
+    color: ACCENT_FOREGROUND_COLOR;
+    background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 220);
+}
+
+
 /*
 FieldWidget[default=false] QLineEdit,
 FieldWidget[default=false] QTextEdit {

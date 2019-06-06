@@ -93,6 +93,18 @@ class FieldWidget(QtWidgets.QFrame):
         else:
             self._label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
+        widget = self.createWidget()
+        if widget:
+            self.setWidget(widget)
+
+    def createWidget(self):
+        """
+        Create the widget to be used by the field.
+
+        :rtype: QtWidgets.Widget or None
+        """
+        return None
+
     def label(self):
         """
         Get the label widget.
@@ -128,8 +140,9 @@ class FieldWidget(QtWidgets.QFrame):
         """
         data = self.data()
 
-        title = data.get("title", "") or data.get("name", "")
-        if title:
+        title = data.get("title")
+        if title is None:
+            title = data.get("name", "")
             title = toTitle(title)
 
         if self.isRequired():
@@ -175,6 +188,10 @@ class FieldWidget(QtWidgets.QFrame):
         if hidden is not None:
             self.setHidden(hidden)
 
+        visible = state.get('visible')
+        if visible is not None:
+            self.setVisible(visible)
+
         required = state.get('required')
         if required is not None:
             self.setRequired(required)
@@ -187,6 +204,10 @@ class FieldWidget(QtWidgets.QFrame):
         if toolTip is not None:
             self.setToolTip(toolTip)
             self.setStatusTip(toolTip)
+
+        placeholder = state.get("placeholder")
+        if placeholder is not None:
+            self.setPlaceholder(placeholder)
 
         style = state.get("style")
         if style is not None:
@@ -226,6 +247,15 @@ class FieldWidget(QtWidgets.QFrame):
         self.refresh()
 
         self.blockSignals(False)
+
+    def setPlaceholder(self, placeholder):
+        """
+        Set the placeholder text to be displayed for the widget.
+
+        :type placeholder: str
+        :raises: NotImplementedError
+        """
+        NotImplementedError('The method "setPlaceholder" needs to be implemented')
 
     def setError(self, message):
         """
@@ -625,10 +655,18 @@ class BoolFieldWidget(FieldWidget):
 
         self.setWidget(widget)
 
+    def setText(self, text):
+        """
+        Overriding this method to add support for the inline key.
+
+        :type text: str
+        """
         inline = self.data().get("inline")
         if inline:
             self.label().setText("")
-            self.widget().setText(self.title())
+            self.widget().setText(text)
+        else:
+            super(BoolFieldWidget, self).setText(text)
 
     def value(self):
         """
@@ -698,6 +736,67 @@ class RangeFieldWidget(FieldWidget):
         super(RangeFieldWidget, self).setValue(value)
 
 
+class StringDoubleFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(StringDoubleFieldWidget, self).__init__(*args, **kwargs)
+
+        widget = QtWidgets.QFrame(self)
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(3)
+        widget.setLayout(layout)
+
+        self._widget1 = QtWidgets.QLineEdit(self)
+        self._widget1.textChanged.connect(self.emitValueChanged)
+        widget.layout().addWidget(self._widget1)
+
+        self._widget2 = QtWidgets.QLineEdit(self)
+        self._widget2.textChanged.connect(self.emitValueChanged)
+        widget.layout().addWidget(self._widget2)
+
+        self.setWidget(widget)
+
+    def setPlaceholder(self, value):
+        """
+        Overriding this method to add support for passing a lists or tuple
+
+        :type value: str or list or tuple
+        """
+        if isinstance(value, list) or isinstance(value, tuple):
+            if len(value) >= 1:
+                self._widget1.setPlaceholderText(value[0])
+
+            if len(value) >= 2:
+                self._widget2.setPlaceholderText(value[1])
+        else:
+            self._widget1.setPlaceholderText(str(value))
+
+    def value(self):
+        """
+        Get the current string double value.
+
+        :rtype: (str, str)
+        """
+        value1 = self._widget1.text() or ""
+        value2 = self._widget2.text() or ""
+
+        return value1, value2
+
+    def setValue(self, value):
+        """
+        Set the current string double value.
+
+        :type value: (str, str)
+        """
+        value1, value2 = value[0], value[1]
+
+        self._widget1.setText(str(value1))
+        self._widget2.setText(str(value2))
+
+        super(StringDoubleFieldWidget, self).setValue(value)
+
+
 class EnumFieldWidget(FieldWidget):
 
     def __init__(self, *args, **kwargs):
@@ -756,6 +855,78 @@ class EnumFieldWidget(FieldWidget):
         """
         self.widget().clear()
         self.widget().addItems(items)
+
+
+class ButtonGroupFieldWidget(FieldWidget):
+    """A simple button group field."""
+
+    def __init__(self, *args, **kwargs):
+        super(ButtonGroupFieldWidget, self).__init__(*args, **kwargs)
+
+        self._value = ""
+        self._buttons = {}
+
+        items = self.data().get('items')
+
+        widget = QtWidgets.QFrame()
+        layout = QtWidgets.QHBoxLayout(widget)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        widget.setLayout(layout)
+
+        i = 0
+        for item in items:
+            i += 1
+
+            button = QtWidgets.QPushButton(toTitle(item), self)
+            button.setCheckable(True)
+
+            callback = functools.partial(self.setValue, item)
+            button.clicked.connect(callback)
+
+            self._buttons[item] = button
+
+            if i == 1:
+                button.setProperty('first', True)
+
+            if i == len(items):
+                button.setProperty('last', True)
+
+            widget.layout().addWidget(button)
+
+        self.setWidget(widget)
+
+    def setItems(self, items):
+        """Overriding this method to avoid the not implemented error."""
+        pass
+
+    def setValue(self, value):
+        """
+        Set the current value.
+
+        :type value: str
+        """
+        self._value = value
+
+        self.blockSignals(True)
+
+        for button in self._buttons.values():
+            button.setChecked(False)
+
+        if value in self._buttons:
+            self._buttons[value].setChecked(True)
+
+        self.blockSignals(False)
+
+        super(ButtonGroupFieldWidget, self).setValue(value)
+
+    def value(self):
+        """
+        Get the current value.
+
+        :rtype: str
+        """
+        return self._value
 
 
 class SeparatorFieldWidget(FieldWidget):

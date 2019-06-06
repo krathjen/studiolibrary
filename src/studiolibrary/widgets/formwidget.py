@@ -40,8 +40,10 @@ FIELD_WIDGET_REGISTRY = {
     "range": fieldwidgets.RangeFieldWidget,
     "color": fieldwidgets.ColorFieldWidget,
     "string": fieldwidgets.StringFieldWidget,
+    "stringDouble": fieldwidgets.StringDoubleFieldWidget,
     "slider": fieldwidgets.SliderFieldWidget,
-    "separator": fieldwidgets.SeparatorFieldWidget
+    "separator": fieldwidgets.SeparatorFieldWidget,
+    "buttonGroup": fieldwidgets.ButtonGroupFieldWidget,
 }
 
 
