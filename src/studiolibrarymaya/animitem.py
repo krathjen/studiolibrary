@@ -105,6 +105,7 @@ class AnimItem(baseitem.BaseItem):
             {
                 "name": "connect",
                 "type": "bool",
+                "inline": True,
                 "default": False,
                 "persistent": True,
                 "label": {"name": ""}
@@ -112,6 +113,7 @@ class AnimItem(baseitem.BaseItem):
             {
                 "name": "currentTime",
                 "type": "bool",
+                "inline": True,
                 "default": True,
                 "persistent": True,
                 "label": {"name": ""}
