@@ -55,6 +55,10 @@ class MenuBarWidget(QtWidgets.QToolBar):
         :rtype: None 
         """
         self._dpi = dpi
+        if self.isExpanded():
+            self.expand()
+        else:
+            self.collapse()
 
     def mousePressEvent(self, *args):
         if not self.isExpanded():

@@ -83,16 +83,18 @@ class StyleSheet(object):
             for key in keys:
                 data = data.replace(key, options[key])
 
-        reDpi = re.compile("[0-9]+[*]DPI")
+        reDpi = re.compile("[0-9]+px")
         newData = []
 
         for line in data.split("\n"):
             dpi_ = reDpi.search(line)
 
             if dpi_:
-                new = dpi_.group().replace("DPI", str(dpi))
-                val = int(eval(new))
-                line = line.replace(dpi_.group(), str(val))
+                new = dpi_.group().replace("px", "")
+                val = int(new)
+                if val > 0:
+                    val = int(val * dpi)
+                line = line.replace(dpi_.group(), str(val) + "px")
 
             newData.append(line)
 

@@ -93,8 +93,6 @@ class LibraryWindow(QtWidgets.QWidget):
 
     # Still in development
     DPI_ENABLED = False
-    DPI_MIN_VALUE = 80
-    DPI_MAX_VALUE = 250
 
     ICON_COLOR = QtGui.QColor(255, 255, 255)
     ICON_BADGE_COLOR = QtGui.QColor(230, 230, 0)
@@ -1082,6 +1080,13 @@ class LibraryWindow(QtWidgets.QWidget):
                 }
             )
 
+        scaleFactor = kwargs.get("scaleFactor")
+        scaleFactorMap = {"Small": 1.0, "Large": 1.5}
+        value = scaleFactorMap.get(scaleFactor, 1.0)
+
+        if value != self.dpi():
+            self.setDpi(value)
+
         return fields
 
     def settingsAccepted(self, **kwargs):
@@ -1139,12 +1144,22 @@ class LibraryWindow(QtWidgets.QWidget):
             "accepted": self.settingsAccepted,
         }
 
-        widget = studiolibrary.widgets.FormDialog(form=form)
+        if self.DPI_ENABLED:
+            form["schema"].append(
+                {
+                    "name": "scaleFactor",
+                    "type": "buttonGroup",
+                    "title": "Scale Factor (DPI)",
+                    "value": 'Small',
+                    "items": [
+                        "Small",
+                        "Large",
+                    ]
+                },
+            )
 
-        widget.setMinimumWidth(300)
-        widget.setMinimumHeight(300)
-        widget.setMaximumWidth(400)
-        widget.setMaximumHeight(400)
+        widget = studiolibrary.widgets.FormDialog(form=form)
+        widget.setObjectName("settingsDialog")
         widget.acceptButton().setText("Save")
 
         self._lightbox = studiolibrary.widgets.Lightbox(self)
@@ -1169,15 +1184,6 @@ class LibraryWindow(QtWidgets.QWidget):
             action.triggered.connect(self.showSettingDialog)
 
         menu.addSeparator()
-
-        if self.DPI_ENABLED:
-            action = studiolibrary.widgets.SliderAction("Dpi", menu)
-            dpi = self.dpi() * 100.0
-            action.slider().setRange(self.DPI_MIN_VALUE, self.DPI_MAX_VALUE)
-            action.slider().setValue(dpi)
-            action.valueChanged.connect(self._dpiSliderChanged)
-            menu.addAction(action)
-            menu.addSeparator()
 
         librariesMenu = studiolibrary.widgets.LibrariesMenu(libraryWindow=self)
         menu.addMenu(librariesMenu)
@@ -2087,15 +2093,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self.showToastMessage("DPI: {0}".format(int(dpi * 100)))
 
         self.reloadStyleSheet()
-
-    def _dpiSliderChanged(self, value):
-        """
-        Triggered the dpi action changes value.
-
-        :rtype: float
-        """
-        dpi = value / 100.0
-        self.setDpi(dpi)
 
     def iconColor(self):
         """

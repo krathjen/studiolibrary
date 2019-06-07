@@ -23,7 +23,7 @@ QLineEdit, QPushButton, QToolBar, QToolButton, QTabBar, QTabBar::tab {
 MenuBarWidget, QToolBar, QToolButton  {
 	color: ACCENT_FOREGROUND_COLOR;
 	background-color: ACCENT_COLOR;
-	spacing:4*DPIpx;
+	spacing:4px;
 }
 
 QToolTip {
@@ -67,7 +67,7 @@ QPushButton#updateButton {
 }
 
 QPushButton#acceptButton {
-	font: bold 12*DPIpx;
+	font: bold 12px;
 	color: ACCENT_FOREGROUND_COLOR;
     background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 230);
 }
@@ -83,16 +83,16 @@ QPushButton#acceptButton:hover {
 */
 
 QSlider::groove:horizontal {
-    height: 3*DPIpx; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    height: 3px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
     background: rgb(0, 0, 0, 0);
 }
 
 QSlider::handle:horizontal {
 	background: ACCENT_COLOR;
-    width: 8*DPIpx;
-    height: 2*DPIpx;
-    margin: -4*DPIpx 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
-    border-radius: 2*DPIpx;
+    width: 8px;
+    height: 2px;
+    margin: -4px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 2px;
  }
 
 QSlider::add-page:horizontal {
@@ -113,11 +113,11 @@ QSlider::sub-page:horizontal {
 */
 
 QScrollBar:vertical {
-	width: 10*DPIpx;
+	width: 10px;
 }
 
 QScrollBar:horizontal {
-	height: 10*DPIpx;
+	height: 10px;
 }
 
 QScrollBar:vertical,
@@ -199,11 +199,11 @@ QListView::item, QTreeView::item {
 }
 
 QHeaderView::section {
-	font: 16*DPIpx;
-	height: 24*DPIpx;
+	font: 16px;
+	height: 24px;
 	border: 0px;
-	border-right: 2*DPIpx solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
-	padding: 5*DPIpx;
+	border-right: 2px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
+	padding: 5px;
 	background-color: BACKGROUND_COLOR;
 }
 
@@ -214,7 +214,7 @@ QHeaderView::section {
 */
 
 QTreeView {
-	font: 13*DPIpx;
+	font: 13px;
 	color: FOREGROUND_COLOR;
 }
 
@@ -224,7 +224,7 @@ QTreeView, QListView, QPushButton {
 }
 
 QTreeView::item, QTreeView::branch {
-	height: 24*DPIpx;
+	height: 24px;
 	show-decoration-selected: 1; /* make the selection span the entire width of the view */
 	background-color: BACKGROUND_COLOR;
 }
@@ -387,7 +387,7 @@ QTabBar::tab:first:selected {
 
 
 QMenu, QMenu QWidget {
-	font: 13*DPIpx;
+	font: 13px;
 	/*color: rgb(255, 255, 255, 180);*/
 	/*background-color: BACKGROUND_COLOR;*/
 }
@@ -429,7 +429,7 @@ QMenu::item:selected {
  --------------------------------------------------------------------------
 */
 SearchWidget, SearchWidget QLabel {
-	font: 22*DPIpx;
+	font: 22px;
 	height: 35px;
 	padding: 0 2px;
 	color: ACCENT_FOREGROUND_COLOR;
@@ -544,7 +544,7 @@ NavigationFrame {
 }
 
 ToastWidget {
-	font: bold 25*DPIpx;
+	font: bold 25px;
 	border-radius: 5px;
 	color: rgb(250, 250, 250);
 	background-color: rgb(0, 0, 0, 200);
@@ -618,7 +618,9 @@ StatusWidget {
     border-top: 1px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 10);
 }
 
+
 StatusWidget QLabel {
+    font-size: 11px;
     background-color: transparent;
 }
 
@@ -677,14 +679,21 @@ ProgressBar QProgressBar::chunk {
  /* CUSTOM MESSAGE BOX */
  /*--------------------------------------------------------------------------*/
 
+MessageBox {
+    min-width: 320px;
+    min-height: 220px;
+}
+
 #messageBoxHeaderLabel {
     font: 16px;
     color: rgb(255,255,255);
 }
 
 #messageBoxHeaderFrame {
+    height: 46px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    background-color: rgb(0,0,0,0);
 }
 
 #messageBox {
@@ -696,7 +705,21 @@ ProgressBar QProgressBar::chunk {
     background-color: rgb(255,255,255,0);
 }
 
+#messageBox #messageBoxTitle QLabel {
+    font: 16px;
+}
+
+#messageBox #messageBoxIcon {
+    width: 32px;
+    height: 32px;
+}
+
+#messageBox #messageBoxBody QLabel {
+    font: 11px;
+}
+
 #messageBox #messageBoxInputEdit {
+    min-height: 32px;
     background-color: rgb(240, 240, 240, 180);
 }
 
@@ -705,7 +728,7 @@ ProgressBar QProgressBar::chunk {
 }
 
 #messageBox QPushButton {
-    font: 12*DPIpx;
+    font: 12px;
     color: rgb(250, 250, 250, 250);
     min-width: 92px;
     min-height: 32px;
@@ -739,9 +762,15 @@ ProgressBar QProgressBar::chunk {
 }
 
 #messageBoxFrame {
-    background-color: rgb(BACKGROUND_COLOR_R,BACKGROUND_COLOR_G,BACKGROUND_COLOR_B,210);
+    background-color: rgb(0,0,0,100);
 }
 
+#settingsDialog {
+    min-width: 300px;
+    min-height: 300px;
+    max-width: 400px;
+    max-height: 400px;
+}
 
 #filterByAction QWidget {
     background-color: transparent;
@@ -910,6 +939,12 @@ BaseLoadWidget #titleLabel {
     font-size: 14px;
 }
 
+BaseSaveWidget QWidget,
+BaseLoadWidget QWidget {
+    font-size: 12px;
+}
+
+
 BaseLoadWidget QLineEdit,
 BaseLoadWidget QTextEdit,
 BaseLoadWidget QComboBox,
@@ -923,12 +958,20 @@ BaseSaveWidget #thumbnailButton {
 
 BaseSaveWidget #acceptButton,
 BaseLoadWidget #acceptButton {
+    min-width: 80px;
+    max-height: 35px;
+    max-width: 125px;
+    min-height: 35px;
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
 }
 
 BaseSaveWidget #selectionSetButton,
 BaseLoadWidget #selectionSetButton {
+    min-width: 35px;
+    max-width: 35px;
+    min-height: 35px;
+    max-height: 35px;
     margin-left: 1px;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
@@ -943,6 +986,10 @@ FormDialog {
 FormDialog #title {
     padding: 4px;
     font-size: 18px;
+}
+
+FieldWidget QWidget {
+    font-size: 12px;
 }
 
 FormDialog FieldWidget QLabel {
@@ -1019,16 +1066,15 @@ ButtonGroupFieldWidget QPushButton {
     margin: 1px;
     text-align: center;
     color: FOREGROUND_COLOR;
+    background-color: rgb(0, 0, 0, 30);
 }
 
 ButtonGroupFieldWidget QPushButton[first=true] {
-    background-color: rgb(0, 0, 0, 30);
     border-top-left-radius: 2px;
     border-bottom-left-radius: 2px;
 }
 
 ButtonGroupFieldWidget QPushButton[last=true] {
-    background-color: rgb(0, 0, 0, 30);
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
 }

@@ -348,8 +348,11 @@ class MessageBox(QtWidgets.QDialog):
         self._clickedButton = None
         self._clickedStandardButton = None
 
-        self.setMinimumWidth(width or 320)
-        self.setMinimumHeight(height or 220)
+        if width:
+            self.setMinimumWidth(width)
+
+        if height:
+            self.setMinimumHeight(height)
 
         parent = self.parent()
 
@@ -361,16 +364,13 @@ class MessageBox(QtWidgets.QDialog):
             self.setParent(self._frame)
 
         self._header = QtWidgets.QFrame(self)
-        self._header.setFixedHeight(46)
         self._header.setObjectName("messageBoxHeaderFrame")
-        self._header.setStyleSheet("background-color: rgb(0,0,0,0);")
         self._header.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                    QtWidgets.QSizePolicy.Fixed)
 
         self._icon = QtWidgets.QLabel(self._header)
+        self._icon.setObjectName("messageBoxIcon")
         self._icon.hide()
-        self._icon.setFixedWidth(32)
-        self._icon.setFixedHeight(32)
         self._icon.setScaledContents(True)
         self._icon.setAlignment(QtCore.Qt.AlignTop)
         self._icon.setSizePolicy(QtWidgets.QSizePolicy.Preferred,
@@ -409,7 +409,6 @@ class MessageBox(QtWidgets.QDialog):
         if enableInputEdit:
             self._inputEdit = QtWidgets.QLineEdit(self._body)
             self._inputEdit.setObjectName("messageBoxInputEdit")
-            self._inputEdit.setMinimumHeight(32)
             self._inputEdit.setFocus()
 
             bodyLayout.addStretch(1)
