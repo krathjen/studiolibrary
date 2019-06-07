@@ -128,8 +128,29 @@ class PoseItem(baseitem.BaseItem):
                 "name": "mirror",
                 "toolTip": mirrorTip,
                 "enabled": mirrorTable is not None,
+            },
+            {
+                "name": "searchAndReplace",
+                "visible": values.get("searchAndReplaceEnabled")
             }
         ]
+
+    def switchSearchAndReplace(self):
+        """
+        Switch the values of the search and replace field.
+
+        :rtype: (str, str)
+        """
+        values = self.currentLoadValue("searchAndReplace")
+        return values[1], values[0]
+
+    def clearSearchAndReplace(self):
+        """
+        Clear the search and replace field.
+
+        :rtype: (str, str)
+        """
+        return '', ''
 
     def loadSchema(self):
         """
@@ -141,14 +162,42 @@ class PoseItem(baseitem.BaseItem):
             {
                 "name": "key",
                 "type": "bool",
+                "inline": True,
                 "default": False,
                 "persistent": True,
             },
             {
                 "name": "mirror",
                 "type": "bool",
+                "inline": True,
                 "default": False,
                 "persistent": True,
+            },
+            {
+                "name": "searchAndReplaceEnabled",
+                "title": "Search and Replace",
+                "type": "bool",
+                "inline": True,
+                "default": False,
+                "persistent": True,
+            },
+            {
+                "name": "searchAndReplace",
+                "title": "",
+                "type": "stringDouble",
+                "default": ("", ""),
+                "placeholder": ("search", "replace"),
+                "persistent": True,
+                "actions": [
+                    {
+                        "name": "Switch",
+                        "callback": self.switchSearchAndReplace
+                    },
+                    {
+                        "name": "Clear",
+                        "callback": self.clearSearchAndReplace
+                    },
+                ]
             },
         ]
 
@@ -245,6 +294,10 @@ class PoseItem(baseitem.BaseItem):
             self._options['mirrorTable'] = self.mirrorTable()
             self._options['objects'] = maya.cmds.ls(selection=True) or []
 
+        searchAndReplace = None
+        if self.currentLoadValue("searchAndReplaceEnabled"):
+            searchAndReplace = self.currentLoadValue("searchAndReplace")
+
         try:
             self.load(
                 blend=blend,
@@ -252,6 +305,7 @@ class PoseItem(baseitem.BaseItem):
                 batchMode=batchMode,
                 clearSelection=clearSelection,
                 showBlendMessage=showBlendMessage,
+                searchAndReplace=searchAndReplace,
                 **self._options
             )
         except Exception as error:
@@ -271,6 +325,7 @@ class PoseItem(baseitem.BaseItem):
         mirrorTable=None,
         clearSelection=False,
         showBlendMessage=False,
+        searchAndReplace=None,
     ):
         """
         Load the pose item to the given objects or namespaces.
@@ -278,13 +333,15 @@ class PoseItem(baseitem.BaseItem):
         :type objects: list[str]
         :type blend: float
         :type key: bool
-        :type namespaces: list[str] | None
+        :type namespaces: list[str] or None
         :type refresh: bool
+        :type attrs: list[str] or None
         :type mirror: bool or None
         :type batchMode: bool
         :type showBlendMessage: bool
         :type clearSelection: bool
         :type mirrorTable: mutils.MirrorTable
+        :type searchAndReplace: (str, str) or None
         """
         logger.debug(u'Loading: {0}'.format(self.path()))
 
@@ -310,6 +367,7 @@ class PoseItem(baseitem.BaseItem):
                 batchMode=batchMode,
                 mirrorTable=mirrorTable,
                 clearSelection=clearSelection,
+                searchAndReplace=searchAndReplace
             )
 
         except Exception:

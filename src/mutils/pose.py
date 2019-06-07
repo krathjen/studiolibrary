@@ -351,8 +351,7 @@ class Pose(mutils.TransferObject):
             onlyConnected=False,
             clearSelection=False,
             ignoreConnected=False,
-            search=None,
-            replace=None,
+            searchAndReplace=None,
     ):
         """
         Load the pose to the given objects or namespaces.
@@ -370,8 +369,7 @@ class Pose(mutils.TransferObject):
         :type ignoreConnected: bool
         :type onlyConnected: bool
         :type clearSelection: bool
-        :type search: str or None
-        :type replace: str or None
+        :type searchAndReplace: (str, str) or None
         """
         if mirror and not mirrorTable:
             logger.warning("Cannot mirror pose without a mirror table!")
@@ -389,8 +387,7 @@ class Pose(mutils.TransferObject):
             mirrorTable=mirrorTable,
             onlyConnected=onlyConnected,
             ignoreConnected=ignoreConnected,
-            search=search,
-            replace=replace,
+            searchAndReplace=searchAndReplace,
         )
 
         self.beforeLoad(clearSelection=clearSelection)
@@ -415,10 +412,9 @@ class Pose(mutils.TransferObject):
             ignoreConnected=False,
             onlyConnected=False,
             mirrorTable=None,
-            search=None,
-            replace=None,
             batchMode=False,
-            clearCache=True
+            clearCache=True,
+            searchAndReplace=None,
     ):
         """
         Update the pose cache.
@@ -431,8 +427,7 @@ class Pose(mutils.TransferObject):
         :type clearCache: bool
         :type batchMode: bool
         :type mirrorTable: mutils.MirrorTable
-        :type search: str or None
-        :type replace: str or None
+        :type searchAndReplace: (str, str) or None
         """
         if clearCache or not batchMode or not self._mtime:
             self._mtime = self.mtime()
@@ -445,6 +440,7 @@ class Pose(mutils.TransferObject):
             str(attrs) + \
             str(namespaces) + \
             str(ignoreConnected) + \
+            str(searchAndReplace) + \
             str(maya.cmds.currentTime(query=True))
 
         if self._cacheKey != cacheKey or clearCache:
@@ -460,6 +456,12 @@ class Pose(mutils.TransferObject):
 
             if mirrorTable:
                 self.setMirrorTable(mirrorTable)
+
+            search = None
+            replace = None
+            if searchAndReplace:
+                search = searchAndReplace[0]
+                replace = searchAndReplace[1]
 
             matches = mutils.matchNames(
                 srcObjects,
