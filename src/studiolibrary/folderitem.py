@@ -112,15 +112,15 @@ class FolderItem(studiolibrary.LibraryItem):
     def createItemData(self):
         """Overriding this method to force the item type to Folder"""
         itemData = super(FolderItem, self).createItemData()
-        itemData['type'] = "Folder"
+        itemData["type"] = "Folder"
         return itemData
 
     def itemData(self):
         """Overriding this method to set the trash icon"""
         data = super(FolderItem, self).itemData()
 
-        if data.get('path').endswith('Trash'):
-            data['iconPath'] = self.TrashIconPath
+        if data.get("path", "").endswith("Trash"):
+            data["iconPath"] = self.TrashIconPath
 
         return data
 
