@@ -27,9 +27,8 @@ __encoding__ = sys.getfilesystemencoding()
 PATH = unicode(os.path.abspath(__file__), __encoding__)
 DIRNAME = os.path.dirname(PATH).replace('\\', '/')
 RESOURCE_DIRNAME = DIRNAME + "/resource"
-
-DEFAULT_FILE_TYPE = "mayaBinary"
 SETTINGS_PATH = studiolibrary.localPath("LibraryItem.json")
+
 
 _resource = None
 _settings = None
@@ -84,22 +83,6 @@ def settings():
     _settings.setdefault("infoToggleBoxChecked", True)
     _settings.setdefault("optionsToggleBoxChecked", True)
     _settings.setdefault("namespaceToggleBoxChecked", True)
-
-    # Anim options
-    _settings.setdefault('byFrame', 1)
-    _settings.setdefault('fileType', DEFAULT_FILE_TYPE)
-    _settings.setdefault('currentTime', False)
-    _settings.setdefault('connectOption', False)
-    _settings.setdefault('showHelpImage', False)
-    _settings.setdefault('pasteOption', "replace")
-
-    # Pose options
-    _settings.setdefault("keyEnabled", False)
-    _settings.setdefault("mirrorEnabled", False)
-
-    # Mirror options
-    _settings.setdefault("mirrorOption", mutils.MirrorOption.Swap)
-    _settings.setdefault("mirrorAnimation", True)
 
     return _settings
 
