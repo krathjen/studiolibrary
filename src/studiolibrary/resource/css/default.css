@@ -332,16 +332,26 @@ QComboBox QAbstractItemView:item {
 	selection-background-color: ACCENT_COLOR;
 }
 
-QComboBox, QLineEdit {
+QComboBox,
+QLineEdit {
 	border: 0px;
 	border-bottom: 2px solid rgb(0,0,0,0);
 }
 
-QComboBox:focus, QLineEdit:focus {
+QComboBox:hover,
+QLineEdit:hover {
+	border: 0px;
+	background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 35);
+}
+
+QComboBox:focus,
+QLineEdit:focus {
 	border: 0px;
 	border-bottom: 2px solid ACCENT_COLOR;
 	background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 30);
 }
+
+
 
 QComboBox QAbstractItemView {
 	selection-background-color: ACCENT_COLOR;
@@ -927,6 +937,25 @@ FormWidget #optionsFrame {
 
 FieldWidget QComboBox {
     border: 1px solid transparent;
+}
+
+
+BaseLoadWidget TitleWidget {
+    padding: 2px;
+    padding-left: 5px;
+    text-align: left;
+    border-radius: 2px;
+    min-height: 18px;
+    max-height: 18px;
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 10);
+}
+
+BaseLoadWidget TitleWidget:checked {
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
+}
+
+BaseLoadWidget TitleWidget:hover {
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 30);
 }
 
 BaseSaveWidget #fieldWidget {

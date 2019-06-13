@@ -42,6 +42,61 @@ class NamespaceOption:
     FromSelection = "selection"
 
 
+class TitleWidget(QtWidgets.QPushButton):
+
+    def __init__(self, title, widget, *args, **kwargs):
+        super(TitleWidget, self).__init__(*args, **kwargs)
+
+        self._widget = None
+
+        self.setText(title)
+        self.setWidget(widget)
+        self.setCheckable(True)
+
+        self.toggled.connect(self._toggle)
+        self.loadSettings()
+
+    def _toggle(self, visible):
+        """
+        Triggered when the user clicks the title.
+
+        :type visible: bool
+        """
+        self.saveSettings()
+        self.setChecked(visible)
+
+    def setWidget(self, widget):
+        """
+        Set the widget to hide when the user clicks the title.
+
+        :type widget: QWidgets.QWidget
+        """
+        self._widget = widget
+
+    def setChecked(self, checked):
+        """
+        Overriding this method to hide the widget when the state changes.
+
+        :type checked: bool
+        """
+        super(TitleWidget, self).setChecked(checked)
+        if self._widget:
+            self._widget.setVisible(checked)
+
+    def saveSettings(self):
+        """Save the state to disc."""
+        data = {
+            self.text().lower() + "ToggleBoxChecked": self.isChecked(),
+        }
+        studiolibrarymaya.saveSettings(data)
+
+    def loadSettings(self):
+        """Load the state to disc."""
+        data = studiolibrarymaya.settings()
+        checked = data.get(self.text().lower() + "ToggleBoxChecked", True)
+        self.setChecked(checked)
+
+
 class BaseLoadWidget(QtWidgets.QWidget):
     """Base widget for creating and previewing transfer items."""
 
@@ -88,16 +143,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self.ui.namespaceComboBox.activated[str].connect(self._namespaceEditChanged)
         self.ui.namespaceComboBox.editTextChanged[str].connect(self._namespaceEditChanged)
         self.ui.namespaceComboBox.currentIndexChanged[str].connect(self._namespaceEditChanged)
-
-        self.ui.iconToggleBoxButton.clicked.connect(self.saveSettings)
-        self.ui.infoToggleBoxButton.clicked.connect(self.saveSettings)
-        self.ui.optionsToggleBoxButton.clicked.connect(self.saveSettings)
-        self.ui.namespaceToggleBoxButton.clicked.connect(self.saveSettings)
-
-        self.ui.iconToggleBoxButton.toggled[bool].connect(self.ui.iconToggleBoxFrame.setVisible)
-        self.ui.infoToggleBoxButton.toggled[bool].connect(self.ui.infoToggleBoxFrame.setVisible)
-        self.ui.optionsToggleBoxButton.toggled[bool].connect(self.ui.optionsToggleBoxFrame.setVisible)
-        self.ui.namespaceToggleBoxButton.toggled[bool].connect(self.ui.namespaceToggleBoxFrame.setVisible)
 
     def createSequenceWidget(self):
         """
@@ -393,21 +438,17 @@ class BaseLoadWidget(QtWidgets.QWidget):
         namespaceOption = settings.get("namespaceOption", NamespaceOption.FromFile)
         self.setNamespaceOption(namespaceOption)
 
-        toggleBoxChecked = settings.get("iconToggleBoxChecked", True)
-        self.ui.iconToggleBoxFrame.setVisible(toggleBoxChecked)
-        self.ui.iconToggleBoxButton.setChecked(toggleBoxChecked)
+        infoTitleWidget = TitleWidget("Info", self.ui.infoFrame)
+        self.ui.infoTitleFrame.layout().addWidget(infoTitleWidget)
 
-        toggleBoxChecked = settings.get("infoToggleBoxChecked", True)
-        self.ui.infoToggleBoxFrame.setVisible(toggleBoxChecked)
-        self.ui.infoToggleBoxButton.setChecked(toggleBoxChecked)
+        iconTitleWidget = TitleWidget("Icon", self.ui.iconFrame)
+        self.ui.iconTitleFrame.layout().addWidget(iconTitleWidget)
 
-        toggleBoxChecked = settings.get("optionsToggleBoxChecked", True)
-        self.ui.optionsToggleBoxFrame.setVisible(toggleBoxChecked)
-        self.ui.optionsToggleBoxButton.setChecked(toggleBoxChecked)
+        optionsTitleWidget = TitleWidget("Options", self.ui.optionsFrame)
+        self.ui.optionsTitleFrame.layout().addWidget(optionsTitleWidget)
 
-        toggleBoxChecked = settings.get("namespaceToggleBoxChecked", True)
-        self.ui.namespaceToggleBoxFrame.setVisible(toggleBoxChecked)
-        self.ui.namespaceToggleBoxButton.setChecked(toggleBoxChecked)
+        namespaceTitleWidget = TitleWidget("Namespace", self.ui.namespaceFrame)
+        self.ui.namespaceTitleFrame.layout().addWidget(namespaceTitleWidget)
 
     def settings(self):
         """
@@ -419,11 +460,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         settings["namespaces"] = self.namespaces()
         settings["namespaceOption"] = self.namespaceOption()
-
-        settings["iconToggleBoxChecked"] = self.ui.iconToggleBoxButton.isChecked()
-        settings["infoToggleBoxChecked"] = self.ui.infoToggleBoxButton.isChecked()
-        settings["optionsToggleBoxChecked"] = self.ui.optionsToggleBoxButton.isChecked()
-        settings["namespaceToggleBoxChecked"] = self.ui.namespaceToggleBoxButton.isChecked()
 
         return settings
 

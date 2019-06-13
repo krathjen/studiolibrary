@@ -79,11 +79,6 @@ def settings():
     _settings.setdefault("namespaces", [])
     _settings.setdefault("namespaceOption", "file")
 
-    _settings.setdefault("iconToggleBoxChecked", True)
-    _settings.setdefault("infoToggleBoxChecked", True)
-    _settings.setdefault("optionsToggleBoxChecked", True)
-    _settings.setdefault("namespaceToggleBoxChecked", True)
-
     return _settings
 
 
