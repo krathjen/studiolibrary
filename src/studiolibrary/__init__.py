@@ -14,7 +14,7 @@ import os
 import json
 
 
-__version__ = "2.5.0.b5"
+__version__ = "2.5.0.b6"
 
 _config = None
 _resource = None
