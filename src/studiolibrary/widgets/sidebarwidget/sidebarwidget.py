@@ -81,7 +81,11 @@ def findRoot(paths, separator=None):
     :type separator: str
     :rtype: str 
     """
-    path = paths[0]  # Only need one from the list to verify the common path.
+    if paths:
+        path = paths[0]  # Only need one from the list to verify the common path.
+    else:
+        path = ""
+
     result = None
     separator = separator or DEFAULT_SEPARATOR
 
