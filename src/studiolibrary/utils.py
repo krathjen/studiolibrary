@@ -89,7 +89,6 @@ __all__ = [
     "itemsFromUrls",
     "findItems",
     "findItemsInFolders",
-    "SHOW_IN_FOLDER_CMD",
 ]
 
 
@@ -97,9 +96,6 @@ logger = logging.getLogger(__name__)
 
 
 _itemClasses = collections.OrderedDict()
-
-
-SHOW_IN_FOLDER_CMD = None
 
 
 class PathError(IOError):
