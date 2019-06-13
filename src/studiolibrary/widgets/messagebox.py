@@ -63,7 +63,6 @@ def createMessageBox(
 
     if headerIcon:
         p = studioqt.resource.pixmap(headerIcon)
-        print(p)
         mb.setPixmap(p)
 
     try:
