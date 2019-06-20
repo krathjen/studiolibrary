@@ -13,6 +13,7 @@ Please feel free to improve this page as needed. Thank you.
 * [How to create a local and shared library](#k25lyqw)
 * [How to create more than one library instance](#ou3nb4z)
 * [How to create a library for several projects](#lvx2med)
+* [How to set a library for several projects](#h2rz6Km)
 * [How to debug "No object match when loading data"](#zi20df5)
 * [How to fix a scene that has unknown nodes](#ufj2oi4)
 * [How to lock and unlock specific folders](#we7zm9m)
@@ -127,6 +128,24 @@ studiolibrary.main(name=name, path=path)
 
 <br>
 
+### <a name="h2rz6Km"></a> How to set a library for several projects (version 2.5.0.b7+)
+
+```python
+import studiolibrary
+
+libraries = [
+    {"name":"Project1", "path":r"D:\Library Data", "default":True, "theme":{"accentColor":"rgb(0,200,100)"}},
+    {"name":"Project2", "path":r"D:\Library Data2"},
+    {"name":"Temp", "path":r"C:\temp"},
+]
+
+studiolibrary.setLibraries(libraries)
+studiolibrary.main()
+```
+
+[Top](#top)
+
+<br>
 
 ### <a name="zi20df5"></a> How to debug "No object match when loading data": (version 1.3.9+)
 
@@ -190,7 +209,6 @@ studiolibrary.main(name=name, path=path, superusers=superusers, unlockFolder="Us
 
 
 <br>
-
 
 ### <a name="qiot1k3"></a> How to install & run for Maya 2011-2015
 

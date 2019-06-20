@@ -33,6 +33,7 @@ class LibrariesMenu(QtWidgets.QMenu):
         self.setTitle('Libraries')
 
         libraries = studiolibrary.readSettings()
+        default = studiolibrary.defaultLibrary()
 
         for name in libraries:
 
@@ -45,7 +46,11 @@ class LibrariesMenu(QtWidgets.QMenu):
             if libraryWindow:
                 enabled = name != libraryWindow.name()
 
-            action = QtWidgets.QAction(name, self)
+            text = name
+            if name == default and name.lower() != "default":
+                text = name + " (default)"
+
+            action = QtWidgets.QAction(text, self)
             action.setEnabled(enabled)
             callback = partial(self.showLibrary, name, path, **kwargs)
             action.triggered.connect(callback)

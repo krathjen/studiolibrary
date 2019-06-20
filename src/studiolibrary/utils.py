@@ -46,6 +46,10 @@ __all__ = [
     "isMaya",
     "isLinux",
     "isWindows",
+    "addLibrary",
+    "setLibraries",
+    "removeLibrary",
+    "defaultLibrary",
     "read",
     "write",
     "update",
@@ -55,6 +59,7 @@ __all__ = [
     "replaceJson",
     "readSettings",
     "saveSettings",
+    "updateSettings",
     "settingsPath",
     "relPath",
     "absPath",
@@ -160,6 +165,88 @@ def reload():
             if mod in sys.modules and mod.startswith(name):
                 logger.info('Removing module: %s', mod)
                 del sys.modules[mod]
+
+
+def defaultLibrary():
+    """
+    Get the name of the default library.
+
+    :rtype: str
+    """
+    libraries = readSettings()
+
+    # Try to get the library that has been set to default
+    for name in libraries:
+        if libraries[name].get("default"):
+            return name
+
+    # Try to get the library named Default
+    if "Default" in libraries:
+        return "Default"
+
+    # Try to get a library
+    for name in libraries:
+        return name
+
+    # Otherwise just return the name "Default"
+    return "Default"
+
+
+def addLibrary(name, path, **settings):
+    """
+    Add a new library with the given name, path and settings.
+
+    :type name: str
+    :type path: path
+    :type settings: dict
+    """
+    libraries = readSettings()
+    libraries.setdefault(name, {})
+    libraries[name]["path"] = path
+
+    update(libraries[name], settings)
+
+    saveSettings(libraries)
+
+
+def removeLibrary(name):
+    """
+    Remove a library by name.
+
+    :type name: str
+    """
+    libraries = readSettings()
+    if name in libraries:
+        del libraries[name]
+    saveSettings(libraries)
+
+
+def setLibraries(libraries):
+    """
+    Remove existing libraries and set the new.
+
+    Example:
+        import studiolibrary
+
+        libraries = [
+            {"name":"test1", "path":r"D:\LibraryData", "default":True}},
+            {"name":"test2", "path":r"D:\LibraryData2"},
+            {"name":"Temp", "path":r"C:\temp"},
+        ]
+
+        studiolibrary.setLibraries(libraries)
+
+    :type libraries: list[dict]
+    """
+    for library in libraries:
+        addLibrary(**library)
+
+    old = readSettings().keys()
+    new = [library["name"] for library in libraries]
+
+    remove = set(old) - set(new)
+    for name in remove:
+        removeLibrary(name)
 
 
 def registerItem(cls):
@@ -786,6 +873,17 @@ def settingsPath():
     """
     formatString = studiolibrary.config().get('settingsPath')
     return studiolibrary.formatPath(formatString)
+
+
+def updateSettings(data):
+    """
+    Update the existing settings with the given data.
+
+    :type data: dict
+    """
+    settings = studiolibrary.readSettings()
+    update(settings, data)
+    studiolibrary.saveSettings(settings)
 
 
 def readSettings():

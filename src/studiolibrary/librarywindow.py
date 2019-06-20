@@ -166,7 +166,7 @@ class LibraryWindow(QtWidgets.QWidget):
         
         :rtype: LibraryWindow
         """
-        name = name or cls.DEFAULT_NAME
+        name = name or studiolibrary.defaultLibrary()
 
         libraryWindow = LibraryWindow._instances.get(name)
 
@@ -1914,13 +1914,9 @@ class LibraryWindow(QtWidgets.QWidget):
         :type settings: dict or None
         :rtype: None
         """
-        settings = settings or self.settings()
+        data = {self.name(): settings or self.settings()}
 
-        key = self.name()
-        data = studiolibrary.readSettings()
-        data[key] = settings
-
-        studiolibrary.saveSettings(data)
+        studiolibrary.updateSettings(data)
 
         self.showToastMessage("Saved")
 
