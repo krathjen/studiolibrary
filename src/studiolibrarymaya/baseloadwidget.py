@@ -42,19 +42,58 @@ class NamespaceOption:
     FromSelection = "selection"
 
 
-class TitleWidget(QtWidgets.QPushButton):
+class GroupBoxWidget(QtWidgets.QFrame):
 
     def __init__(self, title, widget, *args, **kwargs):
-        super(TitleWidget, self).__init__(*args, **kwargs)
+        super(GroupBoxWidget, self).__init__(*args, **kwargs)
 
         self._widget = None
 
-        self.setText(title)
-        self.setWidget(widget)
-        self.setCheckable(True)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        self.toggled.connect(self._toggle)
+        self.setLayout(layout)
+
+        self._titleWidget = QtWidgets.QPushButton(self)
+        self._titleWidget.setCheckable(True)
+        self._titleWidget.setText(title)
+        self._titleWidget.setObjectName("title")
+        self._titleWidget.toggled.connect(self._toggle)
+
+        self.layout().addWidget(self._titleWidget)
+
+        self._widgetFrame = QtWidgets.QFrame(self)
+        self._widgetFrame.setObjectName("frame")
+
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self._widgetFrame.setLayout(layout)
+
+        self.layout().addWidget(self._widgetFrame)
+
+        self.setWidget(widget)
         self.loadSettings()
+
+    def title(self):
+        """
+        Get the title for the group box.
+
+        :rtype: str
+        """
+        return self._titleWidget.text()
+
+    def setWidget(self, widget):
+        """
+        Set the widget to hide when the user clicks the title.
+
+        :type widget: QWidgets.QWidget
+        """
+        self._widget = widget
+        self._widget.setParent(self._widgetFrame)
+        self._widgetFrame.layout().addWidget(self._widget)
 
     def _toggle(self, visible):
         """
@@ -65,13 +104,13 @@ class TitleWidget(QtWidgets.QPushButton):
         self.saveSettings()
         self.setChecked(visible)
 
-    def setWidget(self, widget):
+    def isChecked(self):
         """
-        Set the widget to hide when the user clicks the title.
+        Check the checked state for the group box.
 
-        :type widget: QWidgets.QWidget
+        :rtype: bool
         """
-        self._widget = widget
+        return self._titleWidget.isChecked()
 
     def setChecked(self, checked):
         """
@@ -79,21 +118,21 @@ class TitleWidget(QtWidgets.QPushButton):
 
         :type checked: bool
         """
-        super(TitleWidget, self).setChecked(checked)
+        self._titleWidget.setChecked(checked)
         if self._widget:
             self._widget.setVisible(checked)
 
     def saveSettings(self):
         """Save the state to disc."""
         data = {
-            self.text().lower() + "ToggleBoxChecked": self.isChecked(),
+            self.title().lower() + "ToggleBoxChecked": self.isChecked(),
         }
         studiolibrarymaya.saveSettings(data)
 
     def loadSettings(self):
         """Load the state to disc."""
         data = studiolibrarymaya.settings()
-        checked = data.get(self.text().lower() + "ToggleBoxChecked", True)
+        checked = data.get(self.title().lower() + "ToggleBoxChecked", True)
         self.setChecked(checked)
 
 
@@ -438,16 +477,16 @@ class BaseLoadWidget(QtWidgets.QWidget):
         namespaceOption = settings.get("namespaceOption", NamespaceOption.FromFile)
         self.setNamespaceOption(namespaceOption)
 
-        infoTitleWidget = TitleWidget("Info", self.ui.infoFrame)
+        infoTitleWidget = GroupBoxWidget("Info", self.ui.infoFrame)
         self.ui.infoTitleFrame.layout().addWidget(infoTitleWidget)
 
-        iconTitleWidget = TitleWidget("Icon", self.ui.iconFrame)
+        iconTitleWidget = GroupBoxWidget("Icon", self.ui.iconFrame)
         self.ui.iconTitleFrame.layout().addWidget(iconTitleWidget)
 
-        optionsTitleWidget = TitleWidget("Options", self.ui.optionsFrame)
+        optionsTitleWidget = GroupBoxWidget("Options", self.ui.optionsFrame)
         self.ui.optionsTitleFrame.layout().addWidget(optionsTitleWidget)
 
-        namespaceTitleWidget = TitleWidget("Namespace", self.ui.namespaceFrame)
+        namespaceTitleWidget = GroupBoxWidget("Namespace", self.ui.namespaceFrame)
         self.ui.namespaceTitleFrame.layout().addWidget(namespaceTitleWidget)
 
     def settings(self):

@@ -940,7 +940,7 @@ FieldWidget QComboBox {
 }
 
 
-BaseLoadWidget TitleWidget {
+BaseLoadWidget GroupBoxWidget #title {
     padding: 2px;
     padding-left: 5px;
     text-align: left;
@@ -950,11 +950,11 @@ BaseLoadWidget TitleWidget {
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 10);
 }
 
-BaseLoadWidget TitleWidget:checked {
+BaseLoadWidget GroupBoxWidget #title:checked {
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
 }
 
-BaseLoadWidget TitleWidget:hover {
+BaseLoadWidget GroupBoxWidget #title:hover {
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 30);
 }
 
