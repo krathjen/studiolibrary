@@ -662,6 +662,7 @@ ProgressBar QLabel {
 ProgressBar QLabel {
     margin: 0px;
     padding: 1px;
+    min-width: 100px;
 }
 
 ProgressBar QProgressBar{
