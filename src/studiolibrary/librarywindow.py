@@ -91,8 +91,7 @@ class LibraryWindow(QtWidgets.QWidget):
     RECURSIVE_SEARCH_ENABLED = False
     TEMP_PATH_MENU_ENABLED = False
 
-    # Still in development
-    DPI_ENABLED = False
+    DPI_ENABLED = studiolibrary.config().get("scaleFactorEnabled", False)
 
     ICON_COLOR = QtGui.QColor(255, 255, 255)
     ICON_BADGE_COLOR = QtGui.QColor(230, 230, 0)
@@ -1145,12 +1144,14 @@ class LibraryWindow(QtWidgets.QWidget):
         }
 
         if self.DPI_ENABLED:
+            value = 'Large' if self.dpi() > 1 else "Small"
+
             form["schema"].append(
                 {
                     "name": "scaleFactor",
                     "type": "buttonGroup",
                     "title": "Scale Factor (DPI)",
-                    "value": 'Small',
+                    "value": value,
                     "items": [
                         "Small",
                         "Large",
@@ -2066,6 +2067,9 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :rtype: float
         """
+        if not self.DPI_ENABLED:
+            return 1.0
+
         return float(self._dpi)
 
     def setDpi(self, dpi):

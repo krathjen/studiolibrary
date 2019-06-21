@@ -40,6 +40,10 @@
   // The command used to show a path in the file explorer
   //"showInFolderCmd": "konqueror \"{path}\"&",
 
+  // Enables the scale factor option in the setting dialog
+  // This might be useful when using high-DPI devices like a 4k monitor
+  "scaleFactorEnabled": false,
+
   // Used for very basic analytics and does not send any personal information
   "analyticsEnabled": true,
   "analyticsId": "UA-50172384-1"
