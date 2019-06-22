@@ -1098,6 +1098,8 @@ class LibraryWindow(QtWidgets.QWidget):
         if path and path != self.path():
             self.setPath(path)
 
+        self.saveSettings()
+
     def showSettingDialog(self):
         """Show the settings dialog."""
         accentColor = self.theme().accentColor().toString()
