@@ -867,12 +867,11 @@ Form Widget
 
 /* --- Separator --- */
 SeparatorFieldWidget > #widget {
-    min-height: 18px;
-    max-height: 18px;
+    min-height: 1px;
+    max-height: 1px;
     font: bold;
-    margin: 2px;
-    background-color: transparent;
-    border-bottom: 1px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
+    margin: 4px;
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
 }
 
 TextFieldWidget QTextEdit {
@@ -898,13 +897,14 @@ FieldWidget[layout="vertical"] #label {
 }
 
 FieldWidget[layout="horizontal"] {
+    margin-top: 2px;
     margin-bottom: 2px;
 }
 
 FieldWidget[layout="horizontal"] #label {
+    margin: 0px;
     margin-right: 4px;
 }
-
 
 LabelFieldWidget {
     min-height: 16px;

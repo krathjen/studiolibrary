@@ -857,6 +857,143 @@ class EnumFieldWidget(FieldWidget):
         self.widget().addItems(items)
 
 
+class TagsFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(TagsFieldWidget, self).__init__(*args, **kwargs)
+
+        widget = QtWidgets.QComboBox(self)
+        widget.setEditable(True)
+        widget.currentIndexChanged.connect(self.emitValueChanged)
+
+        self.setWidget(widget)
+
+    def listToString(self, data):
+        """
+        Return a string from the given list.
+
+        Example:
+            print listToString(['apple', 'pear', 'cherry'])
+
+            # apple,pear,cherry
+
+        :type data: list
+        :rtype: str
+        """
+        # Convert all items to string and remove 'u'
+        data = [str(item) for item in data]
+        data = str(data).replace("[", "").replace("]", "")
+        data = data.replace("'", "").replace('"', "")
+        return data
+
+    def stringToList(self, data):
+        """
+        Return a list from the given string.
+
+        Example:
+            print listToString('apple, pear, cherry')
+
+            # ['apple', 'pear', 'cherry']
+
+        :type data: str
+        :rtype: list
+        """
+        data = '["' + str(data) + '"]'
+        data = data.replace(' ', '')
+        data = data.replace(',', '","')
+        return eval(data)
+
+    def value(self):
+        """
+        Get the value of the combobox.
+
+        :rtype: list[str]
+        """
+        return self.stringToList(self.widget().currentText())
+
+    def setValue(self, value):
+        """
+        Set the current value of the combobox.
+
+        :type value: list[str]
+        """
+        self.widget().setCurrentText(self.listToString(value))
+
+    def setItems(self, items):
+        """
+        Set the current items of the combobox.
+
+        :type items: list[unicode]
+        """
+        self.widget().clear()
+        self.widget().addItems(items)
+
+
+class RadioFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(RadioFieldWidget, self).__init__(*args, **kwargs)
+
+        self._radioButtons = []
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self._radioFrame = QtWidgets.QFrame(self)
+        self._radioFrame.setLayout(layout)
+
+        self.setWidget(self._radioFrame)
+
+        self.label().setStyleSheet("margin-top:2px;")
+        self.widget().setStyleSheet("margin-top:2px;")
+
+        self.label().setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
+
+    def value(self):
+        """
+        Get the text of checked radio button.
+
+        :return: str
+        """
+        for radioButton in self._radioButtons:
+            if radioButton.isChecked():
+                return radioButton.text()
+        return ""
+
+    def setValue(self, value):
+        """
+        Set the radio button checked with the given text.
+
+        :type: str
+        """
+        for radioButton in self._radioButtons:
+            checked = radioButton.text() == value
+            radioButton.setChecked(checked)
+
+    def clear(self):
+        """Destroy all the radio buttons."""
+        for radioButton in self._radioButtons:
+            radioButton.destroy()
+            radioButton.close()
+            radioButton.hide()
+
+    def setItems(self, items):
+        """
+        Set the items used to create the radio buttons.
+
+        items: list[str]
+        """
+        self.clear()
+
+        for item in items:
+            widget = QtWidgets.QRadioButton(self)
+            widget.clicked.connect(self.emitValueChanged)
+            widget.setText(item)
+
+            self._radioButtons.append(widget)
+            self._radioFrame.layout().addWidget(widget)
+
+
 class ButtonGroupFieldWidget(FieldWidget):
     """A simple button group field."""
 
@@ -943,7 +1080,8 @@ class SeparatorFieldWidget(FieldWidget):
 
         self.setWidget(widget)
 
-        self.label().hide()
+        if not self.data().get("title"):
+            self.label().hide()
 
     def setValue(self, value):
         """
