@@ -18,6 +18,8 @@ from studioqt import QtGui, QtCore, QtWidgets
 
 from . import fieldwidgets
 
+import studiolibrary
+
 
 __all__ = [
     "FormWidget",
@@ -40,6 +42,7 @@ FIELD_WIDGET_REGISTRY = {
     "label": fieldwidgets.LabelFieldWidget,
     "range": fieldwidgets.RangeFieldWidget,
     "color": fieldwidgets.ColorFieldWidget,
+    "group": fieldwidgets.GroupFieldWidget,
     "string": fieldwidgets.StringFieldWidget,
     "radio": fieldwidgets.RadioFieldWidget,
     "stringDouble": fieldwidgets.StringDoubleFieldWidget,
@@ -149,6 +152,57 @@ class FormWidget(QtWidgets.QFrame):
             widget.reset()
         self.validate()
 
+    def readSettings(self):
+        """
+        Return the local settings from the location of the SETTING_PATH.
+
+        :rtype: dict
+        """
+        path = studiolibrary.localPath("tmpFormSettings.json")
+        return studiolibrary.readJson(path)
+
+    def saveSettings(self, data):
+        """
+        Save the given dict to the local location of the SETTING_PATH.
+
+        :type data: dict
+        :rtype: None
+        """
+        path = studiolibrary.localPath("tmpFormSettings.json")
+        studiolibrary.updateJson(path, data)
+
+    def savePersistentValues(self):
+        """
+        Triggered when the user changes the options.
+        """
+        settings = self.readSettings()
+
+        values = self.values()
+        settings[self.__class__.__name__] = values
+
+        self.saveSettings(settings)
+
+    def loadPersistentValues(self):
+        """
+        Get the options from the user settings.
+
+        :rtype: dict
+        """
+        settings = self.readSettings()
+
+        values = settings.get(self.__class__.__name__, {})
+        defaultValues = self.defaultValues()
+
+        # Remove options from the user settings that are not persistent
+        if values:
+            for value in self.schema():
+                name = value.get("name")
+                persistent = value.get("persistent")
+                if not persistent and name in value:
+                    value[name] = defaultValues[name]
+
+        return values
+
     def setSchema(self, schema, layout=None):
         """
         Set the schema for the widget.
@@ -168,7 +222,7 @@ class FormWidget(QtWidgets.QFrame):
             if layout and not data.get("layout"):
                 data["layout"] = layout
 
-            widget = cls(data=data)
+            widget = cls(data=data, formWidget=self)
             widget.setData(data)
 
             value = data.get("value")
@@ -279,6 +333,14 @@ class FormWidget(QtWidgets.QFrame):
         for widget in self._widgets:
             fields.append(widget.data())
         return fields
+
+    def fieldWidgets(self):
+        """
+        Get all the field widgets.
+
+        :rtype: list[FieldWidget]
+        """
+        return self._widgets
 
     def setValues(self, values):
         """

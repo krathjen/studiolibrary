@@ -933,11 +933,17 @@ FormWidget #titleWidget:checked {
 }
 
 FormWidget #optionsFrame {
-    margin: 2px;
+    margin: 0px;
 }
 
 FieldWidget QComboBox {
     border: 1px solid transparent;
+}
+
+
+
+GroupFieldWidget > QFrame {
+    margin-top: 2px;
 }
 
 

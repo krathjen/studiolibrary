@@ -19,6 +19,7 @@ from studioqt import QtGui, QtCore, QtWidgets
 import studioqt
 
 
+from . import groupbox
 from . import colorpicker
 
 
@@ -50,7 +51,7 @@ class FieldWidget(QtWidgets.QFrame):
 
     DefaultLayout = "horizontal"
 
-    def __init__(self, parent=None, data=None):
+    def __init__(self, parent=None, data=None, formWidget=None):
         super(FieldWidget, self).__init__(parent)
 
         self._data = data or {}
@@ -58,9 +59,14 @@ class FieldWidget(QtWidgets.QFrame):
         self._widget = None
         self._default = None
         self._required = None
+        self._collapsed = False
         self._errorLabel = None
         self._menuButton = None
         self._actionResult = None
+        self._formWidget = None
+
+        if formWidget:
+            self.setFormWidget(formWidget)
 
         self.setObjectName("fieldWidget")
 
@@ -96,6 +102,46 @@ class FieldWidget(QtWidgets.QFrame):
         widget = self.createWidget()
         if widget:
             self.setWidget(widget)
+
+    def name(self):
+        """
+        Get the name of field widget.
+
+        :rtype: str
+        """
+        return self.data()["name"]
+
+    def setFormWidget(self, formWidget):
+        """
+        Set the form widget which contains the field widget.
+
+        :type formWidget: studiolibrary.widgets.formwidget.FormWidget
+        """
+        self._formWidget = formWidget
+
+    def formWidget(self):
+        """
+        Get the form widget the contains the field widget.
+
+        :return: studiolibrary.widgets.formwidget.FormWidget
+        """
+        return self._formWidget
+
+    def setCollapsed(self, collapsed):
+        """
+        Set the field widget collapsed used by the GroupFieldWidget.
+
+        :return: studiolibrary.widgets.formwidget.FormWidget
+        """
+        self._collapsed = collapsed
+
+    def isCollapsed(self):
+        """
+        Get the collapsed state of the field widget.
+
+        :return: studiolibrary.widgets.formwidget.FormWidget
+        """
+        return self._collapsed
 
     def createWidget(self):
         """
@@ -189,7 +235,7 @@ class FieldWidget(QtWidgets.QFrame):
             self.setHidden(hidden)
 
         visible = state.get('visible')
-        if visible is not None:
+        if visible is not None and not self.isCollapsed():
             self.setVisible(visible)
 
         required = state.get('required')
@@ -470,6 +516,57 @@ class FieldWidget(QtWidgets.QFrame):
         self.setProperty('error', self._error)
 
         self.setStyleSheet(self.styleSheet())
+
+
+class GroupFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(GroupFieldWidget, self).__init__(*args, **kwargs)
+
+        widget = groupbox.GroupBoxWidget(self.data().get("title"), None)
+        widget.setChecked(True)
+        widget.toggled.connect(self.setValue)
+
+        self.setWidget(widget)
+
+        self.label().hide()
+
+    def value(self):
+        """
+        Get the value of the Group Field
+
+        :type: bool
+        """
+        return self.widget().isChecked()
+
+    def setValue(self, visible):
+        """
+        Set the value of the Group Field
+
+        :type visible: bool
+        """
+        self.widget().setChecked(visible)
+
+        isChild = False
+
+        if self.formWidget():
+            for fieldWidget in self.formWidget().fieldWidgets():
+
+                if fieldWidget.name() == self.name():
+                    isChild = True
+                    continue
+
+                if isChild:
+
+                    if isinstance(fieldWidget, GroupFieldWidget):
+                        break
+
+                    fieldWidget.setCollapsed(not visible)
+
+                    if visible and fieldWidget.data().get("visible") is not None:
+                        fieldWidget.setVisible(fieldWidget.data().get("visible"))
+                    else:
+                        fieldWidget.setVisible(visible)
 
 
 class Label(QtWidgets.QLabel):
