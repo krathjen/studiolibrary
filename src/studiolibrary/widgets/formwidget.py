@@ -399,7 +399,9 @@ class FormWidget(QtWidgets.QFrame):
         """
         values = {}
         for widget in self._widgets:
-            values[widget.data().get("name")] = widget.default()
+            name = widget.data().get("name")
+            if name:
+                values[name] = widget.default()
         return values
 
     def state(self):
