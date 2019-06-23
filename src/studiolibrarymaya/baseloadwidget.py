@@ -36,12 +36,6 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class NamespaceOption:
-    FromFile = "file"
-    FromCustom = "custom"
-    FromSelection = "selection"
-
-
 class BaseLoadWidget(QtWidgets.QWidget):
     """Base widget for creating and previewing transfer items."""
 
@@ -60,15 +54,20 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._item = None
         self._iconPath = ""
         self._scriptJob = None
+
         self._formWidget = None
+        self._infoFormWidget = None
 
         self.setItem(item)
-        self.loadSettings()
+
+        iconGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
+        iconGroupBoxWidget.setObjectName("iconGroupBoxWidget")
+        iconGroupBoxWidget.setPersistent(True)
+        self.ui.iconTitleFrame.layout().addWidget(iconGroupBoxWidget)
 
         try:
             self.selectionChanged()
             self.setScriptJobEnabled(True)
-            self.updateNamespaceEdit()
         except NameError as error:
             logger.exception(error)
 
@@ -80,14 +79,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """Setup the connections for all the widgets."""
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
-
-        self.ui.useFileNamespace.clicked.connect(self._namespaceOptionClicked)
-        self.ui.useCustomNamespace.clicked.connect(self._useCustomNamespaceClicked)
-        self.ui.useSelectionNamespace.clicked.connect(self._namespaceOptionClicked)
-
-        self.ui.namespaceComboBox.activated[str].connect(self._namespaceEditChanged)
-        self.ui.namespaceComboBox.editTextChanged[str].connect(self._namespaceEditChanged)
-        self.ui.namespaceComboBox.currentIndexChanged[str].connect(self._namespaceEditChanged)
 
     def createSequenceWidget(self):
         """
@@ -109,20 +100,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         if self.item().imageSequencePath():
             self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
-
-    def isEditable(self):
-        """
-        Return True if the user can edit the item.
-
-        :rtype: bool 
-        """
-        item = self.item()
-        editable = True
-
-        if item and item.libraryWindow():
-            editable = not item.libraryWindow().isLocked()
-
-        return editable
 
     def setCaptureMenuEnabled(self, enable):
         """
@@ -173,26 +150,22 @@ class BaseLoadWidget(QtWidgets.QWidget):
             self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
         if hasattr(self.ui, "infoFrame"):
-            infoWidget = studiolibrary.widgets.FormWidget(self)
-            infoWidget.setSchema(item.info())
-            self.ui.infoFrame.layout().addWidget(infoWidget)
+            self._infoFormWidget = studiolibrary.widgets.FormWidget(self)
+            self._infoFormWidget.setSchema(item.info())
+            self.ui.infoFrame.layout().addWidget(self._infoFormWidget)
 
-        if hasattr(self.ui, "optionsFrame"):
+        options = item.loadSchema()
+        if options:
+            item.loadValueChanged.connect(self._itemValueChanged)
 
-            options = item.loadSchema()
-            if options:
-                item.loadValueChanged.connect(self._itemValueChanged)
+            formWidget = studiolibrary.widgets.FormWidget(self)
+            formWidget.setObjectName(item.__class__.__name__ + "Form")
+            formWidget.setSchema(item.loadSchema())
+            formWidget.setValidator(item.loadValidator)
 
-                formWidget = studiolibrary.widgets.FormWidget(self)
-                formWidget.setObjectName(item.__class__.__name__ + "Form")
-                formWidget.setSchema(item.loadSchema())
-                formWidget.setValidator(item.loadValidator)
-
-                self.ui.optionsFrame.layout().addWidget(formWidget)
-                self._formWidget = formWidget
-                formWidget.validate()
-            else:
-                self.ui.optionsToggleBox.setVisible(False)
+            self.ui.optionsFrame.layout().addWidget(formWidget)
+            self._formWidget = formWidget
+            formWidget.validate()
 
     def iconPath(self):
         """
@@ -265,6 +238,9 @@ class BaseLoadWidget(QtWidgets.QWidget):
         if self._formWidget:
             self._formWidget.savePersistentValues()
 
+        if self._infoFormWidget:
+            self._infoFormWidget.savePersistentValues()
+
         QtWidgets.QWidget.close(self)
 
     def scriptJob(self):
@@ -291,205 +267,13 @@ class BaseLoadWidget(QtWidgets.QWidget):
                 sj.kill()
             self._scriptJob = None
 
-    def objectCount(self):
-        """
-        Return the number of controls contained in the item.
-
-        :rtype: int
-        """
-        return self.item().objectCount()
-
-    def _namespaceEditChanged(self, text):
-        """
-        Triggered when the combox box has changed value.
-
-        :type text: str
-        :rtype: None
-        """
-        self.ui.useCustomNamespace.setChecked(True)
-        self.ui.namespaceComboBox.setEditText(text)
-        self.saveSettings()
-
-    def _namespaceOptionClicked(self):
-        self.updateNamespaceEdit()
-        self.saveSettings()
-
-    def _useCustomNamespaceClicked(self):
-        """
-        Triggered when the custom namespace radio button is clicked.
-
-        :rtype: None
-        """
-        self.ui.namespaceComboBox.setFocus()
-        self.updateNamespaceEdit()
-        self.saveSettings()
-
-    def namespaces(self):
-        """
-        Return the namespace names from the namespace edit widget.
-
-        :rtype: list[str]
-        """
-        namespaces = str(self.ui.namespaceComboBox.currentText())
-        namespaces = studiolibrary.stringToList(namespaces)
-        return namespaces
-
-    def setNamespaces(self, namespaces):
-        """
-        Set the namespace names for the namespace edit.
-
-        :type namespaces: list
-        :rtype: None
-        """
-        namespaces = studiolibrary.listToString(namespaces)
-        self.ui.namespaceComboBox.setEditText(namespaces)
-
-    def namespaceOption(self):
-        """
-        Get the current namespace option.
-
-        :rtype: NamespaceOption
-        """
-        if self.ui.useFileNamespace.isChecked():
-            namespaceOption = NamespaceOption.FromFile
-        elif self.ui.useCustomNamespace.isChecked():
-            namespaceOption = NamespaceOption.FromCustom
-        else:
-            namespaceOption = NamespaceOption.FromSelection
-
-        return namespaceOption
-
-    def setNamespaceOption(self, namespaceOption):
-        """
-        Set the current namespace option.
-
-        :type namespaceOption: NamespaceOption
-        """
-        if namespaceOption == NamespaceOption.FromFile:
-            self.ui.useFileNamespace.setChecked(True)
-        elif namespaceOption == NamespaceOption.FromCustom:
-            self.ui.useCustomNamespace.setChecked(True)
-        else:
-            self.ui.useSelectionNamespace.setChecked(True)
-
-    def setSettings(self, settings):
-        """
-        Set the state of the widget.
-
-        :type settings: dict
-        """
-        namespaces = settings.get("namespaces", [])
-        self.setNamespaces(namespaces)
-
-        namespaceOption = settings.get("namespaceOption", NamespaceOption.FromFile)
-        self.setNamespaceOption(namespaceOption)
-
-        infoGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Info", self.ui.infoFrame)
-        infoGroupBoxWidget.setObjectName("infoGroupBoxWidget")
-        infoGroupBoxWidget.setPersistent(True)
-        self.ui.infoTitleFrame.layout().addWidget(infoGroupBoxWidget)
-
-        iconGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
-        iconGroupBoxWidget.setObjectName("iconGroupBoxWidget")
-        iconGroupBoxWidget.setPersistent(True)
-        self.ui.iconTitleFrame.layout().addWidget(iconGroupBoxWidget)
-
-        optionsGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Options", self.ui.optionsFrame)
-        optionsGroupBoxWidget.setObjectName("optionsGroupBoxWidget")
-        optionsGroupBoxWidget.setPersistent(True)
-        self.ui.optionsTitleFrame.layout().addWidget(optionsGroupBoxWidget)
-
-        namespaceGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Namespace", self.ui.namespaceFrame)
-        namespaceGroupBoxWidget.setObjectName("namespaceGroupBoxWidget")
-        namespaceGroupBoxWidget.setPersistent(True)
-        self.ui.namespaceTitleFrame.layout().addWidget(namespaceGroupBoxWidget)
-
-    def settings(self):
-        """
-        Get the current state of the widget.
-
-        :rtype: dict
-        """
-        settings = {}
-
-        settings["namespaces"] = self.namespaces()
-        settings["namespaceOption"] = self.namespaceOption()
-
-        return settings
-
-    def loadSettings(self):
-        """
-        Load the user settings from disc.
-
-        :rtype: None
-        """
-        data = studiolibrarymaya.settings()
-        self.setSettings(data)
-
-    def saveSettings(self):
-        """
-        Save the user settings to disc.
-
-        :rtype: None
-        """
-        data = self.settings()
-        studiolibrarymaya.saveSettings(data)
-
     def selectionChanged(self):
         """
         Triggered when the users Maya selection has changed.
 
         :rtype: None
         """
-        self.updateNamespaceEdit()
-
-    def updateNamespaceFromScene(self):
-        """
-        Update the namespaces in the combobox with the ones in the scene.
-
-        :rtype: None
-        """
-        namespaces = mutils.namespace.getAll()
-
-        text = self.ui.namespaceComboBox.currentText()
-
-        if namespaces:
-            self.ui.namespaceComboBox.setToolTip("")
-        else:
-            toolTip = "No namespaces found in scene."
-            self.ui.namespaceComboBox.setToolTip(toolTip)
-
-        self.ui.namespaceComboBox.clear()
-        self.ui.namespaceComboBox.addItems(namespaces)
-        self.ui.namespaceComboBox.setEditText(text)
-
-    def updateNamespaceEdit(self):
-        """
-        Update the namespace edit.
-
-        :rtype: None
-        """
-        logger.debug('Updating namespace edit')
-
-        self.ui.namespaceComboBox.blockSignals(True)
-
-        self.updateNamespaceFromScene()
-
-        namespaces = []
-
-        if self.ui.useSelectionNamespace.isChecked():
-            namespaces = mutils.namespace.getFromSelection()
-        elif self.ui.useFileNamespace.isChecked():
-            namespaces = self.item().transferObject().namespaces()
-
-        if not self.ui.useCustomNamespace.isChecked():
-            self.setNamespaces(namespaces)
-
-            # Removes focus from the combobox
-            self.ui.namespaceComboBox.setEnabled(False)
-            self.ui.namespaceComboBox.setEnabled(True)
-
-        self.ui.namespaceComboBox.blockSignals(False)
+        self._formWidget.validate()
 
     def accept(self):
         """

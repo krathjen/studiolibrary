@@ -115,15 +115,13 @@ class PoseItem(baseitem.BaseItem):
         :type values: dict
         :rtype: list[dict]
         """
-        super(PoseItem, self).loadValidator(**values)
-
         # Mirror check box
         mirrorTip = "Cannot find a mirror table!"
         mirrorTable = self.mirrorTable()
         if mirrorTable:
             mirrorTip = "Using mirror table: %s" % mirrorTable.path()
 
-        return [
+        fields = [
             {
                 "name": "mirror",
                 "toolTip": mirrorTip,
@@ -132,8 +130,12 @@ class PoseItem(baseitem.BaseItem):
             {
                 "name": "searchAndReplace",
                 "visible": values.get("searchAndReplaceEnabled")
-            }
+            },
         ]
+
+        fields.extend(super(PoseItem, self).loadValidator(**values))
+
+        return fields
 
     def switchSearchAndReplace(self):
         """
@@ -158,7 +160,15 @@ class PoseItem(baseitem.BaseItem):
 
         :rtype: list[dict]
         """
-        return [
+        schema = [
+            {
+                "name": "optionsGroup",
+                "value": True,
+                "title": "Options",
+                "type": "group",
+                "persistent": True,
+                "persistentKey": "BaseItemForm",
+            },
             {
                 "name": "key",
                 "type": "bool",
@@ -200,6 +210,10 @@ class PoseItem(baseitem.BaseItem):
                 ]
             },
         ]
+
+        schema.extend(super(PoseItem, self).loadSchema())
+
+        return schema
 
     def keyPressEvent(self, event):
         """
@@ -290,7 +304,7 @@ class PoseItem(baseitem.BaseItem):
         if self._options is None:
             self._options = dict()
             self._options["key"] = self.currentLoadValue("key")
-            self._options['namespaces'] = self.namespaces()
+            # self._options['namespaces'] = self.currentLoadValue("namespaces")
             self._options['mirrorTable'] = self.mirrorTable()
             self._options['objects'] = maya.cmds.ls(selection=True) or []
 
@@ -350,10 +364,15 @@ class PoseItem(baseitem.BaseItem):
         if mirror is None:
             mirror = self.currentLoadValue("mirror")
 
+        if namespaces is None:
+            namespaces = self.currentLoadValue("namespaces")
+
         self.setBlendValue(blend, load=False)
 
         if showBlendMessage:
             self.showToastMessage("Blend: {0}%".format(blend))
+
+        logger.info(u'Options: {0}'.format(namespaces))
 
         try:
             self.transferObject().load(

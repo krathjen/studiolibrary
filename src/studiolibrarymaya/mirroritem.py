@@ -9,7 +9,7 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-import shutil
+
 import logging
 
 import mutils
@@ -71,7 +71,15 @@ class MirrorItem(baseitem.BaseItem):
         
         :rtype: list[dict]
         """
-        return [
+        schema = [
+            {
+                "name": "optionsGroup",
+                "value": True,
+                "title": "Options",
+                "type": "group",
+                "persistent": True,
+                "persistentKey": "BaseItemForm",
+            },
             {
                 "name": "animation",
                 "type": "bool",
@@ -86,6 +94,10 @@ class MirrorItem(baseitem.BaseItem):
                 "persistent": True
             },
         ]
+
+        schema.extend(super(MirrorItem, self).loadSchema())
+
+        return schema
 
     @mutils.showWaitCursor
     def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):

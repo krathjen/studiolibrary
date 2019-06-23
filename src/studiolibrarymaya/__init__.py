@@ -27,59 +27,11 @@ __encoding__ = sys.getfilesystemencoding()
 PATH = unicode(os.path.abspath(__file__), __encoding__)
 DIRNAME = os.path.dirname(PATH).replace('\\', '/')
 RESOURCE_DIRNAME = DIRNAME + "/resource"
-SETTINGS_PATH = studiolibrary.localPath("LibraryItem.json")
 
 
 _resource = None
 _settings = None
 _mayaCloseScriptJob = None
-
-
-def readSettings():
-    """
-    Return the local settings from the location of the SETTING_PATH.
-
-    :rtype: dict
-    """
-    return studiolibrary.readJson(SETTINGS_PATH)
-
-
-def saveSettings(data):
-    """
-    Save the given dict to the local location of the SETTING_PATH.
-
-    :type data: dict
-    :rtype: None
-    """
-    global _settings
-    _settings = None
-
-    studiolibrary.updateJson(SETTINGS_PATH, data)
-
-
-def resetSettings():
-    """Remove and reset the item settings."""
-    global _settings
-    _settings = None
-    studiolibrary.removePath(SETTINGS_PATH)
-
-
-def settings():
-    """
-    Return the local settings for importing and exporting an animation.
-
-    :rtype: studiolibrary.Settings
-    """
-    global _settings
-
-    if not _settings:
-        _settings = readSettings()
-
-    # Shared options
-    _settings.setdefault("namespaces", [])
-    _settings.setdefault("namespaceOption", "file")
-
-    return _settings
 
 
 def resource():

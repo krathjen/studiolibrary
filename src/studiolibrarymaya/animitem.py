@@ -101,7 +101,15 @@ class AnimItem(baseitem.BaseItem):
         startFrame = self.startFrame() or 0
         endFrame = self.endFrame() or 0
 
-        return [
+        schema = [
+            {
+                "name": "optionsGroup",
+                "value": True,
+                "title": "Options",
+                "type": "group",
+                "persistent": True,
+                "persistentKey": "BaseItemForm",
+            },
             {
                 "name": "connect",
                 "type": "bool",
@@ -132,19 +140,23 @@ class AnimItem(baseitem.BaseItem):
             },
         ]
 
-    def loadValidator(self, **options):
+        schema.extend(super(AnimItem, self).loadSchema())
+
+        return schema
+
+    def loadValidator(self, **values):
         """
         Triggered when the user changes options.
         
         This method is not yet used. It will be used to change the state of 
         the options widget. For example the help image.
         
-        :type options: list[dict]
+        :type values: list[dict]
         """
-        super(AnimItem, self).loadValidator(**options)
+        super(AnimItem, self).loadValidator(**values)
 
-        option = options.get("option")
-        connect = options.get("connect")
+        option = values.get("option")
+        connect = values.get("connect")
 
         if option == "replace all":
             basename = "replaceCompletely"
@@ -157,7 +169,7 @@ class AnimItem(baseitem.BaseItem):
 
         logger.debug(basename)
 
-        return []
+        return super(AnimItem, self).loadValidator(**values)
 
     @mutils.showWaitCursor
     def load(

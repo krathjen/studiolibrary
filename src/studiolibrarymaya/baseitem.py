@@ -38,11 +38,6 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-class NamespaceOption:
-    FromFile = "file"
-    FromCustom = "custom"
-    FromSelection = "selection"
-
 
 class BaseItemSignals(QtCore.QObject):
     """"""
@@ -96,9 +91,6 @@ class BaseItem(studiolibrary.LibraryItem):
         self._currentLoadSchema = []
         self._currentSaveSchema = []
 
-        self._namespaces = []
-        self._namespaceOption = NamespaceOption.FromSelection
-
         self._transferClass = None
         self._transferObject = None
         self._transferBasename = None
@@ -118,7 +110,32 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :type values: dict
         """
+        namespaces = values.get("namespaces")
+        namespaceOption = values.get("namespaceOption")
+
+        if namespaceOption == "From file":
+            namespaces = self.namespacesFromFile()
+        elif namespaceOption == "From selection":
+            namespaces = self.namespacesFromSelection()
+
+        fieldChanged = values.get("fieldChanged")
+        if fieldChanged == "namespaces":
+            values["namespaceOption"] = "Use custom"
+        else:
+            values["namespaces"] = namespaces
+
         self._currentLoadValues = values
+
+        return [
+            {
+                "name": "namespaces",
+                "value": values.get("namespaces"),
+            },
+            {
+                "name": "namespaceOption",
+                "value": values.get("namespaceOption"),
+            },
+        ]
 
     def currentLoadValue(self, name):
         """
@@ -128,6 +145,9 @@ class BaseItem(studiolibrary.LibraryItem):
         :rtype: object
         """
         return self._currentLoadValues.get(name)
+
+    def setCurrentLoadValues(self, values):
+        self._currentLoadValues = values
 
     def info(self):
         """
@@ -144,6 +164,13 @@ class BaseItem(studiolibrary.LibraryItem):
         contains = str(count) + " Object" + plural
 
         return [
+            {
+                "name": "infoGroup",
+                "title": "Info",
+                "type": "group",
+                "value": True,
+                "persistent": True
+            },
             {
                 "name": "name",
                 "value": self.name(),
@@ -163,6 +190,38 @@ class BaseItem(studiolibrary.LibraryItem):
             {
                 "name": "comment",
                 "value": self.description() or "No comment",
+            },
+        ]
+
+    def loadSchema(self):
+
+        return [
+            {
+                "name": "namespaceGroup",
+                "title": "Namespace",
+                "value": True,
+                "type": "group",
+                "persistent": True,
+                "persistentKey": "BaseItemForm",
+            },
+            {
+                "name": "namespaceOption",
+                "title": "",
+                "type": "radio",
+                "value": "From selection",
+                "items": ["From file", "From selection", "Use custom"],
+                "persistent": True,
+                "persistentKey": "BaseItemForm",
+            },
+            {
+                "name": "namespaces",
+                "title": "",
+                "type": "tags",
+                "value": [],
+                "items": mutils.namespace.getAll(),
+                "persistent": True,
+                "label": {"visible": False},
+                "persistentKey": "BaseItemForm",
             },
         ]
 
@@ -386,6 +445,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type namespaces: list[str]
         """
         namespaces = namespaces or self.namespaces()
+
         kwargs = kwargs or mutils.selectionModifiers()
 
         msg = "Select content: Item.selectContent(namespacea={0}, kwargs={1})"
@@ -451,35 +511,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: list[str]
         """
-        namespaces = []
-        namespaceOption = self.namespaceOption()
-
-        # # When creating a new item we can only get the namespaces from
-        # # selection because the file (transferObject) doesn't exist yet.
-        if not self.exists():
-            namespaces = self.namespacesFromSelection()
-
-        # If the file (transferObject) exists then we can use the namespace
-        # option to determined which namespaces to return.
-        if namespaceOption == NamespaceOption.FromFile:
-            namespaces = self.namespacesFromFile()
-
-        elif namespaceOption == NamespaceOption.FromCustom:
-            namespaces = self.namespacesFromCustom()
-
-        elif namespaceOption == NamespaceOption.FromSelection:
-            namespaces = self.namespacesFromSelection()
-
-        return namespaces
-
-    def setNamespaceOption(self, namespaceOption):
-        """
-        Set the namespace option for this item.
-
-        :type namespaceOption: NamespaceOption
-        :rtype: None
-        """
-        self.settings()["namespaceOption"] = namespaceOption
+        return self.currentLoadValue("namespaces")
 
     def namespaceOption(self):
         """
@@ -487,28 +519,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: NamespaceOption
         """
-        namespaceOption = self.settings().get(
-            "namespaceOption",
-            NamespaceOption.FromSelection
-        )
-        return namespaceOption
-
-    def namespacesFromCustom(self):
-        """
-        Return the namespace the user has set.
-
-        :rtype: list[str]
-        """
-        return self.settings().get("namespaces", [])
-
-    def setCustomNamespaces(self, namespaces):
-        """
-        Set the users custom namespace.
-
-        :type namespaces: list[str]
-        :rtype: None
-        """
-        self.settings()["namespaces"] = namespaces
+        return self.currentLoadValue("namespaceOption")
 
     def namespacesFromFile(self):
         """
@@ -546,29 +557,27 @@ class BaseItem(studiolibrary.LibraryItem):
     def loadFromCurrentOptions(self):
         """Load the mirror table using the settings for this item."""
         kwargs = self._currentLoadValues
-        namespaces = self.namespaces()
         objects = maya.cmds.ls(selection=True) or []
 
         try:
             self.load(
                 objects=objects,
-                namespaces=namespaces,
                 **kwargs
             )
         except Exception as error:
             self.showErrorDialog("Item Error", str(error))
             raise
 
-    def load(self, objects=None, namespaces=None, **kwargs):
+    def load(self, objects=None, **kwargs):
         """
         Load the data from the transfer object.
 
-        :type namespaces: list[str] or None
+        # :type namespaces: list[str] or None
         :type objects: list[str] or None
         :rtype: None
         """
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
 
-        self.transferObject().load(objects=objects, namespaces=namespaces, **kwargs)
+        self.transferObject().load(objects=objects, **kwargs)
 
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
