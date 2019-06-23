@@ -154,7 +154,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._item = None
         self._iconPath = ""
         self._scriptJob = None
-        self._optionsWidget = None
+        self._formWidget = None
 
         self.setItem(item)
         self.loadSettings()
@@ -250,7 +250,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         :type field: str
         :type value: object
         """
-        self._optionsWidget.setValue(field, value)
+        self._formWidget.setValue(field, value)
 
     def setItem(self, item):
         """
@@ -277,13 +277,13 @@ class BaseLoadWidget(QtWidgets.QWidget):
             if options:
                 item.loadValueChanged.connect(self._itemValueChanged)
 
-                optionsWidget = studiolibrary.widgets.FormWidget(self)
-                optionsWidget.setSchema(item.loadSchema())
-                optionsWidget.setValidator(item.loadValidator)
+                formWidget = studiolibrary.widgets.FormWidget(self)
+                formWidget.setSchema(item.loadSchema())
+                formWidget.setValidator(item.loadValidator)
 
-                self.ui.optionsFrame.layout().addWidget(optionsWidget)
-                self._optionsWidget = optionsWidget
-                optionsWidget.validate()
+                self.ui.optionsFrame.layout().addWidget(formWidget)
+                self._formWidget = formWidget
+                formWidget.validate()
             else:
                 self.ui.optionsToggleBox.setVisible(False)
 
@@ -355,10 +355,8 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """
         self.setScriptJobEnabled(False)
 
-        if self._optionsWidget:
-            self.item().saveOptions(**self._optionsWidget.values())
-
-            self._optionsWidget.savePersistentValues()
+        if self._formWidget:
+            self._formWidget.savePersistentValues()
 
         QtWidgets.QWidget.close(self)
 

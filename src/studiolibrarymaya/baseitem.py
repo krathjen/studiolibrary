@@ -218,20 +218,6 @@ class BaseItem(studiolibrary.LibraryItem):
             basename = os.path.basename(iconPath)
             shutil.copyfile(iconPath, path + "/" + basename)
 
-    def saveOptions(self, **options):
-        """
-        Triggered when the user changes the options.
-
-        :type options: dict
-        """
-        settings = self.settings()
-        settings[self.__class__.__name__] = {"loadOptions": options}
-
-        self._currentLoadSchema = options
-
-        data = studiolibrarymaya.settings()
-        studiolibrarymaya.saveSettings(data)
-
     def currentLoadSchema(self):
         """
         Get the current options set by the user.
