@@ -158,7 +158,7 @@ class FormWidget(QtWidgets.QFrame):
 
         :rtype: dict
         """
-        path = studiolibrary.localPath("tmpFormSettings.json")
+        path = studiolibrary.localPath("FormWidget.json")
         return studiolibrary.readJson(path)
 
     def saveSettings(self, data):
@@ -168,7 +168,7 @@ class FormWidget(QtWidgets.QFrame):
         :type data: dict
         :rtype: None
         """
-        path = studiolibrary.localPath("tmpFormSettings.json")
+        path = studiolibrary.localPath("FormWidget.json")
         studiolibrary.updateJson(path, data)
 
     def savePersistentValues(self):
@@ -177,8 +177,7 @@ class FormWidget(QtWidgets.QFrame):
         """
         settings = self.readSettings()
 
-        values = self.values()
-        settings[self.__class__.__name__] = values
+        settings[self.__class__.__name__] = self.persistentValues()
 
         self.saveSettings(settings)
 
@@ -198,10 +197,18 @@ class FormWidget(QtWidgets.QFrame):
             for value in self.schema():
                 name = value.get("name")
                 persistent = value.get("persistent")
-                if not persistent and name in value:
-                    value[name] = defaultValues[name]
+                if not persistent and name in values:
+                    values[name] = defaultValues[name]
 
-        return values
+        self.setValues(values)
+
+    def schema(self):
+        """
+        Get the schema for the form.
+
+        :rtype: dict
+        """
+        return self._schema
 
     def setSchema(self, schema, layout=None):
         """
@@ -237,6 +244,8 @@ class FormWidget(QtWidgets.QFrame):
 
             self._fieldsFrame.layout().addWidget(widget)
 
+        self.loadPersistentValues()
+
     def _fieldChanged(self, widget):
         """
         Triggered when the given option widget changes value.
@@ -248,8 +257,11 @@ class FormWidget(QtWidgets.QFrame):
     def accept(self):
         """Accept the current options"""
         self.emitAcceptedCallback()
+        self.savePersistentValues()
 
     def closeEvent(self, event):
+        """Called when the widget is closed."""
+        self.savePersistentValues()
         super(FormWidget, self).closeEvent(event)
 
     def hasErrors(self):
@@ -361,7 +373,22 @@ class FormWidget(QtWidgets.QFrame):
         """
         values = {}
         for widget in self._widgets:
-            values[widget.data().get("name")] = widget.value()
+            name = widget.data().get("name")
+            if name:
+                values[name] = widget.value()
+        return values
+
+    def persistentValues(self):
+        """
+        Get all the persistent field values for the current form.
+
+        :rtype: dict
+        """
+        values = {}
+        for widget in self._widgets:
+            name = widget.data().get("name")
+            if name and widget.data().get("persistent"):
+                values[name] = widget.value()
         return values
 
     def defaultValues(self):
@@ -374,24 +401,6 @@ class FormWidget(QtWidgets.QFrame):
         for widget in self._widgets:
             values[widget.data().get("name")] = widget.default()
         return values
-
-    def persistentValues(self):
-        """
-        Get all the persistent field values for the current form.
-
-        :rtype: dict
-        """
-        state = {}
-        values = self.values()
-        fields = self.fields()
-
-        for field in fields:
-            name = field.get("name")
-            persistent = field.get("persistent")
-            if name and persistent:
-                state[name] = values[name]
-
-        return state
 
     def state(self):
         """
