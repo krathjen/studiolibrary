@@ -280,7 +280,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
                 optionsWidget = studiolibrary.widgets.FormWidget(self)
                 optionsWidget.setSchema(item.loadSchema())
                 optionsWidget.setValidator(item.loadValidator)
-                optionsWidget.setValues(self.item().optionsFromSettings())
+
                 self.ui.optionsFrame.layout().addWidget(optionsWidget)
                 self._optionsWidget = optionsWidget
                 optionsWidget.validate()
@@ -357,6 +357,8 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         if self._optionsWidget:
             self.item().saveOptions(**self._optionsWidget.values())
+
+            self._optionsWidget.savePersistentValues()
 
         QtWidgets.QWidget.close(self)
 

@@ -176,25 +176,14 @@ class BaseSaveWidget(QtWidgets.QWidget):
             formWidget = studiolibrary.widgets.FormWidget(self)
             formWidget.setSchema(schema)
             formWidget.setValidator(item.saveValidator)
-
             formWidget.setValues({"name": item.name()})
 
             self.ui.optionsFrame.layout().addWidget(formWidget)
             self._formWidget = formWidget
-            self.loadSettings()
 
-            formWidget.stateChanged.connect(self._optionsChanged)
             formWidget.validate()
         else:
             self.ui.optionsFrame.setVisible(False)
-
-    def _optionsChanged(self):
-        """
-        Get the options from the user settings.
-        
-        :rtype: dict 
-        """
-        self.saveSettings()
 
     def defaultValues(self):
         """
@@ -208,39 +197,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
             values[option.get('name')] = option.get('default')
 
         return values
-
-    def loadSettings(self):
-        """
-        Return the settings object for saving the state of the widget.
-
-        :rtype: studiolibrary.Settings
-        """
-        settings = studiolibrarymaya.settings()
-        settings = settings.get(self.item().__class__.__name__, {})
-
-        options = settings.get("saveOptions", {})
-        values = self.defaultValues()
-
-        # Only include the persistent fields
-        if options:
-            for option in self.item().saveSchema():
-                name = option.get("name")
-                persistent = option.get("persistent")
-                if not persistent and name in options:
-                    options[name] = values[name]
-
-            self._formWidget.setValues(options)
-
-    def saveSettings(self):
-        """
-        Save the current state of the widget to disc.
-
-        :rtype: None
-        """
-        state = self._formWidget.persistentValues()
-        settings = studiolibrarymaya.settings()
-        settings[self.item().__class__.__name__] = {"saveOptions": state}
-        studiolibrarymaya.saveSettings(settings)
 
     def iconPath(self):
         """
@@ -281,7 +237,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        self.saveSettings()
+        self._formWidget.savePersistentValues()
         self.setScriptJobEnabled(False)
         QtWidgets.QWidget.close(self)
 

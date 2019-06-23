@@ -59,7 +59,7 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
     def sliderReleased(self):
         """Triggered when the user releases the slider handle."""
-        self.item().loadFromSettings(
+        self.item().loadFromCurrentOptions(
             blend=self.ui.blendSlider.value(),
             refresh=False,
             showBlendMessage=True
@@ -71,7 +71,7 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
         :type value: float
         """
-        self.item().loadFromSettings(
+        self.item().loadFromCurrentOptions(
             blend=value,
             batchMode=True,
             showBlendMessage=True
@@ -79,7 +79,7 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
     def accept(self):
         """Triggered when the user clicks the apply button."""
-        self.item().loadFromSettings(clearSelection=False)
+        self.item().loadFromCurrentOptions(clearSelection=False)
 
 
 class PoseItem(baseitem.BaseItem):
@@ -219,13 +219,13 @@ class PoseItem(baseitem.BaseItem):
                 blend = self.blendValue()
 
                 if self.isBlending():
-                    self.loadFromSettings(
+                    self.loadFromCurrentOptions(
                         blend=blend,
                         batchMode=True,
                         showBlendMessage=True
                     )
                 else:
-                    self.loadFromSettings(
+                    self.loadFromCurrentOptions(
                         blend=blend,
                         refresh=True,
                         batchMode=False,
@@ -238,11 +238,11 @@ class PoseItem(baseitem.BaseItem):
         :type event: QtCore.QMouseEvent
         """
         if self.isBlending():
-            self.loadFromSettings(blend=self.blendValue(), refresh=False)
+            self.loadFromCurrentOptions(blend=self.blendValue(), refresh=False)
 
     def doubleClicked(self):
         """Triggered when the user double clicks the item."""
-        self.loadFromSettings(clearSelection=False)
+        self.loadFromCurrentOptions(clearSelection=False)
 
     def selectionChanged(self):
         """Triggered when the item is selected or deselected."""
@@ -264,13 +264,13 @@ class PoseItem(baseitem.BaseItem):
         super(PoseItem, self).setBlendValue(value)
 
         if load:
-            self.loadFromSettings(
+            self.loadFromCurrentOptions(
                 blend=value,
                 batchMode=True,
                 showBlendMessage=True
             )
 
-    def loadFromSettings(
+    def loadFromCurrentOptions(
         self,
         blend=100.0,
         refresh=True,

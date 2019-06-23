@@ -218,28 +218,6 @@ class BaseItem(studiolibrary.LibraryItem):
             basename = os.path.basename(iconPath)
             shutil.copyfile(iconPath, path + "/" + basename)
 
-    def optionsFromSettings(self):
-        """
-        Get the options from the user settings.
-
-        :rtype: dict
-        """
-        settings = self.settings()
-        settings = settings.get(self.__class__.__name__, {})
-
-        options = settings.get("loadOptions", {})
-        defaultOptions = self.defaultOptions()
-
-        # Remove options from the user settings that are not persistent
-        if options:
-            for option in self.loadSchema():
-                name = option.get("name")
-                persistent = option.get("persistent")
-                if not persistent and name in options:
-                    options[name] = defaultOptions[name]
-
-        return options
-
     def saveOptions(self, **options):
         """
         Triggered when the user changes the options.
@@ -260,7 +238,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: dict
         """
-        return self._currentLoadSchema or self.optionsFromSettings()
+        return self._currentLoadSchema
 
     def defaultOptions(self):
         """
@@ -578,22 +556,6 @@ class BaseItem(studiolibrary.LibraryItem):
         :rtype: None
         """
         self.loadFromCurrentOptions()
-
-    def loadFromSettings(self):
-        """Load the mirror table using the settings for this item."""
-        kwargs = self.optionsFromSettings()
-        namespaces = self.namespaces()
-        objects = maya.cmds.ls(selection=True) or []
-
-        try:
-            self.load(
-                objects=objects,
-                namespaces=namespaces,
-                **kwargs
-            )
-        except Exception as error:
-            self.showErrorDialog("Item Error", str(error))
-            raise
 
     def loadFromCurrentOptions(self):
         """Load the mirror table using the settings for this item."""
