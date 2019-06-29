@@ -16,9 +16,8 @@ import functools
 
 from studioqt import QtGui, QtCore, QtWidgets
 
+from . import settings
 from . import fieldwidgets
-
-import studiolibrary
 
 
 __all__ = [
@@ -152,34 +151,12 @@ class FormWidget(QtWidgets.QFrame):
             widget.reset()
         self.validate()
 
-    def readSettings(self):
-        """
-        Return the local settings from the location of the SETTING_PATH.
-
-        :rtype: dict
-        """
-        path = studiolibrary.localPath("FormWidget.json")
-        return studiolibrary.readJson(path)
-
-    def saveSettings(self, data):
-        """
-        Save the given dict to the local location of the SETTING_PATH.
-
-        :type data: dict
-        :rtype: None
-        """
-        path = studiolibrary.localPath("FormWidget.json")
-        studiolibrary.updateJson(path, data)
-
     def savePersistentValues(self):
         """
         Triggered when the user changes the options.
         """
-        settings = self.readSettings()
-
-        settings[self.__class__.__name__] = self.persistentValues()
-
-        self.saveSettings(settings)
+        key = self.objectName() or "FormWidget"
+        settings.set(key, self.persistentValues())
 
     def loadPersistentValues(self):
         """
@@ -187,9 +164,8 @@ class FormWidget(QtWidgets.QFrame):
 
         :rtype: dict
         """
-        settings = self.readSettings()
-
-        values = settings.get(self.__class__.__name__, {})
+        key = self.objectName() or "FormWidget"
+        values = settings.get(key, {})
         defaultValues = self.defaultValues()
 
         # Remove options from the user settings that are not persistent

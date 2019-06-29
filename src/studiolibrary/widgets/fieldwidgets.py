@@ -19,7 +19,7 @@ from studioqt import QtGui, QtCore, QtWidgets
 import studioqt
 
 
-from . import groupbox
+from . import groupboxwidget
 from . import colorpicker
 
 
@@ -523,7 +523,7 @@ class GroupFieldWidget(FieldWidget):
     def __init__(self, *args, **kwargs):
         super(GroupFieldWidget, self).__init__(*args, **kwargs)
 
-        widget = groupbox.GroupBoxWidget(self.data().get("title"), None)
+        widget = groupboxwidget.GroupBoxWidget(self.data().get("title"), None)
         widget.setChecked(True)
         widget.toggled.connect(self.setValue)
 

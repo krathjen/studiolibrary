@@ -21,6 +21,7 @@ from .statuswidget import StatusWidget
 from .previewwidget import PreviewWidget
 from .menubarwidget import MenuBarWidget
 from .sidebarwidget import SidebarWidget
+from .groupboxwidget import GroupBoxWidget
 from .placeholderwidget import PlaceholderWidget
 from .itemswidget.item import Item
 from .itemswidget.groupitem import GroupItem

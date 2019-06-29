@@ -10,8 +10,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 from .themesmenu import Theme
 
 from studioqt import QtCore
@@ -19,8 +17,7 @@ from studioqt import QtWidgets
 
 import studioqt
 
-HOME_PATH = os.getenv('APPDATA') or os.getenv('HOME')
-SETTINGS_PATH = os.path.join(HOME_PATH, 'studioqt.ini')
+from . import settings
 
 
 def createMessageBox(
@@ -109,15 +106,11 @@ def showMessageBox(
 
     :rtype: MessageBox
     """
-    settings = QtCore.QSettings(SETTINGS_PATH, QtCore.QSettings.IniFormat)
+    key = 'MessageBox{0}'.format(title.replace(" ", "_"))
+    data = settings.get(key, {})
 
-    key = 'MessageBox/{}/'.format(title.replace(" ", "_"))
-
-    clickedButton = int(settings.value(key + "clickedButton") or -1)
-    dontShowAgain = settings.value(key + "dontShowAgain")
-
-    if isinstance(dontShowAgain, basestring):
-        dontShowAgain = dontShowAgain == "true"
+    clickedButton = data.get("clickedButton",  -1)
+    dontShowAgain = data.get("dontShowAgain", False)
 
     # Force show the dialog if the user is holding the ctrl key down
     if studioqt.isControlModifier() or studioqt.isAltModifier():
@@ -140,15 +133,16 @@ def showMessageBox(
         mb.exec_()
         mb.close()
 
-        # Save the button that was clicked by the user
         clickedButton = mb.clickedStandardButton()
-        settings.setValue(key + "clickedButton", clickedButton)
+        if clickedButton != QtWidgets.QDialogButtonBox.Cancel:
 
-        # Save the dont show again checked state
-        dontShowAgain = mb.isDontShowCheckboxChecked()
-        settings.setValue(key + "dontShowAgain", dontShowAgain)
-
-        settings.sync()
+            # Save the button that was clicked by the user
+            settings.set(key,
+                {
+                    "clickedButton": int(clickedButton),
+                    "dontShowAgain":  bool(mb.isDontShowCheckboxChecked()),
+                }
+            )
 
     return clickedButton
 

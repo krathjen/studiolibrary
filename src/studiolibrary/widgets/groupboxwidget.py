@@ -15,6 +15,8 @@ import logging
 from studioqt import QtCore
 from studioqt import QtWidgets
 
+from . import settings
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +25,11 @@ class GroupBoxWidget(QtWidgets.QFrame):
 
     toggled = QtCore.Signal(bool)
 
-    def __init__(self, title, widget, *args, **kwargs):
+    def __init__(self, title, widget, persistent=False, *args, **kwargs):
         super(GroupBoxWidget, self).__init__(*args, **kwargs)
 
         self._widget = None
+        self._persistent = None
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -38,7 +41,7 @@ class GroupBoxWidget(QtWidgets.QFrame):
         self._titleWidget.setCheckable(True)
         self._titleWidget.setText(title)
         self._titleWidget.setObjectName("title")
-        self._titleWidget.toggled.connect(self._toggle)
+        self._titleWidget.toggled.connect(self._toggled)
 
         self.layout().addWidget(self._titleWidget)
 
@@ -56,15 +59,18 @@ class GroupBoxWidget(QtWidgets.QFrame):
         if widget:
             self.setWidget(widget)
 
-    def setText(self, text):
-        """
-        Set the text to be displayed for group box.
+        self.setPersistent(persistent)
 
-        :type text: str
+    def setPersistent(self, persistent):
         """
-        self._titleWidget.setText(text)
+        Save and load the state of the widget to disk.
 
-    def text(self):
+        :type persistent: bool
+        """
+        self._persistent = persistent
+        self.loadSettings()
+
+    def title(self):
         """
         Get the title for the group box.
 
@@ -82,12 +88,14 @@ class GroupBoxWidget(QtWidgets.QFrame):
         self._widget.setParent(self._widgetFrame)
         self._widgetFrame.layout().addWidget(self._widget)
 
-    def _toggle(self, visible):
+    def _toggled(self, visible):
         """
         Triggered when the user clicks the title.
 
         :type visible: bool
         """
+        self.saveSettings()
+        self.setChecked(visible)
         self.toggled.emit(visible)
 
     def isChecked(self):
@@ -107,3 +115,25 @@ class GroupBoxWidget(QtWidgets.QFrame):
         self._titleWidget.setChecked(checked)
         if self._widget:
             self._widget.setVisible(checked)
+
+    def saveSettings(self):
+        """Save the state to disc."""
+        if self._persistent:
+
+            if not self.objectName():
+                raise NameError("No object name set for persistent widget.")
+
+            data = {self.objectName(): self.isChecked()}
+            settings.save(data)
+
+    def loadSettings(self):
+        """Load the state to disc."""
+        if self._persistent:
+
+            if not self.objectName():
+                raise NameError("No object name set for persistent widget.")
+
+            data = settings.read()
+            checked = data.get(self.objectName(), True)
+            self.setChecked(checked)
+
