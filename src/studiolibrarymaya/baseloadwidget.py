@@ -42,100 +42,6 @@ class NamespaceOption:
     FromSelection = "selection"
 
 
-class GroupBoxWidget(QtWidgets.QFrame):
-
-    def __init__(self, title, widget, *args, **kwargs):
-        super(GroupBoxWidget, self).__init__(*args, **kwargs)
-
-        self._widget = None
-
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.setLayout(layout)
-
-        self._titleWidget = QtWidgets.QPushButton(self)
-        self._titleWidget.setCheckable(True)
-        self._titleWidget.setText(title)
-        self._titleWidget.setObjectName("title")
-        self._titleWidget.toggled.connect(self._toggle)
-
-        self.layout().addWidget(self._titleWidget)
-
-        self._widgetFrame = QtWidgets.QFrame(self)
-        self._widgetFrame.setObjectName("frame")
-
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self._widgetFrame.setLayout(layout)
-
-        self.layout().addWidget(self._widgetFrame)
-
-        self.setWidget(widget)
-        self.loadSettings()
-
-    def title(self):
-        """
-        Get the title for the group box.
-
-        :rtype: str
-        """
-        return self._titleWidget.text()
-
-    def setWidget(self, widget):
-        """
-        Set the widget to hide when the user clicks the title.
-
-        :type widget: QWidgets.QWidget
-        """
-        self._widget = widget
-        self._widget.setParent(self._widgetFrame)
-        self._widgetFrame.layout().addWidget(self._widget)
-
-    def _toggle(self, visible):
-        """
-        Triggered when the user clicks the title.
-
-        :type visible: bool
-        """
-        self.saveSettings()
-        self.setChecked(visible)
-
-    def isChecked(self):
-        """
-        Check the checked state for the group box.
-
-        :rtype: bool
-        """
-        return self._titleWidget.isChecked()
-
-    def setChecked(self, checked):
-        """
-        Overriding this method to hide the widget when the state changes.
-
-        :type checked: bool
-        """
-        self._titleWidget.setChecked(checked)
-        if self._widget:
-            self._widget.setVisible(checked)
-
-    def saveSettings(self):
-        """Save the state to disc."""
-        data = {
-            self.title().lower() + "ToggleBoxChecked": self.isChecked(),
-        }
-        studiolibrarymaya.saveSettings(data)
-
-    def loadSettings(self):
-        """Load the state to disc."""
-        data = studiolibrarymaya.settings()
-        checked = data.get(self.title().lower() + "ToggleBoxChecked", True)
-        self.setChecked(checked)
-
-
 class BaseLoadWidget(QtWidgets.QWidget):
     """Base widget for creating and previewing transfer items."""
 
@@ -477,17 +383,25 @@ class BaseLoadWidget(QtWidgets.QWidget):
         namespaceOption = settings.get("namespaceOption", NamespaceOption.FromFile)
         self.setNamespaceOption(namespaceOption)
 
-        infoTitleWidget = GroupBoxWidget("Info", self.ui.infoFrame)
-        self.ui.infoTitleFrame.layout().addWidget(infoTitleWidget)
+        infoGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Info", self.ui.infoFrame)
+        infoGroupBoxWidget.setObjectName("infoGroupBoxWidget")
+        infoGroupBoxWidget.setPersistent(True)
+        self.ui.infoTitleFrame.layout().addWidget(infoGroupBoxWidget)
 
-        iconTitleWidget = GroupBoxWidget("Icon", self.ui.iconFrame)
-        self.ui.iconTitleFrame.layout().addWidget(iconTitleWidget)
+        iconGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
+        iconGroupBoxWidget.setObjectName("iconGroupBoxWidget")
+        iconGroupBoxWidget.setPersistent(True)
+        self.ui.iconTitleFrame.layout().addWidget(iconGroupBoxWidget)
 
-        optionsTitleWidget = GroupBoxWidget("Options", self.ui.optionsFrame)
-        self.ui.optionsTitleFrame.layout().addWidget(optionsTitleWidget)
+        optionsGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Options", self.ui.optionsFrame)
+        optionsGroupBoxWidget.setObjectName("optionsGroupBoxWidget")
+        optionsGroupBoxWidget.setPersistent(True)
+        self.ui.optionsTitleFrame.layout().addWidget(optionsGroupBoxWidget)
 
-        namespaceTitleWidget = GroupBoxWidget("Namespace", self.ui.namespaceFrame)
-        self.ui.namespaceTitleFrame.layout().addWidget(namespaceTitleWidget)
+        namespaceGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Namespace", self.ui.namespaceFrame)
+        namespaceGroupBoxWidget.setObjectName("namespaceGroupBoxWidget")
+        namespaceGroupBoxWidget.setPersistent(True)
+        self.ui.namespaceTitleFrame.layout().addWidget(namespaceGroupBoxWidget)
 
     def settings(self):
         """
