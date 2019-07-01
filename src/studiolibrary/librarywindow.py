@@ -1910,16 +1910,19 @@ class LibraryWindow(QtWidgets.QWidget):
         path = studiolibrary.settingsPath()
         studiolibrary.showInFolder(path)
 
-    def saveSettings(self, settings=None):
+    def saveSettings(self, data=None):
         """
         Save the settings to the settings path set in the config.
 
-        :type settings: dict or None
+        :type data: dict or None
         :rtype: None
         """
-        data = {self.name(): settings or self.settings()}
+        settings = studiolibrary.readSettings()
 
-        studiolibrary.updateSettings(data)
+        settings.setdefault(self.name(), {})
+        settings[self.name()].update(data or self.settings())
+
+        studiolibrary.saveSettings(settings)
 
         self.showToastMessage("Saved")
 
