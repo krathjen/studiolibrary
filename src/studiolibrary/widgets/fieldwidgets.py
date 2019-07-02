@@ -961,6 +961,7 @@ class TagsFieldWidget(FieldWidget):
 
         widget = QtWidgets.QComboBox(self)
         widget.setEditable(True)
+        widget.editTextChanged.connect(self.emitValueChanged)
         widget.currentIndexChanged.connect(self.emitValueChanged)
 
         self.setWidget(widget)

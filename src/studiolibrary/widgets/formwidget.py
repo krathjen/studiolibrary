@@ -228,7 +228,7 @@ class FormWidget(QtWidgets.QFrame):
         
         :type widget: FieldWidget 
         """
-        self.validate()
+        self.validate(widget=widget)
 
     def accept(self):
         """Accept the current options"""
@@ -267,11 +267,16 @@ class FormWidget(QtWidgets.QFrame):
         """
         return self._validator
 
-    def validate(self):
+    def validate(self, widget=None):
         """Validate the current options using the validator."""
         if self._validator:
 
-            fields = self._validator(**self.values())
+            values = self.values()
+
+            if widget:
+                values["fieldChanged"] = widget.name()
+
+            fields = self._validator(**values)
             if fields is not None:
                 self._setState(fields)
 
