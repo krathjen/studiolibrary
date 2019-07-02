@@ -123,7 +123,7 @@ class GroupBoxWidget(QtWidgets.QFrame):
             if not self.objectName():
                 raise NameError("No object name set for persistent widget.")
 
-            data = {self.objectName(): self.isChecked()}
+            data = {self.objectName(): {"checked": self.isChecked()}}
             settings.save(data)
 
     def loadSettings(self):
@@ -134,6 +134,9 @@ class GroupBoxWidget(QtWidgets.QFrame):
                 raise NameError("No object name set for persistent widget.")
 
             data = settings.read()
-            checked = data.get(self.objectName(), True)
-            self.setChecked(checked)
+            data = data.get(self.objectName(), {})
+
+            if isinstance(data, dict):
+                checked = data.get("checked", True)
+                self.setChecked(checked)
 

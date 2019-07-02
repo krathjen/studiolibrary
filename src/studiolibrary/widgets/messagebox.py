@@ -106,7 +106,7 @@ def showMessageBox(
 
     :rtype: MessageBox
     """
-    key = 'MessageBox{0}'.format(title.replace(" ", "_"))
+    key = '{0}MessageBox'.format(title.replace(" ", ""))
     data = settings.get(key, {})
 
     clickedButton = data.get("clickedButton",  -1)

@@ -21,7 +21,7 @@ def path():
 
     :rtype: str
     """
-    return studiolibrary.localPath("widgets.json")
+    return studiolibrary.localPath("widgets2.json")
 
 
 def get(key, default=None):

@@ -155,8 +155,20 @@ class FormWidget(QtWidgets.QFrame):
         """
         Triggered when the user changes the options.
         """
-        key = self.objectName() or "FormWidget"
-        settings.set(key, self.persistentValues())
+        data = {}
+
+        for widget in self._widgets:
+            name = widget.data().get("name")
+            if name and widget.data().get("persistent"):
+
+                key = self.objectName() or "FormWidget"
+                key = widget.data().get("persistentKey", key)
+
+                data.setdefault(key, {})
+                data[key][name] = widget.value()
+
+        for key in data:
+            settings.set(key, data[key])
 
     def loadPersistentValues(self):
         """
@@ -164,17 +176,20 @@ class FormWidget(QtWidgets.QFrame):
 
         :rtype: dict
         """
-        key = self.objectName() or "FormWidget"
-        values = settings.get(key, {})
+        values = {}
         defaultValues = self.defaultValues()
 
-        # Remove options from the user settings that are not persistent
-        if values:
-            for value in self.schema():
-                name = value.get("name")
-                persistent = value.get("persistent")
-                if not persistent and name in values:
-                    values[name] = defaultValues[name]
+        for field in self.schema():
+            name = field.get("name")
+            persistent = field.get("persistent")
+
+            if persistent:
+                key = self.objectName() or "FormWidget"
+                key = field.get("persistentKey", key)
+
+                values[name] = settings.get(key, {}).get(name)
+            else:
+                values[name] = defaultValues[name]
 
         self.setValues(values)
 
@@ -356,19 +371,6 @@ class FormWidget(QtWidgets.QFrame):
         for widget in self._widgets:
             name = widget.data().get("name")
             if name:
-                values[name] = widget.value()
-        return values
-
-    def persistentValues(self):
-        """
-        Get all the persistent field values for the current form.
-
-        :rtype: dict
-        """
-        values = {}
-        for widget in self._widgets:
-            name = widget.data().get("name")
-            if name and widget.data().get("persistent"):
                 values[name] = widget.value()
         return values
 

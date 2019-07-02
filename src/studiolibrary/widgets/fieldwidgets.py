@@ -942,7 +942,9 @@ class EnumFieldWidget(FieldWidget):
         if index != -1:
             self.widget().setCurrentIndex(index)
         else:
-            logger.warning("Cannot set the value for field %s", self.name())
+            msg = 'Cannot set the current text to "{0}" for the field "{1}".'
+            msg = msg.format(text, self.name())
+            logger.warning(msg)
 
     def setItems(self, items):
         """
