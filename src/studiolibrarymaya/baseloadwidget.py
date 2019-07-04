@@ -184,6 +184,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
                 item.loadValueChanged.connect(self._itemValueChanged)
 
                 formWidget = studiolibrary.widgets.FormWidget(self)
+                formWidget.setObjectName(item.__class__.__name__ + "Form")
                 formWidget.setSchema(item.loadSchema())
                 formWidget.setValidator(item.loadValidator)
 
