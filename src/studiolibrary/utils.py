@@ -93,6 +93,7 @@ __all__ = [
     "itemsFromPaths",
     "itemsFromUrls",
     "findItems",
+    "runTests",
     "findItemsInFolders",
 ]
 
@@ -1045,13 +1046,17 @@ def realPath(path):
 def normPath(path):
     """
     Return a normalized path containing only forward slashes.
-    
+
     :type path: str
-    :rtype: unicode 
+    :rtype: unicode
     """
+    path = path.replace("//", "/")
     path = path.replace("\\", "/")
-    path = six.u(path)
-    return path.rstrip("/")
+
+    if path.endswith("/") and not path.endswith(":/"):
+        path = path.rstrip("/")
+
+    return path
 
 
 def normPaths(paths):
@@ -1524,9 +1529,29 @@ def testRelativePaths():
     msg = "Data does not match {} {}".format(expected, data_)
     assert data_ == expected, msg
 
-    data_ = absPath(data_, "P:/test/relative/file.database")
-    msg = "Data does not match {} {}".format(data, data_)
-    assert data_ == data, msg
+    data = """
+    {
+    "P:/": {},
+    "P:/head.anim": {},
+    "P:/path/head.anim": {},
+    "P:/test/path/face.anim": {},
+    "P:/test/relative/path/hand.anim": {},
+    }
+    """
+
+    expected = """
+    {
+    "../../": {},
+    "../../head.anim": {},
+    "../../path/head.anim": {},
+    "../../test/path/face.anim": {},
+    "../../test/relative/path/hand.anim": {},
+    }
+    """
+
+    data_ = relPath(data, "P:/.studiolibrary/database.json")
+    msg = "Data does not match {} {}".format(expected, data_)
+    assert data_ == expected, msg
 
     path = "P:/path/head.anim"
     start = "P:/test/relative/file.database"

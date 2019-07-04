@@ -625,7 +625,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         dirname, basename, extension = studiolibrary.splitPath(path)
 
         name = os.path.basename(path)
-        category = os.path.basename(dirname)
+        category = os.path.basename(dirname) or dirname
         modified = ""
         # timeAgo = ""
 

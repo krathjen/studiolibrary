@@ -18,6 +18,7 @@ from studioqt import QtCore
 from studioqt import QtWidgets
 
 import studioqt
+import studiolibrary
 
 from sidebarwidgetitem import SidebarWidgetItem
 
@@ -46,6 +47,7 @@ def pathsToDict(paths, root="", separator=None):
     """
     separator = separator or DEFAULT_SEPARATOR
     results = collections.OrderedDict()
+    paths = studiolibrary.normPaths(paths)
 
     for path in paths:
         p = results
@@ -257,7 +259,10 @@ class SidebarWidget(QtWidgets.QTreeWidget):
 
         for path in self.selectedPaths():
             if self.isRecursive():
-                filter_ = ('folder', 'startswith', path + "/")
+
+                suffix = "" if path.endswith("/") else "/"
+
+                filter_ = ('folder', 'startswith', path + suffix)
                 filters.append(filter_)
 
             filter_ = ('folder', 'is', path)
@@ -525,7 +530,8 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         for item in items:
             path = item.path()
             paths.append(path)
-        return paths
+        return studiolibrary.normPaths(paths)
+
 
     def selectPath(self, path):
         """
@@ -543,10 +549,10 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         :type paths: list[str]
         :rtype: None
         """
-        paths = self.normPaths(paths)
+        paths = studiolibrary.normPaths(paths)
         items = self.items()
         for item in items:
-            if item.path() in paths:
+            if studiolibrary.normPath(item.path()) in paths:
                 item.setSelected(True)
             else:
                 item.setSelected(False)
@@ -578,9 +584,6 @@ class SidebarWidget(QtWidgets.QTreeWidget):
             urls.append(item.url())
         return urls
 
-    def normPaths(self, paths):
-        return [path.replace("\\", "/") for path in paths]
-
     def setPaths(self, *args, **kwargs):
         """
         This method has been deprecated.
@@ -611,6 +614,8 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         self.setSettings(settings)
 
         self.blockSignals(False)
+
+        self.search()
 
     def addPaths(self, paths, root="", split=None):
         """

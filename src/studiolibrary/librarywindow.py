@@ -458,8 +458,6 @@ class LibraryWindow(QtWidgets.QWidget):
         :rtype: None
         """
         path = self.selectedFolderPath()
-        self.library().search()
-
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
 
