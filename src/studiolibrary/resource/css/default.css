@@ -861,7 +861,7 @@ Lightbox {
 
 /*
 ---------------------------
-Form Widget
+Field Widgets
 ---------------------------
 */
 
@@ -923,6 +923,7 @@ FieldWidget #label:disabled {
 FormWidget #titleWidget {
     font-size: 12px;
     padding: 2px;
+    margin:0px;
     padding-left: 5px;
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
     border-bottom: 0px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
@@ -940,30 +941,46 @@ FieldWidget QComboBox {
     border: 1px solid transparent;
 }
 
+/*
+---------------------------
+Group Box Widget
+---------------------------
+*/
 
-
-GroupFieldWidget > QFrame {
-    margin-top: 2px;
+GroupFieldWidget[layout="horizontal"] {
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
+GroupBoxWidget {
+    margin-top: 3px;
+}
 
-BaseLoadWidget GroupBoxWidget #title {
+GroupBoxWidget #title {
     padding: 2px;
     padding-left: 5px;
     text-align: left;
     border-radius: 2px;
     min-height: 18px;
     max-height: 18px;
+    icon-size: 18px;
+    color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 150);
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 10);
 }
 
-BaseLoadWidget GroupBoxWidget #title:checked {
+GroupBoxWidget #title:checked {
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 15);
+}
+
+GroupBoxWidget #title:hover {
     background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
 }
 
-BaseLoadWidget GroupBoxWidget #title:hover {
-    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 30);
-}
+/*
+---------------------------
+Save Widget & Load Widget
+---------------------------
+*/
 
 BaseSaveWidget #fieldWidget {
     margin-top: 4px;
@@ -1013,6 +1030,11 @@ BaseLoadWidget #selectionSetButton {
     border-bottom-right-radius: 2px;
 }
 
+/*
+---------------------------
+Form Widget
+---------------------------
+*/
 
 FormDialog {
     padding: 5px;

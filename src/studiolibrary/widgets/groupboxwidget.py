@@ -17,6 +17,9 @@ from studioqt import QtWidgets
 
 from . import settings
 
+import studioqt
+import studiolibrary
+
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +45,11 @@ class GroupBoxWidget(QtWidgets.QFrame):
         self._titleWidget.setText(title)
         self._titleWidget.setObjectName("title")
         self._titleWidget.toggled.connect(self._toggled)
+
+        on_path = studiolibrary.resource().get("icons", "fa", "caret-down.svg")
+        off_path = studiolibrary.resource().get("icons", "fa", "caret-right.svg")
+        icon = studioqt.Icon.fa(on_path, color="rgb(255,255,255,200)", off=off_path)
+        self._titleWidget.setIcon(icon)
 
         self.layout().addWidget(self._titleWidget)
 
