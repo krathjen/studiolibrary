@@ -10,9 +10,14 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-import studiolibrary.widgets
-import studioqt
+import os
+
+from studioqt import QtGui
+from studioqt import QtCore
 from studioqt import QtWidgets
+
+import studioqt
+import studiolibrary.widgets
 
 
 class PreviewWidget(QtWidgets.QWidget):
@@ -23,86 +28,106 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self._item = item
 
-        pixmap = studioqt.Pixmap(item.thumbnailPath())
-        pixmap.setColor('rgb(255,255,255,20)')
-        self.ui.thumbnailLabel.setPixmap(pixmap)
+        iconGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconGroup)
+        iconGroupBoxWidget.setObjectName("iconGroupBoxWidget")
+        iconGroupBoxWidget.setPersistent(True)
+        self.ui.iconTitleFrame.layout().addWidget(iconGroupBoxWidget)
 
         self._infoWidget = studiolibrary.widgets.FormWidget(self)
-        self._infoWidget.setTitle("Info")
-        self._infoWidget.setTitleVisible(True)
         self._infoWidget.setSchema(item.info())
 
         self.ui.infoFrame.layout().addWidget(self._infoWidget)
 
-        self._optionsWidget = studiolibrary.widgets.FormWidget(self)
-        self._optionsWidget.setTitle("Options")
+        self._formWidget = studiolibrary.widgets.FormWidget(self)
 
-        options = item.loadSchema()
-        if options:
-            self._optionsWidget.setSchema(options)
-            self._optionsWidget.setTitleVisible(True)
+        schema = item.loadSchema()
+        if schema:
+            self._formWidget.setSchema(schema)
 
-        self.ui.optionsFrame.layout().addWidget(self._optionsWidget)
+        self.ui.formFrame.layout().addWidget(self._formWidget)
 
         self.ui.acceptButton.hide()
         self.ui.acceptButton.setText("Load")
         self.ui.acceptButton.clicked.connect(self.accept)
 
-        self.loadSettings()
+        self.createSequenceWidget()
+
+        if item.MenuName:
+            self.ui.titleFrame.setVisible(True)
+            self.ui.titleLabel.setText(item.MenuName)
+        else:
+            self.ui.titleFrame.setVisible(False)
+
+        if item.TypeIconPath:
+            self.ui.titleIcon.setVisible(True)
+            self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+        else:
+            self.ui.titleIcon.setVisible(False)
+
+        self.updateThumbnailSize()
+
+    def setTitle(self, title):
+        self.ui.titleLabel.setText(title)
+
+    def createSequenceWidget(self):
+        """
+        Create a sequence widget to replace the static thumbnail widget.
+
+        :rtype: None
+        """
+        self.ui.sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self.ui.iconFrame)
+
+        self.ui.iconFrame.layout().insertWidget(0, self.ui.sequenceWidget)
+
+        path = self._item.thumbnailPath()
+        if os.path.exists(path):
+            self.ui.sequenceWidget.setPath(path)
+
+        if self._item.imageSequencePath():
+            self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
 
     def close(self):
-        """Triggered when the user changes the options."""
-        self.saveSettings()
-        super(PreviewWidget, self).close()
-
-    def settingsPath(self):
         """
-        Get the user settings path for the item.
-        
-        :rtype: str
+        Overriding the close method so save the persistent data.
+
+        :rtype: None
         """
-        return studiolibrary.localPath("ItemSettings.json")
+        if self._formWidget:
+            self._formWidget.savePersistentValues()
 
-    def readSettings(self):
+        if self._infoWidget:
+            self._infoWidget.savePersistentValues()
+
+        QtWidgets.QWidget.close(self)
+
+    def resizeEvent(self, event):
         """
-        Return the local settings from the location of the SETTING_PATH.
-    
-        :rtype: dict
+        Overriding to adjust the image size when the widget changes size.
+
+        :type event: QtCore.QSizeEvent
         """
-        return studiolibrary.readJson(self.settingsPath())
+        self.updateThumbnailSize()
 
-    def loadSettings(self):
-        """Load the user settings for the preview widget."""
-        data = self.readSettings()
+    def updateThumbnailSize(self):
+        """
+        Update the thumbnail button to the size of the widget.
 
-        name = self._item.__class__.__name__
+        :rtype: None
+        """
+        width = self.width() - 5
+        if width > 250:
+            width = 250
 
-        state = data.get(name, {}).get("optionsWidget")
-        if state is not None:
-            self._optionsWidget.setState(state)
+        size = QtCore.QSize(width, width)
 
-        expand = data.get("infoExpanded")
-        if expand is not None:
-            self._infoWidget.setExpanded(expand)
+        self.ui.iconFrame.setMaximumSize(size)
+        self.ui.iconGroup.setMaximumHeight(width)
 
-        expand = data.get("optionsExpanded")
-        if expand is not None:
-            self._optionsWidget.setExpanded(expand)
-
-    def saveSettings(self):
-        """Save the current user state for the preview widget."""
-
-        name = self._item.__class__.__name__
-
-        data = {
-            "infoExpanded": self._infoWidget.isExpanded(),
-            "optionsExpanded": self._optionsWidget.isExpanded(),
-            name: {"optionsWidget": self._optionsWidget.state()}
-        }
-
-        studiolibrary.updateJson(self.settingsPath(), data)
+        self.ui.sequenceWidget.setIconSize(size)
+        self.ui.sequenceWidget.setMinimumSize(size)
+        self.ui.sequenceWidget.setMaximumSize(size)
 
     def accept(self):
         """Called when the user clicks the load button."""
-        kwargs = self._optionsWidget.values()
+        kwargs = self._formWidget.values()
         self._item.load(**kwargs)

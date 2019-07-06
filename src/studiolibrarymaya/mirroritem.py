@@ -78,7 +78,7 @@ class MirrorItem(baseitem.BaseItem):
                 "title": "Options",
                 "type": "group",
                 "persistent": True,
-                "persistentKey": "BaseItemForm",
+                "persistentKey": "BaseItem",
             },
             {
                 "name": "animation",

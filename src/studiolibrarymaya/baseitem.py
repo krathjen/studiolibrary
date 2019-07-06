@@ -169,7 +169,8 @@ class BaseItem(studiolibrary.LibraryItem):
                 "title": "Info",
                 "type": "group",
                 "value": True,
-                "persistent": True
+                "persistent": True,
+                "persistentKey": "BaseItem"
             },
             {
                 "name": "name",
@@ -202,7 +203,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 "value": True,
                 "type": "group",
                 "persistent": True,
-                "persistentKey": "BaseItemForm",
+                "persistentKey": "BaseItem",
             },
             {
                 "name": "namespaceOption",
@@ -211,7 +212,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 "value": "From selection",
                 "items": ["From file", "From selection", "Use custom"],
                 "persistent": True,
-                "persistentKey": "BaseItemForm",
+                "persistentKey": "BaseItem",
             },
             {
                 "name": "namespaces",
@@ -221,7 +222,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 "items": mutils.namespace.getAll(),
                 "persistent": True,
                 "label": {"visible": False},
-                "persistentKey": "BaseItemForm",
+                "persistentKey": "BaseItem",
             },
         ]
 

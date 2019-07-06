@@ -65,6 +65,14 @@ class FolderItem(studiolibrary.LibraryItem):
 
         return [
             {
+                "name": "infoGroup",
+                "title": "Info",
+                "value": True,
+                "type": "group",
+                "persistent": True,
+                "persistentKey": "BaseItem",
+            },
+            {
                 "name": "name",
                 "value": self.name()
             },

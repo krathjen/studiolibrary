@@ -93,8 +93,8 @@ class GroupBoxWidget(QtWidgets.QFrame):
         :type widget: QWidgets.QWidget
         """
         self._widget = widget
-        self._widget.setParent(self._widgetFrame)
-        self._widgetFrame.layout().addWidget(self._widget)
+        # self._widget.setParent(self._widgetFrame)
+        # self._widgetFrame.layout().addWidget(self._widget)
 
     def _toggled(self, visible):
         """

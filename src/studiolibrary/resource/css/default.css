@@ -986,18 +986,27 @@ BaseSaveWidget #fieldWidget {
     margin-top: 4px;
 }
 
+PreviewWidget ImageSequenceWidget {
+    background-color: rgb(0,0,0,0);
+}
 
+PreviewWidget #titleLabel,
 BaseSaveWidget #titleLabel,
 BaseLoadWidget #titleLabel {
     font-size: 14px;
 }
 
+PreviewWidget QWidget,
 BaseSaveWidget QWidget,
 BaseLoadWidget QWidget {
     font-size: 12px;
 }
 
 
+PreviewWidget QLineEdit,
+PreviewWidget QTextEdit,
+PreviewWidget QComboBox,
+PreviewWidget #thumbnailButton,
 BaseLoadWidget QLineEdit,
 BaseLoadWidget QTextEdit,
 BaseLoadWidget QComboBox,
