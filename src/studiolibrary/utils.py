@@ -84,6 +84,8 @@ __all__ = [
     "MovePathError",
     "RenamePathError",
     "timeAgo",
+    "modules",
+    "setDebugMode",
     "sendAnalytics",
     "showInFolder",
     "stringToList",
@@ -155,13 +157,7 @@ def reload():
     import studiolibrary
     studiolibrary.LibraryWindow.destroyInstances()
 
-    names = [
-        "studioqt",
-        "studiovendor",
-        "studiolibrary",
-        "studiolibrarymaya",
-        "mutils",
-    ]
+    names = modules()
 
     for mod in sys.modules.keys():
         for name in names:
@@ -250,6 +246,36 @@ def setLibraries(libraries):
     remove = set(old) - set(new)
     for name in remove:
         removeLibrary(name)
+
+
+def modules():
+    """
+    Get all the module names for the package.
+
+    :rtype: list[str]
+    """
+    names = []
+    dirname = os.path.dirname(os.path.dirname(__file__))
+    for filename in os.listdir(dirname):
+        names.append(filename)
+    return names
+
+
+def setDebugMode(level):
+    """
+    Set the logging level to debug.
+
+    :type level: int
+    :rtype: None
+    """
+    if level:
+        level = logging.DEBUG
+    else:
+        level = logging.INFO
+
+    for name in modules():
+        logger_ = logging.getLogger(name)
+        logger_.setLevel(level)
 
 
 def resolveModule(name):
