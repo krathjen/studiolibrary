@@ -413,6 +413,3 @@ class PoseItem(baseitem.BaseItem):
             objects,
             metadata={"description": options.get("comment", "")}
         )
-
-
-studiolibrary.registerItem(PoseItem)

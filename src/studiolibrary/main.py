@@ -36,11 +36,13 @@ def main(*args, **kwargs):
         import studiolibrary
         studiolibrary.reload()
 
+    # Register all the items from the config file.
     import studiolibrary
+    studiolibrary.registerItems()
 
     if studiolibrary.isMaya():
-        import studiolibrarymaya
-        libraryWindow = studiolibrarymaya.main(*args, **kwargs)
+        from studiolibrarymaya import mayalibrarywindow
+        libraryWindow = mayalibrarywindow.MayaLibraryWindow.instance(*args, **kwargs)
     else:
         libraryWindow = studiolibrary.LibraryWindow.instance(*args, **kwargs)
 

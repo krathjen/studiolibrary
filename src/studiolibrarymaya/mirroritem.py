@@ -236,6 +236,3 @@ class MirrorItem(baseitem.BaseItem):
             leftSide=options.get("leftSide"),
             rightSide=options.get("rightSide"),
         )
-
-
-studiolibrary.registerItem(MirrorItem)

@@ -316,6 +316,3 @@ class AnimItem(baseitem.BaseItem):
             sequencePath=sequencePath,
             bakeConnected=options.get("bake")
         )
-
-
-studiolibrary.registerItem(AnimItem)

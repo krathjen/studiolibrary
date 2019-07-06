@@ -25,6 +25,10 @@ logger = logging.getLogger(__name__)
 
 class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
 
+    def destroy(self):
+        studiolibrarymaya.disableMayaClosedEvent()
+        studiolibrary.LibraryWindow.destroy(self)
+
     def setObjectName(self, name):
         """
         Overriding to ensure the widget has a unique name for Maya.

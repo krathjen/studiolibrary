@@ -66,7 +66,3 @@ class SetsItem(baseitem.BaseItem):
             objects,
             metadata={"description": options.get("comment", "")}
         )
-
-
-# Register the selection set item to the Studio Library
-studiolibrary.registerItem(SetsItem)

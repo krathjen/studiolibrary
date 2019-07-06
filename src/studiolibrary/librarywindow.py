@@ -45,7 +45,6 @@ class GlobalSignal(QtCore.QObject):
     """
     Triggered for all library instance.
     """
-    debugModeChanged = QtCore.Signal(object, object)
     folderSelectionChanged = QtCore.Signal(object, object)
 
 
@@ -101,7 +100,6 @@ class LibraryWindow(QtWidgets.QWidget):
     # Local signal
     loaded = QtCore.Signal()
     lockChanged = QtCore.Signal(object)
-    debugModeChanged = QtCore.Signal(object)
 
     itemRenamed = QtCore.Signal(str, str)
     itemSelectionChanged = QtCore.Signal(object)
@@ -2691,16 +2689,7 @@ class LibraryWindow(QtWidgets.QWidget):
         :type value: bool
         """
         self._isDebug = value
-
-        logger_ = logging.getLogger("studiolibrary")
-
-        if value:
-            logger_.setLevel(logging.DEBUG)
-        else:
-            logger_.setLevel(logging.INFO)
-
-        self.debugModeChanged.emit(value)
-        self.globalSignal.debugModeChanged.emit(self, value)
+        studiolibrary.setDebugMode(value)
 
     def isDebug(self):
         """

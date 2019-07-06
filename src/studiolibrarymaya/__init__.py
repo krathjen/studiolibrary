@@ -19,8 +19,8 @@ import studiolibrary
 import mutils
 import studioqt
 
-from studiolibrarymaya.main import main
 
+logger = logging.getLogger(__name__)
 
 __encoding__ = sys.getfilesystemencoding()
 
@@ -30,7 +30,6 @@ RESOURCE_DIRNAME = DIRNAME + "/resource"
 
 
 _resource = None
-_settings = None
 _mayaCloseScriptJob = None
 
 
@@ -44,18 +43,6 @@ def resource():
         _resource = studioqt.Resource(RESOURCE_DIRNAME)
 
     return _resource
-
-
-def registerItems():
-    """
-    The following items are registered on import at the bottom of each file.
-    
-    :rtype: None 
-    """
-    from studiolibrarymaya import animitem
-    from studiolibrarymaya import poseitem
-    from studiolibrarymaya import mirroritem
-    from studiolibrarymaya import setsitem
 
 
 def enableMayaClosedEvent():
@@ -72,8 +59,19 @@ def enableMayaClosedEvent():
         event = ['quitApplication', mayaClosedEvent]
         try:
             _mayaCloseScriptJob = mutils.ScriptJob(event=event)
+            logger.debug("Maya close event enabled")
         except NameError as error:
             logging.exception(error)
+
+
+def disableMayaClosedEvent():
+    """Disable the maya closed event."""
+    global _mayaCloseScriptJob
+
+    if _mayaCloseScriptJob:
+        _mayaCloseScriptJob.kill()
+        _mayaCloseScriptJob = None
+        logger.debug("Maya close event disabled")
 
 
 def mayaClosedEvent():
@@ -86,24 +84,4 @@ def mayaClosedEvent():
         libraryWindow.saveSettings()
 
 
-def setDebugMode(libraryWindow, value):
-    """
-    Triggered when the user chooses debug mode.
-
-    :type libraryWindow: studiolibrary.LibraryWindow
-    :type value: int
-    :rtype: None
-    """
-    if value:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
-
-    logger_ = logging.getLogger("mutils")
-    logger_.setLevel(level)
-
-    logger_ = logging.getLogger("studiolibrarymaya")
-    logger_.setLevel(level)
-
-
-studiolibrary.LibraryWindow.globalSignal.debugModeChanged.connect(setDebugMode)
+enableMayaClosedEvent()
