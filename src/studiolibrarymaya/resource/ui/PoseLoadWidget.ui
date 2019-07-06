@@ -42,13 +42,13 @@
     <enum>QLayout::SetDefaultConstraint</enum>
    </property>
    <property name="leftMargin">
-    <number>5</number>
+    <number>4</number>
    </property>
    <property name="topMargin">
     <number>2</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>4</number>
    </property>
    <property name="bottomMargin">
     <number>2</number>
@@ -338,7 +338,7 @@ background-color: rgb(254, 255, 230, 0);</string>
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>5</height>
+          <height>10</height>
          </size>
         </property>
         <property name="styleSheet">
@@ -353,7 +353,7 @@ background-color: rgb(254, 255, 230, 0);</string>
         <property name="lineWidth">
          <number>0</number>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -368,7 +368,7 @@ background-color: rgb(254, 255, 230, 0);</string>
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>5</height>
+          <height>10</height>
          </size>
         </property>
         <property name="styleSheet">
