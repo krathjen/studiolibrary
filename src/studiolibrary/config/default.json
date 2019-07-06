@@ -44,6 +44,14 @@
   // This might be useful when using high-DPI devices like a 4k monitor
   "scaleFactorEnabled": false,
 
+  // A list of the default item plugins
+  "itemRegistry": [
+    "studiolibrarymaya.animitem.AnimItem",
+    "studiolibrarymaya.poseitem.PoseItem",
+    "studiolibrarymaya.mirroritem.MirrorItem",
+    "studiolibrarymaya.setsitem.SetsItem"
+  ],
+
   // Used for very basic analytics and does not send any personal information
   "analyticsEnabled": true,
   "analyticsId": "UA-50172384-1"

@@ -76,6 +76,7 @@ __all__ = [
     "removePath",
     "renamePath",
     "formatPath",
+    "resolveModule",
     "createTempPath",
     "renamePathInFile",
     "walkup",
@@ -88,6 +89,7 @@ __all__ = [
     "stringToList",
     "listToString",
     "registerItem",
+    "registerItems",
     "registeredItems",
     "itemFromPath",
     "itemsFromPaths",
@@ -248,6 +250,28 @@ def setLibraries(libraries):
     remove = set(old) - set(new)
     for name in remove:
         removeLibrary(name)
+
+
+def resolveModule(name):
+    """Resolve a dotted name to a global object."""
+    name = name.split('.')
+    used = name.pop(0)
+    found = __import__(used)
+    for n in name:
+        used = used + '.' + n
+        try:
+            found = getattr(found, n)
+        except AttributeError:
+            __import__(used)
+            found = getattr(found, n)
+    return found
+
+
+def registerItems():
+    """Register all the items from the config file."""
+    for name in studiolibrary.config().get("itemRegistry"):
+        cls = resolveModule(name)
+        studiolibrary.registerItem(cls)
 
 
 def registerItem(cls):
