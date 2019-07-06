@@ -168,9 +168,6 @@ class BaseItem(studiolibrary.LibraryItem):
                 "name": "infoGroup",
                 "title": "Info",
                 "type": "group",
-                "value": True,
-                "persistent": True,
-                "persistentKey": "BaseItem"
             },
             {
                 "name": "name",
@@ -200,10 +197,7 @@ class BaseItem(studiolibrary.LibraryItem):
             {
                 "name": "namespaceGroup",
                 "title": "Namespace",
-                "value": True,
                 "type": "group",
-                "persistent": True,
-                "persistentKey": "BaseItem",
             },
             {
                 "name": "namespaceOption",

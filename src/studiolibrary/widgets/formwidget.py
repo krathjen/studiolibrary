@@ -221,7 +221,11 @@ class FormWidget(QtWidgets.QFrame):
                 data["layout"] = layout
 
             widget = cls(data=data, formWidget=self)
-            widget.setData(data)
+
+            data_ = widget.defaultData()
+            data_.update(data)
+
+            widget.setData(data_)
 
             value = data.get("value")
             default = data.get("default")
@@ -286,7 +290,12 @@ class FormWidget(QtWidgets.QFrame):
         """Validate the current options using the validator."""
         if self._validator:
 
-            values = self.values()
+            values = {}
+
+            for name, value in self.values().items():
+                data = self.widget(name).data()
+                if data.get("validate", True):
+                    values[name] = value
 
             if widget:
                 values["fieldChanged"] = widget.name()

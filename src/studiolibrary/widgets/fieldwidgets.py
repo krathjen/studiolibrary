@@ -111,6 +111,14 @@ class FieldWidget(QtWidgets.QFrame):
         """
         return self.data()["name"]
 
+    def defaultData(self):
+        """
+        This is the default data used by the schema.
+
+        :rtype: dict
+        """
+        return {}
+
     def setFormWidget(self, formWidget):
         """
         Set the form widget which contains the field widget.
@@ -530,6 +538,19 @@ class GroupFieldWidget(FieldWidget):
         self.setWidget(widget)
 
         self.label().hide()
+
+    def defaultData(self):
+        """
+        Get the default values for the group field.
+
+        :rtype: dict
+        """
+        return {
+            "value": True,
+            "persistent": True,
+            "validate": False,
+            "persistentKey": "BaseItem",
+        }
 
     def value(self):
         """

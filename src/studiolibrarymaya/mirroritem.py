@@ -74,11 +74,8 @@ class MirrorItem(baseitem.BaseItem):
         schema = [
             {
                 "name": "optionsGroup",
-                "value": True,
                 "title": "Options",
                 "type": "group",
-                "persistent": True,
-                "persistentKey": "BaseItem",
             },
             {
                 "name": "animation",
