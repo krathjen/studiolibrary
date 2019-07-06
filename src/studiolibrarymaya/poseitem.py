@@ -9,12 +9,10 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
+import os
 import logging
 
 from studioqt import QtCore
-
-import studiolibrary
-import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
 from studiolibrarymaya import baseloadwidget
@@ -33,7 +31,10 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
-iconPath = studiolibrarymaya.resource().get("icons", "pose.png")
+
+
+DIRNAME = os.path.dirname(__file__)
+ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "pose.png")
 
 
 class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
@@ -88,8 +89,8 @@ class PoseItem(baseitem.BaseItem):
     Extensions = [".pose"]
     MenuName = "Pose"
     MenuOrder = 4
-    MenuIconPath = iconPath
-    TypeIconPath = iconPath
+    MenuIconPath = ICON_PATH
+    TypeIconPath = ICON_PATH
     PreviewWidgetClass = PoseLoadWidget
 
     def __init__(self, *args, **kwargs):

@@ -10,10 +10,8 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import logging
-
-import studiolibrarymaya
-import studiolibrary.widgets
 
 from studiolibrarymaya import baseitem
 
@@ -34,8 +32,8 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-# Register the anim item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "animation.png")
+DIRNAME = os.path.dirname(__file__)
+ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "animation.png")
 
 
 class AnimItem(baseitem.BaseItem):
@@ -43,8 +41,8 @@ class AnimItem(baseitem.BaseItem):
     Extensions = [".anim"]
     Extension = ".anim"
     MenuName = "Animation"
-    MenuIconPath = iconPath
-    TypeIconPath = iconPath
+    MenuIconPath = ICON_PATH
+    TypeIconPath = ICON_PATH
 
     def __init__(self, *args, **kwargs):
         """

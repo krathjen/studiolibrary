@@ -9,16 +9,14 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-
+import os
 import mutils
-
-import studiolibrary
-import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
 
 
-iconPath = studiolibrarymaya.resource().get("icons", "selectionSet.png")
+DIRNAME = os.path.dirname(__file__)
+ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "selectionSet.png")
 
 
 class SetsItem(baseitem.BaseItem):
@@ -26,8 +24,8 @@ class SetsItem(baseitem.BaseItem):
     Extensions = [".set"]
     Extension = ".set"
     MenuName = "Selection Set"
-    MenuIconPath = iconPath
-    TypeIconPath = iconPath
+    MenuIconPath = ICON_PATH
+    TypeIconPath = ICON_PATH
 
     def __init__(self, *args, **kwargs):
         """

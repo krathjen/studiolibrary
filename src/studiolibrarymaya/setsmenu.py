@@ -25,7 +25,12 @@ from studiolibrarymaya import setsitem
 
 __all__ = ["SetsMenu"]
 
+
 logger = logging.getLogger(__name__)
+
+
+DIRNAME = os.path.dirname(__file__)
+ARROW_ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "arrow.png")
 
 
 def selectContentAction(item, parent=None):
@@ -33,8 +38,7 @@ def selectContentAction(item, parent=None):
     :param item: mayabaseitem.MayaBaseItem
     :param parent: QtWidgets.QMenu
     """
-    icon = studiolibrarymaya.resource().icon("arrow")
-    action = QtWidgets.QAction(icon, "Select content", parent)
+    action = QtWidgets.QAction(ARROW_ICON_PATH, "Select content", parent)
     action.triggered.connect(item.selectContent)
     return action
 
@@ -84,7 +88,7 @@ class SetsMenu(QtWidgets.QMenu):
         parent = parent or item.libraryWindow()
         QtWidgets.QMenu.__init__(self, "Selection Sets", parent)
 
-        icon = studiolibrarymaya.resource().icon("selectionSet")
+        icon = QtGui.QIcon(setsitem.ICON_PATH)
         self.setIcon(icon)
 
         self._item = item

@@ -10,11 +10,10 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import logging
 
 import mutils
-import studiolibrary
-import studiolibrarymaya
 
 from studiolibrarymaya import baseitem
 
@@ -26,8 +25,9 @@ except ImportError as error:
 
 logger = logging.getLogger(__name__)
 
-# Register the mirror table item to the Studio Library
-iconPath = studiolibrarymaya.resource().get("icons", "mirrortable.png")
+
+DIRNAME = os.path.dirname(__file__)
+ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "mirrortable.png")
 
 
 class MirrorItem(baseitem.BaseItem):
@@ -35,8 +35,8 @@ class MirrorItem(baseitem.BaseItem):
     Extensions = [".mirror"]
     Extension = ".mirror"
     MenuName = "Mirror Table"
-    MenuIconPath = iconPath
-    TypeIconPath = iconPath
+    MenuIconPath = ICON_PATH
+    TypeIconPath = ICON_PATH
 
     def __init__(self, *args, **kwargs):
         """
@@ -80,6 +80,7 @@ class MirrorItem(baseitem.BaseItem):
             {
                 "name": "animation",
                 "type": "bool",
+                "inline": True,
                 "default": False,
                 "persistent": True
             },

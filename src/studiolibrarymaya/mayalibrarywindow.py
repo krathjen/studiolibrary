@@ -13,20 +13,66 @@
 import uuid
 import logging
 
-import studiolibrary
-import studiolibrarymaya
-
 import maya.cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+
+import studiolibrary
+
+import mutils
 
 
 logger = logging.getLogger(__name__)
 
 
+_mayaCloseScriptJob = None
+
+
+def enableMayaClosedEvent():
+    """
+    Create a Maya script job to trigger on the event "quitApplication".
+
+    Enable the Maya closed event to save the library settings on close
+
+    :rtype: None
+    """
+    global _mayaCloseScriptJob
+
+    if not _mayaCloseScriptJob:
+        event = ['quitApplication', mayaClosedEvent]
+        try:
+            _mayaCloseScriptJob = mutils.ScriptJob(event=event)
+            logger.debug("Maya close event enabled")
+        except NameError as error:
+            logging.exception(error)
+
+
+def disableMayaClosedEvent():
+    """Disable the maya closed event."""
+    global _mayaCloseScriptJob
+
+    if _mayaCloseScriptJob:
+        _mayaCloseScriptJob.kill()
+        _mayaCloseScriptJob = None
+        logger.debug("Maya close event disabled")
+
+
+def mayaClosedEvent():
+    """
+    Create a Maya script job to trigger on the event "quitApplication".
+
+    :rtype: None
+    """
+    for libraryWindow in studiolibrary.LibraryWindow.instances():
+        libraryWindow.saveSettings()
+
+
 class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
 
     def destroy(self):
-        studiolibrarymaya.disableMayaClosedEvent()
+        """
+        Overriding this method to avoid multiple script jobs when developing.
+        """
+        disableMayaClosedEvent()
         studiolibrary.LibraryWindow.destroy(self)
 
     def setObjectName(self, name):
@@ -39,11 +85,6 @@ class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
         name = '{0}_{1}'.format(name, uuid.uuid4())
 
         studiolibrary.LibraryWindow.setObjectName(self, name)
-
-    def resetSettings(self):
-        """Reset all the settings for the library widget and library items."""
-        studiolibrary.LibraryWindow.resetSettings(self)
-        studiolibrarymaya.resetSettings()
 
     def tabWidget(self):
         """
@@ -147,3 +188,6 @@ class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
         """
         if self.tabWidget():
             self.tabWidget().setStyleSheet("border:0px;")
+
+
+enableMayaClosedEvent()
