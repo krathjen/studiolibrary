@@ -46,6 +46,7 @@
 
   // A list of the default item plugins
   "itemRegistry": [
+    "studiolibrary.folderitem.FolderItem",
     "studiolibrarymaya.animitem.AnimItem",
     "studiolibrarymaya.poseitem.PoseItem",
     "studiolibrarymaya.mirroritem.MirrorItem",
