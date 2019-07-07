@@ -36,6 +36,10 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+DIRNAME = os.path.dirname(__file__)
+DEFAULT_THUMBNAIL_PATH = os.path.join(DIRNAME, "resource", "icons", "thumbnail2.png")
+
+
 class BaseSaveWidget(QtWidgets.QWidget):
 
     """Base create widget for creating new maya items."""
@@ -115,7 +119,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
             self.showBrowseImageDialog
         )
 
-        icon = studiolibrarymaya.resource().icon("thumbnail2")
+        icon = studioqt.Icon(DEFAULT_THUMBNAIL_PATH)
         sequenceWidget.setIcon(icon)
 
         self.ui.thumbnailFrame.layout().insertWidget(0, sequenceWidget)
