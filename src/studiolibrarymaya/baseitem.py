@@ -68,7 +68,8 @@ class BaseItem(studiolibrary.LibraryItem):
 
         path = libraryWindow.selectedFolderPath()
 
-        widget.folderFrame().hide()
+        widget.formWidget().setData("folder", {"visible": False})
+
         widget.setFolderPath(path)
         widget.setLibraryWindow(libraryWindow)
 
@@ -221,6 +222,11 @@ class BaseItem(studiolibrary.LibraryItem):
     def saveSchema(self):
 
         return [
+            {
+                "name": "folder",
+                "type": "path",
+                "layout": "vertical",
+            },
             {
                 "name": "name",
                 "type": "string",

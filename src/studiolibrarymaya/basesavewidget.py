@@ -71,7 +71,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
-        self.ui.browseFolderButton.clicked.connect(self.browseFolder)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
         try:
@@ -309,14 +308,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         return self.ui.comment.toPlainText().strip()
 
-    def folderFrame(self):
-        """
-        Return the frame that contains the folder edit, label and button.
-
-        :rtype: QtWidgets.QFrame
-        """
-        return self.ui.folderFrame
-
     def setFolderPath(self, path):
         """
         Set the destination folder path.
@@ -324,7 +315,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         :type path: str
         :rtype: None
         """
-        self.ui.folderEdit.setText(path)
+        self._formWidget.setValue("folder", path)
 
     def folderPath(self):
         """
@@ -332,18 +323,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: str
         """
-        return self.ui.folderEdit.text()
-
-    def browseFolder(self):
-        """
-        Show the file dialog for choosing the folder location to save the item.
-
-        :rtype: None
-        """
-        path = self.folderPath()
-        path = QtWidgets.QFileDialog.getExistingDirectory(None, "Browse Folder", path)
-        if path:
-            self.setFolderPath(path)
+        return self._formWidget.value("folder")
 
     def selectionChanged(self):
         """
@@ -502,14 +482,15 @@ class BaseSaveWidget(QtWidgets.QWidget):
     def accept(self):
         """Triggered when the user clicks the save button."""
         try:
-            path = self.folderPath()
+            options = self._formWidget.values()
+            folder = options.get("folder")
 
             options = self._formWidget.values()
             name = options.get("name")
 
             objects = maya.cmds.ls(selection=True) or []
 
-            if not path:
+            if not folder:
                 raise Exception("No folder selected. Please select a destination folder.")
 
             if not name:
@@ -523,7 +504,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
                 if button == QtWidgets.QMessageBox.Cancel:
                     return
 
-            path += "/" + name
+            path = folder + "/" + name
             iconPath = self.iconPath()
 
             self.save(

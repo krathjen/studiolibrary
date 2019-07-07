@@ -135,6 +135,11 @@ class MirrorItem(baseitem.BaseItem):
         """
         return [
             {
+                "name": "folder",
+                "type": "path",
+                "layout": "vertical"
+            },
+            {
                 "name": "name",
                 "type": "string",
                 "layout": "vertical"
