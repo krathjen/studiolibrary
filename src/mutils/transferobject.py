@@ -205,6 +205,22 @@ class TransferObject(object):
         """
         self._data = data
 
+    def owner(self):
+        """
+        Return the user who created this item.
+
+        :rtype: str
+        """
+        return self.metadata().get("user", "")
+
+    def description(self):
+        """
+        Return the user description for this item.
+
+        :rtype: str
+        """
+        return self.metadata().get("description", "")
+
     def objects(self):
         """
         Return all the object data.
@@ -243,7 +259,7 @@ class TransferObject(object):
 
         return self._namespaces
 
-    def count(self):
+    def objectCount(self):
         """
         Return the number of objects in the transfer object.
         

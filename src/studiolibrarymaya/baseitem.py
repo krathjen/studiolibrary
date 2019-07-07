@@ -17,9 +17,7 @@ import logging
 from studioqt import QtGui
 from studioqt import QtCore
 
-import studioqt
 import studiolibrary
-import studiolibrarymaya
 
 from studiolibrarymaya import basesavewidget
 from studiolibrarymaya import baseloadwidget
@@ -114,9 +112,9 @@ class BaseItem(studiolibrary.LibraryItem):
         namespaceOption = values.get("namespaceOption")
 
         if namespaceOption == "From file":
-            namespaces = self.namespacesFromFile()
+            namespaces = self.transferObject().namespaces()
         elif namespaceOption == "From selection":
-            namespaces = self.namespacesFromSelection()
+            namespaces = mutils.namespace.getFromSelection()
 
         fieldChanged = values.get("fieldChanged")
         if fieldChanged == "namespaces":
@@ -159,7 +157,7 @@ class BaseItem(studiolibrary.LibraryItem):
         if ctime:
             ctime = studiolibrary.timeAgo(ctime)
 
-        count = self.objectCount()
+        count = self.transferObject().objectCount()
         plural = "s" if count > 1 else ""
         contains = str(count) + " Object" + plural
 
@@ -175,7 +173,7 @@ class BaseItem(studiolibrary.LibraryItem):
             },
             {
                 "name": "owner",
-                "value": self.owner(),
+                "value": self.transferObject().owner(),
             },
             {
                 "name": "created",
@@ -187,7 +185,7 @@ class BaseItem(studiolibrary.LibraryItem):
             },
             {
                 "name": "comment",
-                "value": self.description() or "No comment",
+                "value": self.transferObject().description() or "No comment",
             },
         ]
 
@@ -347,38 +345,6 @@ class BaseItem(studiolibrary.LibraryItem):
             self._transferObject = self.transferClass().fromPath(path)
         return self._transferObject
 
-    def settings(self):
-        """
-        Return a settings object for saving data to the users local disc.
-
-        :rtype: studiolibrary.Settings
-        """
-        return studiolibrarymaya.settings()
-
-    def owner(self):
-        """
-        Return the user who created this item.
-
-        :rtype: str or None
-        """
-        return self.transferObject().metadata().get("user", "")
-
-    def description(self):
-        """
-        Return the user description for this item.
-
-        :rtype: str
-        """
-        return self.transferObject().metadata().get("description", "")
-
-    def objectCount(self):
-        """
-        Return the number of controls this item contains.
-
-        :rtype: int
-        """
-        return self.transferObject().count()
-
     def contextMenu(self, menu, items=None):
         """
         This method is called when the user right clicks on this item.
@@ -515,31 +481,6 @@ class BaseItem(studiolibrary.LibraryItem):
         :rtype: NamespaceOption
         """
         return self.currentLoadValue("namespaceOption")
-
-    def namespacesFromFile(self):
-        """
-        Return the namespaces from the transfer data.
-
-        :rtype: list[str]
-        """
-        return self.transferObject().namespaces()
-
-    @staticmethod
-    def namespacesFromSelection():
-        """
-        Return the current namespaces from the selected objects in Maya.
-
-        :rtype: list[str]
-        """
-        namespaces = [""]
-
-        try:
-            namespaces = mutils.namespace.getFromSelection() or namespaces
-        except NameError as error:
-            # Catch any errors when running this command outside of Maya
-            logger.exception(error)
-
-        return namespaces
 
     def doubleClicked(self):
         """

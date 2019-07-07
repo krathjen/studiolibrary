@@ -134,7 +134,7 @@ class TestPose(test_base.TestBase):
         """
         self.open()
         pose = mutils.Pose.fromPath(self.dstPath)
-        self.assertEqual(pose.count(), len(self.srcObjects))
+        self.assertEqual(pose.objectCount(), len(self.srcObjects))
 
 
 def testSuite():

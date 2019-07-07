@@ -9,13 +9,16 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-
+import logging
 import traceback
 
 try:
     import maya.cmds
 except ImportError:
     traceback.print_exc()
+
+
+logger = logging.getLogger(__name__)
 
 
 __all__ = [
@@ -52,10 +55,20 @@ def getFromDagPath(dagPath):
 
 def getFromSelection():
     """
+    Get the current namespaces from the selected objects in Maya.
+
     :rtype: list[str]
     """
-    dagPaths = maya.cmds.ls(selection=True)
-    return getFromDagPaths(dagPaths)
+    namespaces = [""]
+
+    try:
+        names = maya.cmds.ls(selection=True)
+        namespaces = getFromDagPaths(names) or namespaces
+    except NameError as error:
+        # Catch any errors when running this command outside of Maya
+        logger.exception(error)
+
+    return namespaces
 
 
 def getAll():
