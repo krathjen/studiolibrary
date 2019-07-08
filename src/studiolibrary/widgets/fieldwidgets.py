@@ -55,7 +55,6 @@ class FieldWidget(QtWidgets.QFrame):
         super(FieldWidget, self).__init__(parent)
 
         self._data = data or {}
-        self._error = False
         self._widget = None
         self._default = None
         self._required = None
@@ -210,16 +209,14 @@ class FieldWidget(QtWidgets.QFrame):
         
         :type data: dict
         """
-        state = data
-
         self.blockSignals(True)
 
-        items = state.get('items')
+        items = data.get('items')
         if items is not None:
             self.setItems(items)
 
-        value = state.get('value')
-        default = state.get('default')
+        value = data.get('value')
+        default = data.get('default')
 
         # Must set the default before value
         if default is not None:
@@ -233,44 +230,48 @@ class FieldWidget(QtWidgets.QFrame):
             except TypeError as error:
                 logger.exception(error)
 
-        enabled = state.get('enabled')
+        enabled = data.get('enabled')
         if enabled is not None:
             self.setEnabled(enabled)
             self._label.setEnabled(enabled)
 
-        hidden = state.get('hidden')
+        hidden = data.get('hidden')
         if hidden is not None:
             self.setHidden(hidden)
 
-        visible = state.get('visible')
+        visible = data.get('visible')
         if visible is not None and not self.isCollapsed():
             self.setVisible(visible)
 
-        required = state.get('required')
+        required = data.get('required')
         if required is not None:
             self.setRequired(required)
 
-        error = state.get('error')
+        error = data.get('error')
         if error is not None:
             self.setError(error)
 
-        toolTip = state.get('toolTip')
+        value = data.get('errorVisible')
+        if value is not None:
+            self.setErrorVisible(value)
+
+        toolTip = data.get('toolTip')
         if toolTip is not None:
             self.setToolTip(toolTip)
             self.setStatusTip(toolTip)
 
-        placeholder = state.get("placeholder")
+        placeholder = data.get("placeholder")
         if placeholder is not None:
             self.setPlaceholder(placeholder)
 
-        style = state.get("style")
+        style = data.get("style")
         if style is not None:
             self.setStyleSheet(style)
 
         title = self.title() or ""
         self.setText(title)
 
-        label = state.get('label')
+        label = data.get('label')
         if label is not None:
 
             text = label.get("name")
@@ -282,12 +283,12 @@ class FieldWidget(QtWidgets.QFrame):
                 self.label().setVisible(visible)
 
         # Menu Items
-        actions = state.get('actions')
+        actions = data.get('actions')
         if actions is not None:
             self._menuButton.setVisible(True)
 
         # Menu Button
-        menu = state.get('menu')
+        menu = data.get('menu')
         if menu is not None:
             text = menu.get("name")
             if text is not None:
@@ -311,20 +312,40 @@ class FieldWidget(QtWidgets.QFrame):
         """
         NotImplementedError('The method "setPlaceholder" needs to be implemented')
 
+    def hasError(self):
+        """
+        Check if the field contains any errors.
+
+        :rtype: bool
+        """
+        return bool(self.data().get("error"))
+
+    def setErrorVisible(self, visible):
+        """
+        Set the error message visibility.
+
+        :type visible: bool
+        """
+        self._data["errorVisible"] = visible
+        self.refreshError()
+
     def setError(self, message):
         """
         Set the error message to be displayed for the field widget.
         
         :type message: str
         """
-        self._error = True if message else False
-
         self._data["error"] = message
+        self.refreshError()
 
-        if self._error:
-            self._errorLabel.setText(message)
+    def refreshError(self):
+        """Refresh the error message with the current data."""
+        error = self.data().get("error")
+
+        if self.hasError() and self.data().get("errorVisible", False):
+            self._errorLabel.setText(error)
             self._errorLabel.setHidden(False)
-            self.setToolTip(message)
+            self.setToolTip(error)
         else:
             self._errorLabel.setText("")
             self._errorLabel.setHidden(True)
@@ -521,7 +542,7 @@ class FieldWidget(QtWidgets.QFrame):
 
         self.setProperty("layout", direction)
         self.setProperty('default', self.isDefault())
-        self.setProperty('error', self._error)
+        self.setProperty('error', self.hasError())
 
         self.setStyleSheet(self.styleSheet())
 

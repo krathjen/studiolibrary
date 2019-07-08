@@ -201,11 +201,13 @@ class FormWidget(QtWidgets.QFrame):
         """
         return self._schema
 
-    def setSchema(self, schema, layout=None):
+    def setSchema(self, schema, layout=None, errorsVisible=False):
         """
         Set the schema for the widget.
         
         :type schema: list[dict]
+        :type layout: None or str
+        :type errorsVisible: bool
         """
         self._schema = schema
 
@@ -219,6 +221,12 @@ class FormWidget(QtWidgets.QFrame):
 
             if layout and not data.get("layout"):
                 data["layout"] = layout
+
+            errorVisible = data.get("errorVisible")
+            if errorVisible is not None:
+                data["errorVisible"] = errorVisible
+            else:
+                data["errorVisible"] = errorsVisible
 
             widget = cls(data=data, formWidget=self)
 
@@ -259,16 +267,26 @@ class FormWidget(QtWidgets.QFrame):
         self.savePersistentValues()
         super(FormWidget, self).closeEvent(event)
 
+    def errors(self):
+        """
+        Get all the errors.
+
+        :rtype: list[str]
+        """
+        errors = []
+        for widget in self._widgets:
+            error = widget.data().get("error")
+            if error:
+                errors.append(error)
+        return errors
+
     def hasErrors(self):
         """
         Return True if the form contains any errors.
 
         :rtype: bool
         """
-        for widget in self._widgets:
-            if widget.data().get("error"):
-                return True
-        return False
+        return bool(self.errors())
 
     def setValidator(self, validator):
         """
