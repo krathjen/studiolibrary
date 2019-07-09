@@ -14,7 +14,7 @@ import re
 import logging
 import functools
 
-from studioqt import QtGui, QtCore, QtWidgets
+from studiovendor.Qt import QtGui, QtCore, QtWidgets
 
 from . import settings
 from . import fieldwidgets

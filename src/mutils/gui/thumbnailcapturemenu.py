@@ -14,14 +14,13 @@ import os
 import shutil
 import logging
 
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
+
 import mutils.gui
 
-import studioqt
 import studiolibrary.widgets
-
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
 
 
 __all__ = [

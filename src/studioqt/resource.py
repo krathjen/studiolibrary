@@ -12,7 +12,6 @@
 
 import os
 
-from studioqt import QtGui
 from studioqt import Icon
 from studioqt import Pixmap
 

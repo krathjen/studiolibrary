@@ -13,9 +13,8 @@
 import mutils
 import mutils.gui
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
 try:
     import maya.cmds

@@ -14,8 +14,8 @@ import logging
 import platform
 import traceback
 
-from studioqt import QtCore
-from studioqt import QtWidgets
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
 try:
     import maya.mel

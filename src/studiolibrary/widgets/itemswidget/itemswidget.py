@@ -12,11 +12,9 @@
 
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
-
-import studioqt
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
 from .item import Item
 from .listview import ListView

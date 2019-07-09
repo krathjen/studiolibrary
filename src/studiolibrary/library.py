@@ -18,7 +18,7 @@ import collections
 
 import studiolibrary
 
-from studioqt import QtCore
+from studiovendor.Qt import QtCore
 
 
 __all__ = [

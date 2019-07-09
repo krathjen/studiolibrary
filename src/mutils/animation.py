@@ -14,10 +14,10 @@ import os
 import shutil
 import logging
 
+from studiovendor.Qt import QtWidgets
+
 import mutils
 import mutils.gui
-
-from studioqt import QtWidgets
 
 try:
     import maya.cmds

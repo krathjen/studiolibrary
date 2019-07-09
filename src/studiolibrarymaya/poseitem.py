@@ -12,7 +12,7 @@
 import os
 import logging
 
-from studioqt import QtCore
+from studiovendor.Qt import QtCore
 
 from studiolibrarymaya import baseitem
 from studiolibrarymaya import baseloadwidget

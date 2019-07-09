@@ -15,15 +15,15 @@ import shutil
 import logging
 from functools import partial
 
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
+
 import studiolibrary
 import studiolibrary.widgets
 import studiolibrary.librarywindow
 
 import studioqt
-
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
 
 
 logger = logging.getLogger(__name__)

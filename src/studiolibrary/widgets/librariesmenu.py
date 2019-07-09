@@ -20,7 +20,7 @@ Example:
 """
 from functools import partial
 
-from studioqt import QtWidgets
+from studiovendor.Qt import QtWidgets
 
 import studiolibrary
 

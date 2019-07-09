@@ -12,8 +12,8 @@
 
 import logging
 
-from studioqt import QtWidgets
-from studioqt import QtCore
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
 import studioqt
 

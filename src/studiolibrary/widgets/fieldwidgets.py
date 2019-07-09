@@ -14,10 +14,7 @@ import re
 import logging
 import functools
 
-from studioqt import QtGui, QtCore, QtWidgets
-
-import studioqt
-
+from studiovendor.Qt import QtGui, QtCore, QtWidgets
 
 from . import groupboxwidget
 from . import colorpicker

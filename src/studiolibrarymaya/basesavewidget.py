@@ -14,9 +14,9 @@ import os
 import shutil
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
 import studioqt
 import studiolibrarymaya

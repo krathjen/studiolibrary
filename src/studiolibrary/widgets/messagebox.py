@@ -12,8 +12,8 @@
 
 from .themesmenu import Theme
 
-from studioqt import QtCore
-from studioqt import QtWidgets
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
 import studioqt
 

@@ -16,10 +16,11 @@ import inspect
 import logging
 import contextlib
 
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtCompat
+from studiovendor.Qt import QtWidgets
+
 import studioqt
-from studioqt import QtCore
-from studioqt import QtCompat
-from studioqt import QtWidgets
 
 
 __all__ = [

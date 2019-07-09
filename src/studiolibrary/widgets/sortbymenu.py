@@ -12,8 +12,8 @@
 
 from functools import partial
 
-from studioqt import QtGui
-from studioqt import QtWidgets
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtWidgets
 
 from .separatoraction import SeparatorAction
 

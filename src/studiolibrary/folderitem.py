@@ -13,10 +13,10 @@
 import os
 from datetime import datetime
 
+from studiovendor.Qt import QtWidgets
+
 import studiolibrary
 import studiolibrary.widgets
-
-from studioqt import QtWidgets
 
 
 class FolderItem(studiolibrary.LibraryItem):

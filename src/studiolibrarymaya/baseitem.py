@@ -14,8 +14,8 @@ import os
 import shutil
 import logging
 
-from studioqt import QtGui
-from studioqt import QtCore
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtCore
 
 import studiolibrary
 

@@ -11,14 +11,13 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-
 from functools import partial
 
-import studioqt
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
-from studioqt import QtGui
-from studioqt import QtCore
-from studioqt import QtWidgets
+import studioqt
 
 from .groupitem import GroupItem
 from .itemviewmixin import ItemViewMixin

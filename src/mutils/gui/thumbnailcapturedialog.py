@@ -20,6 +20,9 @@ print mutils.gui.capture("c:/temp/test.jpg", startFrame=1, endFrame=100)
 import os
 import shutil
 
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
+
 try:
     import maya.cmds
 except Exception:
@@ -31,8 +34,6 @@ import studioqt
 import mutils.gui
 import mutils.gui.modelpanelwidget
 
-from studioqt import QtCore
-from studioqt import QtWidgets
 
 __all__ = [
     "thumbnailCapture",

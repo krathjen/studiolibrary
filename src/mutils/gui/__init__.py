@@ -10,14 +10,13 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
+
 try:
     import maya.OpenMayaUI as omui
 except ImportError as error:
     print(error)
-
-from studioqt import QtCore
-from studioqt import QtWidgets
-
 
 try:
     from shiboken2 import wrapInstance
@@ -26,7 +25,6 @@ except ImportError:
         from shiboken import wrapInstance
     except ImportError as error:
         print(error)
-
 
 from .framerangemenu import FrameRangeMenu
 from .framerangemenu import showFrameRangeMenu
