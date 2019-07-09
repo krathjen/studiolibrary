@@ -63,7 +63,7 @@ class LibraryItem(studiolibrary.widgets.Item):
     MenuName = ""
     MenuOrder = 10
     MenuIconPath = ""
-    DefaultThumbnailPath = studiolibrary.resource().get("icons", "thumbnail.png")
+    DefaultThumbnailPath = studiolibrary.resource.get("icons", "thumbnail.png")
 
     RegisterOrder = 10
     TypeIconPath = ""
@@ -598,7 +598,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         
         :type metadata: dict
         """
-        formatString = studiolibrary.config().get('metadataPath')
+        formatString = studiolibrary.config.get('metadataPath')
         path = studiolibrary.formatPath(formatString, self.path())
         studiolibrary.saveJson(path, metadata)
         self.setMetadata(metadata)
@@ -609,7 +609,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         
         :rtype: dict
         """
-        formatString = studiolibrary.config().get('metadataPath')
+        formatString = studiolibrary.config.get('metadataPath')
         path = studiolibrary.formatPath(formatString, self.path())
         metadata = studiolibrary.readJson(path)
         return metadata

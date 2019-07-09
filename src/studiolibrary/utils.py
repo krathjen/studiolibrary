@@ -295,7 +295,7 @@ def resolveModule(name):
 
 def registerItems():
     """Register all the items from the config file."""
-    for name in studiolibrary.config().get("itemRegistry"):
+    for name in studiolibrary.config.get("itemRegistry"):
         cls = resolveModule(name)
         studiolibrary.registerItem(cls)
 
@@ -339,7 +339,7 @@ def tempPath(*args):
     
     :rtype: str 
     """
-    temp = studiolibrary.config().get("tempPath")
+    temp = studiolibrary.config.get("tempPath")
     return normPath(os.path.join(formatPath(temp), *args))
 
 
@@ -374,7 +374,7 @@ def itemFromPath(path, **kwargs):
     """
     path = normPath(path)
 
-    for ignore in studiolibrary.config().get('ignorePaths', []):
+    for ignore in studiolibrary.config.get('ignorePaths', []):
         if ignore in path:
             return None
 
@@ -922,7 +922,7 @@ def settingsPath():
     
     :rtype: str 
     """
-    formatString = studiolibrary.config().get('settingsPath')
+    formatString = studiolibrary.config.get('settingsPath')
     return studiolibrary.formatPath(formatString)
 
 
@@ -1368,10 +1368,10 @@ def sendAnalytics(
     if os.environ.get("STUDIO_LIBRARY_RELOADED") == "1":
         return
 
-    if not studiolibrary.config().get('analyticsEnabled'):
+    if not studiolibrary.config.get('analyticsEnabled'):
         return
 
-    tid = tid or studiolibrary.config().get('analyticsId')
+    tid = tid or studiolibrary.config.get('analyticsId')
     cid = userUuid()
 
     # In python 2.7 the getdefaultlocale function could return a None "ul"
@@ -1448,7 +1448,7 @@ def showInFolder(path):
     else:
         cmd = os.system
 
-    args = studiolibrary.config().get('showInFolderCmd')
+    args = studiolibrary.config.get('showInFolderCmd')
 
     if args:
         if isinstance(args, six.string_types):

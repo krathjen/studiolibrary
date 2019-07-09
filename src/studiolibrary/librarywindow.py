@@ -90,7 +90,7 @@ class LibraryWindow(QtWidgets.QWidget):
     RECURSIVE_SEARCH_ENABLED = False
     TEMP_PATH_MENU_ENABLED = False
 
-    DPI_ENABLED = studiolibrary.config().get("scaleFactorEnabled", False)
+    DPI_ENABLED = studiolibrary.config.get("scaleFactorEnabled", False)
 
     ICON_COLOR = QtGui.QColor(255, 255, 255)
     ICON_BADGE_COLOR = QtGui.QColor(230, 230, 0)
@@ -168,6 +168,7 @@ class LibraryWindow(QtWidgets.QWidget):
         libraryWindow = LibraryWindow._instances.get(name)
 
         if not libraryWindow:
+            studioqt.installFonts(studiolibrary.resource.get("fonts"))
             libraryWindow = cls(name=name)
             LibraryWindow._instances[name] = libraryWindow
 
@@ -208,8 +209,7 @@ class LibraryWindow(QtWidgets.QWidget):
         version = studiolibrary.version()
         studiolibrary.sendAnalytics("MainWindow", version=version)
 
-        resource = studiolibrary.resource()
-        self.setWindowIcon(resource.icon("icon_black"))
+        self.setWindowIcon(studiolibrary.resource.icon("icon_black"))
 
         self._dpi = 1.0
         self._path = ""
@@ -285,7 +285,7 @@ class LibraryWindow(QtWidgets.QWidget):
         iconColor = self.iconColor()
 
         name = "New Item"
-        icon = studiolibrary.resource().icon("add_28")
+        icon = studiolibrary.resource.icon("add_28")
         icon.setColor(iconColor)
         tip = "Add a new item to the selected folder"
         self.addMenuBarAction(name, icon, tip, callback=self.showNewMenu)
@@ -293,45 +293,45 @@ class LibraryWindow(QtWidgets.QWidget):
         self._menuBarWidget.addWidget(self._searchWidget)
 
         name = "Filters"
-        icon = studiolibrary.resource().icon("filter")
+        icon = studiolibrary.resource.icon("filter")
         icon.setColor(iconColor)
         tip = "Filter the current results by type.\n" \
               "CTRL + Click will hide the others and show the selected one."
         self.addMenuBarAction(name, icon, tip, callback=self.showFilterByMenu)
 
         name = "Item View"
-        icon = studiolibrary.resource().icon("view_settings")
+        icon = studiolibrary.resource.icon("view_settings")
         icon.setColor(iconColor)
         tip = "Change the style of the item view"
         self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
 
         name = "Group By"
-        icon = studiolibrary.resource().icon("groupby")
+        icon = studiolibrary.resource.icon("groupby")
         icon.setColor(iconColor)
         tip = "Group the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showGroupByMenu)
 
         name = "Sort By"
-        icon = studiolibrary.resource().icon("sortby")
+        icon = studiolibrary.resource.icon("sortby")
         icon.setColor(iconColor)
         tip = "Sort the current items in the view by column"
         self.addMenuBarAction(name, icon, tip, callback=self.showSortByMenu)
 
         name = "View"
-        icon = studiolibrary.resource().icon("view")
+        icon = studiolibrary.resource.icon("view")
         icon.setColor(iconColor)
         tip = "Choose to show/hide both the preview and navigation pane.\n" \
               "CTRL + Click will hide the menu bar as well."
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
 
         name = "Sync items"
-        icon = studiolibrary.resource().icon("sync")
+        icon = studiolibrary.resource.icon("sync")
         icon.setColor(iconColor)
         tip = "Sync with the filesystem"
         self.addMenuBarAction(name, icon, tip, callback=self.sync)
 
         name = "Settings"
-        icon = studiolibrary.resource().icon("settings")
+        icon = studiolibrary.resource.icon("settings")
         icon.setColor(iconColor)
         tip = "Settings menu"
         self.addMenuBarAction(name, icon, tip, callback=self.showSettingsMenu)
@@ -592,7 +592,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         title = "Welcome"
         title = title.format(studiolibrary.version(), name)
-        icon = studiolibrary.resource().get('icons/icon_white.png')
+        icon = studiolibrary.resource.get('icons/icon_white.png')
         text = "Before you get started please choose a folder " \
                "location for storing the data. A network folder is " \
                "recommended for sharing within a studio."
@@ -789,7 +789,7 @@ class LibraryWindow(QtWidgets.QWidget):
         queries = [{'filters': [('type', 'is', 'Folder')]}]
 
         items = self.library().findItems(queries)
-        trashIconPath = studiolibrary.resource().get("icons", "delete_96.png")
+        trashIconPath = studiolibrary.resource.get("icons", "delete_96.png")
 
         for item in items:
             path = item.path()
@@ -1029,7 +1029,7 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         color = self.iconColor()
 
-        icon = studiolibrary.resource().icon("add", color=color)
+        icon = studiolibrary.resource.icon("add", color=color)
         menu = QtWidgets.QMenu(self)
         menu.setIcon(icon)
         menu.setTitle("New")
@@ -2441,10 +2441,10 @@ class LibraryWindow(QtWidgets.QWidget):
         action = self.menuBarWidget().findAction("New Item")
 
         if self.isLocked():
-            icon = studiolibrary.resource().icon("lock")
+            icon = studiolibrary.resource.icon("lock")
             action.setEnabled(False)
         else:
-            icon = studiolibrary.resource().icon("add_28")
+            icon = studiolibrary.resource.icon("add_28")
             action.setEnabled(True)
 
         icon.setColor(self.iconColor())
@@ -2632,9 +2632,9 @@ class LibraryWindow(QtWidgets.QWidget):
         action = self.menuBarWidget().findAction("View")
 
         if not compact:
-            icon = studiolibrary.resource().icon("view_all")
+            icon = studiolibrary.resource.icon("view_all")
         else:
-            icon = studiolibrary.resource().icon("view_compact")
+            icon = studiolibrary.resource.icon("view_compact")
 
         icon.setColor(self.iconColor())
         action.setIcon(icon)
@@ -2645,11 +2645,11 @@ class LibraryWindow(QtWidgets.QWidget):
         action = self.menuBarWidget().findAction("Filters")
 
         if self._filterByMenu.isActive():
-            icon = studiolibrary.resource().icon("filter")
+            icon = studiolibrary.resource.icon("filter")
             icon.setColor(self.iconColor())
             icon.setBadge(18, 1, 9, 9, color=self.ICON_BADGE_COLOR)
         else:
-            icon = studiolibrary.resource().icon("filter")
+            icon = studiolibrary.resource.icon("filter")
             icon.setColor(self.iconColor())
 
         action.setIcon(icon)
@@ -2677,12 +2677,12 @@ class LibraryWindow(QtWidgets.QWidget):
     @staticmethod
     def help():
         """Open the help url from the config file in a web browser."""
-        webbrowser.open(studiolibrary.config().get("helpUrl"))
+        webbrowser.open(studiolibrary.config.get("helpUrl"))
 
     @staticmethod
     def reportIssue():
         """Open the report issue url and submit a new issue."""
-        webbrowser.open(studiolibrary.config().get("reportIssueUrl"))
+        webbrowser.open(studiolibrary.config.get("reportIssueUrl"))
 
     def setDebugMode(self, value):
         """

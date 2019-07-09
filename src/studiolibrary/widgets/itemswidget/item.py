@@ -217,7 +217,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         if isinstance(icon, basestring):
             if not os.path.exists(icon):
                 color = color or studioqt.Color(255, 255, 255, 20)
-                icon = studiolibrary.resource().icon("image", color=color)
+                icon = studiolibrary.resource.icon("image", color=color)
             else:
                 icon = QtGui.QIcon(icon)
 

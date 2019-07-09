@@ -683,7 +683,7 @@ def example():
     studiolibrary.widgets.formwidget.example()
     """
     import studiolibrary
-    image = studiolibrary.resource().get("icons", "icon.png")
+    image = studiolibrary.resource.get("icons", "icon.png")
 
     schema = [
         {

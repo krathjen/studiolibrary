@@ -27,10 +27,10 @@ class FolderItem(studiolibrary.LibraryItem):
 
     MenuName = "Folder"
     MenuOrder = 1
-    MenuIconPath = studiolibrary.resource().get("icons/folder.png")
+    MenuIconPath = studiolibrary.resource.get("icons/folder.png")
     PreviewWidgetClass = studiolibrary.widgets.PreviewWidget
-    DefaultThumbnailPath = studiolibrary.resource().get("icons/folder_item.png")
-    TrashIconPath = studiolibrary.resource().get("icons", "delete_96.png")
+    DefaultThumbnailPath = studiolibrary.resource.get("icons/folder_item.png")
+    TrashIconPath = studiolibrary.resource.get("icons", "delete_96.png")
 
     @classmethod
     def match(cls, path):

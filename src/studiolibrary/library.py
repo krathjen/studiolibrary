@@ -159,7 +159,7 @@ class Library(QtCore.QObject):
         
         :rtype: int
         """
-        return studiolibrary.config().get('recursiveSearchDepth')
+        return studiolibrary.config.get('recursiveSearchDepth')
 
     def fields(self):
         """Return all the fields for the library."""
@@ -187,7 +187,7 @@ class Library(QtCore.QObject):
         
         :rtype: str 
         """
-        formatString = studiolibrary.config().get('databasePath')
+        formatString = studiolibrary.config.get('databasePath')
         return studiolibrary.formatPath(formatString, path=self.path())
 
     def distinct(self, field, queries=None, sortBy="name"):

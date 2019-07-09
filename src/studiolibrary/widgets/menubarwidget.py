@@ -249,7 +249,7 @@ def showExample():
         w = QtWidgets.QLineEdit()
         menuBarWidget.addWidget(w)
 
-        icon = studiolibrary.resource().icon("add")
+        icon = studiolibrary.resource.icon("add")
         menuBarWidget.addAction(icon, "Plus")
         menuBarWidget.setStyleSheet("""
 background-color: rgb(0,200,100);

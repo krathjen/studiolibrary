@@ -55,7 +55,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         
         :rtype: str 
         """
-        return self._expandedIconPath or studiolibrary.resource().get("icons", "folder_open")
+        return self._expandedIconPath or studiolibrary.resource.get("icons", "folder_open")
 
     def collapsedIconPath(self):
         """
@@ -63,7 +63,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: str 
         """
-        return self._collapsedIconPath or studiolibrary.resource().get("icons", "folder_48")
+        return self._collapsedIconPath or studiolibrary.resource.get("icons", "folder_48")
 
     def defaultIconPath(self):
         """

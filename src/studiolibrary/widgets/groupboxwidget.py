@@ -46,8 +46,8 @@ class GroupBoxWidget(QtWidgets.QFrame):
         self._titleWidget.setObjectName("title")
         self._titleWidget.toggled.connect(self._toggled)
 
-        on_path = studiolibrary.resource().get("icons", "caret-down.svg")
-        off_path = studiolibrary.resource().get("icons", "caret-right.svg")
+        on_path = studiolibrary.resource.get("icons", "caret-down.svg")
+        off_path = studiolibrary.resource.get("icons", "caret-right.svg")
         icon = studioqt.Icon.fa(on_path, color="rgb(255,255,255,200)", off=off_path)
         self._titleWidget.setIcon(icon)
 

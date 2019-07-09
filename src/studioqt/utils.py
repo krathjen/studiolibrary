@@ -16,6 +16,7 @@ import inspect
 import logging
 import contextlib
 
+from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtCompat
 from studiovendor.Qt import QtWidgets
@@ -28,36 +29,13 @@ __all__ = [
     "fadeIn",
     "fadeOut",
     "loadUi",
+    "installFonts",
     "isAltModifier",
     "isShiftModifier",
     "isControlModifier",
-    "InvokeRepeatingThread",
 ]
 
 logger = logging.getLogger(__name__)
-
-
-class InvokeRepeatingThread(QtCore.QThread):
-    """
-    A convenience class for invoking a method to the given repeat rate.
-    """
-
-    triggered = QtCore.Signal()
-
-    def __init__(self, repeatRate, *args):
-        QtCore.QThread.__init__(self, *args)
-
-        self._repeatRate = repeatRate
-
-    def run(self):
-        """
-        The starting point for the thread.
-        
-        :rtype: None 
-        """
-        while True:
-            QtCore.QThread.sleep(self._repeatRate)
-            self.triggered.emit()
 
 
 @contextlib.contextmanager
@@ -78,7 +56,6 @@ def app():
     isAppRunning = bool(QtWidgets.QApplication.instance())
     if not isAppRunning:
         app_ = QtWidgets.QApplication(sys.argv)
-        installFonts()
 
     yield None
 
@@ -228,7 +205,7 @@ def fadeOut(widget, duration=200, onFinished=None):
     return animation
 
 
-def installFonts(path=""):
+def installFonts(path):
     """
     Install all the fonts in the given directory path.
     
@@ -237,7 +214,7 @@ def installFonts(path=""):
     path = path or studioqt.resource.get("fonts")
 
     path = os.path.abspath(path)
-    fontDatabase = QtWidgets.QFontDatabase()
+    fontDatabase = QtGui.QFontDatabase()
 
     for filename in os.listdir(path):
 

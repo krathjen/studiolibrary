@@ -147,7 +147,7 @@ class StatusWidget(QtWidgets.QFrame):
 
         self.setProperty("status", "info")
 
-        icon = studiolibrary.resource().icon("info")
+        icon = studiolibrary.resource.icon("info")
         self.showMessage(message, icon, msecs)
 
     def setProperty(self, *args):
@@ -170,7 +170,7 @@ class StatusWidget(QtWidgets.QFrame):
         """
         self.setProperty("status", "error")
 
-        icon = studiolibrary.resource().icon("error")
+        icon = studiolibrary.resource.icon("error")
         self.showMessage(message, icon, msecs, blocking=True)
 
     def showWarningMessage(self, message, msecs=None):
@@ -187,7 +187,7 @@ class StatusWidget(QtWidgets.QFrame):
 
         self.setProperty("status", "warning")
 
-        icon = studiolibrary.resource().icon("warning")
+        icon = studiolibrary.resource.icon("warning")
         self.showMessage(message, icon, msecs)
 
     def showMessage(self, message, icon, msecs=None, blocking=False):
@@ -228,7 +228,7 @@ class StatusWidget(QtWidgets.QFrame):
         self._timer.stop()
         self._button.hide()
         self._label.setText("")
-        icon = studiolibrary.resource().icon("blank")
+        icon = studiolibrary.resource.icon("blank")
         self._button.setIcon(icon)
         self.setProperty("status", "")
         self._blocking = False

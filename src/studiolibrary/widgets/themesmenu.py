@@ -120,7 +120,7 @@ class ThemeAction(QtWidgets.QAction):
         else:
             color = "rgb(255,255,255)"
 
-        icon = studiolibrary.resource().icon(ThemesMenu.THEME_ICON, color=color)
+        icon = studiolibrary.resource.icon(ThemesMenu.THEME_ICON, color=color)
         self.setIcon(icon)
 
     def theme(self):
@@ -174,7 +174,7 @@ class ThemesMenu(QtWidgets.QMenu):
             action = QtWidgets.QAction("Custom", self)
             action.triggered.connect(self.theme().browseAccentColor)
             color = self.theme().accentColor().toString()
-            icon = studiolibrary.resource().icon(ThemesMenu.THEME_ICON, color=color)
+            icon = studiolibrary.resource.icon(ThemesMenu.THEME_ICON, color=color)
             action.setIcon(icon)
             self.addAction(action)
 
@@ -191,7 +191,7 @@ class ThemesMenu(QtWidgets.QMenu):
             action = QtWidgets.QAction("Custom", self)
             action.triggered.connect(self._theme.browseBackgroundColor)
             color = self._theme.backgroundColor().toString()
-            icon = studiolibrary.resource().icon(ThemesMenu.THEME_ICON, color=color)
+            icon = studiolibrary.resource.icon(ThemesMenu.THEME_ICON, color=color)
             action.setIcon(icon)
             self.addAction(action)
 
@@ -595,7 +595,7 @@ class Theme(QtCore.QObject):
         else:
             darkness = "black"
 
-        resourceDirname = studiolibrary.resource().dirname()
+        resourceDirname = studiolibrary.resource.RESOURCE_DIRNAME
         resourceDirname = resourceDirname.replace("\\", "/")
 
         options = {
@@ -636,7 +636,7 @@ class Theme(QtCore.QObject):
         :rtype: str
         """
         options = self.options()
-        path = studiolibrary.resource().get("css", "default.css")
+        path = studiolibrary.resource.get("css", "default.css")
         styleSheet = studioqt.StyleSheet.fromPath(path, options=options, dpi=self.dpi())
         return styleSheet.data()
 
