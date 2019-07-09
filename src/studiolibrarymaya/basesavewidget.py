@@ -94,7 +94,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
         sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
 
-        path = studiolibrary.resource().get('icons/fa/camera.svg')
+        path = studiolibrary.resource().get('icons/camera.svg')
         sequenceWidget.addAction(
             path,
             "Capture new image",
@@ -102,7 +102,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
             self.thumbnailCapture
         )
 
-        path = studiolibrary.resource().get('icons/fa/expand.svg')
+        path = studiolibrary.resource().get('icons/expand.svg')
         sequenceWidget.addAction(
             path,
             "Show Capture window",
@@ -110,7 +110,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
             self.showCaptureWindow
         )
 
-        path = studiolibrary.resource().get('icons/fa/folder.svg')
+        path = studiolibrary.resource().get('icons/folder.svg')
         sequenceWidget.addAction(
             path,
             "Load image from disk",
