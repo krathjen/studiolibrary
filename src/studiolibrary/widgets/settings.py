@@ -51,7 +51,12 @@ def read():
 
     :rtype: dict
     """
-    return studiolibrary.readJson(path())
+    global _settings
+
+    if not _settings:
+        _settings = studiolibrary.readJson(path())
+
+    return _settings
 
 
 def save(data):
