@@ -211,8 +211,6 @@ def installFonts(path):
     
     :type path: str
     """
-    path = path or studioqt.resource.get("fonts")
-
     path = os.path.abspath(path)
     fontDatabase = QtGui.QFontDatabase()
 

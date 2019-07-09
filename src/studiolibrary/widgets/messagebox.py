@@ -16,6 +16,7 @@ from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
 
 import studioqt
+import studiolibrary
 
 from . import settings
 
@@ -59,7 +60,7 @@ def createMessageBox(
     mb.setButtons(buttons)
 
     if headerIcon:
-        p = studioqt.resource.pixmap(headerIcon)
+        p = studiolibrary.resource.pixmap(headerIcon)
         mb.setPixmap(p)
 
     try:
