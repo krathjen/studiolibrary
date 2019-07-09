@@ -38,7 +38,8 @@ def selectContentAction(item, parent=None):
     :param item: mayabaseitem.MayaBaseItem
     :param parent: QtWidgets.QMenu
     """
-    action = QtWidgets.QAction(ARROW_ICON_PATH, "Select content", parent)
+    arrowIcon = QtGui.QIcon(ARROW_ICON_PATH)
+    action = QtWidgets.QAction(arrowIcon, "Select content", parent)
     action.triggered.connect(item.selectContent)
     return action
 
