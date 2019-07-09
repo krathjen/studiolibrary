@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "2.5.0.b20"
+__version__ = "2.5.0.b21"
 
 
 def version():
@@ -21,11 +21,9 @@ def version():
     """
     return __version__
 
+
 from studiolibrary import config
 from studiolibrary import resource
-
-import studioqt
-
 from studiolibrary.utils import *
 from studiolibrary.library import Library
 from studiolibrary.libraryitem import LibraryItem
