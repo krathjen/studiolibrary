@@ -6,6 +6,7 @@
 */
 
 QWidget {
+    font-size: 12px;
     font-family: Open Sans;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 180);
     background-color: BACKGROUND_COLOR;
@@ -214,7 +215,6 @@ QHeaderView::section {
 */
 
 QTreeView {
-	font: 13px;
 	color: FOREGROUND_COLOR;
 }
 
@@ -224,7 +224,7 @@ QTreeView, QListView, QPushButton {
 }
 
 QTreeView::item, QTreeView::branch {
-	height: 24px;
+	height: 23px;
 	show-decoration-selected: 1; /* make the selection span the entire width of the view */
 	background-color: BACKGROUND_COLOR;
 }
@@ -397,7 +397,7 @@ QTabBar::tab:first:selected {
 
 
 QMenu, QMenu QWidget {
-	font: 13px;
+	font: 12px;
 	/*color: rgb(255, 255, 255, 180);*/
 	/*background-color: BACKGROUND_COLOR;*/
 }
@@ -630,7 +630,6 @@ StatusWidget {
 
 
 StatusWidget QLabel {
-    font-size: 11px;
     background-color: transparent;
 }
 
@@ -726,7 +725,7 @@ MessageBox {
 }
 
 #messageBox #messageBoxBody QLabel {
-    font: 11px;
+    font: 12px;
 }
 
 #messageBox #messageBoxInputEdit {
@@ -880,7 +879,6 @@ TextFieldWidget QTextEdit {
 }
 
 FormWidget QWidget {
-    /*font-size: 12px;*/
     text-align: left;
 }
 
@@ -921,7 +919,6 @@ FieldWidget #label:disabled {
 }
 
 FormWidget #titleWidget {
-    font-size: 12px;
     padding: 2px;
     margin:0px;
     padding-left: 5px;
@@ -996,12 +993,13 @@ BaseLoadWidget #titleLabel {
     font-size: 14px;
 }
 
+/*
 PreviewWidget QWidget,
 BaseSaveWidget QWidget,
 BaseLoadWidget QWidget {
     font-size: 12px;
 }
-
+*/
 
 PreviewWidget QLineEdit,
 PreviewWidget QTextEdit,
@@ -1055,10 +1053,6 @@ FormDialog #title {
     font-size: 18px;
 }
 
-FieldWidget QWidget {
-    font-size: 12px;
-}
-
 FormDialog FieldWidget QLabel {
     background-color: rgb(200,200,100, 0);
 }
@@ -1071,7 +1065,6 @@ FormDialog #description {
     padding: 4px;
     padding-bottom: 9px;
     margin-bottom: 10px;
-    font-size: 12px;
     border-bottom: 1px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B,15);
 }
 

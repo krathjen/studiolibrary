@@ -357,8 +357,8 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         :rtype: None
         """
         size = 24 * dpi
-        self.setIndentation(15 * dpi)
-        self.setMinimumWidth(35 * dpi)
+        self.setIndentation(14 * dpi)
+        self.setMinimumWidth(22 * dpi)
         self.setIconSize(QtCore.QSize(size, size))
         self.setStyleSheet("height: {size}".format(size=size))
 
@@ -447,7 +447,7 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         if value:
             self.horizontalScrollBar().setValue(value)
 
-        self.setIndentation(18 * self.dpi())
+        self.setDpi(self.dpi())
 
     def setPathSettings(self, path, settings):
         """
