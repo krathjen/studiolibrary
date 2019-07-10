@@ -874,7 +874,6 @@ SeparatorFieldWidget > #widget {
 }
 
 TextFieldWidget QTextEdit {
-    min-height: 42px;
     max-height: 92px;
 }
 
@@ -882,8 +881,8 @@ FormWidget QWidget {
     text-align: left;
 }
 
-FieldWidget {
-    min-height: 18px;
+#fieldWidget[layout="vertical"] {
+    min-height: 44px;
 }
 
 FieldWidget[layout="vertical"] {

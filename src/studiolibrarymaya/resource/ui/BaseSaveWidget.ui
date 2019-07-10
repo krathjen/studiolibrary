@@ -126,7 +126,7 @@ background-color: rgb(254, 255, 230, 200);
        <property name="minimumSize">
         <size>
          <width>50</width>
-         <height>50</height>
+         <height>150</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -219,30 +219,15 @@ background-color: rgb(254, 255, 230, 200);</string>
    </item>
    <item>
     <widget class="QFrame" name="optionsFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>30</height>
-      </size>
-     </property>
      <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
+      <enum>QFrame::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Raised</enum>
      </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <layout class="QVBoxLayout" name="verticalLayout_4">
       <property name="spacing">
-       <number>3</number>
+       <number>0</number>
       </property>
       <property name="margin">
        <number>0</number>

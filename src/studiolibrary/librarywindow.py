@@ -275,9 +275,6 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self.setLibrary(library)
 
-        self.setMinimumWidth(5)
-        self.setMinimumHeight(5)
-
         # --------------------------------------------------------------------
         # Setup the menu bar buttons
         # --------------------------------------------------------------------

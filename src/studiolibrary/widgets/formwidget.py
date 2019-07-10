@@ -228,7 +228,7 @@ class FormWidget(QtWidgets.QFrame):
             else:
                 data["errorVisible"] = errorsVisible
 
-            widget = cls(data=data, formWidget=self)
+            widget = cls(data=data, parent=self._fieldsFrame, formWidget=self)
 
             data_ = widget.defaultData()
             data_.update(data)

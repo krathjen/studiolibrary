@@ -445,7 +445,7 @@ class FieldWidget(QtWidgets.QFrame):
         
         :type widget: QtWidgets.QWidget
         """
-        widgetLayout = QtWidgets.QHBoxLayout()
+        widgetLayout = QtWidgets.QHBoxLayout(self)
         widgetLayout.setContentsMargins(0, 0, 0, 0)
         widgetLayout.setSpacing(0)
 
@@ -469,7 +469,7 @@ class FieldWidget(QtWidgets.QFrame):
         widgetLayout.addWidget(self._widget)
         widgetLayout.addWidget(self._menuButton)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 

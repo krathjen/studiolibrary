@@ -283,7 +283,6 @@ class AnimItem(baseitem.BaseItem):
                 "name": "bakeConnected",
                 "type": "bool",
                 "default": False,
-                "layout": "vertical",
                 "persistent": True,
                 "inline": True,
                 "label": {"visible": False}
