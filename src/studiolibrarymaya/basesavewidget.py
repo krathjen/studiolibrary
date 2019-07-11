@@ -11,7 +11,6 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import shutil
 import logging
 
 from studiovendor.Qt import QtGui
@@ -19,7 +18,6 @@ from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
 
 import studioqt
-import studiolibrarymaya
 import studiolibrary.widgets
 
 try:
@@ -47,11 +45,11 @@ class BaseSaveWidget(QtWidgets.QWidget):
     def __init__(self, item, parent=None):
         """
         :type item: studiolibrarymaya.BaseItem
-        :type parent: QtWidgets.QWidget
+        :type parent: QtWidgets.QWidget or None
         """
         QtWidgets.QWidget.__init__(self, parent)
-        self.setObjectName("studioLibraryMayaCreateWidget")
 
+        self.setObjectName("studioLibraryMayaCreateWidget")
         self.setWindowTitle("Create Item")
 
         studioqt.loadUi(self)
@@ -64,13 +62,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self._libraryWindow = None
         self._sequencePath = None
 
-        text = "Click to capture a thumbnail from the current model panel.\n" \
-               "CTRL + Click to show the capture window for better framing."
-
-        self.ui.thumbnailButton.setToolTip(text)
-
         self.ui.acceptButton.clicked.connect(self.accept)
-        self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
         try:
@@ -89,13 +81,18 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self)
-        sequenceWidget.setObjectName("thumbnailButton")
-        sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
-        sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
+        self.ui.thumbnailButton = studiolibrary.widgets.ImageSequenceWidget(self)
+        self.ui.thumbnailButton.setObjectName("thumbnailButton")
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.thumbnailButton)
+        self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
+
+        text = "Click to capture a thumbnail from the current model panel.\n" \
+               "CTRL + Click to show the capture window for better framing."
+
+        self.ui.thumbnailButton.setToolTip(text)
 
         path = studiolibrary.resource.get("icons", "camera.svg")
-        sequenceWidget.addAction(
+        self.ui.thumbnailButton.addAction(
             path,
             "Capture new image",
             "Capture new image",
@@ -103,7 +100,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         )
 
         path = studiolibrary.resource.get("icons", "expand.svg")
-        sequenceWidget.addAction(
+        self.ui.thumbnailButton.addAction(
             path,
             "Show Capture window",
             "Show Capture window",
@@ -111,7 +108,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         )
 
         path = studiolibrary.resource.get("icons", "folder.svg")
-        sequenceWidget.addAction(
+        self.ui.thumbnailButton.addAction(
             path,
             "Load image from disk",
             "Load image from disk",
@@ -119,12 +116,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         )
 
         icon = studioqt.Icon(DEFAULT_THUMBNAIL_PATH)
-        sequenceWidget.setIcon(icon)
-
-        self.ui.thumbnailFrame.layout().insertWidget(0, sequenceWidget)
-        self.ui.thumbnailButton.hide()
-        self.ui.thumbnailButton = sequenceWidget
-        self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
+        self.ui.thumbnailButton.setIcon(icon)
 
     def setLibraryWindow(self, libraryWindow):
         """
@@ -137,7 +129,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def libraryWindow(self):
         """
-        Return the library widget for the item.
+        Get the library widget for the item.
 
         :rtype: libraryWindow: studiolibrary.LibraryWindow
         """
@@ -153,7 +145,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def item(self):
         """
-        Return the library item to be created.
+        Get the library item to be created.
 
         :rtype: studiolibrarymaya.BaseItem
         """
@@ -161,14 +153,14 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def setItem(self, item):
         """
-        Set the base item to be created.
+        Set the item to be created.
 
         :type item: studiolibrarymaya.BaseItem
         """
         self._item = item
 
         self.ui.titleLabel.setText(item.MenuName)
-        self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
         schema = item.saveSchema()
 
@@ -188,22 +180,9 @@ class BaseSaveWidget(QtWidgets.QWidget):
         else:
             self.ui.optionsFrame.setVisible(False)
 
-    def defaultValues(self):
-        """
-        Get all the default values for the save fields.
-        
-        :rtype: dict
-        """
-        values = {}
-
-        for option in self.item().saveSchema():
-            values[option.get('name')] = option.get('default')
-
-        return values
-
     def iconPath(self):
         """
-        Return the icon path to be used for the thumbnail.
+        Get the icon path to be used for the thumbnail.
 
         :rtype str
         """
@@ -246,7 +225,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def scriptJob(self):
         """
-        Return the script job object used when the users selection changes.
+        Get the script job object used when the users selection changes.
 
         :rtype: mutils.ScriptJob
         """
@@ -254,7 +233,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def setScriptJobEnabled(self, enable):
         """
-        Enable the script job used when the users selection changes.
+        Set the script job used when the users selection changes.
 
         :rtype: None
         """
@@ -292,22 +271,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
             self.ui.thumbnailButton.setMaximumSize(size)
             self.ui.thumbnailFrame.setMaximumSize(size)
 
-    def name(self):
-        """
-        Return the str from the name field.
-
-        :rtype: str
-        """
-        return self.ui.name.text().strip()
-
-    def description(self):
-        """
-         Return the str from the comment field.
-
-        :rtype: str
-        """
-        return self.ui.comment.toPlainText().strip()
-
     def setFolderPath(self, path):
         """
         Set the destination folder path.
@@ -336,7 +299,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def sequencePath(self):
         """
-        Return the playblast path.
+        Get the sequence path.
 
         :rtype: str
         """
@@ -347,7 +310,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         Set the disk location for the image sequence to be saved.
 
         :type path: str
-        :rtype: None
         """
         self._sequencePath = path
         self.ui.thumbnailButton.setDirname(os.path.dirname(path))

@@ -32,11 +32,7 @@
    <string>Create Item</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QLineEdit, QTextEdit, QPlainTextEdit {
-color: rgb(40, 40, 40);
-border: 0px solid rgb(0, 0, 0, 150);
-background-color: rgb(254, 255, 230, 200);
-}</string>
+   <string notr="true"/>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -55,7 +51,7 @@ background-color: rgb(254, 255, 230, 200);
     <number>2</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_18">
+    <layout class="QHBoxLayout" name="titleLayout">
      <property name="leftMargin">
       <number>2</number>
      </property>
@@ -66,7 +62,7 @@ background-color: rgb(254, 255, 230, 200);
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="iconLabel">
+      <widget class="QLabel" name="titleIcon">
        <property name="maximumSize">
         <size>
          <width>13</width>
@@ -105,7 +101,7 @@ background-color: rgb(254, 255, 230, 200);
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="modelPanelLayout">
+    <layout class="QHBoxLayout" name="thumbnailLayout">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -154,64 +150,6 @@ background-color: rgb(254, 255, 230, 200);
         <property name="margin">
          <number>0</number>
         </property>
-        <item>
-         <widget class="QToolButton" name="thumbnailButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>1</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>150</width>
-            <height>150</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Take snapshot</string>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(40, 40, 40);
-border: 0px solid rgb(0, 0, 0, 150);
-background-color: rgb(254, 255, 230, 200);</string>
-          </property>
-          <property name="text">
-           <string>Snapshot</string>
-          </property>
-          <property name="icon">
-           <iconset>
-            <normaloff>../icons/thumbnail2.png</normaloff>../icons/thumbnail2.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>150</width>
-            <height>150</height>
-           </size>
-          </property>
-          <property name="popupMode">
-           <enum>QToolButton::InstantPopup</enum>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonIconOnly</enum>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
      </item>
@@ -220,10 +158,13 @@ background-color: rgb(254, 255, 230, 200);</string>
    <item>
     <widget class="QFrame" name="optionsFrame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <property name="spacing">
@@ -242,6 +183,9 @@ background-color: rgb(254, 255, 230, 200);</string>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <property name="spacing">

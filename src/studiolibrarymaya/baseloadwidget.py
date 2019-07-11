@@ -19,7 +19,6 @@ from studiovendor.Qt import QtWidgets
 
 import studioqt
 import studiolibrary
-import studiolibrarymaya
 import studiolibrary.widgets
 
 try:
@@ -43,7 +42,8 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
     def __init__(self, item, parent=None):
         """
-        :type parent: QtWidgets.QWidget
+        :type item: studiolibrarymaya.BaseItem
+        :type parent: QtWidgets.QWidget or None
         """
         QtWidgets.QWidget.__init__(self, parent)
         self.setObjectName("studioLibraryMayaPreviewWidget")
@@ -54,7 +54,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._item = None
         self._iconPath = ""
         self._scriptJob = None
-
         self._formWidget = None
         self._infoFormWidget = None
 
@@ -86,24 +85,20 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        self.ui.sequenceWidget = studiolibrary.widgets.ImageSequenceWidget(self)
-        self.ui.sequenceWidget.setStyleSheet(self.ui.thumbnailButton.styleSheet())
-        self.ui.sequenceWidget.setToolTip(self.ui.thumbnailButton.toolTip())
-
-        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.sequenceWidget)
-        self.ui.thumbnailButton.hide()
-        self.ui.thumbnailButton = self.ui.sequenceWidget
+        self.ui.thumbnailButton = studiolibrary.widgets.ImageSequenceWidget(self)
+        self.ui.thumbnailButton.setObjectName("thumbnailButton")
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.thumbnailButton)
 
         path = self.item().thumbnailPath()
         if os.path.exists(path):
             self.setIconPath(path)
 
         if self.item().imageSequencePath():
-            self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
+            self.ui.thumbnailButton.setDirname(self.item().imageSequencePath())
 
     def setCaptureMenuEnabled(self, enable):
         """
-        Enable the capture menu for editing the thumbnail.
+        Set the capture menu for editing the thumbnail.
 
         :rtype: None 
         """
@@ -122,7 +117,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
     def item(self):
         """
-        Return the library item to be created.
+        Get the library item to be created.
 
         :rtype: studiolibrarymaya.BaseItem
         """
@@ -130,6 +125,8 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
     def _itemValueChanged(self, field, value):
         """
+        Triggered when the a field value has changed.
+
         :type field: str
         :type value: object
         """
@@ -139,20 +136,16 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """
         Set the item for the preview widget.
 
-        :type item: BaseItem
+        :type item: studiolibrarymaya.BaseItem
         """
         self._item = item
 
-        if hasattr(self.ui, "titleLabel"):
-            self.ui.titleLabel.setText(item.MenuName)
+        self.ui.titleLabel.setText(item.MenuName)
+        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
-        if hasattr(self.ui, "iconLabel"):
-            self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
-
-        if hasattr(self.ui, "infoFrame"):
-            self._infoFormWidget = studiolibrary.widgets.FormWidget(self)
-            self._infoFormWidget.setSchema(item.info())
-            self.ui.infoFrame.layout().addWidget(self._infoFormWidget)
+        self._infoFormWidget = studiolibrary.widgets.FormWidget(self)
+        self._infoFormWidget.setSchema(item.info())
+        self.ui.infoFrame.layout().addWidget(self._infoFormWidget)
 
         options = item.loadSchema()
         if options:
@@ -169,7 +162,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
     def iconPath(self):
         """
-        Return the icon path to be used for the thumbnail.
+        Get the icon path to be used for the thumbnail.
 
         :rtype str
         """
@@ -180,7 +173,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
         Set the icon path to be used for the thumbnail.
 
         :type path: str
-        :rtype: None
         """
         self._iconPath = path
         icon = QtGui.QIcon(QtGui.QPixmap(path))

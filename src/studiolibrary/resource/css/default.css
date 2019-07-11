@@ -1179,3 +1179,23 @@ FieldWidget[error=true] #label {
     color: rgb(240, 0, 0);
 }
 */
+
+BaseLoadWidget ImageSequenceWidget {
+    background-color: rgb(0,0,0,0);
+}
+
+BaseSaveWidget QLineEdit,
+BaseSaveWidget QLineEdit:focus,
+BaseSaveWidget QLineEdit:hover,
+BaseSaveWidget QTextEdit,
+BaseSaveWidget QTextEdit:focus,
+BaseSaveWidget QTextEdit:hover,
+BaseSaveWidget QPlainTextEdit,
+BaseSaveWidget QPlainTextEdit:focus,
+BaseSaveWidget QPlainTextEdit:hover,
+BaseSaveWidget ImageSequenceWidget {
+    color: rgb(40, 40, 40);
+    border: 0px solid rgb(0, 0, 0, 150);
+    background-color: rgb(254, 255, 230, 200);
+}
+
