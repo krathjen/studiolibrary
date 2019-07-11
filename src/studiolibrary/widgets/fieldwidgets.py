@@ -1056,7 +1056,8 @@ class TagsFieldWidget(FieldWidget):
 
         :type value: list[str]
         """
-        self.widget().setCurrentText(self.listToString(value))
+        text = self.listToString(value)
+        self.widget().setEditText(text)
 
     def setItems(self, items):
         """
@@ -1232,7 +1233,7 @@ class SeparatorFieldWidget(FieldWidget):
 
     def value(self):
         """
-        Get the current text of the combobox.
+        Get the current text of the separator.
         
         :rtype: unicode 
         """
