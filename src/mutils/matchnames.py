@@ -122,7 +122,8 @@ def matchNames(srcObjects, dstObjects=None, dstNamespaces=None, search=None, rep
                 srcNode = mutils.Node(name)
 
                 if search is not None and replace is not None:
-                    name = name.replace(search, replace)
+                    # Using the mirror table which supports * style replacing
+                    name = mutils.MirrorTable.replace(name, search, replace)
 
                 dstNode = mutils.Node(name)
 

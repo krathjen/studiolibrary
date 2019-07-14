@@ -79,7 +79,6 @@ __all__ = [
     "MirrorPlane",
     "MirrorOption",
     "saveMirrorTable",
-    "Axis",
 ]
 
 
@@ -254,9 +253,33 @@ class MirrorTable(mutils.TransferObject):
         :type old: str
         :type new: str
         :type count: int
-        :rtype: str 
+        :rtype: str
         """
         return new.join(name.rsplit(old, count))
+
+    @staticmethod
+    def replace(name, old, new):
+        """
+        A static method that is called by self.mirrorObject.
+
+        :type name: str
+        :type old: str
+        :type new: str
+        :rtype: str
+        """
+        # Support for replacing a prefix naming convention.
+        if old.endswith("*") or new.endswith("*"):
+            name = MirrorTable.replacePrefix(name, old, new)
+
+        # Support for replacing a suffix naming convention.
+        elif old.startswith("*") or new.startswith("*"):
+            name = MirrorTable.replaceSuffix(name, old, new)
+
+        # Support for all other naming conventions.
+        else:
+            name = name.replace(old, new)
+
+        return name
 
     @staticmethod
     def replacePrefix(name, old, new):
