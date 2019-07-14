@@ -22,7 +22,6 @@ ICON_PATH = os.path.join(DIRNAME, "icons", "selectionSet.png")
 
 class SetsItem(baseitem.BaseItem):
 
-    Extensions = [".set"]
     Extension = ".set"
     MenuName = "Selection Set"
     MenuIconPath = ICON_PATH

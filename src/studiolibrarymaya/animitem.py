@@ -38,7 +38,6 @@ ICON_PATH = os.path.join(DIRNAME, "icons", "animation.png")
 
 class AnimItem(baseitem.BaseItem):
 
-    Extensions = [".anim"]
     Extension = ".anim"
     MenuName = "Animation"
     MenuIconPath = ICON_PATH

@@ -95,7 +95,6 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 class PoseItem(baseitem.BaseItem):
 
     Extension = ".pose"
-    Extensions = [".pose"]
     MenuName = "Pose"
     MenuOrder = 4
     MenuIconPath = ICON_PATH

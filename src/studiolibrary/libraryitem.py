@@ -132,9 +132,14 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type path: str
         :rtype: bool 
         """
-        for ext in cls.Extensions:
+        extensions = cls.Extensions
+        if not extensions and cls.Extension:
+            extensions = [cls.Extension]
+
+        for ext in extensions:
             if path.endswith(ext):
                 return True
+
         return False
 
     def __init__(

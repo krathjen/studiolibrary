@@ -32,7 +32,6 @@ ICON_PATH = os.path.join(DIRNAME, "icons", "mirrortable.png")
 
 class MirrorItem(baseitem.BaseItem):
 
-    Extensions = [".mirror"]
     Extension = ".mirror"
     MenuName = "Mirror Table"
     MenuIconPath = ICON_PATH
