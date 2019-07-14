@@ -97,7 +97,15 @@ class MirrorItem(baseitem.BaseItem):
         return schema
 
     @mutils.showWaitCursor
-    def load(self, objects=None, namespaces=None, option=None, animation=True, time=None):
+    def load(
+            self,
+            objects=None,
+            namespaces=None,
+            option=None,
+            animation=True,
+            time=None,
+            **kwargs
+    ):
         """
         Load the current mirror table to the given objects and options.
 
