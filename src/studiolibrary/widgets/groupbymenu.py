@@ -78,6 +78,9 @@ class GroupByMenu(QtWidgets.QMenu):
         action = self.addAction("None")
         action.setCheckable(True)
 
+        if not currentField:
+            action.setChecked(True)
+
         callback = partial(self.setGroupBy, None, None)
         action.triggered.connect(callback)
 
