@@ -25,8 +25,9 @@ logger = logging.getLogger(__name__)
 
 class MenuBarWidget(QtWidgets.QToolBar):
 
-    DEFAULT_EXPANDED_HEIGHT = 34
+    DEFAULT_EXPANDED_HEIGHT = 32
     DEFAULT_COLLAPSED_HEIGHT = 10
+    ICON_SIZE = 32
 
     def __init__(self, parent=None):
         QtWidgets.QToolBar.__init__(self, parent)
@@ -127,7 +128,9 @@ class MenuBarWidget(QtWidgets.QToolBar):
         height = self.expandHeight()
         self.setFixedHeight(height)
         self.setChildrenHidden(False)
-        self.setIconSize(QtCore.QSize(height, height))
+        iconSize = self.ICON_SIZE * self.dpi()
+        self.setIconSize(QtCore.QSize(iconSize, iconSize))
+        self.setStyleSheet(self.styleSheet())
 
     def collapse(self):
         """
@@ -141,6 +144,7 @@ class MenuBarWidget(QtWidgets.QToolBar):
         self.setChildrenHeight(0)
         self.setChildrenHidden(True)
         self.setIconSize(QtCore.QSize(0, 0))
+        self.setStyleSheet(self.styleSheet())
 
     def setIconColor(self, color):
         """

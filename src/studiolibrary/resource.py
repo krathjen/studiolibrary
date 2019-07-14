@@ -35,7 +35,8 @@ def icon(*args, **kwargs):
     Return an Icon object from the given resource name.
     :rtype: str 
     """
-    return Resource().icon(*args, **kwargs)
+    path = get("icons", *args)
+    return Resource().icon(path, **kwargs)
 
 
 def pixmap(*args, **kwargs):

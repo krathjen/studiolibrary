@@ -7,6 +7,7 @@
 
 QWidget {
     font-size: 12px;
+
     font-family: Open Sans;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 180);
     background-color: BACKGROUND_COLOR;
@@ -21,11 +22,33 @@ QLineEdit, QPushButton, QToolBar, QToolButton, QTabBar, QTabBar::tab {
     background-color: BACKGROUND_COLOR;
 }
 
-MenuBarWidget, QToolBar, QToolButton  {
+MenuBarWidget, QToolBar , QToolButton  {
 	color: ACCENT_FOREGROUND_COLOR;
 	background-color: ACCENT_COLOR;
-	spacing:4px;
 }
+
+QToolBar {
+	spacing: 4px;
+}
+
+MenuBarWidget  {
+	spacing: 2px;
+}
+
+/*
+MenuBarWidget QToolButton {
+    min-height: 24;
+    max-height: 24;
+    min-width: 24;
+    max-width: 24;
+    border-radius: 2px;
+}
+*/
+MenuBarWidget QToolButton:Hover {
+    background-color: rgb(255,255,255,55);
+}
+
+
 
 QToolTip {
     background-color: rgb(255, 255, 204);
@@ -33,6 +56,7 @@ QToolTip {
     border: black solid 1px;
     margins: 2px;
 }
+
 
 /*
 DIALOG
@@ -200,8 +224,8 @@ QListView::item, QTreeView::item {
 }
 
 QHeaderView::section {
-	font: 16px;
-	height: 24px;
+	font: 12px;
+	height: 18px;
 	border: 0px;
 	border-right: 2px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 20);
 	padding: 5px;
@@ -438,12 +462,21 @@ QMenu::item:selected {
  SearchWidget
  --------------------------------------------------------------------------
 */
+/*
+SearchWidget {
+    margin: 2px;
+    padding: 0px;
+    min-height: 22;
+    max-height: 22;
+    border-radius: 2px;
+}
+
+*/
 SearchWidget, SearchWidget QLabel {
-	font: 22px;
-	height: 35px;
-	padding: 0 2px;
+	font: 18px;
+	padding: 0px;
 	color: ACCENT_FOREGROUND_COLOR;
-	background-color: ACCENT_COLOR;
+	background-color: rgb(255, 255, 255, 0);;
 	selection-background-color: rgb(ACCENT_FOREGROUND_COLOR_R, ACCENT_FOREGROUND_COLOR_G, ACCENT_FOREGROUND_COLOR_B, 210);
 	selection-color: ACCENT_COLOR;
 }
@@ -463,7 +496,7 @@ SearchWidget QLabel {
 
 SearchWidget QPushButton, SearchWidget QPushButton:hover {
 	border: 0px;
-	padding: 0 2px;
+	padding: 2px;
 	color: ACCENT_FOREGROUND_COLOR;
 	background-color: rgb(255, 255, 255, 0);
 }

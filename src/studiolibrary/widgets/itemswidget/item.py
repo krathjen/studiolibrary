@@ -72,7 +72,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
     MAX_ICON_SIZE = 256
 
-    DEFAULT_FONT_SIZE = 13
+    DEFAULT_FONT_SIZE = 12
     DEFAULT_PLAYHEAD_COLOR = QtGui.QColor(255, 255, 255, 220)
 
     THUMBNAIL_COLUMN = 0
@@ -765,8 +765,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type option: QtWidgets.QStyleOptionViewItem
         :rtype: QtCore.QRect
         """
-        rect = QtCore.QRect(option.rect)
-        return rect
+        return QtCore.QRect(option.rect)
 
     def paintRow(self, painter, option, index):
         """
@@ -835,6 +834,11 @@ class Item(QtWidgets.QTreeWidgetItem):
         else:
             color = self.backgroundColor()
             painter.setBrush(QtGui.QBrush(color))
+
+        if not self.itemsWidget().isIconView():
+            spacing = 1 * self.dpi()
+            height = visualRect.height() - spacing
+            visualRect.setHeight(height)
 
         painter.drawRect(visualRect)
 

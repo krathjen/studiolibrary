@@ -19,7 +19,10 @@ from .item import Item
 
 class GroupItem(Item):
 
-    DEFAULT_FONT_SIZE = 24
+    DEFAULT_FONT_SIZE = 18
+    PADDING_LEFT = 2
+    PADDING_RIGHT = 20
+    HEIGHT = 28
 
     def __init__(self, *args):
         super(GroupItem, self).__init__(*args)
@@ -86,8 +89,9 @@ class GroupItem(Item):
 
         :rtype: QtCore.QSize
         """
-        width = self.itemsWidget().width() - 20
-        return QtCore.QSize(width, 40 * self.dpi())
+        padding = self.PADDING_RIGHT * self.dpi()
+        width = self.itemsWidget().width() - padding
+        return QtCore.QSize(width, self.HEIGHT * self.dpi())
 
     def visualRect(self, option):
         """
@@ -97,7 +101,7 @@ class GroupItem(Item):
         :rtype: QtCore.QRect
         """
         rect = QtCore.QRect(option.rect)
-        rect.setX(10 * self.dpi())
+        rect.setX(self.PADDING_LEFT * self.dpi())
         rect.setWidth(self.sizeHint().width())
         return rect
 

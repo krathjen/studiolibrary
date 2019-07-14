@@ -42,7 +42,7 @@
 
   // Enables the scale factor option in the setting dialog
   // This might be useful when using high-DPI devices like a 4k monitor
-  "scaleFactorEnabled": false,
+  "scaleFactorEnabled": true,
 
   // A list of the default item plugins
   "itemRegistry": [

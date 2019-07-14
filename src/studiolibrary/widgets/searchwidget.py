@@ -35,7 +35,6 @@ class SearchWidget(QtWidgets.QLineEdit):
 
         self._dataset = None
         self._spaceOperator = "and"
-        self._iconPadding = 6
         self._iconButton = QtWidgets.QPushButton(self)
         self._iconButton.clicked.connect(self._iconClicked)
 

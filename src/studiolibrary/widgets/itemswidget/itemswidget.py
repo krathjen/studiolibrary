@@ -42,7 +42,7 @@ class ItemsWidget(QtWidgets.QWidget):
     DEFAULT_MIN_SPACING = 0
     DEFAULT_MAX_SPACING = 50
 
-    DEFAULT_MIN_LIST_SIZE = 15
+    DEFAULT_MIN_LIST_SIZE = 12
     DEFAULT_MIN_ICON_SIZE = 50
 
     itemClicked = QtCore.Signal(object)
