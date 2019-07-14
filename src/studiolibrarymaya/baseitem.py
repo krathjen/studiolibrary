@@ -249,11 +249,15 @@ class BaseItem(studiolibrary.LibraryItem):
         self._currentSaveSchema = options
 
         selection = maya.cmds.ls(selection=True) or []
-        count = len(selection)
-        plural = "s" if count > 1 else ""
 
-        msg = "{0} object{1} selected for saving"
-        msg = msg.format(str(count), plural)
+        if selection:
+            count = len(selection)
+            plural = "s" if count > 1 else ""
+
+            msg = "{0} object{1} selected for saving"
+            msg = msg.format(str(count), plural)
+        else:
+            msg = "Nothing selected for saving"
 
         return [
             {
