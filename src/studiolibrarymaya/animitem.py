@@ -33,7 +33,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "animation.png")
+ICON_PATH = os.path.join(DIRNAME, "icons", "animation.png")
 
 
 class AnimItem(baseitem.BaseItem):

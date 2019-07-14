@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 DIRNAME = os.path.dirname(__file__)
-DEFAULT_THUMBNAIL_PATH = os.path.join(DIRNAME, "resource", "icons", "thumbnail2.png")
+DEFAULT_THUMBNAIL_PATH = os.path.join(DIRNAME, "icons", "thumbnail2.png")
 
 
 class BaseSaveWidget(QtWidgets.QWidget):

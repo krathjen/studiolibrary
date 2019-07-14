@@ -9,6 +9,7 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import logging
 
@@ -35,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "pose.png")
+ICON_PATH = os.path.join(DIRNAME, "icons", "pose.png")
 
 
 class PoseLoadWidget(baseloadwidget.BaseLoadWidget):

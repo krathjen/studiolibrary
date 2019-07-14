@@ -9,6 +9,7 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import mutils
 
@@ -16,7 +17,7 @@ from studiolibrarymaya import baseitem
 
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "selectionSet.png")
+ICON_PATH = os.path.join(DIRNAME, "icons", "selectionSet.png")
 
 
 class SetsItem(baseitem.BaseItem):

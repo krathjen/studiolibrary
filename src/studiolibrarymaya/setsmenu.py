@@ -18,7 +18,6 @@ from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtWidgets
 
 import studiolibrary
-import studiolibrarymaya
 
 from studiolibrarymaya import setsitem
 
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 DIRNAME = os.path.dirname(__file__)
-ARROW_ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "arrow.png")
+ARROW_ICON_PATH = os.path.join(DIRNAME, "icons", "arrow.png")
 
 
 def selectContentAction(item, parent=None):

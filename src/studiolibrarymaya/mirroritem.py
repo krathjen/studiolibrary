@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "resource", "icons", "mirrortable.png")
+ICON_PATH = os.path.join(DIRNAME, "icons", "mirrortable.png")
 
 
 class MirrorItem(baseitem.BaseItem):
