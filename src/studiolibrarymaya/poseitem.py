@@ -13,6 +13,7 @@ import os
 import logging
 
 from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtWidgets
 
 from studiolibrarymaya import baseitem
 from studiolibrarymaya import baseloadwidget
@@ -45,8 +46,15 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
         """
         super(PoseLoadWidget, self).__init__(*args, **kwargs)
 
+        self.ui.blendSlider = QtWidgets.QSlider(self)
+        self.ui.blendSlider.setObjectName("blendSlider")
+        self.ui.blendSlider.setMinimum(-30)
+        self.ui.blendSlider.setMaximum(130)
+        self.ui.blendSlider.setOrientation(QtCore.Qt.Horizontal)
         self.ui.blendSlider.sliderMoved.connect(self.sliderMoved)
         self.ui.blendSlider.sliderReleased.connect(self.sliderReleased)
+
+        self.setCustomWidget(self.ui.blendSlider)
 
         self.item().blendChanged.connect(self.setSliderValue)
 

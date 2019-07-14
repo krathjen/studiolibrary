@@ -85,7 +85,7 @@ def uiPath(cls):
     return path
 
 
-def loadUi(widget, path=None):
+def loadUi(widget, path=None, cls=None):
     """
     .. code-block:: python
         import studioqt
@@ -101,9 +101,12 @@ def loadUi(widget, path=None):
 
     :type widget: QWidget or QDialog
     :type path: str
+    :type cls: object
     :rtype: None
     """
-    if not path:
+    if cls:
+        path = uiPath(cls)
+    elif not path:
         path = uiPath(widget.__class__)
 
     cwd = os.getcwd()

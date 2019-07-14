@@ -49,7 +49,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self.setObjectName("studioLibraryMayaPreviewWidget")
         self.setWindowTitle("Preview Item")
 
-        studioqt.loadUi(self)
+        self.loadUi()
 
         self._item = None
         self._iconPath = ""
@@ -73,6 +73,14 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self.createSequenceWidget()
         self.updateThumbnailSize()
         self.setupConnections()
+
+    def loadUi(self):
+        """Convenience method for loading the .ui file."""
+        studioqt.loadUi(self, cls=BaseLoadWidget)
+
+    def setCustomWidget(self, widget):
+        """Convenience method for adding a custom widget when loading."""
+        self.ui.customWidgetFrame.layout().addWidget(widget)
 
     def setupConnections(self):
         """Setup the connections for all the widgets."""
