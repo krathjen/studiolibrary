@@ -506,11 +506,13 @@ class FieldWidget(QtWidgets.QFrame):
         for action in actions:
 
             name = action.get("name", "No name found")
+            enabled = action.get("enabled", True)
             callback = action.get("callback")
 
             func = functools.partial(self._actionCallback, callback)
 
             action = menu.addAction(name)
+            action.setEnabled(enabled)
             action.triggered.connect(func)
 
         point = QtGui.QCursor.pos()
