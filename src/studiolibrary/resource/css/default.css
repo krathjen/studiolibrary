@@ -456,6 +456,10 @@ QMenu::item:selected {
     background-color: ACCENT_COLOR;
 }
 
+QMenu::item:selected:disabled {
+	color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 50);
+	background-color: rgb(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 50);
+}
 
 /*
  --------------------------------------------------------------------------
