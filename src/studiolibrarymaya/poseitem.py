@@ -146,6 +146,14 @@ class PoseItem(baseitem.BaseItem):
 
         return fields
 
+    def mirrorTableSearchAndReplace(self):
+        """
+        Get the values for search and replace from the mirror table.
+
+        :rtype: (str, str)
+        """
+        return self.mirrorTable().leftSide(), self.mirrorTable().rightSide()
+
     def switchSearchAndReplace(self):
         """
         Switch the values of the search and replace field.
@@ -207,11 +215,16 @@ class PoseItem(baseitem.BaseItem):
                 "actions": [
                     {
                         "name": "Switch",
-                        "callback": self.switchSearchAndReplace
+                        "callback": self.switchSearchAndReplace,
                     },
                     {
                         "name": "Clear",
-                        "callback": self.clearSearchAndReplace
+                        "callback": self.clearSearchAndReplace,
+                    },
+                    {
+                        "name": "From Mirror Table",
+                        "enabled": bool(self.mirrorTable()),
+                        "callback": self.mirrorTableSearchAndReplace,
                     },
                 ]
             },
