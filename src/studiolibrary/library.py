@@ -47,7 +47,7 @@ class Library(QtCore.QObject):
         "folder",
         "category",
         "Custom Order",  # legacy case
-        # "modified"
+        "modified",
     ]
 
     GroupFields = [
