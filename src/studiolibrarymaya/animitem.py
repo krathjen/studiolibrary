@@ -213,6 +213,51 @@ class AnimItem(baseitem.BaseItem):
 
         logger.info(u'Loaded: {0}'.format(self.path()))
 
+    def saveValidator(self, **kwargs):
+        """
+        The save validator is called when an input field has changed.
+
+        :type kwargs: dict
+        :rtype: list[dict]
+        """
+        fields = super(AnimItem, self).saveValidator(**kwargs)
+
+        # Validate the by frame field
+        if kwargs.get("byFrame") == '' or kwargs.get("byFrame", 1) < 1:
+            msg = "The by frame value cannot be less than 1!"
+            fields.extend([
+                {
+                    "name": "byFrame",
+                    "error": msg
+                }
+            ])
+
+        # Validate the frame range field
+        start, end = kwargs.get("frameRange", (0, 1))
+        if start >= end:
+            msg = "The start frame cannot be greater " \
+                  "than or equal to the end frame!"
+            fields.extend([
+                {
+                    "name": "frameRange",
+                    "error": msg
+                }
+            ])
+
+        # Validate the current selection field
+        selection = maya.cmds.ls(selection=True) or []
+        if selection and mutils.getDurationFromNodes(selection) <= 0:
+            msg = "No animation was found on the selected object/s! " \
+                  "Please create a pose instead!"
+            fields.extend([
+                {
+                    "name": "contains",
+                    "error": msg,
+                }
+            ])
+
+        return fields
+
     def saveSchema(self):
         """
         Get the anim save schema.

@@ -383,6 +383,9 @@ class BaseSaveWidget(QtWidgets.QWidget):
             options = self._formWidget.values()
             name = options.get("name")
 
+            if self._formWidget.hasErrors():
+                raise Exception("\n".join(self._formWidget.errors()))
+
             objects = maya.cmds.ls(selection=True) or []
 
             if not folder:
