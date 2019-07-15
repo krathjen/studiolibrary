@@ -652,6 +652,12 @@ def copyPath(src, dst, force=False):
         msg = u'Cannot copy over an existing path: "{0}"'
         raise IOError(msg.format(dst))
 
+    if force and os.path.exists(dst):
+        if os.path.isdir(dst):
+            shutil.rmtree(dst)
+        else:
+            os.remove(dst)
+
     # Make sure the destination directory exists
     dstDir = os.path.dirname(dst)
     if not os.path.exists(dstDir):
