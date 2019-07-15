@@ -1073,6 +1073,22 @@ BaseLoadWidget #selectionSetButton {
     border-bottom-right-radius: 2px;
 }
 
+BaseSaveWidget QLineEdit,
+BaseSaveWidget QLineEdit:focus,
+BaseSaveWidget QLineEdit:hover,
+BaseSaveWidget QTextEdit,
+BaseSaveWidget QTextEdit:focus,
+BaseSaveWidget QTextEdit:hover,
+BaseSaveWidget QPlainTextEdit,
+BaseSaveWidget QPlainTextEdit:focus,
+BaseSaveWidget QPlainTextEdit:hover,
+BaseSaveWidget ImageSequenceWidget {
+    color: rgb(40, 40, 40);
+    border: 1px solid rgb(254, 255, 230, 200);
+    background-color: rgb(254, 255, 230, 200);
+}
+
+
 /*
 ---------------------------
 Form Widget
@@ -1148,12 +1164,14 @@ FormDialog FieldWidget QTextEdit {
 
 FieldWidget[error=true] QLineEdit:focus,
 FieldWidget[error=true] QTextEdit:focus {
-    border-color: rgb(200, 0, 0);
+    border-color: rgb(250, 80, 80);
 }
 
 FieldWidget[error=true] QLineEdit,
 FieldWidget[error=true] QTextEdit {
-    background-color: rgb(255, 0, 0, 40);
+    color: rgb(255,255,255,200);
+    border-color: rgb(230, 80, 80);
+    background-color: rgb(230, 80, 80, 50);
 }
 
 
@@ -1220,19 +1238,3 @@ FieldWidget[error=true] #label {
 BaseLoadWidget ImageSequenceWidget {
     background-color: rgb(0,0,0,0);
 }
-
-BaseSaveWidget QLineEdit,
-BaseSaveWidget QLineEdit:focus,
-BaseSaveWidget QLineEdit:hover,
-BaseSaveWidget QTextEdit,
-BaseSaveWidget QTextEdit:focus,
-BaseSaveWidget QTextEdit:hover,
-BaseSaveWidget QPlainTextEdit,
-BaseSaveWidget QPlainTextEdit:focus,
-BaseSaveWidget QPlainTextEdit:hover,
-BaseSaveWidget ImageSequenceWidget {
-    color: rgb(40, 40, 40);
-    border: 0px solid rgb(0, 0, 0, 150);
-    background-color: rgb(254, 255, 230, 200);
-}
-
