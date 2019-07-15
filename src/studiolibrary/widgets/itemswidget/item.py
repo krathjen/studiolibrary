@@ -117,7 +117,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         self._dragEnabled = True
 
         self._imageSequence = None
-        self._imageSequencePath = None
+        self._imageSequencePath = ""
 
         self._blendValue = 0.0
         self._blendPreviousValue = 0.0
