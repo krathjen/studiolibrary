@@ -766,8 +766,11 @@ class IntFieldWidget(FieldWidget):
         :rtype: int 
         """
         value = self.widget().text()
-        if value.strip() == '':
+        if value.strip() == "":
             value = self.default()
+
+        if value == "-":
+            value = 0
 
         return int(str(value))
 
