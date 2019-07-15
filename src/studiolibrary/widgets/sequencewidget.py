@@ -68,6 +68,38 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         self.setSize(150, 150)
         self.setMouseTracking(True)
 
+    def hasFrames(self):
+        """
+        Check if the images sequence has any frames.
+
+        :rtype: bool
+        """
+        return bool(self.firstFrame())
+
+    def firstFrame(self):
+        """
+        Get the first frame in the image sequence.
+
+        :rtype: str
+        """
+        return self._imageSequence.firstFrame()
+
+    def isSequence(self):
+        """
+        Check if the image sequence has more than one frame.
+
+        :rtype: bool
+        """
+        return bool(self._imageSequence.frameCount() > 1)
+
+    def dirname(self):
+        """
+        Get the directory to the image sequence on disk.
+
+        :rtype: str
+        """
+        return self._imageSequence.dirname()
+
     def addAction(self, path, text, tip, callback):
         """
         Add an action to the tool bar.
@@ -166,12 +198,13 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
 
     def setDirname(self, dirname):
         """
-        Set the location to the image sequence.
+        This method has been deprecated.
+
+        Please use setPath instead.
 
         :type dirname: str
-        :rtype: None
         """
-        self._imageSequence.setDirname(dirname)
+        self._imageSequence.setPath(dirname)
         self.updateIcon()
 
     def updateIcon(self):

@@ -37,16 +37,29 @@ class ImageSequence(QtCore.QObject):
         self._paused = False
 
         if path:
-            self.setDirname(path)
+            self.setPath(path)
+
+    def firstFrame(self):
+        """
+        Get the path to the first frame.
+
+        :rtype: str
+        """
+        if self._frames:
+            return self._frames[0]
+        return ""
 
     def setPath(self, path):
         """
-        Set a single frame image sequence.
+        Set a single frame or a directory to an image sequence.
         
         :type path: str
         """
-        self._frame = 0
-        self._frames = [path]
+        if os.path.isfile(path):
+            self._frame = 0
+            self._frames = [path]
+        elif os.path.isdir(path):
+            self.setDirname(path)
 
     def setDirname(self, dirname):
         """
