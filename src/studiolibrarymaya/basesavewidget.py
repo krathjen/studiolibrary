@@ -51,7 +51,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         studioqt.loadUi(self)
 
         self._item = None
-        self._iconPath = ""
         self._scriptJob = None
         self._formWidget = None
         self._focusWidget = None
@@ -160,8 +159,10 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         schema = item.saveSchema()
 
-        if not item.isDefaultThumbnailPath():
-            self.setThumbnail(item.thumbnailPath())
+        if os.path.exists(item.imageSequencePath()):
+            self.setThumbnailPath(item.imageSequencePath())
+        elif not item.isDefaultThumbnailPath():
+            self.setThumbnailPath(item.thumbnailPath())
 
         if schema:
             formWidget = studiolibrary.widgets.FormWidget(self)
@@ -175,24 +176,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
             formWidget.validate()
         else:
             self.ui.optionsFrame.setVisible(False)
-
-    def iconPath(self):
-        """
-        Get the icon path to be used for the thumbnail.
-
-        :rtype str
-        """
-        return self._iconPath
-
-    def setIcon(self, icon):
-        """
-        Set the icon for the create widget thumbnail.
-
-        :type icon: QtGui.QIcon
-        """
-        self.ui.thumbnailButton.setIcon(icon)
-        self.ui.thumbnailButton.setIconSize(QtCore.QSize(200, 200))
-        self.ui.thumbnailButton.setText("")
 
     def showSelectionSetsMenu(self):
         """
@@ -293,23 +276,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         if self._formWidget:
             self._formWidget.validate()
 
-    def sequencePath(self):
-        """
-        Get the sequence path.
-
-        :rtype: str
-        """
-        return self._sequencePath
-
-    def setSequencePath(self, path):
-        """
-        Set the disk location for the image sequence to be saved.
-
-        :type path: str
-        """
-        self._sequencePath = path
-        self.ui.thumbnailButton.setDirname(os.path.dirname(path))
-
     def showByFrameDialog(self):
         """
         Show the by frame dialog.
@@ -351,38 +317,34 @@ class BaseSaveWidget(QtWidgets.QWidget):
             filter="Image Files (*.png *.jpg)"
         )
 
-        fileDialog.fileSelected.connect(self.setThumbnail)
+        fileDialog.fileSelected.connect(self.setThumbnailPath)
         fileDialog.exec_()
 
     def showCaptureWindow(self):
         """Show the capture window for framing."""
         self.thumbnailCapture(show=True)
 
-    def setSequence(self, src):
+    def setThumbnailPath(self, path):
         """
-        Set the sequence path for the thumbnail widget.
-        
-        :type src: str 
-        """
-        self.setThumbnail(src, sequence=True)
+        Set the path to the thumbnail image or the image sequence directory.
 
-    def setThumbnail(self, src, sequence=False):
+        :type path: str
         """
-        Triggered when the user captures a thumbnail/playblast.
-
-        :rtype: None
-        """
-        filename, extension = os.path.splitext(src)
-
+        filename, extension = os.path.splitext(path)
         dst = studiolibrary.tempPath("thumbnail" + extension)
 
-        studiolibrary.copyPath(src, dst, force=True)
+        studiolibrary.copyPath(path, dst, force=True)
 
-        self._iconPath = dst
         self.ui.thumbnailButton.setPath(dst)
 
-        if sequence:
-            self.setSequencePath(src)
+    def _capturedCallback(self, src):
+        """
+        Triggered when capturing a thumbnail snapshot.
+
+        :type src: str
+        """
+        path = os.path.dirname(src)
+        self.setThumbnailPath(path)
 
     def thumbnailCapture(self, show=False):
         """Capture a playblast and save it to the temp thumbnail path."""
@@ -403,7 +365,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
                 endFrame=endFrame,
                 step=step,
                 clearCache=True,
-                captured=self.setSequence,
+                captured=self._capturedCallback,
             )
 
         except Exception as e:
@@ -457,13 +419,14 @@ class BaseSaveWidget(QtWidgets.QWidget):
             if not objects:
                 raise Exception("No objects selected. Please select at least one object.")
 
-            if not os.path.exists(self.iconPath()):
+            hasFrames = self.ui.thumbnailButton.hasFrames()
+            if not hasFrames:
                 button = self.showThumbnailCaptureDialog()
                 if button == QtWidgets.QMessageBox.Cancel:
                     return
 
             path = folder + "/" + name
-            iconPath = self.iconPath()
+            iconPath = self.ui.thumbnailButton.firstFrame()
 
             self.save(
                 objects,
@@ -489,10 +452,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         item = self.item()
 
         options = self._formWidget.values()
-
-        sequencePath = self.sequencePath()
-        if sequencePath:
-            sequencePath = os.path.dirname(sequencePath)
+        sequencePath = self.ui.thumbnailButton.dirname()
 
         item.save(
             path,

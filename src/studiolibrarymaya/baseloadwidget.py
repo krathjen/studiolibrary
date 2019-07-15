@@ -97,13 +97,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self.ui.thumbnailButton.setObjectName("thumbnailButton")
         self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.thumbnailButton)
 
-        path = self.item().thumbnailPath()
-        if os.path.exists(path):
-            self.setIconPath(path)
-
-        if self.item().imageSequencePath():
-            self.ui.thumbnailButton.setDirname(self.item().imageSequencePath())
-
     def setCaptureMenuEnabled(self, enable):
         """
         Set the capture menu for editing the thumbnail.
@@ -154,6 +147,12 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._infoFormWidget = studiolibrary.widgets.FormWidget(self)
         self._infoFormWidget.setSchema(item.info())
         self.ui.infoFrame.layout().addWidget(self._infoFormWidget)
+
+        if os.path.exists(item.imageSequencePath()):
+            self.ui.thumbnailButton.setPath(item.imageSequencePath())
+
+        elif os.path.exists(item.thumbnailPath()):
+            self.ui.thumbnailButton.setPath(item.thumbnailPath())
 
         options = item.loadSchema()
         if options:

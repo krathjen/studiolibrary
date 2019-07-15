@@ -55,7 +55,6 @@ class AnimItem(baseitem.BaseItem):
 
         self.setTransferClass(mutils.Animation)
         self.setTransferBasename("")
-        self.setReadOnly(True)
 
     def startFrame(self):
         """Return the start frame for the animation."""
