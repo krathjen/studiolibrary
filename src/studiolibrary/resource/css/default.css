@@ -1088,6 +1088,10 @@ BaseSaveWidget ImageSequenceWidget {
     background-color: rgb(254, 255, 230, 200);
 }
 
+BaseSaveWidget ImageSequenceWidget {
+    border: 0px solid rgb(254, 255, 230, 200);
+}
+
 
 /*
 ---------------------------
