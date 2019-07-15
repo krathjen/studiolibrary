@@ -36,9 +36,8 @@ logger = logging.getLogger(__name__)
 
 
 class BaseLoadWidget(QtWidgets.QWidget):
-    """Base widget for creating and previewing transfer items."""
 
-    stateChanged = QtCore.Signal(object)
+    """Base widget for loading items."""
 
     def __init__(self, item, parent=None):
         """
@@ -46,23 +45,49 @@ class BaseLoadWidget(QtWidgets.QWidget):
         :type parent: QtWidgets.QWidget or None
         """
         QtWidgets.QWidget.__init__(self, parent)
-        self.setObjectName("studioLibraryMayaPreviewWidget")
-        self.setWindowTitle("Preview Item")
+        self.setObjectName("studioLibraryBaseLoadWidget")
+        self.setWindowTitle("Load Item")
 
         self.loadUi()
 
-        self._item = None
+        self._item = item
         self._iconPath = ""
         self._scriptJob = None
         self._formWidget = None
         self._infoFormWidget = None
 
-        self.setItem(item)
+        self.ui.titleLabel.setText(item.MenuName)
+        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
-        iconGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
-        iconGroupBoxWidget.setObjectName("iconGroupBoxWidget")
-        iconGroupBoxWidget.setPersistent(True)
-        self.ui.iconTitleFrame.layout().addWidget(iconGroupBoxWidget)
+        # Create the icon group box
+        groupBox = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
+        groupBox.setObjectName("iconGroupBoxWidget")
+        groupBox.setPersistent(True)
+        self.ui.iconTitleFrame.layout().addWidget(groupBox)
+
+        # Create the thumbnail widget and set the image
+        self.ui.thumbnailButton = studiolibrary.widgets.ImageSequenceWidget(self)
+        self.ui.thumbnailButton.setObjectName("thumbnailButton")
+        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.thumbnailButton)
+
+        if os.path.exists(item.imageSequencePath()):
+            self.ui.thumbnailButton.setPath(item.imageSequencePath())
+
+        elif os.path.exists(item.thumbnailPath()):
+            self.ui.thumbnailButton.setPath(item.thumbnailPath())
+
+        # Create the info widget and set the info schema
+        self._infoFormWidget = studiolibrary.widgets.FormWidget(self)
+        self._infoFormWidget.setSchema(item.info())
+        self.ui.infoFrame.layout().addWidget(self._infoFormWidget)
+
+        # Create the load widget and set the load schema
+        self._formWidget = studiolibrary.widgets.FormWidget(self)
+        self._formWidget.setObjectName(item.__class__.__name__ + "Form")
+        self._formWidget.setSchema(item.loadSchema())
+        self._formWidget.setValidator(item.loadValidator)
+        self._formWidget.validate()
+        self.ui.formFrame.layout().addWidget(self._formWidget)
 
         try:
             self.selectionChanged()
@@ -70,59 +95,11 @@ class BaseLoadWidget(QtWidgets.QWidget):
         except NameError as error:
             logger.exception(error)
 
-        self.createSequenceWidget()
         self.updateThumbnailSize()
-        self.setupConnections()
 
-    def loadUi(self):
-        """Convenience method for loading the .ui file."""
-        studioqt.loadUi(self, cls=BaseLoadWidget)
-
-    def setCustomWidget(self, widget):
-        """Convenience method for adding a custom widget when loading."""
-        self.ui.customWidgetFrame.layout().addWidget(widget)
-
-    def setupConnections(self):
-        """Setup the connections for all the widgets."""
+        self._item.loadValueChanged.connect(self._itemValueChanged)
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
-
-    def createSequenceWidget(self):
-        """
-        Create a sequence widget to replace the static thumbnail widget.
-
-        :rtype: None
-        """
-        self.ui.thumbnailButton = studiolibrary.widgets.ImageSequenceWidget(self)
-        self.ui.thumbnailButton.setObjectName("thumbnailButton")
-        self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.thumbnailButton)
-
-    def setCaptureMenuEnabled(self, enable):
-        """
-        Set the capture menu for editing the thumbnail.
-
-        :rtype: None 
-        """
-        if enable:
-            parent = self.item().libraryWindow()
-
-            iconPath = self.iconPath()
-            if iconPath == "":
-                iconPath = self.item().thumbnailPath()
-
-            menu = mutils.gui.ThumbnailCaptureMenu(iconPath, parent=parent)
-            menu.captured.connect(self.setIconPath)
-            self.ui.thumbnailButton.setMenu(menu)
-        else:
-            self.ui.thumbnailButton.setMenu(QtWidgets.QMenu(self))
-
-    def item(self):
-        """
-        Get the library item to be created.
-
-        :rtype: studiolibrarymaya.BaseItem
-        """
-        return self._item
 
     def _itemValueChanged(self, field, value):
         """
@@ -133,69 +110,21 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """
         self._formWidget.setValue(field, value)
 
-    def setItem(self, item):
+    def loadUi(self):
+        """Convenience method for loading the .ui file."""
+        studioqt.loadUi(self, cls=BaseLoadWidget)
+
+    def setCustomWidget(self, widget):
+        """Convenience method for adding a custom widget when loading."""
+        self.ui.customWidgetFrame.layout().addWidget(widget)
+
+    def item(self):
         """
-        Set the item for the preview widget.
+        Get the library item to be created.
 
-        :type item: studiolibrarymaya.BaseItem
+        :rtype: studiolibrarymaya.BaseItem
         """
-        self._item = item
-
-        self.ui.titleLabel.setText(item.MenuName)
-        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
-
-        self._infoFormWidget = studiolibrary.widgets.FormWidget(self)
-        self._infoFormWidget.setSchema(item.info())
-        self.ui.infoFrame.layout().addWidget(self._infoFormWidget)
-
-        if os.path.exists(item.imageSequencePath()):
-            self.ui.thumbnailButton.setPath(item.imageSequencePath())
-
-        elif os.path.exists(item.thumbnailPath()):
-            self.ui.thumbnailButton.setPath(item.thumbnailPath())
-
-        options = item.loadSchema()
-        if options:
-            item.loadValueChanged.connect(self._itemValueChanged)
-
-            formWidget = studiolibrary.widgets.FormWidget(self)
-            formWidget.setObjectName(item.__class__.__name__ + "Form")
-            formWidget.setSchema(item.loadSchema())
-            formWidget.setValidator(item.loadValidator)
-
-            self.ui.optionsFrame.layout().addWidget(formWidget)
-            self._formWidget = formWidget
-            formWidget.validate()
-
-    def iconPath(self):
-        """
-        Get the icon path to be used for the thumbnail.
-
-        :rtype str
-        """
-        return self._iconPath
-
-    def setIconPath(self, path):
-        """
-        Set the icon path to be used for the thumbnail.
-
-        :type path: str
-        """
-        self._iconPath = path
-        icon = QtGui.QIcon(QtGui.QPixmap(path))
-        self.setIcon(icon)
-        self.updateThumbnailSize()
-        self.item().update()
-
-    def setIcon(self, icon):
-        """
-        Set the icon to be shown for the preview.
-
-        :type icon: QtGui.QIcon
-        """
-        self.ui.thumbnailButton.setIcon(icon)
-        self.ui.thumbnailButton.setIconSize(QtCore.QSize(200, 200))
-        self.ui.thumbnailButton.setText("")
+        return self._item
 
     def showSelectionSetsMenu(self):
         """Show the selection sets menu."""
@@ -211,27 +140,18 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self.updateThumbnailSize()
 
     def updateThumbnailSize(self):
-        """
-        Update the thumbnail button to the size of the widget.
+        """Update the thumbnail button to the size of the widget."""
+        width = self.width() - 10
+        if width > 250:
+            width = 250
 
-        :rtype: None
-        """
-        if hasattr(self.ui, "thumbnailButton"):
-            width = self.width() - 10
-            if width > 250:
-                width = 250
-
-            size = QtCore.QSize(width, width)
-            self.ui.thumbnailButton.setIconSize(size)
-            self.ui.thumbnailButton.setMaximumSize(size)
-            self.ui.thumbnailFrame.setMaximumSize(size)
+        size = QtCore.QSize(width, width)
+        self.ui.thumbnailButton.setIconSize(size)
+        self.ui.thumbnailButton.setMaximumSize(size)
+        self.ui.thumbnailFrame.setMaximumSize(size)
 
     def close(self):
-        """
-        Overriding the close method so that we can disable the script job.
-
-        :rtype: None
-        """
+        """Overriding this method to disable the script job when closed."""
         self.setScriptJobEnabled(False)
 
         if self._formWidget:
@@ -250,13 +170,13 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """
         return self._scriptJob
 
-    def setScriptJobEnabled(self, enable):
+    def setScriptJobEnabled(self, enabled):
         """
         Enable the script job used when the users selection changes.
 
-        :rtype: None
+        :type enabled: bool
         """
-        if enable:
+        if enabled:
             if not self._scriptJob:
                 event = ['SelectionChanged', self.selectionChanged]
                 self._scriptJob = mutils.ScriptJob(event=event)
@@ -267,17 +187,9 @@ class BaseLoadWidget(QtWidgets.QWidget):
             self._scriptJob = None
 
     def selectionChanged(self):
-        """
-        Triggered when the users Maya selection has changed.
-
-        :rtype: None
-        """
+        """Triggered when the users Maya selection has changed."""
         self._formWidget.validate()
 
     def accept(self):
-        """
-        Called when the user clicks the apply button.
-
-        :rtype: None
-        """
+        """Called when the user clicks the apply button."""
         self.item().loadFromCurrentOptions()

@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 class BaseSaveWidget(QtWidgets.QWidget):
 
-    """Base create widget for creating new maya items."""
+    """Base widget for saving new items."""
 
     def __init__(self, item, parent=None):
         """
@@ -45,8 +45,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         QtWidgets.QWidget.__init__(self, parent)
 
-        self.setObjectName("studioLibraryMayaCreateWidget")
-        self.setWindowTitle("Create Item")
+        self.setObjectName("studioLibraryBaseSaveWidget")
+        self.setWindowTitle("Save Item")
 
         studioqt.loadUi(self)
 
@@ -67,15 +67,11 @@ class BaseSaveWidget(QtWidgets.QWidget):
             logger.exception(error)
 
         self.createSequenceWidget()
-        self.setItem(item)
         self.updateThumbnailSize()
+        self.setItem(item)
 
     def createSequenceWidget(self):
-        """
-        Create a sequence widget to replace the static thumbnail widget.
-
-        :rtype: None
-        """
+        """Create a sequence widget to replace the static thumbnail widget."""
         self.ui.thumbnailButton = studiolibrary.widgets.ImageSequenceWidget(self)
         self.ui.thumbnailButton.setObjectName("thumbnailButton")
         self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.thumbnailButton)
@@ -193,11 +189,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         menu.exec_(position)
 
     def close(self):
-        """
-        Overriding the close method so that we can disable the script job.
-
-        :rtype: None
-        """
+        """Overriding the close method to disable the script job on close."""
         self._formWidget.savePersistentValues()
         self.setScriptJobEnabled(False)
         QtWidgets.QWidget.close(self)
@@ -210,13 +202,9 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         return self._scriptJob
 
-    def setScriptJobEnabled(self, enable):
-        """
-        Set the script job used when the users selection changes.
-
-        :rtype: None
-        """
-        if enable:
+    def setScriptJobEnabled(self, enabled):
+        """Set the script job used when the users selection changes."""
+        if enabled:
             if not self._scriptJob:
                 event = ['SelectionChanged', self.selectionChanged]
                 self._scriptJob = mutils.ScriptJob(event=event)
@@ -235,27 +223,21 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self.updateThumbnailSize()
 
     def updateThumbnailSize(self):
-        """
-        Update the thumbnail button to the size of the widget.
+        """Update the thumbnail button to the size of the widget."""
+        width = self.width() - 10
+        if width > 250:
+            width = 250
 
-        :rtype: None
-        """
-        if hasattr(self.ui, "thumbnailButton"):
-            width = self.width() - 10
-            if width > 250:
-                width = 250
-
-            size = QtCore.QSize(width, width)
-            self.ui.thumbnailButton.setIconSize(size)
-            self.ui.thumbnailButton.setMaximumSize(size)
-            self.ui.thumbnailFrame.setMaximumSize(size)
+        size = QtCore.QSize(width, width)
+        self.ui.thumbnailButton.setIconSize(size)
+        self.ui.thumbnailButton.setMaximumSize(size)
+        self.ui.thumbnailFrame.setMaximumSize(size)
 
     def setFolderPath(self, path):
         """
         Set the destination folder path.
 
         :type path: str
-        :rtype: None
         """
         self._formWidget.setValue("folder", path)
 
@@ -268,20 +250,13 @@ class BaseSaveWidget(QtWidgets.QWidget):
         return self._formWidget.value("folder")
 
     def selectionChanged(self):
-        """
-        Triggered when the Maya selection changes.
-
-        :rtype: None
-        """
+        """Triggered when the Maya selection changes."""
         if self._formWidget:
             self._formWidget.validate()
 
     def showByFrameDialog(self):
-        """
-        Show the by frame dialog.
+        """Show the by frame dialog."""
 
-        :rtype: None
-        """
         text = 'To help speed up the playblast you can set the "by frame" ' \
                'to a number greater than 1. For example if the "by frame" ' \
                'is set to 2 it will playblast every second frame.'
@@ -446,8 +421,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         :type objects: list[str]
         :type path: str
         :type iconPath: str
-
-        :rtype: None
         """
         item = self.item()
 

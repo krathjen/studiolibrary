@@ -285,7 +285,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="optionsFrame">
+       <widget class="QFrame" name="formFrame">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
