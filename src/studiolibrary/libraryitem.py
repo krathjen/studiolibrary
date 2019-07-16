@@ -65,7 +65,7 @@ class LibraryItem(studiolibrary.widgets.Item):
     DefaultThumbnailPath = studiolibrary.resource.get("icons", "thumbnail.png")
 
     SyncOrder = 10
-    TypeIconPath = ""
+    TypeIconPath = None
     DisplayInSidebar = False
     CreateWidgetClass = None
     PreviewWidgetClass = None
@@ -317,7 +317,10 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :rtype: path or None
         """
-        return self.TypeIconPath or self.IconPath
+        if self.TypeIconPath is None:
+            return self.IconPath
+
+        return self.TypeIconPath
 
     def thumbnailPath(self):
         """
