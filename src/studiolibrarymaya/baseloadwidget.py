@@ -57,7 +57,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._infoFormWidget = None
 
         self.ui.titleLabel.setText(item.Name)
-        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
 
         # Create the icon group box
         groupBox = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
