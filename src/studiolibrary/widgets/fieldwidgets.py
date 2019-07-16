@@ -658,7 +658,7 @@ class LabelFieldWidget(FieldWidget):
         
         :type value: str 
         """
-        self.widget().setText(value)
+        self.widget().setText(str(value))
         super(LabelFieldWidget, self).setValue(value)
 
 
