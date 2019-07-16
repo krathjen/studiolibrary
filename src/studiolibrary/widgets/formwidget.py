@@ -201,6 +201,25 @@ class FormWidget(QtWidgets.QFrame):
         """
         return self._schema
 
+    def _sortSchema(self, schema):
+        """
+        Sort the schema depending on the group order.
+
+        :type schema: list[dict]
+        :rtype: list[dict]
+        """
+        order = 0
+
+        for i, field in enumerate(schema):
+            if field.get("type") == "group":
+                order = field.get("order", order)
+            field["order"] = order
+
+        def _key(field):
+            return field["order"]
+
+        return sorted(schema, key=_key)
+
     def setSchema(self, schema, layout=None, errorsVisible=False):
         """
         Set the schema for the widget.
@@ -209,34 +228,34 @@ class FormWidget(QtWidgets.QFrame):
         :type layout: None or str
         :type errorsVisible: bool
         """
-        self._schema = schema
+        self._schema = self._sortSchema(schema)
 
-        for data in schema:
+        for field in self._schema:
 
-            cls = FIELD_WIDGET_REGISTRY.get(data.get("type", "label"))
+            cls = FIELD_WIDGET_REGISTRY.get(field.get("type", "label"))
 
             if not cls:
-                logger.warning("Cannot find widget for %s", data)
+                logger.warning("Cannot find widget for %s", field)
                 continue
 
-            if layout and not data.get("layout"):
-                data["layout"] = layout
+            if layout and not field.get("layout"):
+                field["layout"] = layout
 
-            errorVisible = data.get("errorVisible")
+            errorVisible = field.get("errorVisible")
             if errorVisible is not None:
-                data["errorVisible"] = errorVisible
+                field["errorVisible"] = errorVisible
             else:
-                data["errorVisible"] = errorsVisible
+                field["errorVisible"] = errorsVisible
 
-            widget = cls(data=data, parent=self._fieldsFrame, formWidget=self)
+            widget = cls(data=field, parent=self._fieldsFrame, formWidget=self)
 
             data_ = widget.defaultData()
-            data_.update(data)
+            data_.update(field)
 
             widget.setData(data_)
 
-            value = data.get("value")
-            default = data.get("default")
+            value = field.get("value")
+            default = field.get("default")
             if value is None and default is not None:
                 widget.setValue(default)
 
