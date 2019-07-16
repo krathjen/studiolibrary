@@ -33,14 +33,13 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "icons", "animation.png")
 
 
 class AnimItem(baseitem.BaseItem):
 
     Name = "Animation"
     Extension = ".anim"
-    IconPath = ICON_PATH
+    IconPath = os.path.join(DIRNAME, "icons", "animation.png")
 
     def __init__(self, *args, **kwargs):
         """
@@ -71,36 +70,26 @@ class AnimItem(baseitem.BaseItem):
         """
         return self.path() + "/sequence"
 
-    def info(self):
-        """
-        Get the info to display to user.
-        
-        :rtype: list[dict]
-        """
-        info = baseitem.BaseItem.info(self)
-
-        startFrame = str(self.startFrame())
-        endFrame = str(self.endFrame())
-
-        info.insert(3, {"name": "Start frame", "value": startFrame})
-        info.insert(4, {"name": "End frame", "value": endFrame})
-
-        return info
-
     def loadSchema(self):
         """
-        Get the options for the item.
-        
+        Get schema used to load the anim item.
+
         :rtype: list[dict]
         """
+        schema = super(AnimItem, self).loadSchema()
+
         startFrame = self.startFrame() or 0
         endFrame = self.endFrame() or 0
 
-        schema = [
+        schema.insert(3, {"name": "Start frame", "value": startFrame})
+        schema.insert(4, {"name": "End frame", "value": endFrame})
+
+        schema.extend([
             {
                 "name": "optionsGroup",
                 "title": "Options",
                 "type": "group",
+                "order": 1,
             },
             {
                 "name": "connect",
@@ -130,9 +119,7 @@ class AnimItem(baseitem.BaseItem):
                 "items": ["replace", "replace all", "insert", "merge"],
                 "persistent": True,
             },
-        ]
-
-        schema.extend(super(AnimItem, self).loadSchema())
+        ])
 
         return schema
 

@@ -36,7 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "icons", "pose.png")
 
 
 class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
@@ -96,7 +95,7 @@ class PoseItem(baseitem.BaseItem):
 
     Name = "Pose"
     Extension = ".pose"
-    IconPath = ICON_PATH
+    IconPath = os.path.join(DIRNAME, "icons", "pose.png")
     PreviewWidgetClass = PoseLoadWidget
 
     def __init__(self, *args, **kwargs):
@@ -171,7 +170,7 @@ class PoseItem(baseitem.BaseItem):
 
     def loadSchema(self):
         """
-        Get the schema used for creating the load options.
+        Get schema used to load the pose item.
 
         :rtype: list[dict]
         """
@@ -180,6 +179,7 @@ class PoseItem(baseitem.BaseItem):
                 "name": "optionsGroup",
                 "title": "Options",
                 "type": "group",
+                "order": 2,
             },
             {
                 "name": "key",

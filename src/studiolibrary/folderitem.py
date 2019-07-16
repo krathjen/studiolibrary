@@ -51,7 +51,7 @@ class FolderItem(studiolibrary.LibraryItem):
         """
         pass
 
-    def info(self):
+    def loadSchema(self):
         """
         Get the info to display to user.
         

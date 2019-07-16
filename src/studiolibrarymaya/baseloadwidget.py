@@ -76,11 +76,6 @@ class BaseLoadWidget(QtWidgets.QWidget):
         elif os.path.exists(item.thumbnailPath()):
             self.ui.thumbnailButton.setPath(item.thumbnailPath())
 
-        # Create the info widget and set the info schema
-        self._infoFormWidget = studiolibrary.widgets.FormWidget(self)
-        self._infoFormWidget.setSchema(item.info())
-        self.ui.infoFrame.layout().addWidget(self._infoFormWidget)
-
         # Create the load widget and set the load schema
         self._formWidget = studiolibrary.widgets.FormWidget(self)
         self._formWidget.setObjectName(item.__class__.__name__ + "Form")

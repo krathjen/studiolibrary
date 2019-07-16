@@ -33,18 +33,12 @@ class PreviewWidget(QtWidgets.QWidget):
         iconGroupBoxWidget.setPersistent(True)
         self.ui.iconTitleFrame.layout().addWidget(iconGroupBoxWidget)
 
-        self._infoWidget = studiolibrary.widgets.FormWidget(self)
-        self._infoWidget.setSchema(item.info())
-
-        self.ui.infoFrame.layout().addWidget(self._infoWidget)
-
         self._formWidget = studiolibrary.widgets.FormWidget(self)
+        self.ui.formFrame.layout().addWidget(self._formWidget)
 
         schema = item.loadSchema()
         if schema:
-            self._formWidget.setSchema(schema)
-
-        self.ui.formFrame.layout().addWidget(self._formWidget)
+            self._formWidget.setSchema(item.loadSchema())
 
         self.ui.acceptButton.hide()
         self.ui.acceptButton.setText("Load")
@@ -60,7 +54,7 @@ class PreviewWidget(QtWidgets.QWidget):
 
         if item.TypeIconPath:
             self.ui.titleIcon.setVisible(True)
-            self.ui.iconLabel.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+            self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
         else:
             self.ui.titleIcon.setVisible(False)
 
@@ -94,9 +88,6 @@ class PreviewWidget(QtWidgets.QWidget):
         """
         if self._formWidget:
             self._formWidget.savePersistentValues()
-
-        if self._infoWidget:
-            self._infoWidget.savePersistentValues()
 
         QtWidgets.QWidget.close(self)
 

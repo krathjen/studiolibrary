@@ -148,9 +148,9 @@ class BaseItem(studiolibrary.LibraryItem):
     def setCurrentLoadValues(self, values):
         self._currentLoadValues = values
 
-    def info(self):
+    def loadSchema(self):
         """
-        Get the info to display to user.
+        Get schema used to load the item.
 
         :rtype: list[dict]
         """
@@ -167,6 +167,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 "name": "infoGroup",
                 "title": "Info",
                 "type": "group",
+                "order": 1,
             },
             {
                 "name": "name",
@@ -188,15 +189,11 @@ class BaseItem(studiolibrary.LibraryItem):
                 "name": "comment",
                 "value": self.transferObject().description() or "No comment",
             },
-        ]
-
-    def loadSchema(self):
-
-        return [
             {
                 "name": "namespaceGroup",
                 "title": "Namespace",
                 "type": "group",
+                "order": 10,
             },
             {
                 "name": "namespaceOption",

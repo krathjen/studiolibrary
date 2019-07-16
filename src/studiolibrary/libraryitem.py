@@ -224,14 +224,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         self._ignoreExistsDialog = True
         widget = self.showCreateWidget(self.libraryWindow(), item=self)
 
-    def info(self):
-        """
-        Get the info to display to user.
-        
-        :rtype: list[dict]
-        """
-        return []
-
     def loadSchema(self):
         """
         Get the options used to load the item.

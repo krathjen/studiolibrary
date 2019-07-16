@@ -658,7 +658,7 @@ class LabelFieldWidget(FieldWidget):
         
         :type value: str 
         """
-        self.widget().setText(str(value))
+        self.widget().setText(unicode(value))
         super(LabelFieldWidget, self).setValue(value)
 
 

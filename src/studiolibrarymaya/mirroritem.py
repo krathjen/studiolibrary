@@ -27,14 +27,13 @@ logger = logging.getLogger(__name__)
 
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "icons", "mirrortable.png")
 
 
 class MirrorItem(baseitem.BaseItem):
 
     Name = "Mirror Table"
     Extension = ".mirror"
-    IconPath = ICON_PATH
+    IconPath = os.path.join(DIRNAME, "icons", "mirrortable.png")
 
     def __init__(self, *args, **kwargs):
         """
@@ -48,32 +47,25 @@ class MirrorItem(baseitem.BaseItem):
         self.setTransferBasename("mirrortable.json")
         self.setTransferClass(mutils.MirrorTable)
 
-    def info(self):
+    def loadSchema(self):
         """
-        Get the info to display to user.
+        Get schema used to load the mirror table item.
         
         :rtype: list[dict]
         """
-        info = baseitem.BaseItem.info(self)
+        schema = super(MirrorItem, self).loadSchema()
 
         mt = self.transferObject()
 
-        info.insert(2, {"name": "Left", "value": mt.leftSide()})
-        info.insert(3, {"name": "Right", "value": mt.rightSide()})
+        schema.insert(2, {"name": "Left", "value": mt.leftSide()})
+        schema.insert(3, {"name": "Right", "value": mt.rightSide()})
 
-        return info
-
-    def loadSchema(self):
-        """
-        Get the options for the item.
-        
-        :rtype: list[dict]
-        """
-        schema = [
+        schema.extend([
             {
                 "name": "optionsGroup",
                 "title": "Options",
                 "type": "group",
+                "order": 2,
             },
             {
                 "name": "animation",
@@ -89,9 +81,7 @@ class MirrorItem(baseitem.BaseItem):
                 "items": ["swap", "left to right", "right to left"],
                 "persistent": True
             },
-        ]
-
-        schema.extend(super(MirrorItem, self).loadSchema())
+        ])
 
         return schema
 
