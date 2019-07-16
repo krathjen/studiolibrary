@@ -1031,10 +1031,7 @@ class LibraryWindow(QtWidgets.QWidget):
         menu.setIcon(icon)
         menu.setTitle("New")
 
-        def _key(cls):
-            return cls.MenuOrder
-
-        for cls in sorted(studiolibrary.registeredItems(), key=_key):
+        for cls in studiolibrary.registeredItems():
             action = cls.createAction(menu, self)
 
             if action:

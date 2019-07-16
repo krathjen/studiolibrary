@@ -150,7 +150,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         self._item = item
 
-        self.ui.titleLabel.setText(item.MenuName)
+        self.ui.titleLabel.setText(item.Name)
         self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
         schema = item.saveSchema()

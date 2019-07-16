@@ -60,12 +60,11 @@ class LibraryItem(studiolibrary.widgets.Item):
     Extension = ""
     Extensions = []
 
-    MenuName = ""
-    MenuOrder = 10
-    MenuIconPath = ""
+    Name = ""
+    IconPath = ""
     DefaultThumbnailPath = studiolibrary.resource.get("icons", "thumbnail.png")
 
-    RegisterOrder = 10
+    SyncOrder = 10
     TypeIconPath = ""
     DisplayInSidebar = False
     CreateWidgetClass = None
@@ -90,12 +89,12 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type libraryWindow: studiolibrary.LibraryWindow
         :rtype: QtCore.QAction
         """
-        if cls.MenuName:
+        if cls.Name:
 
-            icon = QtGui.QIcon(cls.MenuIconPath)
+            icon = QtGui.QIcon(cls.IconPath)
             callback = partial(cls.showCreateWidget, libraryWindow)
 
-            action = QtWidgets.QAction(icon, cls.MenuName, menu)
+            action = QtWidgets.QAction(icon, cls.Name, menu)
             action.triggered.connect(callback)
 
             return action
@@ -318,7 +317,7 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :rtype: path or None
         """
-        return self.TypeIconPath
+        return self.TypeIconPath or self.IconPath
 
     def thumbnailPath(self):
         """

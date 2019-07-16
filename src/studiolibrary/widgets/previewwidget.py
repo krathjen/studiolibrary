@@ -52,9 +52,9 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self.createSequenceWidget()
 
-        if item.MenuName:
+        if item.Name:
             self.ui.titleFrame.setVisible(True)
-            self.ui.titleLabel.setText(item.MenuName)
+            self.ui.titleLabel.setText(item.Name)
         else:
             self.ui.titleFrame.setVisible(False)
 

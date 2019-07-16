@@ -317,10 +317,7 @@ def registeredItems():
 
     :rtype: list[studiolibrary.LibraryItem]
     """
-    def key(cls):
-        return cls.RegisterOrder
-
-    return sorted(_itemClasses.values(), key=key)
+    return _itemClasses.values()
 
 
 def clearRegisteredItems():
@@ -374,11 +371,14 @@ def itemFromPath(path, **kwargs):
     """
     path = normPath(path)
 
+    def _key(cls):
+        return cls.SyncOrder
+
     for ignore in studiolibrary.config.get('ignorePaths', []):
         if ignore in path:
             return None
 
-    for cls in registeredItems():
+    for cls in sorted(registeredItems(), key=_key):
         if cls.match(path):
             return cls(path, **kwargs)
 

@@ -56,7 +56,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._formWidget = None
         self._infoFormWidget = None
 
-        self.ui.titleLabel.setText(item.MenuName)
+        self.ui.titleLabel.setText(item.Name)
         self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
 
         # Create the icon group box

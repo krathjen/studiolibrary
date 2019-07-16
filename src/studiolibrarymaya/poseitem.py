@@ -94,11 +94,9 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
 class PoseItem(baseitem.BaseItem):
 
+    Name = "Pose"
     Extension = ".pose"
-    MenuName = "Pose"
-    MenuOrder = 4
-    MenuIconPath = ICON_PATH
-    TypeIconPath = ICON_PATH
+    IconPath = ICON_PATH
     PreviewWidgetClass = PoseLoadWidget
 
     def __init__(self, *args, **kwargs):

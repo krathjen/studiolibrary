@@ -21,13 +21,12 @@ import studiolibrary.widgets
 
 class FolderItem(studiolibrary.LibraryItem):
 
-    RegisterOrder = 100
+    SyncOrder = 100
     EnableNestedItems = True
     DisplayInSidebar = True
 
-    MenuName = "Folder"
-    MenuOrder = 1
-    MenuIconPath = studiolibrary.resource.get("icons/folder.png")
+    Name = "Folder"
+    IconPath = studiolibrary.resource.get("icons/folder.png")
     PreviewWidgetClass = studiolibrary.widgets.PreviewWidget
     DefaultThumbnailPath = studiolibrary.resource.get("icons/folder_item.png")
     TrashIconPath = studiolibrary.resource.get("icons", "delete_96.png")
