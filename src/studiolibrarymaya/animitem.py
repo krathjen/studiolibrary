@@ -81,8 +81,8 @@ class AnimItem(baseitem.BaseItem):
         startFrame = self.startFrame() or 0
         endFrame = self.endFrame() or 0
 
-        schema.insert(3, {"name": "Start frame", "value": startFrame})
-        schema.insert(4, {"name": "End frame", "value": endFrame})
+        value = "{0} - {1}".format(startFrame, endFrame)
+        schema.insert(3, {"name": "Range", "value": value})
 
         schema.extend([
             {

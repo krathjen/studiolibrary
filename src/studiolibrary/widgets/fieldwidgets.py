@@ -835,7 +835,7 @@ class RangeFieldWidget(FieldWidget):
         widget = QtWidgets.QFrame(self)
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(3)
+        layout.setSpacing(4)
         widget.setLayout(layout)
 
         validator = QtGui.QIntValidator(-50000000, 50000000, self)
@@ -885,7 +885,7 @@ class StringDoubleFieldWidget(FieldWidget):
         widget = QtWidgets.QFrame(self)
         layout = QtWidgets.QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(3)
+        layout.setSpacing(4)
         widget.setLayout(layout)
 
         self._widget1 = QtWidgets.QLineEdit(self)

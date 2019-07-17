@@ -151,15 +151,14 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self._item = item
 
         self.ui.titleLabel.setText(item.Name)
-        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
-
-        schema = item.saveSchema()
+        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
 
         if os.path.exists(item.imageSequencePath()):
             self.setThumbnailPath(item.imageSequencePath())
         elif not item.isDefaultThumbnailPath():
             self.setThumbnailPath(item.thumbnailPath())
 
+        schema = item.saveSchema()
         if schema:
             formWidget = studiolibrary.widgets.FormWidget(self)
             formWidget.setSchema(schema)
