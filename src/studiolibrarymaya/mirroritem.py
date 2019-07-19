@@ -68,11 +68,12 @@ class MirrorItem(baseitem.BaseItem):
                 "order": 2,
             },
             {
-                "name": "animation",
-                "type": "bool",
-                "inline": True,
-                "default": False,
-                "persistent": True
+                "name": "keysOption",
+                "title": "Keys",
+                "type": "radio",
+                "value": "Selected Range",
+                "items": ["All Keys", "Selected Range"],
+                "persistent": True,
             },
             {
                 "name": "option",
@@ -91,7 +92,7 @@ class MirrorItem(baseitem.BaseItem):
             objects=None,
             namespaces=None,
             option=None,
-            animation=True,
+            keysOption=None,
             time=None,
             **kwargs
     ):
@@ -101,7 +102,7 @@ class MirrorItem(baseitem.BaseItem):
         :type objects: list[str]
         :type namespaces: list[str]
         :type option: MirrorOption
-        :type animation: bool
+        :type keysOption: str
         :type time: list[int]
         """
         objects = objects or []
@@ -119,7 +120,7 @@ class MirrorItem(baseitem.BaseItem):
             objects=objects,
             namespaces=namespaces,
             option=option,
-            animation=animation,
+            keysOption=keysOption,
             time=time,
         )
 

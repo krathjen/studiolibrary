@@ -103,6 +103,11 @@ class MirrorOption:
     RightToLeft = 2
 
 
+class KeysOption:
+    All = "All Keys"
+    SelectedRange = "Selected Range"
+
+
 def saveMirrorTable(path, objects, metadata=None, *args, **kwargs):
     """
     Convenience function for saving a mirror table to the given disc location.
@@ -425,7 +430,7 @@ class MirrorTable(mutils.TransferObject):
         return None
 
     @staticmethod
-    def scaleKey(obj, attr):
+    def scaleKey(obj, attr, time=None):
         """
         :type obj: str
         :type attr: str
@@ -433,8 +438,10 @@ class MirrorTable(mutils.TransferObject):
         curve = MirrorTable.animCurve(obj, attr)
         if curve:
             maya.cmds.selectKey(curve)
-            maya.cmds.scaleKey(iub=False, ts=1, fs=1, vs=-1, vp=0, animation="keys")
-
+            if time:
+                maya.cmds.scaleKey(time=time, iub=False, ts=1, fs=1, vs=-1, vp=0, animation="keys")
+            else:
+                maya.cmds.scaleKey(iub=False, ts=1, fs=1, vs=-1, vp=0, animation="keys")
     @staticmethod
     def formatValue(attr, value, mirrorAxis):
         """
@@ -674,24 +681,37 @@ class MirrorTable(mutils.TransferObject):
         objects=None,
         namespaces=None,
         option=None,
-        animation=True,
-        time=None
+        keysOption=None,
+        time=None,
     ):
         """
+        Load the mirror table for the given objects.
+
         :type objects: list[str]
         :type namespaces: list[str]
         :type option: mirrorOptions
-        :type animation: bool
+        :type keysOption: None or KeysOption.SelectedRange
         :type time: None or list[int]
         """
         self.validate(namespaces=namespaces)
 
         results = {}
+        animation = True
         foundObject = False
         srcObjects = self.objects().keys()
 
         if option is None:
             option = MirrorOption.Swap
+
+        if keysOption == KeysOption.All:
+            time = None
+        elif keysOption == KeysOption.SelectedRange:
+            time = mutils.selectedFrameRange()
+
+        # Check to make sure that the given time is not a single frame
+        if time and time[0] == time[1]:
+            time = None
+            animation = False
 
         matches = mutils.matchNames(
             srcObjects=srcObjects,
