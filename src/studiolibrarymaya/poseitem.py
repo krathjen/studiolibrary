@@ -13,6 +13,7 @@
 import os
 import logging
 
+from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
 
@@ -46,6 +47,11 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
         """
         super(PoseLoadWidget, self).__init__(*args, **kwargs)
 
+        self.ui.blendFrame = QtWidgets.QFrame(self)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        self.ui.blendFrame.setLayout(layout)
+
         self.ui.blendSlider = QtWidgets.QSlider(self)
         self.ui.blendSlider.setObjectName("blendSlider")
         self.ui.blendSlider.setMinimum(-30)
@@ -54,7 +60,18 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
         self.ui.blendSlider.sliderMoved.connect(self.sliderMoved)
         self.ui.blendSlider.sliderReleased.connect(self.sliderReleased)
 
-        self.setCustomWidget(self.ui.blendSlider)
+        self.ui.blendEdit = QtWidgets.QLineEdit(self)
+        self.ui.blendEdit.setObjectName("blendEdit")
+        self.ui.blendEdit.setText("0")
+        self.ui.blendEdit.editingFinished.connect(self._blendEditChanged)
+
+        validator = QtGui.QIntValidator(-200, 200, self)
+        self.ui.blendEdit.setValidator(validator)
+
+        layout.addWidget(self.ui.blendSlider)
+        layout.addWidget(self.ui.blendEdit)
+
+        self.setCustomWidget(self.ui.blendFrame)
 
         self.item().blendChanged.connect(self.setSliderValue)
 
@@ -63,13 +80,26 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
         if not self.item().isBatchModeEnabled():
             super(PoseLoadWidget, self).selectionChanged()
 
+    def _blendEditChanged(self, *args):
+        """Triggered when the user changes the blend edit value."""
+        blend = int(self.ui.blendEdit.text())
+        self.item().loadFromCurrentOptions(
+            blend=blend,
+            batchMode=False,
+            showBlendMessage=True,
+            clearSelection=False,
+        )
+
     def setSliderValue(self, value):
         """
         Trigger when the item changes blend value.
 
         :type value: int
         """
+        self.ui.blendEdit.blockSignals(True)
         self.ui.blendSlider.setValue(value)
+        self.ui.blendEdit.setText(str(int(value)))
+        self.ui.blendEdit.blockSignals(False)
 
     def sliderReleased(self):
         """Triggered when the user releases the slider handle."""

@@ -1035,6 +1035,11 @@ BaseLoadWidget #titleLabel {
     font-size: 14px;
 }
 
+BaseLoadWidget #blendEdit {
+    min-width: 32px;
+    max-width: 32px;
+}
+
 /*
 PreviewWidget QWidget,
 BaseSaveWidget QWidget,
