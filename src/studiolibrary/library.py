@@ -285,7 +285,6 @@ class Library(QtCore.QObject):
         self._groupedResults = {}
         self.dataChanged.emit()
 
-
     def sync(self, progressCallback=None):
         """Sync the file system with the database."""
         if not self.path():
@@ -295,13 +294,10 @@ class Library(QtCore.QObject):
         if progressCallback:
             progressCallback("Syncing")
 
-        data = self.read()
-
-        for path in data.keys():
-            if not os.path.exists(path):
-                del data[path]
-
+        new = {}
+        old = self.read()
         depth = self.recursiveDepth()
+
         items = studiolibrary.findItems(
             self.path(),
             depth=depth,
@@ -319,20 +315,20 @@ class Library(QtCore.QObject):
 
             path = item.path()
 
-            itemData = data.get(path, {})
+            itemData = old.get(path, {})
             itemData.update(item.createItemData())
 
-            data[path] = itemData
+            new[path] = itemData
 
         if progressCallback:
             progressCallback("Post Callbacks")
 
-        self.postSync(data)
+        self.postSync(new)
 
         if progressCallback:
             progressCallback("Saving Cache")
 
-        self.save(data)
+        self.save(new)
 
         self.dataChanged.emit()
 
