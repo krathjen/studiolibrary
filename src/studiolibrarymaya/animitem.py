@@ -89,7 +89,7 @@ class AnimItem(baseitem.BaseItem):
                 "name": "optionsGroup",
                 "title": "Options",
                 "type": "group",
-                "order": 1,
+                "order": 2,
             },
             {
                 "name": "connect",

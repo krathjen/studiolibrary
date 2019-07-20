@@ -389,8 +389,6 @@ class PoseItem(baseitem.BaseItem):
         if showBlendMessage:
             self.showToastMessage("Blend: {0}%".format(blend))
 
-        logger.info(u'Options: {0}'.format(namespaces))
-
         try:
             self.transferObject().load(
                 objects=objects,
