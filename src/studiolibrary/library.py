@@ -285,6 +285,84 @@ class Library(QtCore.QObject):
         self._groupedResults = {}
         self.dataChanged.emit()
 
+    def registeredItems(self):
+        """
+        Get registered items for the library.
+
+        :rtype: list[LibraryItem.__class__]
+        """
+        return studiolibrary.registeredItems()
+
+    def isValidPath(self, path):
+        """
+        Check if the given item path should be ignored.
+
+        :type path: str
+        :rtype: bool
+        """
+        for ignore in studiolibrary.config.get('ignorePaths', []):
+            if ignore in path:
+                return False
+        return True
+
+    def scraper(self, path):
+        """
+        Walk the given root path for valid items and return the item data.
+
+        :type path: str
+
+        :rtype: collections.Iterable[dict]
+        """
+        path = studiolibrary.normPath(path)
+        maxDepth = self.recursiveDepth()
+        startDepth = path.count(os.path.sep)
+
+        def _key(cls):
+            return cls.SyncOrder
+
+        items = sorted(self.registeredItems(), key=_key)
+
+        for root, dirs, files in os.walk(path, followlinks=True):
+
+            files.extend(dirs)
+
+            for filename in files:
+
+                # Normalise the path for consistent matching
+                path = studiolibrary.normPath(os.path.join(root, filename))
+
+                # Ignore any paths that have been specified in the config
+                if not self.isValidPath(path):
+                    continue
+
+                # Match the path with a registered item
+                item = False
+                for cls in items:
+                    if cls.match(path):
+                        item = cls
+                        break
+
+                remove = False
+                if item:
+
+                    # Yield the item data that matches the current path
+                    yield item(path).createItemData()
+
+                    # Stop walking if the item doesn't support nested items
+                    if not item.EnableNestedItems:
+                        remove = True
+
+                if remove and filename in dirs:
+                    dirs.remove(filename)
+
+            if maxDepth == 1:
+                break
+
+            # Stop walking the directory if the maximum depth has been reached
+            currentDepth = root.count(os.path.sep)
+            if (currentDepth - startDepth) >= maxDepth:
+                del dirs[:]
+
     def sync(self, progressCallback=None):
         """Sync the file system with the database."""
         if not self.path():
@@ -296,14 +374,7 @@ class Library(QtCore.QObject):
 
         new = {}
         old = self.read()
-        depth = self.recursiveDepth()
-
-        items = studiolibrary.findItems(
-            self.path(),
-            depth=depth,
-        )
-
-        items = list(items)
+        items = list(self.scraper(self.path()))
         count = len(items)
 
         for i, item in enumerate(items):
@@ -313,12 +384,9 @@ class Library(QtCore.QObject):
                 label = "{0:.0f}%".format(percent)
                 progressCallback(label, percent)
 
-            path = item.path()
-
-            itemData = old.get(path, {})
-            itemData.update(item.createItemData())
-
-            new[path] = itemData
+            path = item.get("path")
+            new[path] = old.get(path, {})
+            new[path].update(item)
 
         if progressCallback:
             progressCallback("Post Callbacks")
@@ -562,7 +630,7 @@ class Library(QtCore.QObject):
 
         for item in items:
             path = item.path()
-            data = item.itemData()
+            data = item.createItemData(path)
             data_.setdefault(path, {})
             data_[path].update(data)
 
