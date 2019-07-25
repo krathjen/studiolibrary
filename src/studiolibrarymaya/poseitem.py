@@ -109,10 +109,19 @@ class PoseItem(baseitem.BaseItem):
         super(PoseItem, self).__init__(*args, **kwargs)
 
         self._options = None
+        self._batchMode = False
 
         self.setBlendingEnabled(True)
         self.setTransferClass(mutils.Pose)
         self.setTransferBasename("pose.json")
+
+    def isBatchModeEnabled(self):
+        """
+        Check if the pose is currently blending.
+
+        :rtype: bool
+        """
+        return self._batchMode
 
     def loadValidator(self, **values):
         """
@@ -121,6 +130,10 @@ class PoseItem(baseitem.BaseItem):
         :type values: dict
         :rtype: list[dict]
         """
+        # Ignore the validator while blending
+        if self.isBatchModeEnabled():
+            return []
+
         # Mirror check box
         mirrorTip = "Cannot find a mirror table!"
         mirrorTable = self.mirrorTable()
@@ -375,6 +388,8 @@ class PoseItem(baseitem.BaseItem):
         :type searchAndReplace: (str, str) or None
         """
         logger.debug(u'Loading: {0}'.format(self.path()))
+
+        self._batchMode = batchMode
 
         # The mirror option can change during blending, so we always get
         # the value instead of caching it. This might make blending slower.
