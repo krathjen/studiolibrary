@@ -77,6 +77,7 @@ class Library(QtCore.QObject):
         self._groupedResults = {}
         self._searchTime = 0
         self._searchEnabled = True
+        self._registeredItems = None
         self._libraryWindow = libraryWindow
 
         self.setPath(path)
@@ -283,6 +284,7 @@ class Library(QtCore.QObject):
         self._items = []
         self._results = []
         self._groupedResults = {}
+        self._registeredItems = None
         self.dataChanged.emit()
 
     def registeredItems(self):
@@ -418,15 +420,27 @@ class Library(QtCore.QObject):
         # Check if the database has changed since the last read call
         if self.isDirty():
 
-            paths = self.read().keys()
-            items = studiolibrary.itemsFromPaths(
-                paths,
-                library=self,
-                libraryWindow=self._libraryWindow
-            )
+            logger.info("CREATE ITEMS")
 
-            self._items = list(items)
-            self.loadItemData(self._items)
+            self._items = []
+
+            data = self.read()
+
+            modules = set([d.get("__class__") for d in data.values()])
+            classes = {}
+            for module in modules:
+                classes[module] = studiolibrary.resolveModule(module)
+
+            for path in data.keys():
+                module = data[path].get("__class__")
+                cls = classes.get(module)
+                if cls:
+                    item = cls(path, library=self, libraryWindow=self._libraryWindow)
+                    self._items.append(item)
+                else:
+                    msg = 'Cannot resolve module name "{0}" for item'
+                    msg = msg.format(module)
+                    logger.debug(msg)
 
         return self._items
 
@@ -630,7 +644,7 @@ class Library(QtCore.QObject):
 
         for item in items:
             path = item.path()
-            data = item.createItemData(path)
+            data = item.createItemData()
             data_.setdefault(path, {})
             data_[path].update(data)
 
@@ -639,21 +653,6 @@ class Library(QtCore.QObject):
         if emitDataChanged:
             self.search()
             self.dataChanged.emit()
-
-    def loadItemData(self, items):
-        """
-        Load the item data from the database to the given items.
-
-        :type items: list[studiolibrary.LibraryItem]
-        """
-        logger.debug("Loading item data %s", items)
-
-        data = self.read()
-
-        for item in items:
-            key = item.id()
-            if key in data:
-                item.setItemData(data[key])
 
     def addPaths(self, paths, data=None):
         """

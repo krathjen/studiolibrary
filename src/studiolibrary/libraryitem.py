@@ -638,7 +638,8 @@ class LibraryItem(studiolibrary.widgets.Item):
             "type": extension,
             "folder": dirname,
             "category": category,
-            "modified": modified
+            "modified": modified,
+            "__class__": self.__module__ + "." + self.__class__.__name__
         }
 
         return itemData
