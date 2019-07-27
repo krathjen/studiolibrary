@@ -229,6 +229,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._superusers = None
         self._lockRegExp = None
         self._unlockRegExp = None
+        self._settingsWidget = None
 
         self._trashEnabled = self.TRASH_ENABLED
         self._recursiveSearchEnabled = self.RECURSIVE_SEARCH_ENABLED
@@ -1151,12 +1152,12 @@ class LibraryWindow(QtWidgets.QWidget):
                 },
             )
 
-        widget = studiolibrary.widgets.FormDialog(form=form)
-        widget.setObjectName("settingsDialog")
-        widget.acceptButton().setText("Save")
+        self._settingsWidget = studiolibrary.widgets.FormDialog(form=form)
+        self._settingsWidget.setObjectName("settingsDialog")
+        self._settingsWidget.acceptButton().setText("Save")
 
         self._lightbox = studiolibrary.widgets.Lightbox(self)
-        self._lightbox.setWidget(widget)
+        self._lightbox.setWidget(self._settingsWidget)
         self._lightbox.show()
 
     def createSettingsMenu(self):
@@ -2160,6 +2161,16 @@ class LibraryWindow(QtWidgets.QWidget):
         self.itemsWidget().setBackgroundSelectedColor(color)
 
         self.setStyleSheet(styleSheet)
+
+        # Reloading the style sheets is needed for OSX
+        self.itemsWidget().setStyleSheet(self.itemsWidget().styleSheet())
+        self.searchWidget().setStyleSheet(self.searchWidget().styleSheet())
+        self.menuBarWidget().setStyleSheet(self.menuBarWidget().styleSheet())
+        self.sidebarWidget().setStyleSheet(self.sidebarWidget().styleSheet())
+        self.previewWidget().setStyleSheet(self.previewWidget().styleSheet())
+
+        if self._settingsWidget:
+            self._settingsWidget.setStyleSheet(self._settingsWidget.styleSheet())
 
         self.searchWidget().update()
         self.menuBarWidget().update()

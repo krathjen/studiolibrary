@@ -7,9 +7,11 @@
 
 QWidget {
     font-size: 12px;
-
     font-family: Open Sans;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 180);
+}
+
+QFrame {
     background-color: BACKGROUND_COLOR;
 }
 
@@ -422,8 +424,8 @@ QTabBar::tab:first:selected {
 
 QMenu, QMenu QWidget {
 	font: 12px;
-	/*color: rgb(255, 255, 255, 180);*/
-	/*background-color: BACKGROUND_COLOR;*/
+	color: FOREGROUND_COLOR;
+	background-color: BACKGROUND_COLOR;
 }
 
 QMenu::separator {
