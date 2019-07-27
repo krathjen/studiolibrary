@@ -620,25 +620,17 @@ class LibraryWindow(QtWidgets.QWidget):
         :rtype: str
         """
         path = self.path()
-        title = "Choose the root location"
-        directory = path
 
-        if not directory:
-            directory = os.path.expanduser("~")
+        if not path:
+            path = os.path.expanduser("~")
 
-        dialog = QtWidgets.QFileDialog(None, QtCore.Qt.WindowStaysOnTopHint)
+        path = QtWidgets.QFileDialog.getExistingDirectory(
+            None,
+            "Choose a root folder location",
+            path
+        )
 
-        dialog.setWindowTitle(title)
-        dialog.setDirectory(directory)
-        dialog.setFileMode(QtWidgets.QFileDialog.DirectoryOnly)
-
-        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-            selectedFiles = dialog.selectedFiles()
-            if selectedFiles:
-                path = selectedFiles[0]
-
-        path = studiolibrary.normPath(path)
-        return path
+        return studiolibrary.normPath(path)
 
     def isRefreshEnabled(self):
         """
