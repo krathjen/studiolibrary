@@ -58,6 +58,11 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
         self.item().blendChanged.connect(self.setSliderValue)
 
+    def selectionChanged(self):
+        """Overriding to avoid validating when the selection changes."""
+        if not self.item().isBatchModeEnabled():
+            super(PoseLoadWidget, self).selectionChanged()
+
     def setSliderValue(self, value):
         """
         Trigger when the item changes blend value.
@@ -132,7 +137,7 @@ class PoseItem(baseitem.BaseItem):
         """
         # Ignore the validator while blending
         if self.isBatchModeEnabled():
-            return []
+            return None
 
         # Mirror check box
         mirrorTip = "Cannot find a mirror table!"
