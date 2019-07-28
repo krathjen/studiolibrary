@@ -230,6 +230,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._lockRegExp = None
         self._unlockRegExp = None
         self._settingsWidget = None
+        self._checkForUpdateThread = None
 
         self._trashEnabled = self.TRASH_ENABLED
         self._recursiveSearchEnabled = self.RECURSIVE_SEARCH_ENABLED
@@ -264,6 +265,16 @@ class LibraryWindow(QtWidgets.QWidget):
         self._groupByMenu = self.GROUPBY_MENU_CLASS(self)
         self._filterByMenu = self.FILTERBY_MENU_CLASS(self)
         self._statusWidget = self.STATUS_WIDGET_CLASS(self)
+
+        # Add the update available button to the status widget
+        self._updateAvailableButton = QtWidgets.QPushButton(self._statusWidget)
+        self._updateAvailableButton.setObjectName("updateAvailableButton")
+        self._updateAvailableButton.setText("Update Available")
+        self._updateAvailableButton.hide()
+        self._updateAvailableButton.clicked.connect(self.openReleasesUrl)
+
+        self.statusWidget().layout().addWidget(self._updateAvailableButton)
+
         self._menuBarWidget = self.MENUBAR_WIDGET_CLASS(self)
         self._sidebarWidget = self.SIDEBAR_WIDGET_CLASS(self)
 
@@ -400,6 +411,8 @@ class LibraryWindow(QtWidgets.QWidget):
         self.updateFiltersButton()
         self.updatePreviewWidget()
 
+        self.checkForUpdate()
+
         if path:
             self.setPath(path)
 
@@ -456,6 +469,35 @@ class LibraryWindow(QtWidgets.QWidget):
         path = self.selectedFolderPath()
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
+
+    def checkForUpdate(self):
+        """Check if there are any new versions available."""
+        class _Thread(QtCore.QThread):
+            def __init__(self, parent, func):
+                super(_Thread, self).__init__(parent)
+                self._func = func
+                self._result = None
+
+            def run(self):
+                try:
+                    self._result = self._func()
+                except Exception as error:
+                    logger.exception(error)
+
+            def result(self):
+                return self._result
+
+        if studiolibrary.config.get("checkForUpdateEnabled"):
+            self._checkForUpdateThread = _Thread(self, studiolibrary.isLatestRelease)
+            self._checkForUpdateThread.finished.connect(self.checkForUpdateFinished)
+            self._checkForUpdateThread.start()
+
+    def checkForUpdateFinished(self):
+        """Triggered when the check for update thread has finished."""
+        if self._checkForUpdateThread.result():
+            self._updateAvailableButton.show()
+        else:
+            self._updateAvailableButton.hide()
 
     def destroy(self):
         """Destroy the current library window instance."""
@@ -2685,6 +2727,11 @@ class LibraryWindow(QtWidgets.QWidget):
     def reportIssue():
         """Open the report issue url and submit a new issue."""
         webbrowser.open(studiolibrary.config.get("reportIssueUrl"))
+
+    @staticmethod
+    def openReleasesUrl():
+        """Open the help url from the config file in a web browser."""
+        webbrowser.open(studiolibrary.config.get("releasesUrl"))
 
     def setDebugMode(self, value):
         """

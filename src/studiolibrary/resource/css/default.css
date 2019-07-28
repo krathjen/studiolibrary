@@ -692,6 +692,31 @@ StatusWidget[status="warning"] {
 
 /*
 --------------------------------------------------------------------------
+UPDATE AVAILABLE WIDGET
+--------------------------------------------------------------------------
+*/
+
+#updateAvailableButton {
+    padding: 2px;
+    margin: 2px;
+    font-size: 11px;
+    color: BACKGROUND_COLOR;
+    background-color: rgb(FOREGROUND_COLOR_R,FOREGROUND_COLOR_G,FOREGROUND_COLOR_B,150);
+    border-radius: 2px;
+}
+
+#updateAvailableButton {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#updateAvailableButton:hover {
+    background-color: rgb(FOREGROUND_COLOR_R,FOREGROUND_COLOR_G,FOREGROUND_COLOR_B,200);
+}
+
+
+/*
+--------------------------------------------------------------------------
 PROGRESS WIDGET
 --------------------------------------------------------------------------
 */

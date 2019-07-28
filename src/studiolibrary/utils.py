@@ -24,6 +24,7 @@ import tempfile
 import platform
 import threading
 import collections
+import distutils.version
 
 from datetime import datetime
 
@@ -51,6 +52,7 @@ __all__ = [
     "setLibraries",
     "removeLibrary",
     "defaultLibrary",
+    "isLatestRelease",
     "read",
     "write",
     "update",
@@ -244,6 +246,32 @@ def setLibraries(libraries):
     remove = set(old) - set(new)
     for name in remove:
         removeLibrary(name)
+
+
+def isLatestRelease():
+    """
+    Check if the installed version of the Studio Library is the latest.
+
+    :rtype: bool
+    """
+    url = "https://api.github.com/repos/krathjen/studiolibrary/releases/latest"
+    f = urllib.request.urlopen(url)
+    result = json.load(f)
+
+    if result:
+        latestVersion = result.get('tag_name', '0.0.0')
+        currentVersion = studiolibrary.__version__
+
+        # Ignore beta releases if the current version is not beta
+        if "b" in latestVersion and "b" not in currentVersion:
+            return False
+
+        v1 = distutils.version.LooseVersion(latestVersion)
+        v2 = distutils.version.LooseVersion(currentVersion)
+
+        return v1 > v2
+
+    return False
 
 
 def modules():
