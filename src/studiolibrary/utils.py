@@ -14,6 +14,7 @@ import os
 import sys
 import json
 import uuid
+import errno
 import ctypes
 import shutil
 import locale
@@ -717,6 +718,25 @@ def movePaths(srcPaths, dst):
 
         logger.info(u'Moving Content: {0} => {1}'.format(src, dst_))
         shutil.move(src, dst_)
+        
+
+def silentRemove(filename):
+    """
+    Silently remove a file, ignore if it doesn't exist.
+    
+    Workaround for #237 where `os.path.exists` gave false
+    positives and removal of files failed because of it.
+    
+    :type filename: str
+    :rtype: None
+    
+    """
+    try:
+        os.remove(filename)
+    except OSError as e:
+        # Ignore case of no such file or directory
+        if e.errno != errno.ENOENT: 
+            raise
 
 
 def removePath(path):
@@ -834,8 +854,7 @@ def write(path, data):
             f.flush()
 
         # Remove any existing path.bak files
-        if os.path.exists(bak):
-            os.remove(bak)
+        silentRemove(bak)
 
         # Rename the existing path to path.bak
         if os.path.exists(path):
@@ -847,12 +866,11 @@ def write(path, data):
 
         # Clean up the bak file only if the given path exists
         if os.path.exists(path) and os.path.exists(bak):
-            os.remove(bak)
+            silentRemove(bak)
 
     except:
         # Remove the tmp file if there are any issues
-        if os.path.exists(tmp):
-            os.remove(tmp)
+        silentRemove(tmp)
 
         # Restore the path from the current .bak file
         if not os.path.exists(path) and os.path.exists(bak):
