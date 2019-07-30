@@ -473,7 +473,7 @@ class Library(QtCore.QObject):
         :rtype: list[studiolibrary.LibraryItem]
         """
         items = []
-        for path in self.pathsFromUrls(urls):
+        for path in studiolibrary.pathsFromUrls(urls):
 
             item = self.itemFromPath(path, **kwargs)
 

@@ -77,6 +77,7 @@ __all__ = [
     "removePath",
     "renamePath",
     "formatPath",
+    "pathsFromUrls",
     "resolveModule",
     "createTempPath",
     "renamePathInFile",
