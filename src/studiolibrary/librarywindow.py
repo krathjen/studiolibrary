@@ -803,7 +803,7 @@ class LibraryWindow(QtWidgets.QWidget):
         items = []
 
         if path:
-            item = studiolibrary.itemFromPath(path, libraryWindow=self)
+            item = self.library().itemFromPath(path, libraryWindow=self)
 
             if item:
                 items = [item]
@@ -933,7 +933,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :rtype: list[studiolibrary.LibraryItem]
         """
-        return studiolibrary.itemsFromUrls(urls, libraryWindow=self)
+        return self.library().itemsFromUrls(urls, libraryWindow=self)
 
     # -----------------------------------------------------------------
     # Support for custom context menus
@@ -1024,7 +1024,10 @@ class LibraryWindow(QtWidgets.QWidget):
         menu.setIcon(icon)
         menu.setTitle("New")
 
-        for cls in studiolibrary.registeredItems():
+        def _sortKey(item):
+            return item.MenuOrder
+
+        for cls in sorted(studiolibrary.registeredItems(), key=_sortKey):
             action = cls.createAction(menu, self)
 
             if action:

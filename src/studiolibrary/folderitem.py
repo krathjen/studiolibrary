@@ -22,6 +22,7 @@ import studiolibrary.widgets
 class FolderItem(studiolibrary.LibraryItem):
 
     SyncOrder = 100
+    MenuOrder = 0
     EnableNestedItems = True
     DisplayInSidebar = True
 

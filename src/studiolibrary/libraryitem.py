@@ -65,6 +65,7 @@ class LibraryItem(studiolibrary.widgets.Item):
     DefaultThumbnailPath = studiolibrary.resource.get("icons", "thumbnail.png")
 
     SyncOrder = 10
+    MenuOrder = 10
     TypeIconPath = None
     DisplayInSidebar = False
     CreateWidgetClass = None

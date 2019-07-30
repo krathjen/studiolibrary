@@ -94,10 +94,6 @@ __all__ = [
     "registerItem",
     "registerItems",
     "registeredItems",
-    "itemFromPath",
-    "itemsFromPaths",
-    "itemsFromUrls",
-    "findItems",
     "runTests",
     "findItemsInFolders",
 ]
@@ -361,62 +357,6 @@ def createTempPath(name, clean=True, makedirs=True):
         os.makedirs(path)
 
     return path
-
-
-def itemFromPath(path, **kwargs):
-    """
-    Return a new item instance for the given path.
-
-    :type path: str
-    :rtype: studiolibrary.LibraryItem or None
-    """
-    path = normPath(path)
-
-    def _key(cls):
-        return cls.SyncOrder
-
-    for ignore in studiolibrary.config.get('ignorePaths', []):
-        if ignore in path:
-            return None
-
-    for cls in sorted(registeredItems(), key=_key):
-        if cls.match(path):
-            return cls(path, **kwargs)
-
-
-def itemsFromPaths(paths, **kwargs):
-    """
-    Return new item instances for the given paths.
-
-    :type paths: list[str]:
-    :rtype: collections.Iterable[studiolibrary.LibraryItem]
-    """
-    for path in paths:
-        item = itemFromPath(path, **kwargs)
-        if item:
-            yield item
-
-
-def itemsFromUrls(urls, **kwargs):
-    """
-    Return new item instances for the given QUrl objects.
-
-    :type urls: list[QtGui.QUrl]
-    :rtype: list[studiolibrary.LibraryItem]
-    """
-    items = []
-    for path in pathsFromUrls(urls):
-
-        item = itemFromPath(path, **kwargs)
-
-        if item:
-            items.append(item)
-        else:
-            msg = 'Cannot find the item for path "{0}"'
-            msg = msg.format(path)
-            logger.warning(msg)
-
-    return items
 
 
 def pathsFromUrls(urls):

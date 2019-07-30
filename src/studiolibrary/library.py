@@ -307,7 +307,7 @@ class Library(QtCore.QObject):
                 return False
         return True
 
-    def scraper(self, path):
+    def walker(self, path):
         """
         Walk the given root path for valid items and return the item data.
 
@@ -318,11 +318,6 @@ class Library(QtCore.QObject):
         path = studiolibrary.normPath(path)
         maxDepth = self.recursiveDepth()
         startDepth = path.count(os.path.sep)
-
-        def _key(cls):
-            return cls.SyncOrder
-
-        items = sorted(self.registeredItems(), key=_key)
 
         for root, dirs, files in os.walk(path, followlinks=True):
 
@@ -338,17 +333,13 @@ class Library(QtCore.QObject):
                     continue
 
                 # Match the path with a registered item
-                item = False
-                for cls in items:
-                    if cls.match(path):
-                        item = cls
-                        break
+                item = self.itemFromPath(path)
 
                 remove = False
                 if item:
 
                     # Yield the item data that matches the current path
-                    yield item(path).createItemData()
+                    yield item.createItemData()
 
                     # Stop walking if the item doesn't support nested items
                     if not item.EnableNestedItems:
@@ -366,7 +357,11 @@ class Library(QtCore.QObject):
                 del dirs[:]
 
     def sync(self, progressCallback=None):
-        """Sync the file system with the database."""
+        """
+        Sync the file system with the database.
+
+        :type progressCallback: None or func
+        """
         if not self.path():
             logger.info('No path set for syncing data')
             return
@@ -376,7 +371,7 @@ class Library(QtCore.QObject):
 
         new = {}
         old = self.read()
-        items = list(self.scraper(self.path()))
+        items = list(self.walker(self.path()))
         count = len(items)
 
         for i, item in enumerate(items):
@@ -420,7 +415,7 @@ class Library(QtCore.QObject):
         # Check if the database has changed since the last read call
         if self.isDirty():
 
-            logger.info("CREATE ITEMS")
+            logger.debug("Creating items")
 
             self._items = []
 
@@ -428,6 +423,7 @@ class Library(QtCore.QObject):
 
             modules = set([d.get("__class__") for d in data.values()])
             classes = {}
+
             for module in modules:
                 classes[module] = studiolibrary.resolveModule(module)
 
@@ -438,11 +434,57 @@ class Library(QtCore.QObject):
                     item = cls(path, library=self, libraryWindow=self._libraryWindow)
                     self._items.append(item)
                 else:
-                    msg = 'Cannot resolve module name "{0}" for item'
-                    msg = msg.format(module)
+                    msg = 'No "__class__" field found for "{0}"'
+                    msg = msg.format(path)
                     logger.debug(msg)
 
         return self._items
+
+    def itemFromPath(self, path, **kwargs):
+        """
+        Return a new item instance for the given path.
+
+        :type path: str
+        :rtype: studiolibrary.LibraryItem or None
+        """
+        path = studiolibrary.normPath(path)
+
+        for cls in self.registeredItems():
+            if cls.match(path):
+                return cls(path, **kwargs)
+
+    def itemsFromPaths(self, paths, **kwargs):
+        """
+        Return new item instances for the given paths.
+
+        :type paths: list[str]:
+        :rtype: collections.Iterable[studiolibrary.LibraryItem]
+        """
+        for path in paths:
+            item = self.itemFromPath(path, **kwargs)
+            if item:
+                yield item
+
+    def itemsFromUrls(self, urls, **kwargs):
+        """
+        Return new item instances for the given QUrl objects.
+
+        :type urls: list[QtGui.QUrl]
+        :rtype: list[studiolibrary.LibraryItem]
+        """
+        items = []
+        for path in self.pathsFromUrls(urls):
+
+            item = self.itemFromPath(path, **kwargs)
+
+            if item:
+                items.append(item)
+            else:
+                msg = 'Cannot find the item for path "{0}"'
+                msg = msg.format(path)
+                logger.warning(msg)
+
+        return items
 
     def findItems(self, queries):
         """
