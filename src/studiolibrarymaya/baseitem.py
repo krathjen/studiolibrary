@@ -48,8 +48,11 @@ class BaseItem(studiolibrary.LibraryItem):
     loadValueChanged = _baseItemSignals.loadValueChanged
 
     """Base class for anim, pose, mirror and sets transfer items."""
-    CreateWidgetClass = basesavewidget.BaseSaveWidget
-    PreviewWidgetClass = baseloadwidget.BaseLoadWidget
+    SaveWidgetClass = basesavewidget.BaseSaveWidget
+    LoadWidgetClass = baseloadwidget.BaseLoadWidget
+
+    TransferClass = None
+    TransferBasename = ""
 
     @classmethod
     def showCreateWidget(cls, libraryWindow, item=None):
@@ -84,15 +87,13 @@ class BaseItem(studiolibrary.LibraryItem):
         :type args: list
         :type kwargs: dict
         """
-        studiolibrary.LibraryItem.__init__(self, *args, **kwargs)
+        self._transferObject = None
 
         self._currentLoadValues = {}
         self._currentLoadSchema = []
         self._currentSaveSchema = []
 
-        self._transferClass = None
-        self._transferObject = None
-        self._transferBasename = None
+        studiolibrary.LibraryItem.__init__(self, *args, **kwargs)
 
     def emitLoadValueChanged(self, field, value):
         """
@@ -298,48 +299,16 @@ class BaseItem(studiolibrary.LibraryItem):
 
         return options
 
-    def setTransferClass(self, classname):
-        """
-        Set the transfer class used to read and write the data.
-
-        :type classname: mutils.TransferObject
-        """
-        self._transferClass = classname
-
-    def transferClass(self):
-        """
-        Return the transfer class used to read and write the data.
-
-        :rtype: mutils.TransferObject
-        """
-        return self._transferClass
-
     def transferPath(self):
         """
         Return the disc location to transfer path.
 
         :rtype: str
         """
-        if self.transferBasename():
-            return os.path.join(self.path(), self.transferBasename())
+        if self.TransferBasename:
+            return os.path.join(self.path(), self.TransferBasename)
         else:
             return self.path()
-
-    def transferBasename(self):
-        """
-        Return the filename of the transfer path.
-
-        :rtype: str
-        """
-        return self._transferBasename
-
-    def setTransferBasename(self, transferBasename):
-        """
-        Set the filename of the transfer path.
-
-        :type: str
-        """
-        self._transferBasename = transferBasename
 
     def transferObject(self):
         """
@@ -349,7 +318,7 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         if not self._transferObject:
             path = self.transferPath()
-            self._transferObject = self.transferClass().fromPath(path)
+            self._transferObject = self.TransferClass.fromPath(path)
         return self._transferObject
 
     def contextMenu(self, menu, items=None):

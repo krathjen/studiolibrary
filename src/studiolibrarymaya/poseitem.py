@@ -131,7 +131,9 @@ class PoseItem(baseitem.BaseItem):
     Name = "Pose"
     Extension = ".pose"
     IconPath = os.path.join(DIRNAME, "icons", "pose.png")
-    PreviewWidgetClass = PoseLoadWidget
+    LoadWidgetClass = PoseLoadWidget
+    TransferClass = mutils.Pose
+    TransferBasename = "pose.json"
 
     def __init__(self, *args, **kwargs):
         """
@@ -147,8 +149,6 @@ class PoseItem(baseitem.BaseItem):
         self._batchMode = False
 
         self.setBlendingEnabled(True)
-        self.setTransferClass(mutils.Pose)
-        self.setTransferBasename("pose.json")
 
     def isBatchModeEnabled(self):
         """

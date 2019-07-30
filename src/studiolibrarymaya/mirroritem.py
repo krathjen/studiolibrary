@@ -34,6 +34,8 @@ class MirrorItem(baseitem.BaseItem):
     Name = "Mirror Table"
     Extension = ".mirror"
     IconPath = os.path.join(DIRNAME, "icons", "mirrortable.png")
+    TransferClass = mutils.MirrorTable
+    TransferBasename = "mirrortable.json"
 
     def __init__(self, *args, **kwargs):
         """
@@ -42,10 +44,7 @@ class MirrorItem(baseitem.BaseItem):
         """
         super(MirrorItem, self).__init__(*args, **kwargs)
 
-        self._validateObjects = []
-
-        self.setTransferBasename("mirrortable.json")
-        self.setTransferClass(mutils.MirrorTable)
+        self._validatedObjects = []
 
     def loadSchema(self):
         """
@@ -181,8 +180,8 @@ class MirrorItem(baseitem.BaseItem):
         results = super(MirrorItem, self).saveValidator(**options)
 
         objects = maya.cmds.ls(selection=True) or []
-        if self._validateObjects != objects:
-            self._validateObjects = objects
+        if self._validatedObjects != objects:
+            self._validatedObjects = objects
 
             left = options.get("leftSide")
             if not left:

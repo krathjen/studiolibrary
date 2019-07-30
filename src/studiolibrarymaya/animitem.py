@@ -40,19 +40,7 @@ class AnimItem(baseitem.BaseItem):
     Name = "Animation"
     Extension = ".anim"
     IconPath = os.path.join(DIRNAME, "icons", "animation.png")
-
-    def __init__(self, *args, **kwargs):
-        """
-        Create a new instance of the anim item from the given path.
-
-        :type path: str
-        :type args: list
-        :type kwargs: dict
-        """
-        baseitem.BaseItem.__init__(self, *args, **kwargs)
-
-        self.setTransferClass(mutils.Animation)
-        self.setTransferBasename("")
+    TransferClass = mutils.Animation
 
     def startFrame(self):
         """Return the start frame for the animation."""

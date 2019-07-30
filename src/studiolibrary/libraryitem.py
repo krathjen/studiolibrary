@@ -67,9 +67,8 @@ class LibraryItem(studiolibrary.widgets.Item):
     SyncOrder = 10
     MenuOrder = 10
     TypeIconPath = None
-    DisplayInSidebar = False
-    CreateWidgetClass = None
-    PreviewWidgetClass = None
+    SaveWidgetClass = None
+    LoadWidgetClass = None
 
     _libraryItemSignals = LibraryItemSignals()
 
@@ -109,7 +108,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type item: studiolibrary.LibraryItem or None
         """
         item = item or cls()
-        widget = cls.CreateWidgetClass(item=item)
+        widget = cls.SaveWidgetClass(item=item)
         libraryWindow.setCreateWidget(widget)
 
     @classmethod
@@ -357,8 +356,8 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         widget = None
 
-        if self.PreviewWidgetClass:
-            widget = self.PreviewWidgetClass(item=self)
+        if self.LoadWidgetClass:
+            widget = self.LoadWidgetClass(item=self)
 
         return widget
 

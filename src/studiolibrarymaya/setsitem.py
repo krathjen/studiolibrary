@@ -17,23 +17,15 @@ from studiolibrarymaya import baseitem
 
 
 DIRNAME = os.path.dirname(__file__)
-ICON_PATH = os.path.join(DIRNAME, "icons", "selectionSet.png")
 
 
 class SetsItem(baseitem.BaseItem):
 
     Name = "Selection Set"
     Extension = ".set"
-    IconPath = ICON_PATH
-
-    def __init__(self, *args, **kwargs):
-        """
-        :rtype: None
-        """
-        super(SetsItem, self).__init__(*args, **kwargs)
-
-        self.setTransferBasename("set.json")
-        self.setTransferClass(mutils.SelectionSet)
+    IconPath = os.path.join(DIRNAME, "icons", "selectionSet.png")
+    TransferClass = mutils.SelectionSet
+    TransferBasename = "set.json"
 
     def loadFromCurrentOptions(self):
         """Load the selection set using the settings for this item."""
