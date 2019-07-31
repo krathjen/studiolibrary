@@ -46,8 +46,8 @@ class Library(QtCore.QObject):
         "type",
         "folder",
         "category",
-        "Custom Order",  # legacy case
         "modified",
+        "Custom Order",  # legacy case
     ]
 
     GroupFields = [
@@ -339,7 +339,7 @@ class Library(QtCore.QObject):
                 if item:
 
                     # Yield the item data that matches the current path
-                    yield item.createItemData()
+                    yield item.createItemData(path)
 
                     # Stop walking if the item doesn't support nested items
                     if not item.EnableNestedItems:
@@ -412,7 +412,7 @@ class Library(QtCore.QObject):
 
         :rtype: list[studiolibrary.LibraryItem] 
         """
-        # Check if the database has changed since the last read call
+        # Check if the cache has changed since the last read call
         if self.isDirty():
 
             logger.debug("Creating items")
@@ -421,9 +421,13 @@ class Library(QtCore.QObject):
 
             data = self.read()
 
-            modules = set([d.get("__class__") for d in data.values()])
-            classes = {}
+            modules = []
+            for itemData in data.values():
+                if '__class__' in itemData:
+                    modules.append(itemData.get("__class__"))
+            modules = set(modules)
 
+            classes = {}
             for module in modules:
                 classes[module] = studiolibrary.resolveModule(module)
 
@@ -432,6 +436,7 @@ class Library(QtCore.QObject):
                 cls = classes.get(module)
                 if cls:
                     item = cls(path, library=self, libraryWindow=self._libraryWindow)
+                    item.setItemData(data[path])
                     self._items.append(item)
                 else:
                     msg = 'No "__class__" field found for "{0}"'
@@ -478,6 +483,9 @@ class Library(QtCore.QObject):
             item = self.itemFromPath(path, **kwargs)
 
             if item:
+                data = item.createItemData(path)
+                item.setItemData(data)
+
                 items.append(item)
             else:
                 msg = 'Cannot find the item for path "{0}"'
@@ -664,15 +672,6 @@ class Library(QtCore.QObject):
         """
         self.saveItemData(items)
 
-    def updateItem(self, item):
-        """
-        Update the given item in the database.    
-    
-        :type item: studiolibrary.LibraryItem
-        :rtype: None 
-        """
-        self.saveItemData([item])
-
     def saveItemData(self, items, emitDataChanged=True):
         """
         Add the given items to the database.
@@ -686,7 +685,7 @@ class Library(QtCore.QObject):
 
         for item in items:
             path = item.path()
-            data = item.createItemData()
+            data = item.itemData()
             data_.setdefault(path, {})
             data_[path].update(data)
 

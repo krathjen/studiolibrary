@@ -88,7 +88,7 @@ class SetsMenu(QtWidgets.QMenu):
         parent = parent or item.libraryWindow()
         QtWidgets.QMenu.__init__(self, "Selection Sets", parent)
 
-        icon = QtGui.QIcon(setsitem.ICON_PATH)
+        icon = QtGui.QIcon(setsitem.SetsItem.IconPath)
         self.setIcon(icon)
 
         self._item = item
@@ -152,8 +152,12 @@ class SetsMenu(QtWidgets.QMenu):
 
         if selectionSets:
             for selectionSet in selectionSets:
-                dirname = os.path.basename(selectionSet.dirname())
-                basename = selectionSet.name().replace(selectionSet.extension(), "")
+
+                dirname = os.path.basename(os.path.dirname(selectionSet.path()))
+
+                basename = os.path.basename(selectionSet.path())
+                basename = basename.replace(selectionSet.Extension, "")
+
                 nicename = dirname + ": " + basename
 
                 action = QtWidgets.QAction(nicename, self)

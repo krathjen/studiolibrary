@@ -80,6 +80,35 @@ class LibraryItem(studiolibrary.widgets.Item):
     deleted = _libraryItemSignals.deleted
 
     @classmethod
+    def createItemData(cls, path):
+        """
+        Called when syncing the given path with the library cache.
+
+        :type path: str
+        :rtype: dict
+        """
+        dirname, basename, extension = studiolibrary.splitPath(path)
+
+        name = os.path.basename(path)
+        category = os.path.basename(dirname) or dirname
+        modified = ""
+
+        if os.path.exists(path):
+            modified = os.path.getmtime(path)
+
+        itemData = {
+            "name": name,
+            "path": path,
+            "type": extension,
+            "folder": dirname,
+            "category": category,
+            "modified": modified,
+            "__class__": cls.__module__ + "." + cls.__name__
+        }
+
+        return itemData
+
+    @classmethod
     def createAction(cls, menu, libraryWindow):
         """
         Return the action to be displayed when the user 
@@ -156,7 +185,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         super(LibraryItem, self).__init__()
 
-        self._path = ""
+        self._path = path
         self._modal = None
         self._library = None
         self._metadata = None
@@ -173,8 +202,8 @@ class LibraryItem(studiolibrary.widgets.Item):
         if library:
             self.setLibrary(library)
 
-        if path:
-            self.setPath(path)
+        # if path:
+        #     self.setPath(path)
 
     def setReadOnly(self, readOnly):
         """
@@ -443,44 +472,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         """Used by the mime data when dragging/dropping the item."""
         return QtCore.QUrl("file:///" + self.path())
 
-    def dirname(self):
-        """
-        :rtype: str
-        """
-        return os.path.dirname(self.path())
-
-    def extension(self):
-        """
-        :rtype: str
-        """
-        _, extension = os.path.splitext(self.path())
-        return extension
-
-    def exists(self):
-        """
-        :rtype: bool
-        """
-        return os.path.exists(self.path())
-
-    def mtime(self):
-        """
-        :rtype: float
-        """
-        return os.path.getmtime(self.path())
-
-    def ctime(self):
-        """
-        Return when the item was created.
-
-        :rtype: str
-        """
-        path = self.path()
-
-        if os.path.exists(path):
-            return int(os.path.getctime(path))
-
-        return None
-
     def setLibraryWindow(self, libraryWindow):
         """
         Set the library widget containing the item.
@@ -547,24 +538,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return self._path
 
-    def setPath(self, path):
-        """
-        Set the path location on disc for the item.
-
-        :type path: str
-        :rtype: None
-        """
-        if not path:
-            raise ItemError('Cannot set an empty item path.')
-
-        self.resetImageSequence()
-
-        path = studiolibrary.normPath(path)
-
-        self._path = path
-
-        self.updateItemData()
-
     def setMetadata(self, metadata):
         """
         Set the given metadata for the item.
@@ -613,42 +586,13 @@ class LibraryItem(studiolibrary.widgets.Item):
         metadata = studiolibrary.readJson(path)
         return metadata
 
-    def updateItemData(self):
-        itemData = self.createItemData()
-        self.setItemData(itemData)
+    def syncItemData(self):
+        """Sync the item data to the database."""
+        data = self.createItemData(self.path())
+        self.setItemData(data)
 
-    def createItemData(self):
-
-        path = self.path()
-
-        dirname, basename, extension = studiolibrary.splitPath(path)
-
-        name = os.path.basename(path)
-        category = os.path.basename(dirname) or dirname
-        modified = ""
-        # timeAgo = ""
-
-        if os.path.exists(path):
-            modified = os.path.getmtime(path)
-        #     timeAgo = studiolibrary.timeAgo(modified)
-
-        itemData = {
-            "name": name,
-            "path": path,
-            "type": extension,
-            "folder": dirname,
-            "category": category,
-            "modified": modified,
-            "__class__": self.__module__ + "." + self.__class__.__name__
-        }
-
-        return itemData
-
-    def saveItemData(self):
-        """Sync the item data to the database """
-        self.updateItemData()
         if self.library():
-            self.library().updateItem(self)
+            self.library().saveItemData([self])
 
     def load(self, *args, **kwargs):
         """Reimplement this method for loading any item data."""
@@ -680,13 +624,13 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :type path: str or None
         """
-        path = path or self.path()
+        if path:
+            path = studiolibrary.normPath(path)
 
         if path and not path.endswith(self.Extension):
             path += self.Extension
 
-        self.setPath(path)
-        path = self.path()
+        self._path = path
 
         logger.debug(u'Item Saving: {0}'.format(path))
         self.saving.emit(self)
@@ -703,13 +647,13 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         shutil.move(tempPath, path)
 
-        self.saveItemData()
+        self.syncItemData()
 
         if self.libraryWindow():
             self.libraryWindow().selectItems([self])
 
         self.saved.emit(self)
-        logger.debug(u'Item Saved: {0}'.format(self.path()))
+        logger.debug(u'Item Saved: {0}'.format(path))
 
     def write(self, path, *args, **kwargs):
         """
@@ -771,7 +715,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type extension: bool or None
         :rtype: None
         """
-        extension = extension or self.extension()
+        extension = extension or self.Extension
         if dst and extension not in dst:
             dst += extension
 
@@ -784,9 +728,9 @@ class LibraryItem(studiolibrary.widgets.Item):
         if self.library():
             self.library().renamePath(src, dst)
 
-        # Update the data for the item
-        self.setPath(dst)
-        self.saveItemData()
+        self._path = dst
+
+        self.syncItemData()
 
         self.renamed.emit(self, src, dst)
 
@@ -829,7 +773,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type parent: QtWidgets.QWidget
         """
         title = "Move To..."
-        path = os.path.dirname(self.dirname())
+        path = os.path.dirname(os.path.dirname(self.path()))
 
         dst = QtWidgets.QFileDialog.getExistingDirectory(parent, title, path)
 
@@ -901,7 +845,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         library = self.library()
         item = studiolibrary.LibraryItem(path, library=library)
         self.libraryWindow().moveItemsToTrash([item])
-        self.setPath(path)
+        # self.setPath(path)
 
     def typePixmap(self):
         """

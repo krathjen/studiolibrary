@@ -67,7 +67,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
         """
         item = item or cls()
-        widget = cls.CreateWidgetClass(item=item, parent=libraryWindow)
+        widget = cls.SaveWidgetClass(item=item, parent=libraryWindow)
 
         path = libraryWindow.selectedFolderPath()
 
@@ -155,9 +155,9 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: list[dict]
         """
-        ctime = self.ctime()
-        if ctime:
-            ctime = studiolibrary.timeAgo(ctime)
+        modified = self.itemData().get("modified")
+        if modified:
+            modified = studiolibrary.timeAgo(modified)
 
         count = self.transferObject().objectCount()
         plural = "s" if count > 1 else ""
@@ -180,7 +180,7 @@ class BaseItem(studiolibrary.LibraryItem):
             },
             {
                 "name": "created",
-                "value": ctime,
+                "value": modified,
             },
             {
                 "name": "contains",

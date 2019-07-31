@@ -429,24 +429,24 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
             item.itemData()["Custom Order"] = str(row).zfill(padding)
             row += 1
 
-    def updateCustomOrder(self):
-        """
-        Update any empty custom orders.
-
-        :rtype: None
-        """
-        row = 1
-        padding = 5
-
-        items = self.items()
-        columnLabel = "Custom Order"
-
-        for item in items:
-            customOrder = item.text(columnLabel)
-
-            if not customOrder:
-                item.setText(columnLabel, str(row).zfill(padding))
-            row += 1
+    # def updateCustomOrder(self):
+    #     """
+    #     Update any empty custom orders.
+    #
+    #     :rtype: None
+    #     """
+    #     row = 1
+    #     padding = 5
+    #
+    #     items = self.items()
+    #     columnLabel = "Custom Order"
+    #
+    #     for item in items:
+    #         customOrder = item.text(columnLabel)
+    #
+    #         if not customOrder:
+    #             item.setText(columnLabel, str(row).zfill(padding))
+    #         row += 1
 
     def itemsCustomOrder(self):
         """

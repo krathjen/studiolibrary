@@ -117,9 +117,10 @@ class FolderItem(studiolibrary.LibraryItem):
                 libraryWindow.refresh()
                 libraryWindow.selectFolderPath(path)
 
-    def createItemData(self):
+    @classmethod
+    def createItemData(cls, path):
         """Overriding this method to force the item type to Folder"""
-        itemData = super(FolderItem, self).createItemData()
+        itemData = super(FolderItem, cls).createItemData(path)
         itemData["type"] = "Folder"
         return itemData
 

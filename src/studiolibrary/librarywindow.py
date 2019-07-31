@@ -1376,7 +1376,9 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :rtype:  None
         """
-        self.library().saveItemData(self.items(), emitDataChanged=True)
+        print(len(self.items()))
+
+        self.library().saveItemData(self.library()._items, emitDataChanged=True)
         # self.library().search()
 
     # -------------------------------------------------------------------
