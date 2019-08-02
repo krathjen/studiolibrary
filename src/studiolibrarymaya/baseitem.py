@@ -71,8 +71,6 @@ class BaseItem(studiolibrary.LibraryItem):
 
         path = libraryWindow.selectedFolderPath()
 
-        widget.formWidget().setData("folder", {"visible": False})
-
         widget.setFolderPath(path)
         widget.setLibraryWindow(libraryWindow)
 
@@ -224,6 +222,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 "name": "folder",
                 "type": "path",
                 "layout": "vertical",
+                "visible": False,
             },
             {
                 "name": "name",
@@ -264,19 +263,18 @@ class BaseItem(studiolibrary.LibraryItem):
             },
         ]
 
-    def write(self, path, objects, iconPath="", **options):
+    def save(self, objects, thumbnail="", **kwargs):
         """
-        Write all the given object data to the given path on disc.
+        Write all the given object data to the item path on disc.
 
-        :type path: str
         :type objects: list[str]
-        :type iconPath: str
-        :type options: dict
+        :type thumbnail: str
+        :type kwargs: dict
         """
         # Copy the icon path to the given path
-        if iconPath:
-            basename = os.path.basename(iconPath)
-            shutil.copyfile(iconPath, path + "/" + basename)
+        if thumbnail:
+            basename = os.path.basename(thumbnail)
+            shutil.copyfile(thumbnail, self.path() + "/" + basename)
 
     def currentLoadSchema(self):
         """

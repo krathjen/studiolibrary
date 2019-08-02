@@ -19,27 +19,28 @@ try:
     import mutils
     import mutils.gui
     import maya.cmds
-    # Wrapping the following constant for convenience.
-    # This also used in the readme.md
-    PasteOption = mutils.PasteOption
 except ImportError as error:
     print(error)
 
 
-__all__ = [
-    "AnimItem",
-]
-
 logger = logging.getLogger(__name__)
 
-DIRNAME = os.path.dirname(__file__)
+
+def save(path, *args, **kwargs):
+    """Convenience function for saving an AnimItem."""
+    AnimItem(path).save(*args, **kwargs)
+
+
+def load(path, *args, **kwargs):
+    """Convenience function for loading an AnimItem."""
+    AnimItem(path).load(*args, **kwargs)
 
 
 class AnimItem(baseitem.BaseItem):
 
     Name = "Animation"
     Extension = ".anim"
-    IconPath = os.path.join(DIRNAME, "icons", "animation.png")
+    IconPath = os.path.join(os.path.dirname(__file__), "icons", "animation.png")
     TransferClass = mutils.Animation
 
     def startFrame(self):
@@ -111,19 +112,19 @@ class AnimItem(baseitem.BaseItem):
 
         return schema
 
-    def loadValidator(self, **values):
+    def loadValidator(self, **kwargs):
         """
         Triggered when the user changes options.
         
         This method is not yet used. It will be used to change the state of 
         the options widget. For example the help image.
         
-        :type values: list[dict]
+        :type kwargs: dict
         """
-        super(AnimItem, self).loadValidator(**values)
+        super(AnimItem, self).loadValidator(**kwargs)
 
-        option = values.get("option")
-        connect = values.get("connect")
+        option = kwargs.get("option")
+        connect = kwargs.get("connect")
 
         if option == "replace all":
             basename = "replaceCompletely"
@@ -136,53 +137,26 @@ class AnimItem(baseitem.BaseItem):
 
         logger.debug(basename)
 
-        return super(AnimItem, self).loadValidator(**values)
+        return super(AnimItem, self).loadValidator(**kwargs)
 
     @mutils.showWaitCursor
-    def load(
-            self,
-            objects=None,
-            namespaces=None,
-            **options
-    ):
+    def load(self, objects=None, namespaces=None, **kwargs):
         """
         Load the animation for the given objects and options.
                 
         :type objects: list[str]
         :type namespaces: list[str]
-        :type options: dict
+        :type kwargs: dict
         """
         logger.info(u'Loading: {0}'.format(self.path()))
-
-        objects = objects or []
-
-        source = options.get("source")
-        option = options.get("option")
-        connect = options.get("connect")
-        currentTime = options.get("currentTime")
-
-        if option.lower() == "replace all":
-            option = "replaceCompletely"
-
-        if source and source != [0, 0]:
-            sourceStart, sourceEnd = source
-        else:
-            sourceStart, sourceEnd = (None, None)
-
-        if sourceStart is None:
-            sourceStart = self.startFrame()
-
-        if sourceEnd is None:
-            sourceEnd = self.endFrame()
 
         self.transferObject().load(
             objects=objects,
             namespaces=namespaces,
-            currentTime=currentTime,
-            connect=connect,
-            option=option,
-            startFrame=None,
-            sourceTime=(sourceStart, sourceEnd)
+            currentTime=kwargs.get("currentTime"),
+            connect=kwargs.get("connect"),
+            option=kwargs.get("option"),
+            sourceTime=kwargs.get("source"),
         )
 
         logger.info(u'Loaded: {0}'.format(self.path()))
@@ -249,7 +223,8 @@ class AnimItem(baseitem.BaseItem):
             {
                 "name": "folder",
                 "type": "path",
-                "layout": "vertical"
+                "layout": "vertical",
+                "visible": False,
             },
             {
                 "name": "name",
@@ -313,25 +288,24 @@ class AnimItem(baseitem.BaseItem):
             },
         ]
 
-    def write(self, path, objects, iconPath="", sequencePath="", **options):
+    def save(self, objects, thumbnail="", sequencePath="", **kwargs):
         """
-        Write the animation on the given objects to the given path.
+        Save the animation on the given objects to the item path.
         
         :type objects: list[str]
-        :type path: str
-        :type iconPath: str
+        :type thumbnail: str
         :type sequencePath: str
         """
-        super(AnimItem, self).write(path, objects, iconPath, **options)
+        super(AnimItem, self).save(objects, thumbnail, **kwargs)
 
         # Save the animation to the given path location on disc
         mutils.saveAnim(
             objects,
-            path,
-            time=options.get("frameRange"),
-            fileType=options.get("fileType"),
-            iconPath=iconPath,
-            metadata={"description": options.get("comment", "")},
+            self.path(),
+            time=kwargs.get("frameRange"),
+            fileType=kwargs.get("fileType"),
+            iconPath=thumbnail,
+            metadata={"description": kwargs.get("comment", "")},
             sequencePath=sequencePath,
-            bakeConnected=options.get("bake")
+            bakeConnected=kwargs.get("bake")
         )

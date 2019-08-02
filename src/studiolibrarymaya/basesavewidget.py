@@ -27,9 +27,6 @@ try:
 except ImportError as error:
     print(error)
 
-__all__ = [
-    "BaseSaveWidget",
-]
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +50,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self._item = None
         self._scriptJob = None
         self._formWidget = None
-        self._focusWidget = None
-        self._libraryWindow = None
-        self._sequencePath = None
 
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
@@ -238,7 +232,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :type path: str
         """
-        self._formWidget.setValue("folder", path)
+        self.formWidget().setValue("folder", path)
 
     def folderPath(self):
         """
@@ -246,12 +240,12 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: str
         """
-        return self._formWidget.value("folder")
+        return self.formWidget().value("folder")
 
     def selectionChanged(self):
         """Triggered when the Maya selection changes."""
-        if self._formWidget:
-            self._formWidget.validate()
+        if self.formWidget():
+            self.formWidget().validate()
 
     def showByFrameDialog(self):
         """Show the by frame dialog."""
@@ -260,7 +254,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
                'to a number greater than 1. For example if the "by frame" ' \
                'is set to 2 it will playblast every second frame.'
 
-        options = self._formWidget.values()
+        options = self.formWidget().values()
         byFrame = options.get("byFrame", 1)
         startFrame, endFrame = options.get("frameRange", [None, None])
 
@@ -322,7 +316,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def thumbnailCapture(self, show=False):
         """Capture a playblast and save it to the temp thumbnail path."""
-        options = self._formWidget.values()
+        options = self.formWidget().values()
         startFrame, endFrame = options.get("frameRange", [None, None])
         step = options.get("byFrame", 1)
 
@@ -376,14 +370,11 @@ class BaseSaveWidget(QtWidgets.QWidget):
     def accept(self):
         """Triggered when the user clicks the save button."""
         try:
-            options = self._formWidget.values()
-            folder = options.get("folder")
+            name = self.formWidget().value("name")
+            folder = self.formWidget().value("folder")
 
-            options = self._formWidget.values()
-            name = options.get("name")
-
-            if self._formWidget.hasErrors():
-                raise Exception("\n".join(self._formWidget.errors()))
+            if self.formWidget().hasErrors():
+                raise Exception("\n".join(self.formWidget().errors()))
 
             objects = maya.cmds.ls(selection=True) or []
 
@@ -403,37 +394,35 @@ class BaseSaveWidget(QtWidgets.QWidget):
                     return
 
             path = folder + "/" + name
-            iconPath = self.ui.thumbnailButton.firstFrame()
+            thumbnail = self.ui.thumbnailButton.firstFrame()
 
-            self.save(
-                objects,
-                path=path,
-                iconPath=iconPath,
-            )
+            self.save(path=path, objects=objects, thumbnail=thumbnail)
 
         except Exception as e:
-            title = "Error while saving"
-            studiolibrary.widgets.MessageBox.critical(self.libraryWindow(), title, str(e))
+            studiolibrary.widgets.MessageBox.critical(
+                self.libraryWindow(),
+                "Error while saving",
+                str(e),
+            )
             raise
 
-    def save(self, objects, path, iconPath):
+    def save(self, path, objects, thumbnail):
         """
         Save the item with the given objects to the given disc location path.
 
-        :type objects: list[str]
         :type path: str
-        :type iconPath: str
+        :type objects: list[str]
+        :type thumbnail: str
         """
-        item = self.item()
-
-        options = self._formWidget.values()
+        kwargs = self.formWidget().values()
         sequencePath = self.ui.thumbnailButton.dirname()
 
-        item.save(
-            path,
-            objects,
-            iconPath=iconPath,
+        item = self.item()
+        item.setPath(path)
+        item.safeSave(
+            objects=objects,
+            thumbnail=thumbnail,
             sequencePath=sequencePath,
-            **options
+            **kwargs
         )
         self.close()

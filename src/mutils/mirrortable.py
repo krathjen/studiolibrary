@@ -663,13 +663,11 @@ class MirrorTable(mutils.TransferObject):
             yield srcNode.name(), dstName, mirrorAxis
 
     def rightToLeft(self):
-        """
-        """
+        """"""
         self.load(option=MirrorOption.RightToLeft)
 
     def leftToRight(self):
-        """
-        """
+        """"""
         self.load(option=MirrorOption.LeftToRight)
 
     @mutils.timing
@@ -693,6 +691,16 @@ class MirrorTable(mutils.TransferObject):
         :type keysOption: None or KeysOption.SelectedRange
         :type time: None or list[int]
         """
+        if option and not isinstance(option, int):
+            if option.lower() == "swap":
+                option = 0
+            elif option.lower() == "left to right":
+                option = 1
+            elif option.lower() == "right to left":
+                option = 2
+            else:
+                raise ValueError('Invalid load option=' + str(option))
+
         self.validate(namespaces=namespaces)
 
         results = {}

@@ -261,14 +261,23 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return []
 
-    def loadValidator(self, **options):
+    def loadValidator(self, **kwargs):
         """
         Validate the current load options.
         
-        :type options: dict
+        :type kwargs: dict
         :rtype: list[dict]
         """
         return []
+
+    def load(self, *args, **kwargs):
+        """
+        Reimplement this method for loading item data.
+
+        :type args: list
+        :type kwargs: dict
+        """
+        raise NotImplementedError("The load method has not been implemented!")
 
     def id(self):
         """
@@ -283,7 +292,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         A convenience method for showing the toast widget with the given text.
 
         :type text: str
-        :rtype: None
         """
         if self.libraryWindow():
             self.libraryWindow().showToastMessage(text)
@@ -397,8 +405,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         The given menu is shown as a submenu of the main context menu.
 
         :type menu: QtWidgets.QMenu
-        :type items: list[LibraryItem]
-        :rtype: None
+        :type items: list[LibraryItem] or None
         """
         action = QtWidgets.QAction("Rename", menu)
         action.triggered.connect(self.showRenameDialog)
@@ -532,11 +539,19 @@ class LibraryItem(studiolibrary.widgets.Item):
 
     def path(self):
         """
-        Return the path for the item.
+        Get the path for the item.
 
         :rtype: str
         """
         return self._path
+
+    def setPath(self, path):
+        """
+        Set the path for the item.
+
+        :rtype: str
+        """
+        self._path = path
 
     def setMetadata(self, metadata):
         """
@@ -594,12 +609,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         if self.library():
             self.library().saveItemData([self])
 
-    def load(self, *args, **kwargs):
-        """Reimplement this method for loading any item data."""
-        logger.debug(u'Loading "{0}"'.format(self.name()))
-        logger.debug(u'Loading kwargs {0}'.format(kwargs))
-        LibraryItem.loaded.emit(self)
-
     def saveSchema(self):
         """
         Get the schema used for saving the item.
@@ -618,50 +627,51 @@ class LibraryItem(studiolibrary.widgets.Item):
         return []
 
     @studioqt.showWaitCursor
-    def save(self, path=None, *args, **kwargs):
+    def safeSave(self, *args, **kwargs):
         """
-        Submit the item for saving.
-
-        :type path: str or None
+        Safe save the item.
         """
-        if path:
-            path = studiolibrary.normPath(path)
+        dst = self.path()
 
-        if path and not path.endswith(self.Extension):
-            path += self.Extension
+        if dst and not dst.endswith(self.Extension):
+            dst += self.Extension
 
-        self._path = path
+        self.setPath(dst)
 
-        logger.debug(u'Item Saving: {0}'.format(path))
+        logger.debug(u'Item Saving: {0}'.format(dst))
         self.saving.emit(self)
 
-        if os.path.exists(path):
+        if os.path.exists(dst):
             if self._ignoreExistsDialog:
                 self._moveToTrash()
             else:
                 self.showAlreadyExistsDialog()
 
-        tempPath = studiolibrary.createTempPath(self.__class__.__name__)
+        tmp = studiolibrary.createTempPath(self.__class__.__name__)
 
-        self.write(tempPath, *args, **kwargs)
+        self.setPath(tmp)
 
-        shutil.move(tempPath, path)
+        self.save(*args, **kwargs)
 
+        shutil.move(tmp, dst)
+
+        self.setPath(dst)
         self.syncItemData()
 
         if self.libraryWindow():
             self.libraryWindow().selectItems([self])
 
         self.saved.emit(self)
-        logger.debug(u'Item Saved: {0}'.format(path))
+        logger.debug(u'Item Saved: {0}'.format(dst))
 
-    def write(self, path, *args, **kwargs):
+    def save(self, *args, **kwargs):
         """
-        Write the item io data to the given path.
+        Save the item io data to the given path.
 
-        :type path: str
+        :type args: list
+        :type kwargs: dict
         """
-        raise NotImplementedError("The write method has not been implemented!")
+        raise NotImplementedError("The save method has not been implemented!")
 
     # -----------------------------------------------------------------
     # Support for copy and rename
@@ -813,7 +823,7 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         title = "Item already exists"
         text = 'Would you like to move the existing item "{}" to the trash?'
-        text = text.format(self.name())
+        text = text.format(os.path.basename(self.path()))
 
         buttons = QtWidgets.QMessageBox.Yes | \
                   QtWidgets.QMessageBox.Cancel

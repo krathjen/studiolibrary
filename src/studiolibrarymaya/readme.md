@@ -1,17 +1,8 @@
 # Studio Library Items
 
 
-## Items
 
-* poseitem
-* animitem
-* setsItem
-* mirroritem
-
-
-## Examples
-
-### Pose Item Example
+### Pose Item
 
 Saving and loading a pose items
 
@@ -23,15 +14,13 @@ objects = maya.cmds.ls(selection=True) or []
 namespaces = []
 
 # Saving a pose item
-item = poseitem.PoseItem(path)
-item.save(objects=objects)
+poseitem.save(path, objects=objects)
 
 # Loading a pose item
-item = poseitem.PoseItem(path)
-item.load(objects=objects, namespaces=namespaces, key=True, mirror=False)
+poseitem.load(path, objects=objects, namespaces=namespaces, key=True, mirror=False)
 ```
 
-### Animation Item Example
+### Animation Item
 
 Saving and loading animation items
 
@@ -40,20 +29,22 @@ from studiolibrarymaya import animitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.anim"
 objects = maya.cmds.ls(selection=True) or []
-option = animitem.PasteOption.ReplaceCompletely
-namespaces = []
 
 # Saving an animation item
-item = animitem.AnimItem(path)
-item.save(objects=objects, startFrame=0, endFrame=200, bakeConnected=False)
+animitem.save(path, objects=objects, startFrame=0, endFrame=200, bakeConnected=False)
 
 # Loading an animation item
-item = animitem.AnimItem(path)
-item.load(objects=objects, namespaces=namespaces,
-            option=option, connect=False, currentTime=False)
+animitem.load(path, objects=objects, option="replace all", connect=False, currentTime=False)
 ```
 
-### Mirror Table Item Example
+Loading an animation to multiple namespaces
+
+```python
+from studiolibrarymaya import animitem
+animitem.load(path, namespaces=["character1", "character2"], option="replace all")
+```
+
+### Mirror Table Item
 
 Saving and loading mirror tables
 
@@ -62,20 +53,15 @@ from studiolibrarymaya import mirroritem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.mirror"
 objects = maya.cmds.ls(selection=True) or []
-option = mirroritem.MirrorOption.Swap
-namespaces = []
 
 # Saving a mirror table item
-item = mirroritem.MirrorItem(path)
-item.save(objects=objects, leftSide="Lf", rightSide="Rf")
+mirroritem.save(path, objects=objects, leftSide="Lf", rightSide="Rf")
 
 # Loading a mirror table item
-item = mirroritem.MirrorItem(path)
-item.load(objects=objects, namespaces=namespaces,
-            option=option, animation=True, time=None)
+mirroritem.load(path, objects=objects, namespaces=[], option="swap", animation=True, time=None)
 ```
 
-### Selection Set Item Example
+### Selection Set Item
 
 Saving and loading selection sets
 
@@ -84,13 +70,10 @@ from studiolibrarymaya import setsitem
 
 path = "/AnimLibrary/Characters/Malcolm/malcolm.set"
 objects = maya.cmds.ls(selection=True) or []
-namespaces = []
 
 # Saving a selection sets item
-item = setsitem.SetsItem(path)
-item.save(objects=objects)
+setsitem.save(path, objects=objects)
 
 # Loading a selection sets item
-item = setsitem.SetsItem(path)
-item.load(objects=objects, namespaces=namespaces)
+setsitem.load(path, objects=objects, namespaces=[])
 ```

@@ -28,9 +28,6 @@ try:
 except ImportError as error:
     print(error)
 
-__all__ = [
-    "BaseLoadWidget",
-]
 
 logger = logging.getLogger(__name__)
 
@@ -45,16 +42,15 @@ class BaseLoadWidget(QtWidgets.QWidget):
         :type parent: QtWidgets.QWidget or None
         """
         QtWidgets.QWidget.__init__(self, parent)
+
         self.setObjectName("studioLibraryBaseLoadWidget")
         self.setWindowTitle("Load Item")
 
         self.loadUi()
 
         self._item = item
-        self._iconPath = ""
         self._scriptJob = None
         self._formWidget = None
-        self._infoFormWidget = None
 
         self.ui.titleLabel.setText(item.Name)
         self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
@@ -82,6 +78,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._formWidget.setSchema(item.loadSchema())
         self._formWidget.setValidator(item.loadValidator)
         self._formWidget.validate()
+
         self.ui.formFrame.layout().addWidget(self._formWidget)
 
         try:
@@ -108,6 +105,14 @@ class BaseLoadWidget(QtWidgets.QWidget):
     def loadUi(self):
         """Convenience method for loading the .ui file."""
         studioqt.loadUi(self, cls=BaseLoadWidget)
+
+    def formWidget(self):
+        """
+        Get the form widget instance.
+
+        :rtype: studiolibrary.widgets.formwidget.FormWidget
+        """
+        return self._formWidget
 
     def setCustomWidget(self, widget):
         """Convenience method for adding a custom widget when loading."""
@@ -149,11 +154,8 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """Overriding this method to disable the script job when closed."""
         self.setScriptJobEnabled(False)
 
-        if self._formWidget:
-            self._formWidget.savePersistentValues()
-
-        if self._infoFormWidget:
-            self._infoFormWidget.savePersistentValues()
+        if self.formWidget():
+            self.formWidget().savePersistentValues()
 
         QtWidgets.QWidget.close(self)
 
@@ -183,7 +185,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
     def selectionChanged(self):
         """Triggered when the users Maya selection has changed."""
-        self._formWidget.validate()
+        self.formWidget().validate()
 
     def accept(self):
         """Called when the user clicks the apply button."""

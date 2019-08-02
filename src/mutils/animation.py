@@ -703,19 +703,25 @@ class Animation(mutils.Pose):
         :type objects: list[str]
         :type namespaces: list[str]
         :type startFrame: int
-        :type sourceTime: (int, int)
+        :type sourceTime: (int, int) or None
         :type attrs: list[str]
-        :type option: PasteOption
+        :type option: PasteOption or None
         :type connect: bool
         :type mirrorTable: mutils.MirrorTable
         :type currentTime: bool or None
         """
         connect = bool(connect)  # Make false if connect is None
 
-        self.validate(namespaces=namespaces)
+        if not sourceTime:
+            sourceTime = (self.startFrame(), self.endFrame())
+
+        if option and option.lower() == "replace all":
+            option = "replaceCompletely"
 
         if option is None or option == PasteOption.ReplaceAll:
             option = PasteOption.ReplaceCompletely
+
+        self.validate(namespaces=namespaces)
 
         objects = objects or []
 

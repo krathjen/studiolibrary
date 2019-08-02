@@ -27,16 +27,17 @@ except ImportError as error:
     print(error)
 
 
-__all__ = [
-    "PoseItem",
-    "PoseLoadWidget"
-]
-
-
 logger = logging.getLogger(__name__)
 
 
-DIRNAME = os.path.dirname(__file__)
+def save(path, *args, **kwargs):
+    """Convenience function for saving a PoseItem."""
+    PoseItem(path).save(*args, **kwargs)
+
+
+def load(path, *args, **kwargs):
+    """Convenience function for loading a PoseItem."""
+    PoseItem(path).load(*args, **kwargs)
 
 
 class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
@@ -130,7 +131,7 @@ class PoseItem(baseitem.BaseItem):
 
     Name = "Pose"
     Extension = ".pose"
-    IconPath = os.path.join(DIRNAME, "icons", "pose.png")
+    IconPath = os.path.join(os.path.dirname(__file__), "icons", "pose.png")
     LoadWidgetClass = PoseLoadWidget
     TransferClass = mutils.Pose
     TransferBasename = "pose.json"
@@ -464,20 +465,19 @@ class PoseItem(baseitem.BaseItem):
 
         logger.debug(u'Loaded: {0}'.format(self.path()))
 
-    def write(self, path, objects, iconPath="", **options):
+    def save(self, objects, *args, **kwargs):
         """
-        Write all the given object data to the given path on disc.
+        Save all the given object data to the item path on disc.
 
-        :type path: str
         :type objects: list[str]
-        :type iconPath: str
-        :type options: dict
+        :type args: list
+        :type kwargs: dict
         """
-        super(PoseItem, self).write(path, objects, iconPath, **options)
+        super(PoseItem, self).save(objects, *args, **kwargs)
 
         # Save the pose to the temp location
         mutils.savePose(
-            path + "/pose.json",
+            self.path() + "/pose.json",
             objects,
-            metadata={"description": options.get("comment", "")}
+            metadata={"description": kwargs.get("comment", "")}
         )

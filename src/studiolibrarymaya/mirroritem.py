@@ -26,14 +26,21 @@ except ImportError as error:
 logger = logging.getLogger(__name__)
 
 
-DIRNAME = os.path.dirname(__file__)
+def save(path, *args, **kwargs):
+    """Convenience function for saving a MirrorItem."""
+    MirrorItem(path).save(*args, **kwargs)
+
+
+def load(path, *args, **kwargs):
+    """Convenience function for loading a MirrorItem."""
+    MirrorItem(path).load(*args, **kwargs)
 
 
 class MirrorItem(baseitem.BaseItem):
 
     Name = "Mirror Table"
     Extension = ".mirror"
-    IconPath = os.path.join(DIRNAME, "icons", "mirrortable.png")
+    IconPath = os.path.join(os.path.dirname(__file__), "icons", "mirrortable.png")
     TransferClass = mutils.MirrorTable
     TransferBasename = "mirrortable.json"
 
@@ -106,15 +113,6 @@ class MirrorItem(baseitem.BaseItem):
         """
         objects = objects or []
 
-        if option.lower() == "swap":
-            option = 0
-        elif option.lower() == "left to right":
-            option = 1
-        elif option.lower() == "right to left":
-            option = 2
-        else:
-            raise Exception('Wrong value passed to load: option=' + str(option))
-
         self.transferObject().load(
             objects=objects,
             namespaces=namespaces,
@@ -133,7 +131,8 @@ class MirrorItem(baseitem.BaseItem):
             {
                 "name": "folder",
                 "type": "path",
-                "layout": "vertical"
+                "layout": "vertical",
+                "visible": False,
             },
             {
                 "name": "name",
@@ -170,24 +169,24 @@ class MirrorItem(baseitem.BaseItem):
             },
         ]
 
-    def saveValidator(self, **options):
+    def saveValidator(self, **kwargs):
         """
         The save validator is called when an input field has changed.
         
-        :type options: dict 
+        :type kwargs: dict
         :rtype: list[dict] 
         """
-        results = super(MirrorItem, self).saveValidator(**options)
+        results = super(MirrorItem, self).saveValidator(**kwargs)
 
         objects = maya.cmds.ls(selection=True) or []
         if self._validatedObjects != objects:
             self._validatedObjects = objects
 
-            left = options.get("leftSide")
+            left = kwargs.get("leftSide")
             if not left:
                 left = mutils.MirrorTable.findLeftSide(objects)
 
-            right = options.get("rightSide")
+            right = kwargs.get("rightSide")
             if not right:
                 right = mutils.MirrorTable.findRightSide(objects)
 
@@ -219,22 +218,20 @@ class MirrorItem(baseitem.BaseItem):
 
         return results
 
-    def write(self, path, objects, iconPath="", **options):
+    def save(self, objects, **kwargs):
         """
-        Write the given objects to the given path on disc.
+        Save the given objects to the item path on disc.
 
-        :type path: str
         :type objects: list[str]
-        :type iconPath: str
-        :type options: dict
+        :type kwargs: dict
         """
-        super(MirrorItem, self).write(path, objects, iconPath, **options)
+        super(MirrorItem, self).save(objects, **kwargs)
 
         # Save the mirror table to the given location
         mutils.saveMirrorTable(
-            path + "/mirrortable.json",
+            self.path() + "/mirrortable.json",
             objects,
-            metadata={"description": options.get("comment", "")},
-            leftSide=options.get("leftSide"),
-            rightSide=options.get("rightSide"),
+            metadata={"description": kwargs.get("comment", "")},
+            leftSide=kwargs.get("leftSide"),
+            rightSide=kwargs.get("rightSide"),
         )

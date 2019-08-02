@@ -16,14 +16,21 @@ import mutils
 from studiolibrarymaya import baseitem
 
 
-DIRNAME = os.path.dirname(__file__)
+def save(path, *args, **kwargs):
+    """Convenience function for saving a SetsItem."""
+    SetsItem(path).save(*args, **kwargs)
+
+
+def load(path, *args, **kwargs):
+    """Convenience function for loading a SetsItem."""
+    SetsItem(path).load(*args, **kwargs)
 
 
 class SetsItem(baseitem.BaseItem):
 
     Name = "Selection Set"
     Extension = ".set"
-    IconPath = os.path.join(DIRNAME, "icons", "selectionSet.png")
+    IconPath = os.path.join(os.path.dirname(__file__), "icons", "selectionSet.png")
     TransferClass = mutils.SelectionSet
     TransferBasename = "set.json"
 
@@ -38,20 +45,18 @@ class SetsItem(baseitem.BaseItem):
         """
         self.selectContent(namespaces=namespaces)
 
-    def write(self, path, objects, iconPath="", **options):
+    def save(self, objects, **kwargs):
         """
-        Write all the given object data to the given path on disc.
+        Save all the given object data to the item path on disc.
 
-        :type path: str
         :type objects: list[str]
-        :type iconPath: str
-        :type options: dict
+        :type kwargs: dict
         """
-        super(SetsItem, self).write(path, objects, iconPath, **options)
+        super(SetsItem, self).save(objects, **kwargs)
 
         # Save the selection set to the given path
         mutils.saveSelectionSet(
-            path + "/set.json",
+            self.path() + "/set.json",
             objects,
-            metadata={"description": options.get("comment", "")}
+            metadata={"description": kwargs.get("comment", "")}
         )
