@@ -121,7 +121,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         if cls.Name:
 
             icon = QtGui.QIcon(cls.IconPath)
-            callback = partial(cls.showCreateWidget, libraryWindow)
+            callback = partial(cls.showSaveWidget, libraryWindow)
 
             action = QtWidgets.QAction(icon, cls.Name, menu)
             action.triggered.connect(callback)
@@ -129,7 +129,7 @@ class LibraryItem(studiolibrary.widgets.Item):
             return action
 
     @classmethod
-    def showCreateWidget(cls, libraryWindow, item=None):
+    def showSaveWidget(cls, libraryWindow, item=None):
         """
         Show the create widget for creating a new item.
 
@@ -251,7 +251,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         Show the save widget with the input fields populated.
         """
         self._ignoreExistsDialog = True
-        widget = self.showCreateWidget(self.libraryWindow(), item=self)
+        widget = self.showSaveWidget(self.libraryWindow(), item=self)
 
     def loadSchema(self):
         """

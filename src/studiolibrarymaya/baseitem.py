@@ -55,10 +55,10 @@ class BaseItem(studiolibrary.LibraryItem):
     TransferBasename = ""
 
     @classmethod
-    def showCreateWidget(cls, libraryWindow, item=None):
+    def showSaveWidget(cls, libraryWindow, item=None):
         """
         Overriding this method to set the destination location
-        for the create widget.
+        for the save widget.
 
         Triggered when the user clicks the item action in the new item menu.
 

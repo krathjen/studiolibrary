@@ -91,7 +91,7 @@ class FolderItem(studiolibrary.LibraryItem):
         ]
 
     @classmethod
-    def showCreateWidget(cls, libraryWindow):
+    def showSaveWidget(cls, libraryWindow):
         """
         Show the dialog for creating a new folder.
 
@@ -137,7 +137,7 @@ class FolderItem(studiolibrary.LibraryItem):
         """Overriding this method to show the items contained in the folder."""
         self.libraryWindow().selectFolderPath(self.path())
 
-    def write(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
         """Adding this method to avoid NotImpementedError."""
         pass
 
