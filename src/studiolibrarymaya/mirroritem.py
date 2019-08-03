@@ -13,11 +13,10 @@
 import os
 import logging
 
-import mutils
-
 from studiolibrarymaya import baseitem
 
 try:
+    import mutils
     import maya.cmds
 except ImportError as error:
     print(error)

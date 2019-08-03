@@ -40,8 +40,7 @@ class SetsItem(baseitem.BaseItem):
 
     def loadFromCurrentOptions(self):
         """Load the selection set using the settings for this item."""
-        namespaces = self.namespaces()
-        self.load(namespaces=namespaces)
+        self.load(namespaces=self.namespaces())
 
     def load(self, namespaces=None):
         """
