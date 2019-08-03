@@ -484,7 +484,7 @@ class MessageBox(QtWidgets.QDialog):
             geometry.setY(geometry.y() - 50)
             self.move(geometry.topLeft())
 
-    def fadeIn(self, duration=200):
+    def fadeIn(self, duration=400):
         """
         Fade in the dialog using the opacity effect.
 
@@ -495,7 +495,7 @@ class MessageBox(QtWidgets.QDialog):
             self._animation = studioqt.fadeIn(self._frame, duration=duration)
         return self._animation
 
-    def fadeOut(self, duration=200):
+    def fadeOut(self, duration=400):
         """
         Fade out the dialog using the opacity effect.
         
