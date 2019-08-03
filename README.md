@@ -2,7 +2,7 @@
 
 <img src="./src/studiolibrary/resource/icons/header.png" width="252" height="42"/>
 
-A free tool written in python for managing poses and animation in Maya.
+Studio Library is a python-based Qt tool for managing poses and animation in Maya.
 
 
 ## Features 
@@ -14,7 +14,7 @@ A free tool written in python for managing poses and animation in Maya.
 * LMB drag and drop to organize items
 * Insert, merge and replace animation
 * Supports Windows, Linux and OSX
-* Supports Maya 2016, 2017 and 2018
+* Supports Maya 2016, 2017, 2018 and 2019
 
 ## Tutorials
 

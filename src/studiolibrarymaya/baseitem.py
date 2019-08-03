@@ -29,12 +29,8 @@ try:
 except ImportError as error:
     print(error)
 
-__all__ = [
-    "BaseItem",
-]
 
 logger = logging.getLogger(__name__)
-
 
 
 class BaseItemSignals(QtCore.QObject):
@@ -43,6 +39,7 @@ class BaseItemSignals(QtCore.QObject):
 
 
 class BaseItem(studiolibrary.LibraryItem):
+
     _baseItemSignals = BaseItemSignals()
 
     loadValueChanged = _baseItemSignals.loadValueChanged
@@ -64,7 +61,6 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :type libraryWindow: studiolibrary.LibraryWindow
         :type item: studiolibrary.LibraryItem or None
-
         """
         item = item or cls()
         widget = cls.SaveWidgetClass(item=item, parent=libraryWindow)
@@ -145,6 +141,11 @@ class BaseItem(studiolibrary.LibraryItem):
         return self._currentLoadValues.get(name)
 
     def setCurrentLoadValues(self, values):
+        """
+        Set the current field values for the the item.
+
+        :type values: dict
+        """
         self._currentLoadValues = values
 
     def loadSchema(self):
@@ -241,9 +242,14 @@ class BaseItem(studiolibrary.LibraryItem):
             },
         ]
 
-    def saveValidator(self, **options):
+    def saveValidator(self, **kwargs):
+        """
+        Called when a save field has changed.
 
-        self._currentSaveSchema = options
+        :type kwargs: dict
+        :rtype: list[dict]
+        """
+        self._currentSaveSchema = kwargs
 
         selection = maya.cmds.ls(selection=True) or []
 
@@ -265,7 +271,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
     def save(self, objects, thumbnail="", **kwargs):
         """
-        Write all the given object data to the item path on disc.
+        Save all the given object data to the item path on disc.
 
         :type objects: list[str]
         :type thumbnail: str
@@ -283,19 +289,6 @@ class BaseItem(studiolibrary.LibraryItem):
         :rtype: dict
         """
         return self._currentLoadSchema
-
-    def defaultOptions(self):
-        """
-        Triggered when the user changes the options.
-
-        :rtype: dict
-        """
-        options = {}
-
-        for option in self.loadSchema():
-            options[option.get('name')] = option.get('default')
-
-        return options
 
     def transferPath(self):
         """
@@ -352,7 +345,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
     def createSelectionSetsMenu(self, parent=None, enableSelectContent=True):
         """
-        Return a new instance of the selection sets menu.
+        Get a new instance of the selection sets menu.
 
         :type parent: QtWidgets.QWidget
         :type enableSelectContent: bool

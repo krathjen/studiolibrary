@@ -11,7 +11,11 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import mutils
+
+try:
+    import mutils
+except ImportError as error:
+    print(error)
 
 from studiolibrarymaya import baseitem
 

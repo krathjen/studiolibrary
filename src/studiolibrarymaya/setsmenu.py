@@ -22,9 +22,6 @@ import studiolibrary
 from studiolibrarymaya import setsitem
 
 
-__all__ = ["SetsMenu"]
-
-
 logger = logging.getLogger(__name__)
 
 
