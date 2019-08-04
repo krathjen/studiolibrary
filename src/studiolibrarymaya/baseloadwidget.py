@@ -189,4 +189,4 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
     def accept(self):
         """Called when the user clicks the apply button."""
-        self.item().loadFromCurrentOptions()
+        self.item().loadFromCurrentValues()

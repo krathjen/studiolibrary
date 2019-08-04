@@ -38,7 +38,7 @@ class SetsItem(baseitem.BaseItem):
     TransferClass = mutils.SelectionSet
     TransferBasename = "set.json"
 
-    def loadFromCurrentOptions(self):
+    def loadFromCurrentValues(self):
         """Load the selection set using the settings for this item."""
         self.load(namespaces=self.namespaces())
 

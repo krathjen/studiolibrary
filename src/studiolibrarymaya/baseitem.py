@@ -217,7 +217,11 @@ class BaseItem(studiolibrary.LibraryItem):
         ]
 
     def saveSchema(self):
+        """
+        The base save schema.
 
+        :rtype: list[dict]
+        """
         return [
             {
                 "name": "folder",
@@ -236,38 +240,48 @@ class BaseItem(studiolibrary.LibraryItem):
                 "layout": "vertical"
             },
             {
-                "name": "contains",
-                "type": "label",
+                "name": "objects",
+                "type": "objects",
                 "label": {"visible": False}
             },
         ]
 
     def saveValidator(self, **kwargs):
         """
-        Called when a save field has changed.
+        The save validator is called when an input field has changed.
 
         :type kwargs: dict
         :rtype: list[dict]
         """
         self._currentSaveSchema = kwargs
 
+        fields = []
+
+        if not kwargs.get("folder"):
+            fields.append({
+                "name": "folder",
+                "error": "No folder selected. Please select a destination folder.",
+            })
+
+        if not kwargs.get("name"):
+            fields.append({
+                "name": "name",
+                "error": "No name specified. Please set a name before saving.",
+            })
+
         selection = maya.cmds.ls(selection=True) or []
+        msg = ""
+        if not selection:
+            msg = "No objects selected. Please select at least one object."
 
-        if selection:
-            count = len(selection)
-            plural = "s" if count > 1 else ""
-
-            msg = "{0} object{1} selected for saving"
-            msg = msg.format(str(count), plural)
-        else:
-            msg = "Nothing selected for saving"
-
-        return [
-            {
-                "name": "contains",
-                "value": msg
+        fields.append({
+                "name": "objects",
+                "value": selection,
+                "error": msg,
             },
-        ]
+        )
+
+        return fields
 
     def save(self, objects, thumbnail="", **kwargs):
         """
@@ -455,9 +469,9 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: None
         """
-        self.loadFromCurrentOptions()
+        self.loadFromCurrentValues()
 
-    def loadFromCurrentOptions(self):
+    def loadFromCurrentValues(self):
         """Load the mirror table using the settings for this item."""
         kwargs = self._currentLoadValues
         objects = maya.cmds.ls(selection=True) or []
@@ -471,16 +485,14 @@ class BaseItem(studiolibrary.LibraryItem):
             self.showErrorDialog("Item Error", str(error))
             raise
 
-    def load(self, objects=None, **kwargs):
+    def load(self, **kwargs):
         """
         Load the data from the transfer object.
 
-        # :type namespaces: list[str] or None
-        :type objects: list[str] or None
         :rtype: None
         """
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
 
-        self.transferObject().load(objects=objects, **kwargs)
+        self.transferObject().load(**kwargs)
 
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
