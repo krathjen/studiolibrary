@@ -43,14 +43,6 @@ class AnimItem(baseitem.BaseItem):
     IconPath = os.path.join(os.path.dirname(__file__), "icons", "animation.png")
     TransferClass = mutils.Animation
 
-    def startFrame(self):
-        """Return the start frame for the animation."""
-        return self.transferObject().startFrame()
-
-    def endFrame(self):
-        """Return the end frame for the animation."""
-        return self.transferObject().endFrame()
-
     def imageSequencePath(self):
         """
         Return the image sequence location for playing the animation preview.
@@ -67,8 +59,10 @@ class AnimItem(baseitem.BaseItem):
         """
         schema = super(AnimItem, self).loadSchema()
 
-        startFrame = self.startFrame() or 0
-        endFrame = self.endFrame() or 0
+        anim = mutils.Animation.fromPath(self.path())
+
+        startFrame = anim.startFrame() or 0
+        endFrame = anim.endFrame() or 0
 
         value = "{0} - {1}".format(startFrame, endFrame)
         schema.insert(3, {"name": "Range", "value": value})
@@ -97,7 +91,8 @@ class AnimItem(baseitem.BaseItem):
                 "label": {"name": ""}
             },
             {
-                "name": "source",
+                "name": "sourceTime",
+                "title": "source",
                 "type": "range",
                 "default": [startFrame, endFrame],
             },
@@ -116,7 +111,7 @@ class AnimItem(baseitem.BaseItem):
         """
         Triggered when the user changes options.
         
-        This method is not yet used. It will be used to change the state of 
+        This method is not used. It will be used to change the state of
         the options widget. For example the help image.
         
         :type kwargs: dict
@@ -139,27 +134,14 @@ class AnimItem(baseitem.BaseItem):
 
         return super(AnimItem, self).loadValidator(**kwargs)
 
-    @mutils.showWaitCursor
-    def load(self, objects=None, namespaces=None, **kwargs):
+    def load(self, **kwargs):
         """
         Load the animation for the given objects and options.
-                
-        :type objects: list[str]
-        :type namespaces: list[str]
+
         :type kwargs: dict
         """
-        logger.info(u'Loading: {0}'.format(self.path()))
-
-        self.transferObject().load(
-            objects=objects,
-            namespaces=namespaces,
-            currentTime=kwargs.get("currentTime"),
-            connect=kwargs.get("connect"),
-            option=kwargs.get("option"),
-            sourceTime=kwargs.get("source"),
-        )
-
-        logger.info(u'Loaded: {0}'.format(self.path()))
+        anim = mutils.Animation.fromPath(self.path())
+        anim.load(**kwargs)
 
     def saveValidator(self, **kwargs):
         """
@@ -172,35 +154,32 @@ class AnimItem(baseitem.BaseItem):
 
         # Validate the by frame field
         if kwargs.get("byFrame") == '' or kwargs.get("byFrame", 1) < 1:
-            msg = "The by frame value cannot be less than 1!"
             fields.extend([
                 {
                     "name": "byFrame",
-                    "error": msg
+                    "error": "The by frame value cannot be less than 1!"
                 }
             ])
 
         # Validate the frame range field
         start, end = kwargs.get("frameRange", (0, 1))
         if start >= end:
-            msg = "The start frame cannot be greater " \
-                  "than or equal to the end frame!"
             fields.extend([
                 {
                     "name": "frameRange",
-                    "error": msg
+                    "error":  "The start frame cannot be greater "
+                              "than or equal to the end frame!"
                 }
             ])
 
         # Validate the current selection field
-        selection = maya.cmds.ls(selection=True) or []
-        if selection and mutils.getDurationFromNodes(selection) <= 0:
-            msg = "No animation was found on the selected object/s! " \
-                  "Please create a pose instead!"
+        objects = kwargs.get("objects")
+        if objects and mutils.getDurationFromNodes(objects) <= 0:
             fields.extend([
                 {
-                    "name": "contains",
-                    "error": msg,
+                    "name": "objects",
+                    "error": "No animation was found on the selected object/s!"
+                             "Please create a pose instead!",
                 }
             ])
 
@@ -280,8 +259,8 @@ class AnimItem(baseitem.BaseItem):
                 "label": {"visible": False}
             },
             {
-                "name": "contains",
-                "type": "label",
+                "name": "objects",
+                "type": "objects",
                 "label": {
                     "visible": False
                 }
@@ -295,6 +274,7 @@ class AnimItem(baseitem.BaseItem):
         :type objects: list[str]
         :type thumbnail: str
         :type sequencePath: str
+        :type kwargs: dict
         """
         super(AnimItem, self).save(objects, thumbnail, **kwargs)
 

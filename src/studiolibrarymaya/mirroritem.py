@@ -91,34 +91,14 @@ class MirrorItem(baseitem.BaseItem):
 
         return schema
 
-    @mutils.showWaitCursor
-    def load(
-            self,
-            objects=None,
-            namespaces=None,
-            option=None,
-            keysOption=None,
-            time=None,
-            **kwargs
-    ):
+    def load(self, **kwargs):
         """
-        Load the current mirror table to the given objects and options.
+        Load the current mirror table to the given objects.
 
-        :type objects: list[str]
-        :type namespaces: list[str]
-        :type option: MirrorOption
-        :type keysOption: str
-        :type time: list[int]
+        :type kwargs: dict
         """
-        objects = objects or []
-
-        self.transferObject().load(
-            objects=objects,
-            namespaces=namespaces,
-            option=option,
-            keysOption=keysOption,
-            time=time,
-        )
+        mt = mutils.MirrorTable.fromPath(self.path() + "/mirrortable.json")
+        mt.load(**kwargs)
 
     def saveSchema(self):
         """
@@ -160,8 +140,8 @@ class MirrorItem(baseitem.BaseItem):
                 "layout": "vertical"
             },
             {
-                "name": "contains",
-                "type": "label",
+                "name": "objects",
+                "type": "objects",
                 "label": {
                     "visible": False
                 }

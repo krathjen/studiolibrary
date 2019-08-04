@@ -55,7 +55,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
         try:
-            self.selectionChanged()
             self.setScriptJobEnabled(True)
         except NameError as error:
             logger.exception(error)
@@ -157,7 +156,10 @@ class BaseSaveWidget(QtWidgets.QWidget):
             formWidget = studiolibrary.widgets.FormWidget(self)
             formWidget.setSchema(schema)
             formWidget.setValidator(item.saveValidator)
-            formWidget.setValues({"name": item.name()})
+
+            # Used when overriding the item
+            name = os.path.basename(item.path())
+            formWidget.setValues({"name": name})
 
             self.ui.optionsFrame.layout().addWidget(formWidget)
             self._formWidget = formWidget
@@ -370,22 +372,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
     def accept(self):
         """Triggered when the user clicks the save button."""
         try:
-            name = self.formWidget().value("name")
-            folder = self.formWidget().value("folder")
-
             if self.formWidget().hasErrors():
                 raise Exception("\n".join(self.formWidget().errors()))
-
-            objects = maya.cmds.ls(selection=True) or []
-
-            if not folder:
-                raise Exception("No folder selected. Please select a destination folder.")
-
-            if not name:
-                raise Exception("No name specified. Please set a name before saving.")
-
-            if not objects:
-                raise Exception("No objects selected. Please select at least one object.")
 
             hasFrames = self.ui.thumbnailButton.hasFrames()
             if not hasFrames:
@@ -393,10 +381,12 @@ class BaseSaveWidget(QtWidgets.QWidget):
                 if button == QtWidgets.QMessageBox.Cancel:
                     return
 
+            name = self.formWidget().value("name")
+            folder = self.formWidget().value("folder")
             path = folder + "/" + name
             thumbnail = self.ui.thumbnailButton.firstFrame()
 
-            self.save(path=path, objects=objects, thumbnail=thumbnail)
+            self.save(path=path, thumbnail=thumbnail)
 
         except Exception as e:
             studiolibrary.widgets.MessageBox.critical(
@@ -406,12 +396,11 @@ class BaseSaveWidget(QtWidgets.QWidget):
             )
             raise
 
-    def save(self, path, objects, thumbnail):
+    def save(self, path, thumbnail):
         """
         Save the item with the given objects to the given disc location path.
 
         :type path: str
-        :type objects: list[str]
         :type thumbnail: str
         """
         kwargs = self.formWidget().values()
@@ -420,7 +409,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         item = self.item()
         item.setPath(path)
         item.safeSave(
-            objects=objects,
             thumbnail=thumbnail,
             sequencePath=sequencePath,
             **kwargs

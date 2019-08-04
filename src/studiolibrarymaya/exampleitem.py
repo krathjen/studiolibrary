@@ -91,4 +91,4 @@ class ExampleItem(baseitem.BaseItem):
         :type kwargs: dict
         """
         logger.info("Save %s %s", self.path(), kwargs)
-        raise NotImplementedError("Saving is not implemented!\n" + str(kwargs))
+        raise NotImplementedError("The save method is not implemented!")
