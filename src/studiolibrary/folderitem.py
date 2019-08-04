@@ -111,7 +111,7 @@ class FolderItem(studiolibrary.LibraryItem):
             path = os.path.join(path, name)
 
             item = cls(path, libraryWindow=libraryWindow)
-            item.save(path)
+            item.safeSave()
 
             if libraryWindow:
                 libraryWindow.refresh()

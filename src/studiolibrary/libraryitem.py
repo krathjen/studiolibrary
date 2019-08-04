@@ -551,7 +551,7 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :rtype: str
         """
-        self._path = path
+        self._path = studiolibrary.normPath(path)
 
     def setMetadata(self, metadata):
         """

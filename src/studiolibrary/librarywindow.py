@@ -1514,7 +1514,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
             for item in items:
 
-                path = dst + "/" + item.name()
+                path = dst + "/" + os.path.basename(item.path())
 
                 if force:
                     path = studiolibrary.generateUniquePath(path)
