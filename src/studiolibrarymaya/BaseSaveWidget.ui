@@ -262,7 +262,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../icons/selectionSet2.png</normaloff>../icons/selectionSet2.png</iconset>
+          <normaloff>icons/selectionSet2.png</normaloff>icons/selectionSet2.png</iconset>
         </property>
         <property name="iconSize">
          <size>
