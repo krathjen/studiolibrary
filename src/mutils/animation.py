@@ -710,6 +710,8 @@ class Animation(mutils.Pose):
         :type mirrorTable: mutils.MirrorTable
         :type currentTime: bool or None
         """
+        logger.info(u'Loading: {0}'.format(self.path()))
+
         connect = bool(connect)  # Make false if connect is None
 
         if not sourceTime:
@@ -802,3 +804,5 @@ class Animation(mutils.Pose):
 
             # Return the focus to the Maya window
             maya.cmds.setFocus("MayaWindow")
+
+        logger.info(u'Loaded: {0}'.format(self.path()))
