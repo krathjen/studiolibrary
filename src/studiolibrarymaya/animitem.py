@@ -53,7 +53,7 @@ class AnimItem(baseitem.BaseItem):
 
     def loadSchema(self):
         """
-        Get schema used to load the anim item.
+        Get schema used to load the animation item.
 
         :rtype: list[dict]
         """
@@ -107,33 +107,6 @@ class AnimItem(baseitem.BaseItem):
 
         return schema
 
-    def loadValidator(self, **kwargs):
-        """
-        Triggered when the user changes options.
-        
-        This method is not used. It will be used to change the state of
-        the options widget. For example the help image.
-        
-        :type kwargs: dict
-        """
-        super(AnimItem, self).loadValidator(**kwargs)
-
-        option = kwargs.get("option")
-        connect = kwargs.get("connect")
-
-        if option == "replace all":
-            basename = "replaceCompletely"
-            connect = False
-        else:
-            basename = option
-
-        if connect and basename != "replaceCompletely":
-            basename += "Connect"
-
-        logger.debug(basename)
-
-        return super(AnimItem, self).loadValidator(**kwargs)
-
     def load(self, **kwargs):
         """
         Load the animation for the given objects and options.
@@ -143,52 +116,10 @@ class AnimItem(baseitem.BaseItem):
         anim = mutils.Animation.fromPath(self.path())
         anim.load(**kwargs)
 
-    def saveValidator(self, **kwargs):
-        """
-        The save validator is called when an input field has changed.
-
-        :type kwargs: dict
-        :rtype: list[dict]
-        """
-        fields = super(AnimItem, self).saveValidator(**kwargs)
-
-        # Validate the by frame field
-        if kwargs.get("byFrame") == '' or kwargs.get("byFrame", 1) < 1:
-            fields.extend([
-                {
-                    "name": "byFrame",
-                    "error": "The by frame value cannot be less than 1!"
-                }
-            ])
-
-        # Validate the frame range field
-        start, end = kwargs.get("frameRange", (0, 1))
-        if start >= end:
-            fields.extend([
-                {
-                    "name": "frameRange",
-                    "error":  "The start frame cannot be greater "
-                              "than or equal to the end frame!"
-                }
-            ])
-
-        # Validate the current selection field
-        objects = kwargs.get("objects")
-        if objects and mutils.getDurationFromNodes(objects) <= 0:
-            fields.extend([
-                {
-                    "name": "objects",
-                    "error": "No animation was found on the selected object/s!"
-                             "Please create a pose instead!",
-                }
-            ])
-
-        return fields
-
     def saveSchema(self):
         """
-        Get the anim save schema.
-        
+        Get the schema for saving an animation item.
+
         :rtype: list[dict]
         """
         start, end = (1, 100)
@@ -267,9 +198,51 @@ class AnimItem(baseitem.BaseItem):
             },
         ]
 
+    def saveValidator(self, **kwargs):
+        """
+        The save validator is called when an input field has changed.
+
+        :type kwargs: dict
+        :rtype: list[dict]
+        """
+        fields = super(AnimItem, self).saveValidator(**kwargs)
+
+        # Validate the by frame field
+        if kwargs.get("byFrame") == '' or kwargs.get("byFrame", 1) < 1:
+            fields.extend([
+                {
+                    "name": "byFrame",
+                    "error": "The by frame value cannot be less than 1!"
+                }
+            ])
+
+        # Validate the frame range field
+        start, end = kwargs.get("frameRange", (0, 1))
+        if start >= end:
+            fields.extend([
+                {
+                    "name": "frameRange",
+                    "error":  "The start frame cannot be greater "
+                              "than or equal to the end frame!"
+                }
+            ])
+
+        # Validate the current selection field
+        objects = kwargs.get("objects")
+        if objects and mutils.getDurationFromNodes(objects) <= 0:
+            fields.extend([
+                {
+                    "name": "objects",
+                    "error": "No animation was found on the selected object/s!"
+                             "Please create a pose instead!",
+                }
+            ])
+
+        return fields
+
     def save(self, objects, thumbnail="", sequencePath="", **kwargs):
         """
-        Save the animation on the given objects to the item path.
+        Save the animation from the given objects to the item path.
         
         :type objects: list[str]
         :type thumbnail: str

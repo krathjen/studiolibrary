@@ -30,7 +30,7 @@ class ExampleItem(baseitem.BaseItem):
 
     def loadSchema(self, **kwargs):
         """
-        Get the schema used to load the item.
+        Get the schema used for loading the example item.
 
         :rtype: list[dict]
         """
@@ -47,21 +47,21 @@ class ExampleItem(baseitem.BaseItem):
 
     def load(self, **kwargs):
         """
-        Load the item data from disc.
+        The load method is called with the user values from the load schema.
 
         :type kwargs: dict
         """
-        logger.info("Load %s %s", self.path(), kwargs)
-        raise NotImplementedError("Load is not implemented!\n" + str(kwargs))
+        logger.info("Loading %s %s", self.path(), kwargs)
+        raise NotImplementedError("The load method is not implemented!")
 
     def saveSchema(self, **kwargs):
         """
-        Get the schema used for saving the item.
+        Get the schema used for saving the example item.
 
         :rtype: list[dict]
         """
         return [
-            # The name field and the folder field are both required by
+            # The 'name' field and the 'folder' field are both required by
             # the BaseItem. How this is handled may change in the future.
             {
                 "name": "folder",
@@ -86,9 +86,9 @@ class ExampleItem(baseitem.BaseItem):
 
     def save(self, **kwargs):
         """
-        Save the item data to disc.
+        The save method is called with the user values from the save schema.
 
         :type kwargs: dict
         """
-        logger.info("Save %s %s", self.path(), kwargs)
+        logger.info("Saving %s %s", self.path(), kwargs)
         raise NotImplementedError("The save method is not implemented!")
