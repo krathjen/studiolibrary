@@ -221,7 +221,7 @@ class FieldWidget(QtWidgets.QFrame):
         elif value is not None:
             self.setDefault(value)
 
-        if value is not None and value != self.value():
+        if value is not None or (value and value != self.value()):
             try:
                 self.setValue(value)
             except TypeError as error:
@@ -541,7 +541,9 @@ class FieldWidget(QtWidgets.QFrame):
 
         self.setProperty("layout", direction)
         self.setProperty('default', self.isDefault())
-        self.setProperty('error', self.hasError())
+
+        if self.data().get("errorVisible", False):
+            self.setProperty('error', self.hasError())
 
         self.setStyleSheet(self.styleSheet())
 
@@ -662,6 +664,46 @@ class LabelFieldWidget(FieldWidget):
         super(LabelFieldWidget, self).setValue(value)
 
 
+class ObjectsFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(ObjectsFieldWidget, self).__init__(*args, **kwargs)
+
+        self._value = []
+
+        widget = Label(self)
+        widget.setAlignment(QtCore.Qt.AlignVCenter)
+        widget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        self.setWidget(widget)
+
+    def value(self):
+        """
+        Get the objects
+
+        :rtype: list[str]
+        """
+        return self._value
+
+    def setValue(self, value):
+        """
+        Set the objects
+
+        :type value: list[str]
+        """
+        if value:
+            count = len(value)
+            plural = "s" if count > 1 else ""
+
+            msg = "{0} object{1} selected for saving"
+            msg = msg.format(str(count), plural)
+        else:
+            msg = "Nothing selected for saving"
+
+        self._value = value
+        self.widget().setText(msg)
+        super(ObjectsFieldWidget, self).setValue(value)
+
+
 class StringFieldWidget(FieldWidget):
 
     def __init__(self, *args, **kwargs):
@@ -685,7 +727,12 @@ class StringFieldWidget(FieldWidget):
         
         :type value: unicode 
         """
-        self.widget().setText(value)
+        self.widget().blockSignals(True)
+        try:
+            self.widget().setText(value)
+        finally:
+            self.widget().blockSignals(False)
+
         super(StringFieldWidget, self).setValue(value)
 
 

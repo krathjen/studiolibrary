@@ -46,6 +46,7 @@ FIELD_WIDGET_REGISTRY = {
     "radio": fieldwidgets.RadioFieldWidget,
     "stringDouble": fieldwidgets.StringDoubleFieldWidget,
     "slider": fieldwidgets.SliderFieldWidget,
+    "objects": fieldwidgets.ObjectsFieldWidget,
     "separator": fieldwidgets.SeparatorFieldWidget,
     "buttonGroup": fieldwidgets.ButtonGroupFieldWidget,
 }
@@ -325,7 +326,10 @@ class FormWidget(QtWidgets.QFrame):
 
     def validate(self, widget=None):
         """Validate the current options using the validator."""
+
         if self._validator:
+
+            logger.debug("Running validator: form.validate(widget=%s)", widget)
 
             values = {}
 
