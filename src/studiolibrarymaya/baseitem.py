@@ -148,7 +148,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type name: str
         :rtype: object
         """
-        return self.currentLoadValues().get(name)
+        return self._currentLoadValues.get(name)
 
     def setCurrentLoadValues(self, values):
         """
@@ -160,7 +160,7 @@ class BaseItem(studiolibrary.LibraryItem):
 
     def loadFromCurrentValues(self):
         """Load the mirror table using the settings for this item."""
-        kwargs = self.currentLoadValues()
+        kwargs = self._currentLoadValues
         objects = maya.cmds.ls(selection=True) or []
 
         try:
