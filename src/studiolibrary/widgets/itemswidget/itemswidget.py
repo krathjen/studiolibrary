@@ -140,7 +140,7 @@ class ItemsWidget(QtWidgets.QWidget):
 
     def setDataset(self, dataset):
         self._dataset = dataset
-        self.setColumnLabels(dataset.Fields)
+        self.setColumnLabels(dataset.fieldNames())
         dataset.searchFinished.connect(self.updateItems)
 
     def dataset(self):

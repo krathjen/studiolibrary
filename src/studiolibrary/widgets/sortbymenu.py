@@ -74,19 +74,24 @@ class SortByMenu(QtWidgets.QMenu):
         action = SeparatorAction("Sort By", self)
         self.addAction(action)
 
-        fields = self.dataset().SortFields
+        fields = self.dataset().fields()
 
         for field in fields:
 
-            action = self.addAction(field.title())
+            if not field.get("sortable"):
+                continue
+
+            name = field.get("name")
+
+            action = self.addAction(name.title())
             action.setCheckable(True)
 
-            if currentField == field:
+            if currentField == name:
                 action.setChecked(True)
             else:
                 action.setChecked(False)
 
-            callback = partial(self.setSortBy, field, currentOrder)
+            callback = partial(self.setSortBy, name, currentOrder)
             action.triggered.connect(callback)
 
         action = SeparatorAction("Sort Order", self)

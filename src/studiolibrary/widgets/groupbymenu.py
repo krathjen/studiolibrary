@@ -84,19 +84,24 @@ class GroupByMenu(QtWidgets.QMenu):
         callback = partial(self.setGroupBy, None, None)
         action.triggered.connect(callback)
 
-        fields = self.dataset().GroupFields
+        fields = self.dataset().fields()
 
         for field in fields:
 
-            action = self.addAction(field.title())
+            if not field.get("groupable"):
+                continue
+
+            name = field.get("name")
+
+            action = self.addAction(name.title())
             action.setCheckable(True)
 
-            if currentField == field:
+            if currentField == name:
                 action.setChecked(True)
             else:
                 action.setChecked(False)
 
-            callback = partial(self.setGroupBy, field, currentOrder)
+            callback = partial(self.setGroupBy, name, currentOrder)
             action.triggered.connect(callback)
 
         action = SeparatorAction("Group Order", self)

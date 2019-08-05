@@ -31,29 +31,46 @@ logger = logging.getLogger(__name__)
 class Library(QtCore.QObject):
 
     Fields = [
-        "icon",
-        "name",
-        "path",
-        "type",
-        "folder",
-        "category",
-        # "modified"
-    ]
-
-    SortFields = [
-        "name",
-        "path",
-        "type",
-        "folder",
-        "category",
-        "modified",
-        "Custom Order",  # legacy case
-    ]
-
-    GroupFields = [
-        "type",
-        "category",
-        # "modified",
+        {
+            "name": "icon",
+            "sortable": False,
+            "groupable": False,
+        },
+        {
+            "name": "name",
+            "sortable": True,
+            "groupable": False,
+        },
+        {
+            "name": "path",
+            "sortable": True,
+            "groupable": False,
+        },
+        {
+            "name": "type",
+            "sortable": True,
+            "groupable": True,
+        },
+        {
+            "name": "folder",
+            "sortable": True,
+            "groupable": False,
+        },
+        {
+            "name": "category",
+            "sortable": True,
+            "groupable": True,
+        },
+        {
+            "name": "modified",
+            "sortable": True,
+            "groupable": False,
+        },
+        {
+            "name": "Custom Order",
+            "sortable": True,
+            "groupable": False,
+        },
     ]
 
     dataChanged = QtCore.Signal()
@@ -163,8 +180,20 @@ class Library(QtCore.QObject):
         return studiolibrary.config.get('recursiveSearchDepth')
 
     def fields(self):
-        """Return all the fields for the library."""
-        return self._fields
+        """
+        Get all the fields for the library.
+
+        :rtype: list[dict]
+        """
+        return self.Fields
+
+    def fieldNames(self):
+        """
+        Get all the field names for the library.
+
+        :rtype: list[str]
+        """
+        return [field["name"] for field in self.fields()]
 
     def path(self):
         """
