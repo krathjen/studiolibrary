@@ -82,10 +82,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type kwargs: dict
         """
         self._transferObject = None
-
         self._currentLoadValues = {}
-        self._currentLoadSchema = []
-        self._currentSaveSchema = []
 
         studiolibrary.LibraryItem.__init__(self, *args, **kwargs)
 
@@ -98,211 +95,29 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         self.loadValueChanged.emit(field, value)
 
-    def loadValidator(self, **values):
+    def namespaces(self):
         """
-        Called when the load fields change.
+        Return the namesapces for this item depending on the namespace option.
 
-        :type values: dict
+        :rtype: list[str] or None
         """
-        namespaces = values.get("namespaces")
-        namespaceOption = values.get("namespaceOption")
+        return self.currentLoadValue("namespaces")
 
-        if namespaceOption == "From file":
-            namespaces = self.transferObject().namespaces()
-        elif namespaceOption == "From selection":
-            namespaces = mutils.namespace.getFromSelection()
-
-        fieldChanged = values.get("fieldChanged")
-        if fieldChanged == "namespaces":
-            values["namespaceOption"] = "Use custom"
-        else:
-            values["namespaces"] = namespaces
-
-        self._currentLoadValues = values
-
-        return [
-            {
-                "name": "namespaces",
-                "value": values.get("namespaces"),
-            },
-            {
-                "name": "namespaceOption",
-                "value": values.get("namespaceOption"),
-            },
-        ]
-
-    def currentLoadValue(self, name):
+    def namespaceOption(self):
         """
-        Get the current field value for the given name.
+        Return the namespace option for this item.
 
-        :type name: str
-        :rtype: object
+        :rtype: NamespaceOption or None
         """
-        return self._currentLoadValues.get(name)
+        return self.currentLoadValue("namespaceOption")
 
-    def setCurrentLoadValues(self, values):
+    def doubleClicked(self):
         """
-        Set the current field values for the the item.
+        This method is called when the user double clicks the item.
 
-        :type values: dict
+        :rtype: None
         """
-        self._currentLoadValues = values
-
-    def loadSchema(self):
-        """
-        Get schema used to load the item.
-
-        :rtype: list[dict]
-        """
-        modified = self.itemData().get("modified")
-        if modified:
-            modified = studiolibrary.timeAgo(modified)
-
-        count = self.transferObject().objectCount()
-        plural = "s" if count > 1 else ""
-        contains = str(count) + " Object" + plural
-
-        return [
-            {
-                "name": "infoGroup",
-                "title": "Info",
-                "type": "group",
-                "order": 1,
-            },
-            {
-                "name": "name",
-                "value": self.name(),
-            },
-            {
-                "name": "owner",
-                "value": self.transferObject().owner(),
-            },
-            {
-                "name": "created",
-                "value": modified,
-            },
-            {
-                "name": "contains",
-                "value": contains,
-            },
-            {
-                "name": "comment",
-                "value": self.transferObject().description() or "No comment",
-            },
-            {
-                "name": "namespaceGroup",
-                "title": "Namespace",
-                "type": "group",
-                "order": 10,
-            },
-            {
-                "name": "namespaceOption",
-                "title": "",
-                "type": "radio",
-                "value": "From selection",
-                "items": ["From file", "From selection", "Use custom"],
-                "persistent": True,
-                "persistentKey": "BaseItem",
-            },
-            {
-                "name": "namespaces",
-                "title": "",
-                "type": "tags",
-                "value": [],
-                "items": mutils.namespace.getAll(),
-                "persistent": True,
-                "label": {"visible": False},
-                "persistentKey": "BaseItem",
-            },
-        ]
-
-    def saveSchema(self):
-        """
-        The base save schema.
-
-        :rtype: list[dict]
-        """
-        return [
-            {
-                "name": "folder",
-                "type": "path",
-                "layout": "vertical",
-                "visible": False,
-            },
-            {
-                "name": "name",
-                "type": "string",
-                "layout": "vertical",
-            },
-            {
-                "name": "comment",
-                "type": "text",
-                "layout": "vertical"
-            },
-            {
-                "name": "objects",
-                "type": "objects",
-                "label": {"visible": False}
-            },
-        ]
-
-    def saveValidator(self, **kwargs):
-        """
-        The save validator is called when an input field has changed.
-
-        :type kwargs: dict
-        :rtype: list[dict]
-        """
-        self._currentSaveSchema = kwargs
-
-        fields = []
-
-        if not kwargs.get("folder"):
-            fields.append({
-                "name": "folder",
-                "error": "No folder selected. Please select a destination folder.",
-            })
-
-        if not kwargs.get("name"):
-            fields.append({
-                "name": "name",
-                "error": "No name specified. Please set a name before saving.",
-            })
-
-        selection = maya.cmds.ls(selection=True) or []
-        msg = ""
-        if not selection:
-            msg = "No objects selected. Please select at least one object."
-
-        fields.append({
-                "name": "objects",
-                "value": selection,
-                "error": msg,
-            },
-        )
-
-        return fields
-
-    def save(self, objects, thumbnail="", **kwargs):
-        """
-        Save all the given object data to the item path on disc.
-
-        :type objects: list[str]
-        :type thumbnail: str
-        :type kwargs: dict
-        """
-        # Copy the icon path to the given path
-        if thumbnail:
-            basename = os.path.basename(thumbnail)
-            shutil.copyfile(thumbnail, self.path() + "/" + basename)
-
-    def currentLoadSchema(self):
-        """
-        Get the current options set by the user.
-
-        :rtype: dict
-        """
-        return self._currentLoadSchema
+        self.loadFromCurrentValues()
 
     def transferPath(self):
         """
@@ -325,6 +140,34 @@ class BaseItem(studiolibrary.LibraryItem):
             path = self.transferPath()
             self._transferObject = self.TransferClass.fromPath(path)
         return self._transferObject
+
+    def currentLoadValue(self, name):
+        """
+        Get the current field value for the given name.
+
+        :type name: str
+        :rtype: object
+        """
+        return self.currentLoadValues().get(name)
+
+    def setCurrentLoadValues(self, values):
+        """
+        Set the current field values for the the item.
+
+        :type values: dict
+        """
+        self._currentLoadValues = values
+
+    def loadFromCurrentValues(self):
+        """Load the mirror table using the settings for this item."""
+        kwargs = self.currentLoadValues()
+        objects = maya.cmds.ls(selection=True) or []
+
+        try:
+            self.load(objects=objects, **kwargs)
+        except Exception as error:
+            self.showErrorDialog("Item Error", str(error))
+            raise
 
     def contextMenu(self, menu, items=None):
         """
@@ -400,90 +243,106 @@ class BaseItem(studiolibrary.LibraryItem):
             self.showErrorDialog("Item Error", str(error))
             raise
 
-    def mirrorTable(self):
+    def loadSchema(self):
         """
-        Return the mirror table object for this item.
+        Get schema used to load the item.
 
-        :rtype: mutils.MirrorTable or None
+        :rtype: list[dict]
         """
-        mirrorTable = None
+        modified = self.itemData().get("modified")
+        if modified:
+            modified = studiolibrary.timeAgo(modified)
 
-        mirrorTablePath = self.mirrorTablePath()
+        count = self.transferObject().objectCount()
+        plural = "s" if count > 1 else ""
+        contains = str(count) + " Object" + plural
 
-        if mirrorTablePath:
+        return [
+            {
+                "name": "infoGroup",
+                "title": "Info",
+                "type": "group",
+                "order": 1,
+            },
+            {
+                "name": "name",
+                "value": self.name(),
+            },
+            {
+                "name": "owner",
+                "value": self.transferObject().owner(),
+            },
+            {
+                "name": "created",
+                "value": modified,
+            },
+            {
+                "name": "contains",
+                "value": contains,
+            },
+            {
+                "name": "comment",
+                "value": self.transferObject().description() or "No comment",
+            },
+            {
+                "name": "namespaceGroup",
+                "title": "Namespace",
+                "type": "group",
+                "order": 10,
+            },
+            {
+                "name": "namespaceOption",
+                "title": "",
+                "type": "radio",
+                "value": "From selection",
+                "items": ["From file", "From selection", "Use custom"],
+                "persistent": True,
+                "persistentKey": "BaseItem",
+            },
+            {
+                "name": "namespaces",
+                "title": "",
+                "type": "tags",
+                "value": [],
+                "items": mutils.namespace.getAll(),
+                "persistent": True,
+                "label": {"visible": False},
+                "persistentKey": "BaseItem",
+            },
+        ]
 
-            path = os.path.join(mirrorTablePath, "mirrortable.json")
-
-            if path:
-                mirrorTable = mutils.MirrorTable.fromPath(path)
-
-        return mirrorTable
-
-    def mirrorTablePath(self):
+    def loadValidator(self, **values):
         """
-        Return the mirror table path for this item.
+        Called when the load fields change.
 
-        :rtype: str or None
+        :type values: dict
         """
-        path = None
-        paths = self.mirrorTablePaths()
+        namespaces = values.get("namespaces")
+        namespaceOption = values.get("namespaceOption")
 
-        if paths:
-            path = paths[0]
+        if namespaceOption == "From file":
+            namespaces = self.transferObject().namespaces()
+        elif namespaceOption == "From selection":
+            namespaces = mutils.namespace.getFromSelection()
 
-        return path
+        fieldChanged = values.get("fieldChanged")
+        if fieldChanged == "namespaces":
+            values["namespaceOption"] = "Use custom"
+        else:
+            values["namespaces"] = namespaces
 
-    def mirrorTablePaths(self):
-        """
-        Return all mirror table paths for this item.
+        self._currentLoadValues = values
 
-        :rtype: list[str]
-        """
-        paths = list(studiolibrary.walkup(
-                self.path(),
-                match=lambda path: path.endswith(".mirror"),
-                depth=10,
-            )
-        )
-        return paths
-
-    def namespaces(self):
-        """
-        Return the namesapces for this item depending on the namespace option.
-
-        :rtype: list[str]
-        """
-        return self.currentLoadValue("namespaces")
-
-    def namespaceOption(self):
-        """
-        Return the namespace option for this item.
-
-        :rtype: NamespaceOption
-        """
-        return self.currentLoadValue("namespaceOption")
-
-    def doubleClicked(self):
-        """
-        This method is called when the user double clicks the item.
-
-        :rtype: None
-        """
-        self.loadFromCurrentValues()
-
-    def loadFromCurrentValues(self):
-        """Load the mirror table using the settings for this item."""
-        kwargs = self._currentLoadValues
-        objects = maya.cmds.ls(selection=True) or []
-
-        try:
-            self.load(
-                objects=objects,
-                **kwargs
-            )
-        except Exception as error:
-            self.showErrorDialog("Item Error", str(error))
-            raise
+        return [
+            {
+                "name": "namespaces",
+                "value": values.get("namespaces"),
+            },
+            {
+                "name": "namespaceOption",
+                "value": values.get("namespaceOption"),
+            },
+        ]
 
     def load(self, **kwargs):
         """
@@ -496,3 +355,81 @@ class BaseItem(studiolibrary.LibraryItem):
         self.transferObject().load(**kwargs)
 
         logger.debug(u'Loading: {0}'.format(self.transferPath()))
+
+    def saveSchema(self):
+        """
+        The base save schema.
+
+        :rtype: list[dict]
+        """
+        return [
+            {
+                "name": "folder",
+                "type": "path",
+                "layout": "vertical",
+                "visible": False,
+            },
+            {
+                "name": "name",
+                "type": "string",
+                "layout": "vertical",
+            },
+            {
+                "name": "comment",
+                "type": "text",
+                "layout": "vertical"
+            },
+            {
+                "name": "objects",
+                "type": "objects",
+                "label": {"visible": False}
+            },
+        ]
+
+    def saveValidator(self, **kwargs):
+        """
+        The save validator is called when an input field has changed.
+
+        :type kwargs: dict
+        :rtype: list[dict]
+        """
+        fields = []
+
+        if not kwargs.get("folder"):
+            fields.append({
+                "name": "folder",
+                "error": "No folder selected. Please select a destination folder.",
+            })
+
+        if not kwargs.get("name"):
+            fields.append({
+                "name": "name",
+                "error": "No name specified. Please set a name before saving.",
+            })
+
+        selection = maya.cmds.ls(selection=True) or []
+        msg = ""
+        if not selection:
+            msg = "No objects selected. Please select at least one object."
+
+        fields.append({
+                "name": "objects",
+                "value": selection,
+                "error": msg,
+            },
+        )
+
+        return fields
+
+    def save(self, objects, thumbnail="", **kwargs):
+        """
+        Save all the given object data to the item path on disc.
+
+        :type objects: list[str]
+        :type thumbnail: str
+        :type kwargs: dict
+        """
+        # Copy the icon path to the given path
+        if thumbnail:
+            basename = os.path.basename(thumbnail)
+            shutil.copyfile(thumbnail, self.path() + "/" + basename)

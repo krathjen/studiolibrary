@@ -13,6 +13,8 @@
 import os
 import logging
 
+import studiolibrary
+
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
@@ -159,38 +161,30 @@ class PoseItem(baseitem.BaseItem):
         """
         return self._batchMode
 
-    def loadValidator(self, **values):
+    def mirrorTable(self):
         """
-        Using the validator to change the state of the mirror option.
+        Get the mirror table object for this item.
 
-        :type values: dict
-        :rtype: list[dict]
+        :rtype: mutils.MirrorTable or None
         """
-        # Ignore the validator while blending
-        if self.isBatchModeEnabled():
-            return None
+        mirrorTable = None
 
-        # Mirror check box
-        mirrorTip = "Cannot find a mirror table!"
-        mirrorTable = self.mirrorTable()
-        if mirrorTable:
-            mirrorTip = "Using mirror table: %s" % mirrorTable.path()
+        mirrorTablePaths = list(studiolibrary.walkup(
+                self.path(),
+                match=lambda path: path.endswith(".mirror"),
+                depth=10,
+            )
+        )
 
-        fields = [
-            {
-                "name": "mirror",
-                "toolTip": mirrorTip,
-                "enabled": mirrorTable is not None,
-            },
-            {
-                "name": "searchAndReplace",
-                "visible": values.get("searchAndReplaceEnabled")
-            },
-        ]
+        if mirrorTablePaths:
+            mirrorTablePath = mirrorTablePaths[0]
 
-        fields.extend(super(PoseItem, self).loadValidator(**values))
+            path = os.path.join(mirrorTablePath, "mirrortable.json")
 
-        return fields
+            if path:
+                mirrorTable = mutils.MirrorTable.fromPath(path)
+
+        return mirrorTable
 
     def mirrorTableSearchAndReplace(self):
         """
@@ -216,6 +210,75 @@ class PoseItem(baseitem.BaseItem):
         :rtype: (str, str)
         """
         return '', ''
+
+    def keyPressEvent(self, event):
+        """
+        Called when a key press event for the item is triggered.
+
+        :type event: QtGui.QEvent
+        """
+        super(PoseItem, self).keyPressEvent(event)
+
+        if not event.isAutoRepeat():
+            if event.key() == QtCore.Qt.Key_M:
+
+                # Toggle the value of the mirror option
+                mirror = self.currentLoadValue("mirror")
+                self.emitLoadValueChanged("mirror", not mirror)
+
+                blend = self.blendValue()
+
+                if self.isBlending():
+                    self.loadFromCurrentValues(
+                        blend=blend,
+                        batchMode=True,
+                        showBlendMessage=True
+                    )
+                else:
+                    self.loadFromCurrentValues(
+                        blend=blend,
+                        refresh=True,
+                        batchMode=False,
+                    )
+
+    def mouseReleaseEvent(self, event):
+        """
+        Triggered when the mouse button is released on this item.
+
+        :type event: QtCore.QMouseEvent
+        """
+        if self.isBlending():
+            self.loadFromCurrentValues(blend=self.blendValue(), refresh=False)
+
+    def doubleClicked(self):
+        """Triggered when the user double clicks the item."""
+        self.loadFromCurrentValues(clearSelection=False)
+
+    def selectionChanged(self):
+        """Triggered when the item is selected or deselected."""
+        self._transferObject = None
+        baseitem.BaseItem.selectionChanged(self)
+
+    def stopBlending(self):
+        """This method is called from the base class to stop blending."""
+        self._options = None
+        baseitem.BaseItem.stopBlending(self)
+
+    def setBlendValue(self, value, load=True):
+        """
+        This method is called from the base class to set the blend amount.
+
+        :type value: float
+        :type load: bool
+        """
+        super(PoseItem, self).setBlendValue(value)
+
+        if load:
+            self.loadFromCurrentValues(
+                blend=value,
+                batchMode=True,
+                showBlendMessage=True
+            )
 
     def loadSchema(self):
         """
@@ -281,74 +344,38 @@ class PoseItem(baseitem.BaseItem):
 
         return schema
 
-    def keyPressEvent(self, event):
+    def loadValidator(self, **values):
         """
-        Called when a key press event for the item is triggered.
-        
-        :type event: QtGui.QEvent
+        Using the validator to change the state of the mirror option.
+
+        :type values: dict
+        :rtype: list[dict]
         """
-        super(PoseItem, self).keyPressEvent(event)
+        # Ignore the validator while blending
+        if self.isBatchModeEnabled():
+            return None
 
-        if not event.isAutoRepeat():
-            if event.key() == QtCore.Qt.Key_M:
+        # Mirror check box
+        mirrorTip = "Cannot find a mirror table!"
+        mirrorTable = self.mirrorTable()
+        if mirrorTable:
+            mirrorTip = "Using mirror table: %s" % mirrorTable.path()
 
-                # Toggle the value of the mirror option
-                mirror = self.currentLoadValue("mirror")
-                self.emitLoadValueChanged("mirror", not mirror)
+        fields = [
+            {
+                "name": "mirror",
+                "toolTip": mirrorTip,
+                "enabled": mirrorTable is not None,
+            },
+            {
+                "name": "searchAndReplace",
+                "visible": values.get("searchAndReplaceEnabled")
+            },
+        ]
 
-                blend = self.blendValue()
+        fields.extend(super(PoseItem, self).loadValidator(**values))
 
-                if self.isBlending():
-                    self.loadFromCurrentValues(
-                        blend=blend,
-                        batchMode=True,
-                        showBlendMessage=True
-                    )
-                else:
-                    self.loadFromCurrentValues(
-                        blend=blend,
-                        refresh=True,
-                        batchMode=False,
-                    )
-
-    def mouseReleaseEvent(self, event):
-        """
-        Triggered when the mouse button is released on this item.
-
-        :type event: QtCore.QMouseEvent
-        """
-        if self.isBlending():
-            self.loadFromCurrentValues(blend=self.blendValue(), refresh=False)
-
-    def doubleClicked(self):
-        """Triggered when the user double clicks the item."""
-        self.loadFromCurrentValues(clearSelection=False)
-
-    def selectionChanged(self):
-        """Triggered when the item is selected or deselected."""
-        self._transferObject = None
-        baseitem.BaseItem.selectionChanged(self)
-
-    def stopBlending(self):
-        """This method is called from the base class to stop blending."""
-        self._options = None
-        baseitem.BaseItem.stopBlending(self)
-
-    def setBlendValue(self, value, load=True):
-        """
-        This method is called from the base class to set the blend amount.
-
-        :type value: float
-        :type load: bool
-        """
-        super(PoseItem, self).setBlendValue(value)
-
-        if load:
-            self.loadFromCurrentValues(
-                blend=value,
-                batchMode=True,
-                showBlendMessage=True
-            )
+        return fields
 
     def loadFromCurrentValues(
         self,
