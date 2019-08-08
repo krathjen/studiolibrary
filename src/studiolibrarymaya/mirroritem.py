@@ -98,7 +98,13 @@ class MirrorItem(baseitem.BaseItem):
         :type kwargs: dict
         """
         mt = mutils.MirrorTable.fromPath(self.path() + "/mirrortable.json")
-        mt.load(**kwargs)
+        mt.load(
+            objects=kwargs.get("objects"),
+            namespaces=kwargs.get("namespaces"),
+            option=kwargs.get("option"),
+            keysOption=kwargs.get("keysOption"),
+            time=kwargs.get("time")
+        )
 
     def saveSchema(self):
         """
