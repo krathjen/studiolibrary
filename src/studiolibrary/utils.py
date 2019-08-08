@@ -255,8 +255,11 @@ def isLatestRelease():
     :rtype: bool
     """
     url = "https://api.github.com/repos/krathjen/studiolibrary/releases/latest"
-    f = urllib.request.urlopen(url)
-    result = json.load(f)
+    try:
+        f = urllib.request.urlopen(url)
+        result = json.load(f)
+    except Exception:
+        return False
 
     if result:
         latestVersion = result.get('tag_name', '0.0.0')
