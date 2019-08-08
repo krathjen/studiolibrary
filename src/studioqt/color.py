@@ -37,12 +37,10 @@ class Color(QtGui.QColor):
         return cls(int(r), int(g), int(b), int(a))
 
     def __eq__(self, other):
-        if other == self:
-            return True
-        elif isinstance(other, Color):
+        if isinstance(other, Color):
             return self.toString() == other.toString()
         else:
-            return False
+            return QtGui.QColor.__eq__(self, other)
 
     def toString(self):
         """
