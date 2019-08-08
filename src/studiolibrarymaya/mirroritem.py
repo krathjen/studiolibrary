@@ -164,19 +164,20 @@ class MirrorItem(baseitem.BaseItem):
         results = super(MirrorItem, self).saveValidator(**kwargs)
 
         objects = maya.cmds.ls(selection=True) or []
-        if self._validatedObjects != objects:
+
+        dirty = kwargs.get("fieldChanged") in ["leftSide", "rightSide"]
+        dirty = dirty or self._validatedObjects != objects
+
+        if dirty:
             self._validatedObjects = objects
 
-            left = kwargs.get("leftSide")
-            if not left:
-                left = mutils.MirrorTable.findLeftSide(objects)
+            leftSide = kwargs.get("leftSide", "")
+            if not leftSide:
+                leftSide = mutils.MirrorTable.findLeftSide(objects)
 
-            right = kwargs.get("rightSide")
-            if not right:
-                right = mutils.MirrorTable.findRightSide(objects)
-
-            leftSide = str(left)
-            rightSide = str(right)
+            rightSide = kwargs.get("rightSide", "")
+            if not rightSide:
+                rightSide = mutils.MirrorTable.findRightSide(objects)
 
             mt = mutils.MirrorTable.fromObjects(
                     [],
