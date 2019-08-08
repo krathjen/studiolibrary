@@ -1211,7 +1211,7 @@ class ButtonGroupFieldWidget(FieldWidget):
         for item in items:
             i += 1
 
-            button = QtWidgets.QPushButton(toTitle(item), self)
+            button = QtWidgets.QPushButton(item, self)
             button.setCheckable(True)
 
             callback = functools.partial(self.setValue, item)

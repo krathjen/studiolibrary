@@ -187,10 +187,13 @@ class FormWidget(QtWidgets.QFrame):
             if persistent:
                 key = self.objectName() or "FormWidget"
                 key = field.get("persistentKey", key)
-
-                values[name] = settings.get(key, {}).get(name)
+                value = settings.get(key, {}).get(name)
             else:
-                values[name] = defaultValues[name]
+                value = defaultValues.get(name)
+
+            if value:
+                values[name] = value
+
 
         self.setValues(values)
 
