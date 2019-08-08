@@ -193,6 +193,8 @@ class ColorPickerWidget(QtWidgets.QFrame):
         :rtype: None
         """
         color = self.currentColor()
+        if color:
+            color = studioqt.Color.fromString(color)
 
         d = QtWidgets.QColorDialog(self)
         d.setCurrentColor(color)

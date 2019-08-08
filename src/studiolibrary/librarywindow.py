@@ -92,7 +92,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
     DPI_ENABLED = studiolibrary.config.get("scaleFactorEnabled", False)
 
-    ICON_COLOR = QtGui.QColor(255, 255, 255, 220)
+    ICON_COLOR = QtGui.QColor(255, 255, 255, 210)
     ICON_BADGE_COLOR = QtGui.QColor(230, 230, 0)
 
     globalSignal = GlobalSignal()
