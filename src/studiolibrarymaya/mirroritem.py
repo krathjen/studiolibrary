@@ -125,6 +125,13 @@ class MirrorItem(baseitem.BaseItem):
                 "layout": "vertical"
             },
             {
+                "name": "mirrorPlane",
+                "type": "buttonGroup",
+                "default": "YZ",
+                "layout": "vertical",
+                "items": ["YZ", "XY", "XZ"],
+            },
+            {
                 "name": "leftSide",
                 "type": "string",
                 "layout": "vertical",
@@ -220,4 +227,5 @@ class MirrorItem(baseitem.BaseItem):
             metadata={"description": kwargs.get("comment", "")},
             leftSide=kwargs.get("leftSide"),
             rightSide=kwargs.get("rightSide"),
+            mirrorPlane=kwargs.get("mirrorPlane"),
         )

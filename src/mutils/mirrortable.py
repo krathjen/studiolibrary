@@ -132,13 +132,16 @@ def saveMirrorTable(path, objects, metadata=None, *args, **kwargs):
 class MirrorTable(mutils.TransferObject):
 
     @classmethod
+    @mutils.timing
+    @mutils.unifyUndo
+    @mutils.showWaitCursor
     @mutils.restoreSelection
     def fromObjects(
         cls,
         objects,
         leftSide=None,
         rightSide=None,
-        mirrorPlane=MirrorPlane.YZ
+        mirrorPlane=None
     ):
         """
         Create a new Mirror Table instance from the given Maya object/controls.
@@ -146,10 +149,23 @@ class MirrorTable(mutils.TransferObject):
         :type objects: list[str]
         :type leftSide: str
         :type rightSide: str
-        :type mirrorPlane: mirrortable.MirrorPlane
+        :type mirrorPlane: mirrortable.MirrorPlane or str
         
         :rtype: MirrorTable
         """
+        mirrorPlane = mirrorPlane or MirrorPlane.YZ
+
+        if isinstance(mirrorPlane, basestring):
+
+            if mirrorPlane.lower() == "yz":
+                mirrorPlane = MirrorPlane.YZ
+
+            elif mirrorPlane.lower() == "xz":
+                mirrorPlane = MirrorPlane.XZ
+
+            elif mirrorPlane.lower() == "xy":
+                mirrorPlane = MirrorPlane.XY
+
         mirrorTable = cls()
         mirrorTable.setMetadata("left", leftSide)
         mirrorTable.setMetadata("right", rightSide)
