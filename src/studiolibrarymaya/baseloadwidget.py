@@ -54,6 +54,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         self.ui.titleLabel.setText(item.Name)
         self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
+        self.ui.editButton.clicked.connect(self.showEditMenu)
 
         # Create the icon group box
         groupBox = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
@@ -101,6 +102,22 @@ class BaseLoadWidget(QtWidgets.QWidget):
         :type value: object
         """
         self._formWidget.setValue(field, value)
+
+    def showEditMenu(self):
+        """
+        Show the edit menu at the current cursor position.
+
+        :rtype: QtWidgets.QAction
+        """
+        menu = QtWidgets.QMenu()
+
+        self.item().contextEditMenu(menu)
+
+        point = QtGui.QCursor.pos()
+        point.setX(point.x() + 3)
+        point.setY(point.y() + 3)
+
+        return menu.exec_(point)
 
     def loadUi(self):
         """Convenience method for loading the .ui file."""
