@@ -294,7 +294,7 @@ class BaseItem(studiolibrary.LibraryItem):
                 "name": "namespaceOption",
                 "title": "",
                 "type": "radio",
-                "value": "From selection",
+                "value": "From file",
                 "items": ["From file", "From selection", "Use custom"],
                 "persistent": True,
                 "persistentKey": "BaseItem",
