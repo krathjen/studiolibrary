@@ -727,11 +727,15 @@ class StringFieldWidget(FieldWidget):
         
         :type value: unicode 
         """
+        pos = self.widget().cursorPosition()
+
         self.widget().blockSignals(True)
         try:
             self.widget().setText(value)
         finally:
             self.widget().blockSignals(False)
+
+        self.widget().setCursorPosition(pos)
 
         super(StringFieldWidget, self).setValue(value)
 
