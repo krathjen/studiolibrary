@@ -54,6 +54,8 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         self.ui.titleLabel.setText(item.Name)
         self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
+
+        self.ui.editButton.setHidden(item.isReadOnly())
         self.ui.editButton.clicked.connect(self.showEditMenu)
 
         # Create the icon group box
@@ -109,7 +111,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
 
         :rtype: QtWidgets.QAction
         """
-        menu = QtWidgets.QMenu()
+        menu = QtWidgets.QMenu(self)
 
         self.item().contextEditMenu(menu)
 
