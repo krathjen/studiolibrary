@@ -61,12 +61,10 @@ class LibraryItem(studiolibrary.widgets.Item):
     Extensions = []
 
     Name = ""
-    IconPath = ""
     DefaultThumbnailPath = studiolibrary.resource.get("icons", "thumbnail.png")
 
     SyncOrder = 10
     MenuOrder = 10
-    TypeIconPath = None
     SaveWidgetClass = None
     LoadWidgetClass = None
 
@@ -189,8 +187,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         self._modal = None
         self._library = None
         self._metadata = None
-        self._iconPath = None
-        self._typePixmap = None
         self._libraryWindow = None
 
         self._readOnly = False
@@ -339,17 +335,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         :rtype: QMessageBox.StandardButton
         """
         return studiolibrary.widgets.MessageBox.question(self.libraryWindow(), title, text)
-
-    def typeIconPath(self):
-        """
-        Return the type icon path on disc.
-
-        :rtype: path or None
-        """
-        if self.TypeIconPath is None:
-            return self.IconPath
-
-        return self.TypeIconPath
 
     def thumbnailPath(self):
         """
@@ -856,62 +841,3 @@ class LibraryItem(studiolibrary.widgets.Item):
         item = studiolibrary.LibraryItem(path, library=library)
         self.libraryWindow().moveItemsToTrash([item])
         # self.setPath(path)
-
-    def typePixmap(self):
-        """
-        Return the type pixmap for the plugin.
-
-        :rtype: QtWidgets.QPixmap
-        """
-        if not self._typePixmap:
-            iconPath = self.typeIconPath()
-            if iconPath and os.path.exists(iconPath):
-                self._typePixmap = QtGui.QPixmap(iconPath)
-        return self._typePixmap
-
-    def typeIconRect(self, option):
-        """
-        Return the type icon rect.
-
-        :rtype: QtGui.QRect
-        """
-        padding = 2 * self.dpi()
-        r = self.iconRect(option)
-
-        x = r.x() + padding
-        y = r.y() + padding
-        rect = QtCore.QRect(x, y, 13 * self.dpi(), 13 * self.dpi())
-
-        return rect
-
-    def paintTypeIcon(self, painter, option):
-        """
-        Draw the item type icon at the top left.
-
-        :type painter: QtWidgets.QPainter
-        :type option: QtWidgets.QStyleOptionViewItem
-        :rtype: None
-        """
-        rect = self.typeIconRect(option)
-        typePixmap = self.typePixmap()
-        if typePixmap:
-            painter.setOpacity(0.5)
-            painter.drawPixmap(rect, typePixmap)
-            painter.setOpacity(1)
-
-    def paint(self, painter, option, index):
-        """
-        Overriding the paint method to draw the tag icon and type icon.
-
-        :type painter: QtWidgets.QPainter
-        :type option: QtWidgets.QStyleOptionViewItem
-        :rtype: None
-        """
-        super(LibraryItem, self).paint(painter, option, index)
-
-        painter.save()
-        try:
-            if index.column() == 0:
-                self.paintTypeIcon(painter, option)
-        finally:
-            painter.restore()

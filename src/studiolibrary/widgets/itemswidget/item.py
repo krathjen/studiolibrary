@@ -64,8 +64,8 @@ class ImageWorker(QtCore.QRunnable):
 class Item(QtWidgets.QTreeWidgetItem):
     """The Item is used to hold rows of information for an item view."""
 
-    SortRole = "SortRole"
-    DataRole = "DataRole"
+    IconPath = None
+    TypeIconPath = None
 
     ThreadPool = QtCore.QThreadPool()
     DefaultThumbnailPath = ""
@@ -100,7 +100,9 @@ class Item(QtWidgets.QTreeWidgetItem):
         self._pixmapRect = None
         self._pixmapScaled = None
 
-        self._iconPath = ""
+        self._iconPath = None
+        self._typePixmap = None
+
         self._thumbnailIcon = None
 
         self._underMouse = False
@@ -355,9 +357,19 @@ class Item(QtWidgets.QTreeWidgetItem):
         pass
 
     def setGroupItem(self, groupItem):
+        """
+        Set the group item that this item is a child to.
+
+        :type groupItem: groupitem.GroupItem
+        """
         self._groupItem = groupItem
 
     def groupItem(self):
+        """
+        Get the group item that this item is a child to.
+
+        :rtype: groupitem.GroupItem
+        """
         return self._groupItem
 
     def itemsWidget(self):
@@ -805,6 +817,8 @@ class Item(QtWidgets.QTreeWidgetItem):
             self.paintIcon(painter, option, index)
 
             if index.column() == 0:
+                self.paintTypeIcon(painter, option)
+
                 if self.imageSequence():
                     self.paintPlayhead(painter, option)
         finally:
@@ -1324,3 +1338,56 @@ class Item(QtWidgets.QTreeWidgetItem):
             y = r.y() + r.height() - (height - 1)
 
             painter.drawRect(r.x(), y, width, height)
+
+    def typeIconPath(self):
+        """
+        Return the type icon path on disc.
+
+        :rtype: path or None
+        """
+        if self.TypeIconPath is None:
+            return self.IconPath
+
+        return self.TypeIconPath
+
+    def typePixmap(self):
+        """
+        Return the type pixmap for the plugin.
+
+        :rtype: QtWidgets.QPixmap
+        """
+        if not self._typePixmap:
+            iconPath = self.typeIconPath()
+            if iconPath and os.path.exists(iconPath):
+                self._typePixmap = QtGui.QPixmap(iconPath)
+        return self._typePixmap
+
+    def typeIconRect(self, option):
+        """
+        Return the type icon rect.
+
+        :rtype: QtGui.QRect
+        """
+        padding = 2 * self.dpi()
+        r = self.iconRect(option)
+
+        x = r.x() + padding
+        y = r.y() + padding
+        rect = QtCore.QRect(x, y, 13 * self.dpi(), 13 * self.dpi())
+
+        return rect
+
+    def paintTypeIcon(self, painter, option):
+        """
+        Draw the item type icon at the top left.
+
+        :type painter: QtWidgets.QPainter
+        :type option: QtWidgets.QStyleOptionViewItem
+        :rtype: None
+        """
+        rect = self.typeIconRect(option)
+        typePixmap = self.typePixmap()
+        if typePixmap:
+            painter.setOpacity(0.5)
+            painter.drawPixmap(rect, typePixmap)
+            painter.setOpacity(1)
