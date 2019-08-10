@@ -44,7 +44,8 @@ def main(*args, **kwargs):
         from studiolibrarymaya import mayalibrarywindow
         libraryWindow = mayalibrarywindow.MayaLibraryWindow.instance(*args, **kwargs)
     else:
-        libraryWindow = studiolibrary.LibraryWindow.instance(*args, **kwargs)
+        from studiolibrary import librarywindow
+        libraryWindow = librarywindow.LibraryWindow.instance(*args, **kwargs)
 
     return libraryWindow
 

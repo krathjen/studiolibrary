@@ -27,5 +27,4 @@ from studiolibrary import resource
 from studiolibrary.utils import *
 from studiolibrary.library import Library
 from studiolibrary.libraryitem import LibraryItem
-from studiolibrary.librarywindow import LibraryWindow
 from studiolibrary.main import main

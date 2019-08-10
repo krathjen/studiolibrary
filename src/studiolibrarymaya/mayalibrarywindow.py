@@ -17,6 +17,7 @@ import maya.cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 import studiolibrary
+from studiolibrary import librarywindow
 
 import mutils
 
@@ -62,18 +63,18 @@ def mayaClosedEvent():
 
     :rtype: None
     """
-    for libraryWindow in studiolibrary.LibraryWindow.instances():
+    for libraryWindow in librarywindow.LibraryWindow.instances():
         libraryWindow.saveSettings()
 
 
-class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
+class MayaLibraryWindow(MayaQWidgetDockableMixin, librarywindow.LibraryWindow):
 
     def destroy(self):
         """
         Overriding this method to avoid multiple script jobs when developing.
         """
         disableMayaClosedEvent()
-        studiolibrary.LibraryWindow.destroy(self)
+        librarywindow.LibraryWindow.destroy(self)
 
     def setObjectName(self, name):
         """
@@ -84,7 +85,7 @@ class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
         """
         name = '{0}_{1}'.format(name, uuid.uuid4())
 
-        studiolibrary.LibraryWindow.setObjectName(self, name)
+        librarywindow.LibraryWindow.setObjectName(self, name)
 
     def tabWidget(self):
         """
@@ -145,7 +146,7 @@ class MayaLibraryWindow(MayaQWidgetDockableMixin, studiolibrary.LibraryWindow):
         if self.isDocked():
             return self
         else:
-            return studiolibrary.LibraryWindow.window(self)
+            return librarywindow.LibraryWindow.window(self)
 
     def show(self, **kwargs):
         """

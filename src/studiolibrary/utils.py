@@ -154,8 +154,8 @@ def reload():
     """
     os.environ["STUDIO_LIBRARY_RELOADED"] = "1"
 
-    import studiolibrary
-    studiolibrary.LibraryWindow.destroyInstances()
+    from studiolibrary import librarywindow
+    librarywindow.LibraryWindow.destroyInstances()
 
     names = modules()
 
