@@ -24,13 +24,52 @@ class ColorButton(QtWidgets.QPushButton):
     def __init__(self, *args):
         QtWidgets.QPushButton.__init__(self, *args)
 
+        self._color = None
+
+        self.setCheckable(True)
+
+    def setColor(self, color):
+        """
+        Set the color for the button.
+
+        :type color: QtGui.QColor
+        """
+        self._color = color
+
+        color = studioqt.Color.fromString(color)
+
+        rgb = "{0},{1},{2}"
+        rgb = rgb.format(color.red(), color.green(), color.blue())
+
+        css = """
+        ColorButton {
+            background-color: rgba(RGB);
+        }
+        
+        ColorButton:hover {
+            background-color: rgba(RGB, 220);
+        }
+        """.replace("RGB", rgb)
+
+        self.setStyleSheet(css)
+
+    def color(self):
+        """
+        Get the color for the button.
+
+        :rtype: QtGui.QColor
+        """
+        return self._color
+
 
 class ColorPickerAction(QtWidgets.QWidgetAction):
 
     def __init__(self, *args):
         super(ColorPickerAction, self).__init__(*args)
 
-        self._picker = ColorPickerWidget(self.parent())
+        self._picker = ColorPickerWidget()
+        self._picker.setMouseTracking(True)
+        self._picker.setObjectName("colorPickerAction")
         self._picker.colorChanged.connect(self._triggered)
 
     def picker(self):
@@ -44,7 +83,12 @@ class ColorPickerAction(QtWidgets.QWidgetAction):
     def _triggered(self):
         """Triggered when the checkbox value has changed."""
         self.trigger()
-        self.parent().close()
+
+        if isinstance(self.parent().parent(), QtWidgets.QMenu):
+            self.parent().parent().close()
+
+        elif isinstance(self.parent(), QtWidgets.QMenu):
+            self.parent().close()
 
     def createWidget(self, menu):
         """
@@ -52,7 +96,7 @@ class ColorPickerAction(QtWidgets.QWidgetAction):
 
         :type menu: QtWidgets.QMenu
         """
-        widget = QtWidgets.QFrame(self.parent())
+        widget = QtWidgets.QFrame(menu)
         widget.setObjectName("colorPickerAction")
 
         actionLayout = QtWidgets.QHBoxLayout(widget)
@@ -75,11 +119,22 @@ class ColorPickerWidget(QtWidgets.QFrame):
         self._buttons = []
         self._currentColor = None
         self._browserColors = None
+        self._menuButton = None
 
         layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
+
+    def enterEvent(self, event):
+        """
+        Overriding this method to fix a bug with custom actions.
+
+        :type event: QtCore.QEvent
+        """
+        menu = self.parent().parent()
+        if isinstance(menu, QtWidgets.QMenu):
+            menu.setActiveAction(None)
 
     def _colorChanged(self, color):
         """
@@ -88,8 +143,16 @@ class ColorPickerWidget(QtWidgets.QFrame):
         :type color: studioqt.Color
         :rtype: None
         """
-        self._currentColor = color
+        self.setCurrentColor(color)
         self.colorChanged.emit(color)
+
+    def menuButton(self):
+        """
+        Get the menu button used for browsing for custom colors.
+
+        :rtype: QtGui.QWidget
+        """
+        return self._menuButton
 
     def deleteButtons(self):
         """
@@ -117,6 +180,12 @@ class ColorPickerWidget(QtWidgets.QFrame):
         :type color: studioqt.Color
         """
         self._currentColor = color
+        self.refresh()
+
+    def refresh(self):
+        """Update the current state of the selected color."""
+        for button in self._buttons:
+            button.setChecked(button.color() == self.currentColor())
 
     def setColors(self, colors):
         """
@@ -139,11 +208,12 @@ class ColorPickerWidget(QtWidgets.QFrame):
                 color = color.toString()
 
             callback = partial(self._colorChanged, color)
-            css = "background-color: " + color
 
             button = self.COLOR_BUTTON_CLASS(self)
+
             button.setObjectName('colorButton')
-            button.setStyleSheet(css)
+            button.setColor(color)
+
             button.setSizePolicy(
                 QtWidgets.QSizePolicy.Expanding,
                 QtWidgets.QSizePolicy.Preferred
@@ -153,19 +223,23 @@ class ColorPickerWidget(QtWidgets.QFrame):
             button.setProperty("last", last)
 
             button.clicked.connect(callback)
+
             self.layout().addWidget(button)
+
+            self._buttons.append(button)
 
             first = False
 
-        button = QtWidgets.QPushButton("...", self)
-        button.setObjectName('menuButton')
-        button.setSizePolicy(
+        self._menuButton = QtWidgets.QPushButton("...", self)
+        self._menuButton.setObjectName('menuButton')
+        self._menuButton.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding,
             QtWidgets.QSizePolicy.Preferred
         )
 
-        button.clicked.connect(self.browseColor)
-        self.layout().addWidget(button)
+        self._menuButton.clicked.connect(self.browseColor)
+        self.layout().addWidget(self._menuButton)
+        self.refresh()
 
     def setBrowserColors(self, colors):
         """

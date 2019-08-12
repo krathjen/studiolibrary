@@ -39,6 +39,7 @@ class PreviewWidget(QtWidgets.QWidget):
         schema = item.loadSchema()
         if schema:
             self._formWidget.setSchema(item.loadSchema())
+            self._formWidget.setValidator(self.validator)
 
         self.ui.acceptButton.hide()
         self.ui.acceptButton.setText("Load")
@@ -58,10 +59,35 @@ class PreviewWidget(QtWidgets.QWidget):
         else:
             self.ui.titleIcon.setVisible(False)
 
+        self._item.dataChanged.connect(self._itemDataChanged)
+
         self.updateThumbnailSize()
 
+    def _itemDataChanged(self, *args, **kwargs):
+        """
+        Triggered when the current item data changes.
+
+        :type args: list
+        :type kwargs: dict
+        """
+        self.updateIcon()
+
     def setTitle(self, title):
+        """
+        Set the title of the preview widget.
+
+        :type title: str
+        """
         self.ui.titleLabel.setText(title)
+
+    def validator(self, **kwargs):
+        """
+        Validator used for validating the load arguments.
+
+        :type kwargs: dict
+        """
+        self._item.loadValidator(**kwargs)
+        self.updateIcon()
 
     def createSequenceWidget(self):
         """
@@ -73,9 +99,13 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self.ui.iconFrame.layout().insertWidget(0, self.ui.sequenceWidget)
 
-        path = self._item.thumbnailPath()
-        if os.path.exists(path):
-            self.ui.sequenceWidget.setPath(path)
+        self.updateIcon()
+
+    def updateIcon(self):
+        """Update the thumbnail icon."""
+        icon = self._item.thumbnailIcon()
+        if icon:
+            self.ui.sequenceWidget.setIcon(icon)
 
         if self._item.imageSequencePath():
             self.ui.sequenceWidget.setDirname(self.item().imageSequencePath())
@@ -106,8 +136,8 @@ class PreviewWidget(QtWidgets.QWidget):
         :rtype: None
         """
         width = self.width() - 5
-        if width > 250:
-            width = 250
+        if width > 150:
+            width = 150
 
         size = QtCore.QSize(width, width)
 

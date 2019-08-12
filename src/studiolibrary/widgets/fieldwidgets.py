@@ -16,6 +16,8 @@ import functools
 
 from studiovendor.Qt import QtGui, QtCore, QtWidgets
 
+import studioqt
+
 from . import groupboxwidget
 from . import colorpicker
 
@@ -1363,6 +1365,9 @@ class ColorFieldWidget(FieldWidget):
         
         :type color: QtGui.QColor
         """
+        if isinstance(color, QtGui.QColor):
+            color = studioqt.Color(color).toString()
+
         self.setValue(color)
         self.emitValueChanged()
 

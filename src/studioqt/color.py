@@ -29,6 +29,8 @@ class Color(QtGui.QColor):
         :type text: str
         """
         a = 255
+        text = text.replace(";", "")
+
         try:
             r, g, b, a = text.replace("rgb(", "").replace(")", "").split(",")
         except ValueError:

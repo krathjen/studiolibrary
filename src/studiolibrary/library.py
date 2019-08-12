@@ -368,7 +368,7 @@ class Library(QtCore.QObject):
                 if item:
 
                     # Yield the item data that matches the current path
-                    yield item.createItemData(path)
+                    yield item.createItemData()
 
                     # Stop walking if the item doesn't support nested items
                     if not item.EnableNestedItems:

@@ -829,9 +829,18 @@ class LibraryWindow(QtWidgets.QWidget):
             if item.path().endswith('Trash'):
                 data[path] = {'iconPath': trashIconPath}
             else:
-                data[path] = {}
+                data[path] = item.itemData()
 
         self.sidebarWidget().setData(data, root=root)
+
+    def setFolderSettings(self, path, data):
+        """
+        Convenience method for setting folder data.
+
+        :type path: str
+        :type data: dict
+        """
+        self.sidebarWidget().setPathSettings(path, data)
 
     def createFolderContextMenu(self):
         """
@@ -1147,7 +1156,7 @@ class LibraryWindow(QtWidgets.QWidget):
                     "colors": [
                         "rgb(230, 80, 80, 255)",
                         "rgb(230, 125, 100, 255)",
-                        "rgb(230, 120, 40)",
+                        "rgb(230, 120, 40, 255)",
                         "rgb(240, 180, 0, 255)",
                         "rgb(80, 200, 140, 255)",
                         "rgb(50, 180, 240, 255)",
@@ -1159,13 +1168,13 @@ class LibraryWindow(QtWidgets.QWidget):
                     "type": "color",
                     "value": backgroundColor,
                     "colors": [
-                        "rgb(40, 40, 40)",
-                        "rgb(68, 68, 68)",
-                        "rgb(80, 60, 80)",
-                        "rgb(85, 60, 60)",
-                        "rgb(60, 75, 75)",
-                        "rgb(60, 64, 79)",
-                        "rgb(245, 245, 255)",
+                        "rgb(40, 40, 40, 255)",
+                        "rgb(68, 68, 68, 255)",
+                        "rgb(80, 60, 80, 255)",
+                        "rgb(85, 60, 60, 255)",
+                        "rgb(60, 75, 75, 255)",
+                        "rgb(60, 64, 79, 255)",
+                        "rgb(245, 245, 255, 255)",
                     ]
                 },
             ],

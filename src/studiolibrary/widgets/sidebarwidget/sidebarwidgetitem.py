@@ -111,13 +111,18 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         :type color: QtGui.QColor or str
         :rtype: None 
         """
-        if isinstance(color, QtGui.QColor):
-            color = studioqt.Color.fromColor(color)
+        if color:
 
-        elif isinstance(color, basestring):
-            color = studioqt.Color.fromString(color)
+            if isinstance(color, QtGui.QColor):
+                color = studioqt.Color.fromColor(color)
 
-        self._iconColor = color.toString()
+            elif isinstance(color, basestring):
+                color = studioqt.Color.fromString(color)
+
+            self._iconColor = color.toString()
+        else:
+            self._iconColor = None
+
         self.updateIcon()
 
     def setPath(self, path):
@@ -259,10 +264,6 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         if iconPath != self.defaultIconPath():
             settings["iconPath"] = iconPath
 
-        iconColor = self.iconColor()
-        if iconColor != self.defaultIconColor():
-            settings["iconColor"] = iconColor
-
         bold = self._settings.get("bold")
         if bold:
             settings["bold"] = bold
@@ -310,8 +311,8 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         if iconPath:
             self.setIconPath(iconPath)
 
-        iconColor = settings.get("iconColor")
-        if iconColor:
+        iconColor = settings.get("iconColor") or settings.get("color")
+        if iconColor is not None:
             self.setIconColor(iconColor)
 
         isSelected = settings.get("selected")

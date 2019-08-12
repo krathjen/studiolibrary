@@ -15,6 +15,7 @@ from datetime import datetime
 
 from studiovendor.Qt import QtWidgets
 
+import studioqt
 import studiolibrary
 import studiolibrary.widgets
 
@@ -31,6 +32,15 @@ class FolderItem(studiolibrary.LibraryItem):
     LoadWidgetClass = studiolibrary.widgets.PreviewWidget
     DefaultThumbnailPath = studiolibrary.resource.get("icons/folder_item.png")
     TrashIconPath = studiolibrary.resource.get("icons", "delete_96.png")
+
+    DEFAULT_ICON_COLORS =[
+                    "rgb(239, 112, 99)",
+                    "rgb(239, 207, 103)",
+                    "rgb(136, 200, 101)",
+                    "rgb(111, 183, 239)",
+                    "rgb(199, 142, 220)",
+                    "rgb(200, 200, 200)",
+                ]
 
     @classmethod
     def match(cls, path):
@@ -50,6 +60,66 @@ class FolderItem(studiolibrary.LibraryItem):
         :type menu: QtWidgets.QMenu
         """
         pass
+
+    def contextEditMenu(self, menu, items=None):
+        super(FolderItem, self).contextEditMenu(menu, items=items)
+
+        action = studiolibrary.widgets.colorpicker.ColorPickerAction(menu)
+
+        action.picker().setColors(self.DEFAULT_ICON_COLORS)
+        action.picker().colorChanged.connect(self.setIconColor)
+        action.picker().setCurrentColor(self.iconColor())
+        action.picker().menuButton().hide()
+
+        menu.addAction(action)
+
+    def iconColor(self):
+        """
+        Get the icon color for the folder.
+
+        :rtype: str
+        """
+        return self.readMetadata().get("color", "")
+
+    def setIconColor(self, color):
+        """
+        Set the icon color for the folder.
+
+        :type color: str
+        """
+        if color == "rgb(200, 200, 200)":
+            color = ""
+
+        self.saveMetadata({"color": color})
+        self.syncItemData(emitDataChanged=False)
+
+        if self.libraryWindow():
+            self.libraryWindow().setFolderSettings(self.path(), self.itemData())
+            self.updateIcon()
+
+    def loadValidator(self, **kwargs):
+        """
+        The validator used for validating the load arguments.
+
+        :type kwargs: dict
+        """
+        if kwargs.get("fieldChanged") == "color":
+            self.setIconColor(kwargs.get("color"))
+
+    def thumbnailIcon(self):
+        """
+        Overriding this method add support for dynamic icon colors.
+
+        :rtype: QtGui.QIcon
+        """
+        path = studiolibrary.resource.get("icons/folder_item.png")
+        icon = studioqt.Icon(path)
+
+        if self.iconColor():
+            color = studioqt.Color.fromString(self.iconColor())
+            icon.setColor(color)
+
+        return icon
 
     def loadSchema(self):
         """
@@ -87,6 +157,19 @@ class FolderItem(studiolibrary.LibraryItem):
             {
                 "name": "modified",
                 "value": modified,
+            },
+            {
+                "name": "optionsGroup",
+                "title": "options",
+                "type": "group",
+            },
+
+            {
+                "name": "color",
+                "type": "color",
+                "value": self.iconColor(),
+                "layout": "vertical",
+                "colors": self.DEFAULT_ICON_COLORS,
             }
         ]
 
@@ -117,12 +200,14 @@ class FolderItem(studiolibrary.LibraryItem):
                 libraryWindow.refresh()
                 libraryWindow.selectFolderPath(path)
 
-    @classmethod
-    def createItemData(cls, path):
-        """Overriding this method to force the item type to Folder"""
-        itemData = super(FolderItem, cls).createItemData(path)
-        itemData["type"] = "Folder"
-        return itemData
+    def createItemData(self):
+
+        data = self.readMetadata()
+
+        data.update(super(FolderItem, self).createItemData())
+        data["type"] = "Folder"
+
+        return data
 
     def itemData(self):
         """Overriding this method to set the trash icon"""

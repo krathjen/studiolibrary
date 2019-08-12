@@ -49,7 +49,7 @@ class LibraryItemSignals(QtCore.QObject):
     copied = QtCore.Signal(object, object, object)
     deleted = QtCore.Signal(object)
     renamed = QtCore.Signal(object, object, object)
-
+    dataChanged = QtCore.Signal(object)
 
 # Note: We will be changing the base class in the near future
 class LibraryItem(studiolibrary.widgets.Item):
@@ -76,15 +76,16 @@ class LibraryItem(studiolibrary.widgets.Item):
     copied = _libraryItemSignals.renamed
     renamed = _libraryItemSignals.renamed
     deleted = _libraryItemSignals.deleted
+    dataChanged = _libraryItemSignals.dataChanged
 
-    @classmethod
-    def createItemData(cls, path):
+    def createItemData(self):
         """
         Called when syncing the given path with the library cache.
 
-        :type path: str
         :rtype: dict
         """
+        path = self.path()
+
         dirname, basename, extension = studiolibrary.splitPath(path)
 
         name = os.path.basename(path)
@@ -101,7 +102,7 @@ class LibraryItem(studiolibrary.widgets.Item):
             "folder": dirname,
             "category": category,
             "modified": modified,
-            "__class__": cls.__module__ + "." + cls.__name__
+            "__class__": self.__class__.__module__ + "." + self.__class__.__name__
         }
 
         return itemData
@@ -574,6 +575,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         path = studiolibrary.formatPath(formatString, self.path())
         studiolibrary.saveJson(path, metadata)
         self.setMetadata(metadata)
+        self.dataChanged.emit(self)
 
     def readMetadata(self):
         """
@@ -586,13 +588,13 @@ class LibraryItem(studiolibrary.widgets.Item):
         metadata = studiolibrary.readJson(path)
         return metadata
 
-    def syncItemData(self):
+    def syncItemData(self, emitDataChanged=True):
         """Sync the item data to the database."""
-        data = self.createItemData(self.path())
+        data = self.createItemData()
         self.setItemData(data)
 
         if self.library():
-            self.library().saveItemData([self])
+            self.library().saveItemData([self], emitDataChanged=emitDataChanged)
 
     def saveSchema(self):
         """
