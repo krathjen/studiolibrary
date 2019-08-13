@@ -11,12 +11,14 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import functools
 
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
 
 from .item import Item
+from .item import LabelDisplayOption
 from .listview import ListView
 from .groupitem import GroupItem
 from .treewidget import TreeWidget
@@ -45,6 +47,8 @@ class ItemsWidget(QtWidgets.QWidget):
     DEFAULT_MIN_LIST_SIZE = 12
     DEFAULT_MIN_ICON_SIZE = 50
 
+    LABEL_DISPLAY_OPTION = LabelDisplayOption.Under
+
     itemClicked = QtCore.Signal(object)
     itemDoubleClicked = QtCore.Signal(object)
 
@@ -65,7 +69,7 @@ class ItemsWidget(QtWidgets.QWidget):
         self._itemSizeHint = QtCore.QSize(w, h)
 
         self._zoomAmount = self.DEFAULT_ZOOM_AMOUNT
-        self._isItemTextVisible = True
+        self._labelDisplayOption = self.LABEL_DISPLAY_OPTION
 
         self._dataset = None
         self._treeWidget = TreeWidget(self)
@@ -85,7 +89,7 @@ class ItemsWidget(QtWidgets.QWidget):
 
         self._textColor = QtGui.QColor(255, 255, 255, 200)
         self._textSelectedColor = QtGui.QColor(255, 255, 255, 200)
-        self._backgroundColor = QtGui.QColor(255, 255, 255, 30)
+        self._itemBackgroundColor = QtGui.QColor(255, 255, 255, 30)
         self._backgroundHoverColor = QtGui.QColor(255, 255, 255, 35)
         self._backgroundSelectedColor = QtGui.QColor(30, 150, 255)
 
@@ -417,37 +421,23 @@ class ItemsWidget(QtWidgets.QWidget):
         """
         return self.treeWidget().textFromColumn(*args, **kwargs)
 
-    def toggleTextVisible(self):
+    def setLabelDisplayOption(self, value):
         """
-        Toggle the item text visibility.
+        Set the label display option.
 
-        :rtype: None
+        :type value: LabelDisplayOption
         """
-        if self.isItemTextVisible():
-            self.setItemTextVisible(False)
-        else:
-            self.setItemTextVisible(True)
-
-    def setItemTextVisible(self, value):
-        """
-        Set the visibility of the item text.
-
-        :type value: bool
-        :rtype: None
-        """
-        self._isItemTextVisible = value
+        self._labelDisplayOption = value
         self.refreshSize()
 
-    def isItemTextVisible(self):
+    def labelDisplayOption(self):
         """
         Return the visibility of the item text.
 
-        :rtype: bool
+        :rtype: LabelDisplayOption
         """
         if self.isIconView():
-            return self._isItemTextVisible
-        else:
-            return True
+            return self._labelDisplayOption
 
     def itemTextHeight(self):
         """
@@ -478,7 +468,7 @@ class ItemsWidget(QtWidgets.QWidget):
         settings["spacing"] = self.spacing()
         settings["zoomAmount"] = self.zoomAmount()
         settings["selectedPaths"] = self.selectedPaths()
-        settings["textVisible"] = self.isItemTextVisible()
+        settings["labelDisplayOption"] = self.labelDisplayOption()
         settings.update(self.treeWidget().settings())
 
         return settings
@@ -504,8 +494,8 @@ class ItemsWidget(QtWidgets.QWidget):
         selectedPaths = settings.get("selectedPaths", [])
         self.selectPaths(selectedPaths)
 
-        itemTextVisible = settings.get("textVisible", True)
-        self.setItemTextVisible(itemTextVisible)
+        value = settings.get("labelDisplayOption", self.LABEL_DISPLAY_OPTION)
+        self.setLabelDisplayOption(value)
 
         self.treeWidget().setSettings(settings)
 
@@ -516,7 +506,7 @@ class ItemsWidget(QtWidgets.QWidget):
     def createCopyTextMenu(self):
         return self.treeWidget().createCopyTextMenu()
 
-    def createItemSettingsMenu(self):
+    def createSettingsMenu(self):
 
         menu = QtWidgets.QMenu("Item View", self)
 
@@ -544,60 +534,16 @@ class ItemsWidget(QtWidgets.QWidget):
         action.slider().valueChanged.connect(self.setSpacing)
         menu.addAction(action)
 
-        action = SeparatorAction("Item Options", menu)
+        action = SeparatorAction("Label Options", menu)
         menu.addAction(action)
 
-        action = QtWidgets.QAction("Show labels", menu)
-        action.setCheckable(True)
-        action.setChecked(self.isItemTextVisible())
-        action.triggered[bool].connect(self.setItemTextVisible)
-        menu.addAction(action)
-
-        return menu
-
-    def createSettingsMenu(self):
-        """
-        Create and return the settings menu for the widget.
-
-        :rtype: QtWidgets.QMenu
-        """
-        menu = QtWidgets.QMenu("Item View", self)
-
-        menu.addSeparator()
-
-        action = QtWidgets.QAction("Show labels", menu)
-        action.setCheckable(True)
-        action.setChecked(self.isItemTextVisible())
-        action.triggered[bool].connect(self.setItemTextVisible)
-        menu.addAction(action)
-
-        menu.addSeparator()
-
-        copyTextMenu = self.treeWidget().createCopyTextMenu()
-        menu.addMenu(copyTextMenu)
-
-        menu.addSeparator()
-
-        action = SliderAction("Size", menu)
-        action.slider().setMinimum(10)
-        action.slider().setMaximum(200)
-        action.slider().setValue(self.zoomAmount())
-        action.slider().valueChanged.connect(self.setZoomAmount)
-        menu.addAction(action)
-
-        action = SliderAction("Border", menu)
-        action.slider().setMinimum(0)
-        action.slider().setMaximum(20)
-        action.slider().setValue(self.padding())
-        action.slider().valueChanged.connect(self.setPadding)
-        menu.addAction(action)
-        #
-        action = SliderAction("Spacing", menu)
-        action.slider().setMinimum(self.DEFAULT_MIN_SPACING)
-        action.slider().setMaximum(self.DEFAULT_MAX_SPACING)
-        action.slider().setValue(self.spacing())
-        action.slider().valueChanged.connect(self.setSpacing)
-        menu.addAction(action)
+        for option in LabelDisplayOption.values():
+            action = QtWidgets.QAction(option.title(), menu)
+            action.setCheckable(True)
+            action.setChecked(option == self.labelDisplayOption())
+            callback = functools.partial(self.setLabelDisplayOption, option)
+            action.triggered.connect(callback)
+            menu.addAction(action)
 
         return menu
 
@@ -845,10 +791,12 @@ class ItemsWidget(QtWidgets.QWidget):
         """
         self._iconSize = size
 
-        if self.isItemTextVisible():
+        if self.labelDisplayOption() == LabelDisplayOption.Under:
             w = size.width()
             h = size.width() + self.itemTextHeight()
             self._itemSizeHint = QtCore.QSize(w, h)
+        elif size.height() < self.itemTextHeight():
+            self._itemSizeHint = QtCore.QSize(size.width(), self.itemTextHeight())
         else:
             self._itemSizeHint = size
 
@@ -1109,6 +1057,14 @@ class ItemsWidget(QtWidgets.QWidget):
         """
         self._backgroundColor = color
 
+    def setItemBackgroundColor(self, color):
+        """
+        Set the item background color.
+
+        :type color: QtWidgets.QtColor
+        """
+        self._itemBackgroundColor = color
+
     def setBackgroundHoverColor(self, color):
         """
         Set the background color when the mouse hovers over the item.
@@ -1149,6 +1105,14 @@ class ItemsWidget(QtWidgets.QWidget):
         :rtype: QtWidgets.QtColor
         """
         return self._backgroundColor
+
+    def itemBackgroundColor(self):
+        """
+        Return the item background color.
+
+        :rtype: QtWidgets.QtColor
+        """
+        return self._itemBackgroundColor
 
     def backgroundHoverColor(self):
         """

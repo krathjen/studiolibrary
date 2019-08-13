@@ -34,6 +34,21 @@ class WorkerSignals(QtCore.QObject):
     triggered = QtCore.Signal(object)
 
 
+class LabelDisplayOption:
+
+    Hide = "hide label"
+    Over = "label over item"
+    Under = "label under item"
+
+    @staticmethod
+    def values():
+        return [
+            LabelDisplayOption.Hide,
+            LabelDisplayOption.Over,
+            LabelDisplayOption.Under,
+        ]
+
+
 class ImageWorker(QtCore.QRunnable):
     """A convenience class for loading an image in a thread."""
 
@@ -463,7 +478,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         else:
             iconSize = self.itemsWidget().iconSize()
 
-            if self.isTextVisible():
+            if self.isLabelUnderItem():
                 w = iconSize.width()
                 h = iconSize.width() + self.textHeight()
                 iconSize = QtCore.QSize(w, h)
@@ -592,11 +607,35 @@ class Item(QtWidgets.QTreeWidgetItem):
 
     def isTextVisible(self):
         """
+        Check if the label should be displayed.
+
+        :rtype: bool
+        """
+        return self.labelDisplayOption() != LabelDisplayOption.Hide
+
+    def isLabelOverItem(self):
+        """
+        Check if the label should be displayed over the item.
+
+        :rtype: bool
+        """
+        return self.labelDisplayOption() == LabelDisplayOption.Over
+
+    def isLabelUnderItem(self):
+        """
+        Check if the label should be displayed under the item.
+
+        :rtype: bool
+        """
+        return self.labelDisplayOption() == LabelDisplayOption.Under
+
+    def labelDisplayOption(self):
+        """
         Return True if the text is visible.
 
         :rtype: bool
         """
-        return self.itemsWidget().isItemTextVisible()
+        return self.itemsWidget().labelDisplayOption()
 
     def textAlignment(self, column):
         """
@@ -735,7 +774,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :rtype: QtWidgets.QtColor
         """
-        return self.itemsWidget().backgroundColor()
+        return self.itemsWidget().itemBackgroundColor()
 
     def backgroundHoverColor(self):
         """
@@ -811,10 +850,10 @@ class Item(QtWidgets.QTreeWidgetItem):
         try:
             self.paintBackground(painter, option, index)
 
+            self.paintIcon(painter, option, index)
+
             if self.isTextVisible():
                 self.paintText(painter, option, index)
-
-            self.paintIcon(painter, option, index)
 
             if index.column() == 0:
                 self.paintTypeIcon(painter, option)
@@ -868,7 +907,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         width = rect.width()
         height = rect.height()
 
-        if self.isTextVisible() and self.itemsWidget().isIconView():
+        if self.isLabelUnderItem():
             height -= self.textHeight()
 
         width -= padding
@@ -1087,15 +1126,31 @@ class Item(QtWidgets.QTreeWidgetItem):
             text = metrics.elidedText(text, QtCore.Qt.ElideRight, visualWidth)
             align = QtCore.Qt.AlignLeft
 
+        align = align | QtCore.Qt.AlignVCenter
+
+        rect = QtCore.QRect(visualRect)
+
         if self.itemsWidget().isIconView():
-            align = align | QtCore.Qt.AlignBottom
-        else:
-            align = align | QtCore.Qt.AlignVCenter
+
+            if self.isLabelOverItem() or self.isLabelUnderItem():
+                padding = 8 if padding < 8 else padding
+
+                height = metrics.height() + (padding / 2)
+                y = (rect.y() + rect.height()) - height
+
+                rect.setY(y)
+                rect.setHeight(height)
+
+            if self.isLabelOverItem():
+                color2 = self.itemsWidget().backgroundColor().toRgb()
+                color2.setAlpha(200)
+                painter.setBrush(QtGui.QBrush(color2))
+                painter.drawRect(rect)
 
         pen = QtGui.QPen(color)
         painter.setPen(pen)
         painter.setFont(font)
-        painter.drawText(visualRect, align, text)
+        painter.drawText(rect, align, text)
 
     # ------------------------------------------------------------------------
     # Support for middle mouse blending (slider)
@@ -1106,7 +1161,6 @@ class Item(QtWidgets.QTreeWidgetItem):
         Set if middle mouse slider is enabled.
 
         :type enabled: bool
-        :rtype: None
         """
         self._blendingEnabled = enabled
 
@@ -1114,7 +1168,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         """
         Return true if middle mouse slider is enabled.
 
-        :rtype: None
+        :rtype: bool
         """
         return self._blendingEnabled
 
@@ -1123,7 +1177,6 @@ class Item(QtWidgets.QTreeWidgetItem):
         Called when the mouse moves while the middle mouse button is held down.
 
         :param event: QtGui.QMouseEvent
-        :rtype: None
         """
         if self.isBlending():
             value = (event.pos().x() - self.blendPosition().x()) / 1.5
@@ -1145,21 +1198,12 @@ class Item(QtWidgets.QTreeWidgetItem):
                 self._blendPosition = event.pos()
 
     def stopBlending(self):
-        """
-        Called when the middle mouse button is released.
-
-        :param event: QtGui.QMouseEvent
-        :rtype: None
-        """
+        """Called when the middle mouse button is released."""
         self._blendPosition = None
         self._blendPreviousValue = self.blendValue()
 
     def resetBlending(self):
-        """
-        Reset the blending value to zero.
-
-        :rtype: None
-        """
+        """Reset the blending value to zero."""
         self._blendValue = 0.0
         self._blendPreviousValue = 0.0
 
@@ -1240,7 +1284,6 @@ class Item(QtWidgets.QTreeWidgetItem):
     def setImageSequencePath(self, path):
         """
         :type path: str
-        :rtype: None
         """
         self._imageSequencePath = path
 
@@ -1251,16 +1294,12 @@ class Item(QtWidgets.QTreeWidgetItem):
         return self._imageSequencePath
 
     def stop(self):
-        """
-        :rtype: None
-        """
+        """Stop playing the image sequence movie."""
         if self.imageSequence():
             self.imageSequence().stop()
 
     def play(self):
-        """
-        :rtype: None
-        """
+        """Start playing the image sequence movie."""
         self.resetImageSequence()
         path = self.imageSequencePath() or self.thumbnailPath()
 

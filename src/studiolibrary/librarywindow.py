@@ -1056,7 +1056,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :rtype: None
         """
-        menu = self.itemsWidget().createItemSettingsMenu()
+        menu = self.itemsWidget().createSettingsMenu()
         widget = self.menuBarWidget().findToolButton("Item View")
 
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
@@ -2198,6 +2198,9 @@ class LibraryWindow(QtWidgets.QWidget):
         self.itemsWidget().setTextSelectedColor(color)
 
         color = studioqt.Color.fromString(options["ITEM_BACKGROUND_COLOR"])
+        self.itemsWidget().setItemBackgroundColor(color)
+
+        color = studioqt.Color.fromString(options["BACKGROUND_COLOR"])
         self.itemsWidget().setBackgroundColor(color)
 
         color = studioqt.Color.fromString(

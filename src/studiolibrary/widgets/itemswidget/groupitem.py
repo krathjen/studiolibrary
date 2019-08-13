@@ -164,9 +164,16 @@ class GroupItem(Item):
             if self.isTextVisible():
                 self._paintText(painter, option, 1)
 
-            self.paintIcon(painter, option, index)
         finally:
             painter.restore()
+
+    def isLabelOverItem(self):
+        """Overriding this method to ignore this feature for group items."""
+        return False
+
+    def isLabelUnderItem(self):
+        """Overriding this method to ignore this feature for group items."""
+        return False
 
     def icon(self, *args):
         """
