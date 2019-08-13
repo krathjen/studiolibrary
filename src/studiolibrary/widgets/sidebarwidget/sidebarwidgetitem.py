@@ -322,6 +322,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         isExpanded = settings.get("expanded")
         if isExpanded is not None and self.childCount() > 0:
             self.setExpanded(isExpanded)
+            self.updateIcon()
 
         bold = settings.get("bold")
         if bold is not None:
