@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 def save(path, *args, **kwargs):
     """Convenience function for saving a PoseItem."""
-    PoseItem(path).save(*args, **kwargs)
+    PoseItem(path).safeSave(*args, **kwargs)
 
 
 def load(path, *args, **kwargs):

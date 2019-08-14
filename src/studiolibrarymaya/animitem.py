@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 def save(path, *args, **kwargs):
     """Convenience function for saving an AnimItem."""
-    AnimItem(path).save(*args, **kwargs)
+    AnimItem(path).safeSave(*args, **kwargs)
 
 
 def load(path, *args, **kwargs):

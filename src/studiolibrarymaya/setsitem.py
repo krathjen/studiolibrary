@@ -22,7 +22,7 @@ from studiolibrarymaya import baseitem
 
 def save(path, *args, **kwargs):
     """Convenience function for saving a SetsItem."""
-    SetsItem(path).save(*args, **kwargs)
+    SetsItem(path).safeSave(*args, **kwargs)
 
 
 def load(path, *args, **kwargs):

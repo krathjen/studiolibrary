@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 def save(path, *args, **kwargs):
     """Convenience function for saving a MirrorItem."""
-    MirrorItem(path).save(*args, **kwargs)
+    MirrorItem(path).safeSave(*args, **kwargs)
 
 
 def load(path, *args, **kwargs):
