@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class GlobalSignals(QtCore.QObject):
     """"""
-    blendChanged = QtCore.Signal(float)
+    sliderChanged = QtCore.Signal(float)
 
 
 class WorkerSignals(QtCore.QObject):
@@ -92,9 +92,10 @@ class Item(QtWidgets.QTreeWidgetItem):
 
     THUMBNAIL_COLUMN = 0
     ENABLE_THUMBNAIL_THREAD = True
+    PAINT_SLIDER = False
 
     _globalSignals = GlobalSignals()
-    blendChanged = _globalSignals.blendChanged
+    sliderChanged = _globalSignals.sliderChanged
 
     def __init__(self, *args):
         QtWidgets.QTreeWidgetItem.__init__(self, *args)
@@ -136,10 +137,11 @@ class Item(QtWidgets.QTreeWidgetItem):
         self._imageSequence = None
         self._imageSequencePath = ""
 
-        self._blendValue = 0.0
-        self._blendPreviousValue = 0.0
-        self._blendPosition = None
-        self._blendingEnabled = False
+        self._sliderDown = False
+        self._sliderValue = 0.0
+        self._sliderPreviousValue = 0.0
+        self._sliderPosition = None
+        self._sliderEnabled = False
 
         self._worker = ImageWorker()
         self._worker.setAutoDelete(False)
@@ -361,7 +363,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :rtype: None
         """
-        self.resetBlending()
+        self.resetSlider()
 
     def doubleClicked(self):
         """
@@ -702,7 +704,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        self.blendingEvent(event)
+        self.sliderEvent(event)
         self.imageSequenceEvent(event)
 
     def mousePressEvent(self, event):
@@ -713,7 +715,9 @@ class Item(QtWidgets.QTreeWidgetItem):
         :rtype: None
         """
         if event.button() == QtCore.Qt.MidButton:
-            self._blendPosition = event.pos()
+            if self.isSliderEnabled():
+                self.setSliderDown(True)
+                self._sliderPosition = event.pos()
 
     def mouseReleaseEvent(self, event):
         """
@@ -722,9 +726,9 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        if self.isBlending():
-            self._blendPosition = None
-            self._blendPreviousValue = self.blendValue()
+        if self.isSliderDown():
+            self._sliderPosition = None
+            self._sliderPreviousValue = self.sliderValue()
 
     def keyPressEvent(self, event):
         """
@@ -852,14 +856,18 @@ class Item(QtWidgets.QTreeWidgetItem):
 
             self.paintIcon(painter, option, index)
 
+            if index.column() == 0 and self.sliderValue() != 0:
+                self.paintSlider(painter, option, index)
+
             if self.isTextVisible():
                 self.paintText(painter, option, index)
 
             if index.column() == 0:
                 self.paintTypeIcon(painter, option)
 
-                if self.imageSequence():
-                    self.paintPlayhead(painter, option)
+            if index.column() == 0 and self.imageSequence():
+                self.paintPlayhead(painter, option)
+
         finally:
             painter.restore()
 
@@ -870,7 +878,6 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type painter: QtWidgets.QPainter
         :type option: QtWidgets.QStyleOptionViewItem
         :type index: QtCore.QModelIndex
-        :rtype: None
         """
         isSelected = option.state & QtWidgets.QStyle.State_Selected
         isMouseOver = option.state & QtWidgets.QStyle.State_MouseOver
@@ -894,6 +901,57 @@ class Item(QtWidgets.QTreeWidgetItem):
             visualRect.setHeight(height)
 
         painter.drawRect(visualRect)
+
+    def paintSlider(self, painter, option, index):
+        """
+        Draw the virtual slider for the item.
+
+        :type painter: QtWidgets.QPainter
+        :type option: QtWidgets.QStyleOptionViewItem
+        :type index: QtCore.QModelIndex
+        """
+        if not self.PAINT_SLIDER:
+            return
+
+        if not self.itemsWidget().isIconView():
+            return
+
+        # Draw slider background
+        painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+
+        rect = self.visualRect(option)
+
+        color = self.itemsWidget().backgroundColor().toRgb()
+        color.setAlpha(75)
+        painter.setBrush(QtGui.QBrush(color))
+
+        height = rect.height()
+
+        ratio = self.sliderValue()
+
+        if ratio < 0:
+            width = 0
+        elif ratio > 100:
+            width = rect.width()
+        else:
+            width = rect.width() * (float(ratio) / 100)
+
+        rect.setWidth(width)
+        rect.setHeight(height)
+
+        painter.drawRect(rect)
+
+        # Draw slider value
+        rect = self.visualRect(option)
+        rect.setY(rect.y() + (4 * self.dpi()))
+
+        color = self.itemsWidget().textColor().toRgb()
+        color.setAlpha(220)
+        pen = QtGui.QPen(color)
+        align = QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter
+
+        painter.setPen(pen)
+        painter.drawText(rect, align, str(self.sliderValue()) + "%")
 
     def iconRect(self, option):
         """
@@ -1144,6 +1202,8 @@ class Item(QtWidgets.QTreeWidgetItem):
             if self.isLabelOverItem():
                 color2 = self.itemsWidget().backgroundColor().toRgb()
                 color2.setAlpha(200)
+
+                painter.setPen(QtCore.Qt.NoPen)
                 painter.setBrush(QtGui.QBrush(color2))
                 painter.drawRect(rect)
 
@@ -1153,99 +1213,99 @@ class Item(QtWidgets.QTreeWidgetItem):
         painter.drawText(rect, align, text)
 
     # ------------------------------------------------------------------------
-    # Support for middle mouse blending (slider)
+    # Support for middle mouse slider
     # ------------------------------------------------------------------------
 
-    def setBlendingEnabled(self, enabled):
+    def setSliderEnabled(self, enabled):
         """
         Set if middle mouse slider is enabled.
 
         :type enabled: bool
         """
-        self._blendingEnabled = enabled
+        self._sliderEnabled = enabled
 
-    def isBlendingEnabled(self):
+    def isSliderEnabled(self):
         """
         Return true if middle mouse slider is enabled.
 
         :rtype: bool
         """
-        return self._blendingEnabled
+        return self._sliderEnabled
 
-    def blendingEvent(self, event):
+    def sliderEvent(self, event):
         """
         Called when the mouse moves while the middle mouse button is held down.
 
         :param event: QtGui.QMouseEvent
         """
-        if self.isBlending():
-            value = (event.pos().x() - self.blendPosition().x()) / 1.5
-            value = math.ceil(value) + self.blendPreviousValue()
+        if self.isSliderDown():
+            value = (event.pos().x() - self.sliderPosition().x()) / 1.5
+            value = math.ceil(value) + self.sliderPreviousValue()
             try:
-                self.setBlendValue(value)
+                self.setSliderValue(value)
             except Exception:
-                self.stopBlending()
+                self.setSliderDown(False)
 
-    def startBlendingEvent(self, event):
-        """
-        Called when the middle mouse button is pressed.
+    def resetSlider(self):
+        """Reset the slider value to zero."""
+        self._sliderValue = 0.0
+        self._sliderPreviousValue = 0.0
 
-        :param event: QtGui.QMouseEvent
-        :rtype: None
-        """
-        if self.isBlendingEnabled():
-            if event.button() == QtCore.Qt.MidButton:
-                self._blendPosition = event.pos()
-
-    def stopBlending(self):
+    def setSliderDown(self, down):
         """Called when the middle mouse button is released."""
-        self._blendPosition = None
-        self._blendPreviousValue = self.blendValue()
+        self._sliderDown = down
+        if not down:
+            self._sliderPosition = None
+            self._sliderPreviousValue = self.sliderValue()
 
-    def resetBlending(self):
-        """Reset the blending value to zero."""
-        self._blendValue = 0.0
-        self._blendPreviousValue = 0.0
-
-    def isBlending(self):
+    def isSliderDown(self):
         """
         Return True if blending.
 
         :rtype: bool
         """
-        return self.blendPosition() is not None
+        return self._sliderDown
 
-    def setBlendValue(self, value):
+    def setSliderValue(self, value):
         """
         Set the blend value.
 
         :type value: float
         :rtype: bool
         """
-        if self.isBlendingEnabled():
-            self._blendValue = value
-            self.blendChanged.emit(value)
-            logger.debug("BLENDING:" + str(value))
+        if self.isSliderEnabled():
 
-    def blendValue(self):
+            self._sliderValue = value
+
+            if self.PAINT_SLIDER:
+                self.update()
+
+            self.sliderChanged.emit(value)
+
+            if self.PAINT_SLIDER:
+                self.update()
+
+            logger.debug("Blending:" + str(value))
+
+    def sliderValue(self):
         """
         Return the blend value.
 
         :rtype: float
         """
-        return self._blendValue
+        return self._sliderValue
 
-    def blendPreviousValue(self):
+    def sliderPreviousValue(self):
         """
         :rtype: float
         """
-        return self._blendPreviousValue
+        return self._sliderPreviousValue
 
-    def blendPosition(self):
+    def sliderPosition(self):
         """
         :rtype: QtGui.QPoint
         """
-        return self._blendPosition
+        return self._sliderPosition
 
     # ------------------------------------------------------------------------
     # Support animated image sequence

@@ -76,7 +76,7 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
         self.setCustomWidget(self.ui.blendFrame)
 
-        self.item().blendChanged.connect(self.setSliderValue)
+        self.item().sliderChanged.connect(self.setSliderValue)
 
     def selectionChanged(self):
         """Overriding to avoid validating when the selection changes."""
@@ -118,11 +118,7 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
         :type value: float
         """
-        self.item().loadFromCurrentValues(
-            blend=value,
-            batchMode=True,
-            showBlendMessage=True
-        )
+        self.item().setSliderValue(value)
 
     def accept(self):
         """Triggered when the user clicks the apply button."""
@@ -151,7 +147,7 @@ class PoseItem(baseitem.BaseItem):
         self._options = None
         self._batchMode = False
 
-        self.setBlendingEnabled(True)
+        self.setSliderEnabled(True)
 
     def isBatchModeEnabled(self):
         """
@@ -226,9 +222,9 @@ class PoseItem(baseitem.BaseItem):
                 mirror = self.currentLoadValue("mirror")
                 self.emitLoadValueChanged("mirror", not mirror)
 
-                blend = self.blendValue()
+                blend = self.sliderValue()
 
-                if self.isBlending():
+                if self.isSliderDown():
                     self.loadFromCurrentValues(
                         blend=blend,
                         batchMode=True,
@@ -247,8 +243,8 @@ class PoseItem(baseitem.BaseItem):
 
         :type event: QtCore.QMouseEvent
         """
-        if self.isBlending():
-            self.loadFromCurrentValues(blend=self.blendValue(), refresh=False)
+        if self.isSliderDown():
+            self.loadFromCurrentValues(blend=self.sliderValue(), refresh=False)
 
     def doubleClicked(self):
         """Triggered when the user double clicks the item."""
@@ -257,21 +253,22 @@ class PoseItem(baseitem.BaseItem):
     def selectionChanged(self):
         """Triggered when the item is selected or deselected."""
         self._transferObject = None
-        baseitem.BaseItem.selectionChanged(self)
+        super(PoseItem, self).selectionChanged()
 
-    def stopBlending(self):
+    def setSliderDown(self, down):
         """This method is called from the base class to stop blending."""
-        self._options = None
-        baseitem.BaseItem.stopBlending(self)
+        if not down:
+            self._options = None
+        super(PoseItem, self).setSliderDown(down)
 
-    def setBlendValue(self, value, load=True):
+    def setSliderValue(self, value, load=True):
         """
         This method is called from the base class to set the blend amount.
 
         :type value: float
         :type load: bool
         """
-        super(PoseItem, self).setBlendValue(value)
+        super(PoseItem, self).setSliderValue(value)
 
         if load:
             self.loadFromCurrentValues(
@@ -462,7 +459,7 @@ class PoseItem(baseitem.BaseItem):
         if namespaces is None:
             namespaces = self.currentLoadValue("namespaces")
 
-        self.setBlendValue(blend, load=False)
+        self.setSliderValue(blend, load=False)
 
         if showBlendMessage:
             self.showToastMessage("Blend: {0}%".format(blend))
@@ -483,12 +480,12 @@ class PoseItem(baseitem.BaseItem):
             )
 
         except Exception:
-            self.stopBlending()
+            self.setSliderDown(False)
             raise
 
         finally:
             if not batchMode:
-                self.stopBlending()
+                self.setSliderDown(False)
 
         logger.debug(u'Loaded: {0}'.format(self.path()))
 

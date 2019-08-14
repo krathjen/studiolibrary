@@ -17,8 +17,6 @@ from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
 
 
-import studioqt
-
 from .itemviewmixin import ItemViewMixin
 
 
