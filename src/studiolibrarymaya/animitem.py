@@ -114,7 +114,17 @@ class AnimItem(baseitem.BaseItem):
         :type kwargs: dict
         """
         anim = mutils.Animation.fromPath(self.path())
-        anim.load(**kwargs)
+        anim.load(
+            objects=kwargs.get("objects"),
+            namespaces=kwargs.get("namespaces"),
+            attrs=kwargs.get("attrs"),
+            startFrame=kwargs.get("startFrame"),
+            sourceTime=kwargs.get("sourceTime"),
+            option=kwargs.get("option"),
+            connect=kwargs.get("connect"),
+            mirrorTable=kwargs.get("mirrorTable"),
+            currentTime=kwargs.get("currentTime")
+        )
 
     def saveSchema(self):
         """
