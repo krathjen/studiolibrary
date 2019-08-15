@@ -79,11 +79,11 @@ class ImageWorker(QtCore.QRunnable):
 class Item(QtWidgets.QTreeWidgetItem):
     """The Item is used to hold rows of information for an item view."""
 
-    IconPath = None
-    TypeIconPath = None
+    ICON_PATH = None
+    TYPE_ICON_PATH = None
 
     ThreadPool = QtCore.QThreadPool()
-    DefaultThumbnailPath = ""
+    THUMBNAIL_PATH = ""
 
     MAX_ICON_SIZE = 256
 
@@ -528,7 +528,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         
         :rtype: str 
         """
-        return self.DefaultThumbnailPath
+        return self.THUMBNAIL_PATH
 
     def defaultThumbnailIcon(self):
         """
@@ -1444,10 +1444,10 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :rtype: path or None
         """
-        if self.TypeIconPath is None:
-            return self.IconPath
+        if self.TYPE_ICON_PATH is None:
+            return self.ICON_PATH
 
-        return self.TypeIconPath
+        return self.TYPE_ICON_PATH
 
     def typePixmap(self):
         """

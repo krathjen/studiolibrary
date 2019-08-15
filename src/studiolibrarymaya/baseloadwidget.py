@@ -52,7 +52,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._scriptJob = None
         self._formWidget = None
 
-        self.ui.titleLabel.setText(item.Name)
+        self.ui.titleLabel.setText(item.NAME)
         self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
 
         self.ui.editButton.setHidden(item.isReadOnly())

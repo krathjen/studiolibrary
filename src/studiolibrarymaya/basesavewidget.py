@@ -143,12 +143,12 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         self._item = item
 
-        self.ui.titleLabel.setText(item.Name)
+        self.ui.titleLabel.setText(item.NAME)
         self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
 
         if os.path.exists(item.imageSequencePath()):
             self.setThumbnailPath(item.imageSequencePath())
-        elif not item.isDefaultThumbnailPath():
+        elif not item.isTHUMBNAIL_PATH():
             self.setThumbnailPath(item.thumbnailPath())
 
         schema = item.saveSchema()

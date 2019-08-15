@@ -32,11 +32,11 @@ def load(path, *args, **kwargs):
 
 class SetsItem(baseitem.BaseItem):
 
-    Name = "Selection Set"
-    Extension = ".set"
-    IconPath = os.path.join(os.path.dirname(__file__), "icons", "selectionSet.png")
-    TransferClass = mutils.SelectionSet
-    TransferBasename = "set.json"
+    NAME = "Selection Set"
+    EXTENSION = ".set"
+    ICON_PATH = os.path.join(os.path.dirname(__file__), "icons", "selectionSet.png")
+    TRANSFER_CLASS = mutils.SelectionSet
+    TRANSFER_BASENAME = "set.json"
 
     def loadFromCurrentValues(self):
         """Load the selection set using the settings for this item."""

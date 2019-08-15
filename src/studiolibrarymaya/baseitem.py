@@ -45,11 +45,11 @@ class BaseItem(studiolibrary.LibraryItem):
     loadValueChanged = _baseItemSignals.loadValueChanged
 
     """Base class for anim, pose, mirror and sets transfer items."""
-    SaveWidgetClass = basesavewidget.BaseSaveWidget
-    LoadWidgetClass = baseloadwidget.BaseLoadWidget
+    SAVE_WIDGET_CLASS = basesavewidget.BaseSaveWidget
+    LOAD_WIDGET_CLASS = baseloadwidget.BaseLoadWidget
 
-    TransferClass = None
-    TransferBasename = ""
+    TRANSFER_CLASS = None
+    TRANSFER_BASENAME = ""
 
     @classmethod
     def showSaveWidget(cls, libraryWindow, item=None):
@@ -63,7 +63,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type item: studiolibrary.LibraryItem or None
         """
         item = item or cls()
-        widget = cls.SaveWidgetClass(item=item, parent=libraryWindow)
+        widget = cls.SAVE_WIDGET_CLASS(item=item, parent=libraryWindow)
 
         path = libraryWindow.selectedFolderPath()
 
@@ -125,8 +125,8 @@ class BaseItem(studiolibrary.LibraryItem):
 
         :rtype: str
         """
-        if self.TransferBasename:
-            return os.path.join(self.path(), self.TransferBasename)
+        if self.TRANSFER_BASENAME:
+            return os.path.join(self.path(), self.TRANSFER_BASENAME)
         else:
             return self.path()
 
@@ -138,7 +138,7 @@ class BaseItem(studiolibrary.LibraryItem):
         """
         if not self._transferObject:
             path = self.transferPath()
-            self._transferObject = self.TransferClass.fromPath(path)
+            self._transferObject = self.TRANSFER_CLASS.fromPath(path)
         return self._transferObject
 
     def currentLoadValue(self, name):

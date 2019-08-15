@@ -47,15 +47,15 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self.createSequenceWidget()
 
-        if item.Name:
+        if item.NAME:
             self.ui.titleFrame.setVisible(True)
-            self.ui.titleLabel.setText(item.Name)
+            self.ui.titleLabel.setText(item.NAME)
         else:
             self.ui.titleFrame.setVisible(False)
 
-        if item.TypeIconPath:
+        if item.TYPE_ICON_PATH:
             self.ui.titleIcon.setVisible(True)
-            self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TypeIconPath))
+            self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TYPE_ICON_PATH))
         else:
             self.ui.titleIcon.setVisible(False)
 

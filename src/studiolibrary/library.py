@@ -371,7 +371,7 @@ class Library(QtCore.QObject):
                     yield item.createItemData()
 
                     # Stop walking if the item doesn't support nested items
-                    if not item.EnableNestedItems:
+                    if not item.ENABLE_NESTED_ITEMS:
                         remove = True
 
                 if remove and filename in dirs:

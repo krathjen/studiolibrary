@@ -37,11 +37,11 @@ def load(path, *args, **kwargs):
 
 class MirrorItem(baseitem.BaseItem):
 
-    Name = "Mirror Table"
-    Extension = ".mirror"
-    IconPath = os.path.join(os.path.dirname(__file__), "icons", "mirrortable.png")
-    TransferClass = mutils.MirrorTable
-    TransferBasename = "mirrortable.json"
+    NAME = "Mirror Table"
+    EXTENSION = ".mirror"
+    ICON_PATH = os.path.join(os.path.dirname(__file__), "icons", "mirrortable.png")
+    TRANSFER_CLASS = mutils.MirrorTable
+    TRANSFER_BASENAME = "mirrortable.json"
 
     def __init__(self, *args, **kwargs):
         """

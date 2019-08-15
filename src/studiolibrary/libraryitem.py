@@ -54,19 +54,20 @@ class LibraryItemSignals(QtCore.QObject):
 # Note: We will be changing the base class in the near future
 class LibraryItem(studiolibrary.widgets.Item):
 
-    EnableDelete = False
-    EnableNestedItems = False
+    NAME = ""
+    THUMBNAIL_PATH = studiolibrary.resource.get("icons", "thumbnail.png")
 
-    Extension = ""
-    Extensions = []
+    EXTENSION = ""
+    EXTENSIONS = []
 
-    Name = ""
-    DefaultThumbnailPath = studiolibrary.resource.get("icons", "thumbnail.png")
+    ENABLE_DELETE = False
+    ENABLE_NESTED_ITEMS = False
 
-    SyncOrder = 10
-    MenuOrder = 10
-    SaveWidgetClass = None
-    LoadWidgetClass = None
+    SYNC_ORDER = 10
+    MENU_ORDER = 10
+
+    SAVE_WIDGET_CLASS = None
+    LOAD_WIDGET_CLASS = None
 
     _libraryItemSignals = LibraryItemSignals()
 
@@ -117,12 +118,12 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type libraryWindow: studiolibrary.LibraryWindow
         :rtype: QtCore.QAction
         """
-        if cls.Name:
+        if cls.NAME:
 
-            icon = QtGui.QIcon(cls.IconPath)
+            icon = QtGui.QIcon(cls.ICON_PATH)
             callback = partial(cls.showSaveWidget, libraryWindow)
 
-            action = QtWidgets.QAction(icon, cls.Name, menu)
+            action = QtWidgets.QAction(icon, cls.NAME, menu)
             action.triggered.connect(callback)
 
             return action
@@ -136,7 +137,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type item: studiolibrary.LibraryItem or None
         """
         item = item or cls()
-        widget = cls.SaveWidgetClass(item=item)
+        widget = cls.SAVE_WIDGET_CLASS(item=item)
         libraryWindow.setCreateWidget(widget)
 
     @classmethod
@@ -159,9 +160,9 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type path: str
         :rtype: bool 
         """
-        extensions = cls.Extensions
-        if not extensions and cls.Extension:
-            extensions = [cls.Extension]
+        extensions = cls.EXTENSIONS
+        if not extensions and cls.EXTENSION:
+            extensions = [cls.EXTENSION]
 
         for ext in extensions:
             if path.endswith(ext):
@@ -241,7 +242,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         if self.isLocked():
             return False
 
-        return self.EnableDelete
+        return self.ENABLE_DELETE
 
     def overwrite(self):
         """
@@ -351,15 +352,15 @@ class LibraryItem(studiolibrary.widgets.Item):
         if os.path.exists(thumbnailPath):
             return thumbnailPath
 
-        return self.DefaultThumbnailPath
+        return self.THUMBNAIL_PATH
 
-    def isDefaultThumbnailPath(self):
+    def isTHUMBNAIL_PATH(self):
         """
         Check if the thumbnail path is the default path.
 
         :rtype: bool
         """
-        return self.thumbnailPath() == self.DefaultThumbnailPath
+        return self.thumbnailPath() == self.THUMBNAIL_PATH
 
     def showPreviewWidget(self, libraryWindow):
         """
@@ -379,8 +380,8 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         widget = None
 
-        if self.LoadWidgetClass:
-            widget = self.LoadWidgetClass(item=self)
+        if self.LOAD_WIDGET_CLASS:
+            widget = self.LOAD_WIDGET_CLASS(item=self)
 
         return widget
 
@@ -620,8 +621,8 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         dst = self.path()
 
-        if dst and not dst.endswith(self.Extension):
-            dst += self.Extension
+        if dst and not dst.endswith(self.EXTENSION):
+            dst += self.EXTENSION
 
         self.setPath(dst)
 
@@ -712,7 +713,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type extension: bool or None
         :rtype: None
         """
-        extension = extension or self.Extension
+        extension = extension or self.EXTENSION
         if dst and extension not in dst:
             dst += extension
 

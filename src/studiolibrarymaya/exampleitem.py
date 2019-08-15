@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 class ExampleItem(baseitem.BaseItem):
 
-    Name = "Example"
-    Extension = ".example"
-    IconPath = os.path.join(os.path.dirname(__file__), "icons", "pose.png")
+    NAME = "Example"
+    EXTENSION = ".example"
+    ICON_PATH = os.path.join(os.path.dirname(__file__), "icons", "pose.png")
 
     def loadSchema(self, **kwargs):
         """

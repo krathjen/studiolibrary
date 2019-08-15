@@ -38,10 +38,10 @@ def load(path, *args, **kwargs):
 
 class AnimItem(baseitem.BaseItem):
 
-    Name = "Animation"
-    Extension = ".anim"
-    IconPath = os.path.join(os.path.dirname(__file__), "icons", "animation.png")
-    TransferClass = mutils.Animation
+    NAME = "Animation"
+    EXTENSION = ".anim"
+    ICON_PATH = os.path.join(os.path.dirname(__file__), "icons", "animation.png")
+    TRANSFER_CLASS = mutils.Animation
 
     def imageSequencePath(self):
         """

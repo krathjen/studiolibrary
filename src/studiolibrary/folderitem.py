@@ -22,25 +22,27 @@ import studiolibrary.widgets
 
 class FolderItem(studiolibrary.LibraryItem):
 
-    SyncOrder = 100
-    MenuOrder = 0
-    EnableNestedItems = True
+    NAME = "Folder"
 
-    Name = "Folder"
-    IconPath = studiolibrary.resource.get("icons/folder.png")
-    TypeIconPath = ""
-    LoadWidgetClass = studiolibrary.widgets.PreviewWidget
-    DefaultThumbnailPath = studiolibrary.resource.get("icons/folder_item.png")
-    TrashIconPath = studiolibrary.resource.get("icons", "delete_96.png")
+    MENU_ORDER = 0  # Show at the top of the menu
+    SYNC_ORDER = 100  # Last item to run when syncing
 
-    DEFAULT_ICON_COLORS =[
-                    "rgb(239, 112, 99)",
-                    "rgb(239, 207, 103)",
-                    "rgb(136, 200, 101)",
-                    "rgb(111, 183, 239)",
-                    "rgb(199, 142, 220)",
-                    "rgb(200, 200, 200)",
-                ]
+    LOAD_WIDGET_CLASS = studiolibrary.widgets.PreviewWidget
+    ENABLE_NESTED_ITEMS = True
+
+    ICON_PATH = studiolibrary.resource.get("icons/folder.png")
+    TYPE_ICON_PATH = ""  # Don't show a type icon for the folder item
+    TRASH_ICON_PATH = studiolibrary.resource.get("icons", "delete_96.png")
+    THUMBNAIL_PATH = studiolibrary.resource.get("icons/folder_item.png")
+
+    DEFAULT_ICON_COLORS = [
+        "rgb(239, 112, 99)",
+        "rgb(239, 207, 103)",
+        "rgb(136, 200, 101)",
+        "rgb(111, 183, 239)",
+        "rgb(199, 142, 220)",
+        "rgb(200, 200, 200)",
+    ]
 
     @classmethod
     def match(cls, path):
@@ -214,7 +216,7 @@ class FolderItem(studiolibrary.LibraryItem):
         data = super(FolderItem, self).itemData()
 
         if data.get("path", "").endswith("Trash"):
-            data["iconPath"] = self.TrashIconPath
+            data["iconPath"] = self.TRASH_ICON_PATH
 
         return data
 

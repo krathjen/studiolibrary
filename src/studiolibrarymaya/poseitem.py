@@ -127,12 +127,12 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
 class PoseItem(baseitem.BaseItem):
 
-    Name = "Pose"
-    Extension = ".pose"
-    IconPath = os.path.join(os.path.dirname(__file__), "icons", "pose.png")
-    LoadWidgetClass = PoseLoadWidget
-    TransferClass = mutils.Pose
-    TransferBasename = "pose.json"
+    NAME = "Pose"
+    EXTENSION = ".pose"
+    ICON_PATH = os.path.join(os.path.dirname(__file__), "icons", "pose.png")
+    LOAD_WIDGET_CLASS = PoseLoadWidget
+    TRANSFER_CLASS = mutils.Pose
+    TRANSFER_BASENAME = "pose.json"
 
     def __init__(self, *args, **kwargs):
         """

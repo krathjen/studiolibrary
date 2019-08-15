@@ -85,27 +85,12 @@ class LibraryWindow(QtWidgets.QWidget):
     }
 
     TRASH_ENABLED = True
-    PROGRESS_BAR_VISIBLE = True
-    SETTINGS_DIALOG_ENABLED = True
-    RECURSIVE_SEARCH_ENABLED = False
     TEMP_PATH_MENU_ENABLED = False
 
     DPI_ENABLED = studiolibrary.config.get("scaleFactorEnabled", False)
 
     ICON_COLOR = QtGui.QColor(255, 255, 255, 210)
     ICON_BADGE_COLOR = QtGui.QColor(230, 230, 0)
-
-    globalSignal = GlobalSignal()
-
-    # Local signal
-    loaded = QtCore.Signal()
-    lockChanged = QtCore.Signal(object)
-
-    itemRenamed = QtCore.Signal(str, str)
-    itemSelectionChanged = QtCore.Signal(object)
-
-    folderRenamed = QtCore.Signal(str, str)
-    folderSelectionChanged = QtCore.Signal(object)
 
     # Customize widget classes
     SORTBY_MENU_CLASS = studiolibrary.widgets.SortByMenu
@@ -120,6 +105,18 @@ class LibraryWindow(QtWidgets.QWidget):
 
     # Customize library classe
     LIBRARY_CLASS = studiolibrary.Library
+
+    globalSignal = GlobalSignal()
+
+    # Local signal
+    loaded = QtCore.Signal()
+    lockChanged = QtCore.Signal(object)
+
+    itemRenamed = QtCore.Signal(str, str)
+    itemSelectionChanged = QtCore.Signal(object)
+
+    folderRenamed = QtCore.Signal(str, str)
+    folderSelectionChanged = QtCore.Signal(object)
 
     @staticmethod
     def instances():
@@ -233,7 +230,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self._checkForUpdateThread = None
 
         self._trashEnabled = self.TRASH_ENABLED
-        self._recursiveSearchEnabled = self.RECURSIVE_SEARCH_ENABLED
 
         self._itemsHiddenCount = 0
         self._itemsVisibleCount = 0
@@ -718,8 +714,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self.setProgressBarValue("Syncing")
         studioqt.fadeIn(progressBar, duration=1, onFinished=_sync)
 
-        if self.PROGRESS_BAR_VISIBLE:
-            progressBar.show()
+        progressBar.show()
 
     def setProgressBarValue(self, label, value=-1):
         """Set the progress bar label and value"""
@@ -1076,7 +1071,7 @@ class LibraryWindow(QtWidgets.QWidget):
         menu.setTitle("New")
 
         def _sortKey(item):
-            return item.MenuOrder
+            return item.MENU_ORDER
 
         for cls in sorted(studiolibrary.registeredItems(), key=_sortKey):
             action = cls.createAction(menu, self)
@@ -1218,10 +1213,9 @@ class LibraryWindow(QtWidgets.QWidget):
         action = menu.addAction("Sync")
         action.triggered.connect(self.sync)
 
-        if self.SETTINGS_DIALOG_ENABLED:
-            menu.addSeparator()
-            action = menu.addAction("Settings")
-            action.triggered.connect(self.showSettingDialog)
+        menu.addSeparator()
+        action = menu.addAction("Settings")
+        action.triggered.connect(self.showSettingDialog)
 
         menu.addSeparator()
 
@@ -2727,8 +2721,6 @@ class LibraryWindow(QtWidgets.QWidget):
         :rtype: None
         """
         self.sidebarWidget().setRecursive(value)
-        # self._recursiveSearchEnabled = value
-        # self.refresh()
 
     @staticmethod
     def help():
