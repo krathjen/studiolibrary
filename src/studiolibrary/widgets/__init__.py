@@ -30,6 +30,7 @@ from .themesmenu import Theme, ThemesMenu
 from .librariesmenu import LibrariesMenu
 from .slideraction import SliderAction
 from .separatoraction import SeparatorAction
+from .iconpicker import IconPickerAction, IconPickerWidget
 from .colorpicker import ColorPickerAction, ColorPickerWidget
 from .sequencewidget import ImageSequenceWidget
 from .formwidget import FormWidget, FormDialog

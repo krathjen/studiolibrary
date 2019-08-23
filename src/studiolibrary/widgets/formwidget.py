@@ -48,6 +48,7 @@ FIELD_WIDGET_REGISTRY = {
     "slider": fieldwidgets.SliderFieldWidget,
     "objects": fieldwidgets.ObjectsFieldWidget,
     "separator": fieldwidgets.SeparatorFieldWidget,
+    "iconPicker": fieldwidgets.IconPickerFieldWidget,
     "buttonGroup": fieldwidgets.ButtonGroupFieldWidget,
 }
 

@@ -20,6 +20,7 @@ import studioqt
 
 from . import groupboxwidget
 from . import colorpicker
+from . import iconpicker
 
 
 logger = logging.getLogger(__name__)
@@ -1371,6 +1372,9 @@ class ColorFieldWidget(FieldWidget):
         self.setValue(color)
         self.emitValueChanged()
 
+    def setItems(self, items):
+        self.widget().setColors(items)
+
     def setValue(self, value):
         """
         Set the current value for the slider.
@@ -1386,6 +1390,69 @@ class ColorFieldWidget(FieldWidget):
         :rtype: str 
         """
         return self.widget().currentColor()
+
+
+class IconPickerFieldWidget(FieldWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(IconPickerFieldWidget, self).__init__(*args, **kwargs)
+
+        self._value = "rgb(100,100,100)"
+
+        widget = iconpicker.IconPickerWidget()
+        widget.setObjectName('widget')
+        widget.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Preferred
+        )
+        widget.iconChanged.connect(self._iconChanged)
+        self.setWidget(widget)
+
+    def setData(self, data):
+        """
+        Overriding this method to add support for a "colors" key.
+
+        :type data: dict
+        """
+        colors = data.get("colors")
+        if colors:
+            self.widget().setColors(colors)
+
+        super(IconPickerFieldWidget, self).setData(data)
+
+    def _iconChanged(self, icon):
+        """
+        Triggered when the color changes from the color browser.
+
+        :type icon: QtGui.QColor
+        """
+        self.setValue(icon)
+        self.emitValueChanged()
+
+    def setValue(self, value):
+        """
+        Set the current value for the slider.
+
+        :type value: str
+        """
+        self.widget().setCurrentIcon(value)
+
+    def setItems(self, items):
+        """
+        Set the icons to be displayed in the picker.
+
+        :type items: str
+        """
+        self.widget().setIcons(items)
+        self.widget().menuButton().setVisible(False)
+
+    def value(self):
+        """
+        Get the current value for the slider.
+
+        :rtype: str
+        """
+        return self.widget().currentIcon()
 
 
 class ImageFieldWidget(FieldWidget):
