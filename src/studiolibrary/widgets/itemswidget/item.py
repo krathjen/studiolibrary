@@ -94,6 +94,8 @@ class Item(QtWidgets.QTreeWidgetItem):
     ENABLE_THUMBNAIL_THREAD = True
     PAINT_SLIDER = False
 
+    _TYPE_PIXMAP_CACHE = {}
+
     _globalSignals = GlobalSignals()
     sliderChanged = _globalSignals.sliderChanged
 
@@ -1455,11 +1457,13 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :rtype: QtWidgets.QPixmap
         """
-        if not self._typePixmap:
-            iconPath = self.typeIconPath()
-            if iconPath and os.path.exists(iconPath):
-                self._typePixmap = QtGui.QPixmap(iconPath)
-        return self._typePixmap
+        path = self.typeIconPath()
+        pixmap = self._TYPE_PIXMAP_CACHE.get(path)
+
+        if not pixmap and path and os.path.exists(path):
+            self._TYPE_PIXMAP_CACHE[path] = QtGui.QPixmap(path)
+
+        return self._TYPE_PIXMAP_CACHE.get(path)
 
     def typeIconRect(self, option):
         """
