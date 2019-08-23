@@ -29,93 +29,46 @@ def get(*args):
 
     :rtype: str 
     """
-    return Resource().get(*args)
+    path = os.path.join(RESOURCE_DIRNAME, *args)
+    return utils.normPath(path)
 
 
 def icon(*args, **kwargs):
     """
     Return an Icon object from the given resource name.
-    :rtype: str 
+
+    :rtype: str
     """
     path = get("icons", *args)
-    return Resource().icon(path, **kwargs)
+    return Icon(pixmap(path, **kwargs))
 
 
-def pixmap(*args, **kwargs):
+def pixmap(name, scope="icons", extension="png", color=None):
     """
     Return a Pixmap object from the given resource name.
-    :rtype: str 
+
+    :type name: str
+    :type scope: str
+    :type extension: str
+    :type color: str
+    :rtype: QtWidgets.QPixmap
     """
-    return Resource().pixmap(*args, **kwargs)
+    if name.endswith(".svg"):
+        extension = ""
 
+    path = ""
 
-class Resource(object):
+    if os.path.exists(name):
+        path = name
 
-    DEFAULT_DIRNAME = RESOURCE_DIRNAME
+    elif extension:
+        path = get(scope, name + "." + extension)
+        if not os.path.exists(path):
+            path = get(scope, name + ".svg")
 
-    def __init__(self, *args):
-        """"""
-        dirname = ""
+    p = Pixmap(path)
 
-        if args:
-            dirname = os.path.join(*args)
+    if color:
+        p.setColor(color)
 
-        if os.path.isfile(dirname):
-            dirname = os.path.dirname(dirname)
-
-        self._dirname = dirname or self.DEFAULT_DIRNAME
-
-    def dirname(self):
-        """
-        :rtype: str
-        """
-        return self._dirname
-
-    def get(self, *args):
-        """
-        Return the resource path for the given args.
-
-        :rtype: str
-        """
-        path = os.path.join(self.dirname(), *args)
-        return utils.normPath(path)
-
-    def icon(self, name, extension="png", color=None):
-        """
-        Return an Icon object from the given resource name.
-
-        :type name: str
-        :type extension: str
-        :rtype: QtGui.QIcon
-        """
-        p = self.pixmap(name, extension=extension, color=color)
-        return Icon(p)
-
-    def pixmap(self, name, scope="icons", extension="png", color=None):
-        """
-        Return a Pixmap object from the given resource name.
-
-        :type name: str
-        :type scope: str
-        :type extension: str
-        :rtype: QtWidgets.QPixmap
-        """
-        if name.endswith(".svg"):
-            extension = ""
-
-        path = ""
-
-        if os.path.exists(name):
-            path = name
-
-        elif extension:
-            path = self.get(scope, name + "." + extension)
-            if not os.path.exists(path):
-                path = self.get(scope, name + ".svg")
-
-        p = Pixmap(path)
-
-        if color:
-            p.setColor(color)
-
-        return p
+    return p
