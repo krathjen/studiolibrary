@@ -19,72 +19,66 @@ _config = None
 
 def get(*args):
     """
-    This is a convenience function for getting values from the config.
+    Get values from the config.
 
     :rtype: str
-    """
-    return config().get(*args)
-
-
-def config():
-    """
-    Get the config object for the current environment.
-
-    :rtype: Config
     """
     global _config
 
     if not _config:
-        _config = Config()
-        _config.read()
+        _config = read(paths())
 
-    return _config
+    return _config.get(*args)
 
 
-class Config(dict):
+def paths():
     """
+    Return all possible config paths.
+
+    :rtype: list[str]
+    """
+    cwd = os.path.dirname(__file__)
+    paths_ = [os.path.join(cwd, "config", "default.json")]
+
+    path = os.environ.get("STUDIO_LIBRARY_CONFIG_PATH")
+    path = path or os.path.join(cwd, "config", "config.json")
+
+    if not os.path.exists(path):
+        cwd = os.path.dirname(os.path.dirname(cwd))
+        path = os.path.join(cwd, "config", "config.json")
+
+    if os.path.exists(path):
+        paths_.append(path)
+
+    return paths_
+
+
+def read(paths):
+    """
+    Read all paths and overwrite the keys with each successive file.
+
     A custom config parser for passing JSON files.
 
     We use this instead of the standard ConfigParser as the JSON format
     can support list and dict types.
 
     This parser can also support comments using the following style "//"
+
+    :type paths: list[str]
+    :rtype: dict
     """
+    conf = {}
 
-    @staticmethod
-    def paths():
-        """
-        Return all possible config paths.
+    for path in paths:
+        lines = []
 
-        :rtype: list[str]
-        """
-        cwd = os.path.dirname(__file__)
-        paths = [os.path.join(cwd, "config", "default.json")]
+        with open(path) as f:
+            for line in f.readlines():
+                if not line.strip().startswith('//'):
+                    lines.append(line)
 
-        path = os.environ.get("STUDIO_LIBRARY_CONFIG_PATH")
-        path = path or os.path.join(cwd, "config", "config.json")
+        data = '\n'.join(lines)
+        if data:
+            conf.update(json.loads(data))
 
-        if not os.path.exists(path):
-            cwd = os.path.dirname(os.path.dirname(cwd))
-            path = os.path.join(cwd, "config", "config.json")
-
-        if os.path.exists(path):
-            paths.append(path)
-
-        return paths
-
-    def read(self):
-        """Read all paths and overwrite the keys with each successive file."""
-        self.clear()
-
-        for path in self.paths():
-            lines = []
-
-            with open(path) as f:
-                for line in f.readlines():
-                    if not line.strip().startswith('//'):
-                        lines.append(line)
-
-            data = '\n'.join(lines)
-            if data:
-                self.update(json.loads(data))
+    return conf
