@@ -10,6 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import logging
 
 from studiovendor.Qt import QtGui
@@ -28,14 +29,18 @@ logger = logging.getLogger(__name__)
 
 class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
 
+    PIXMAP_CACHE = {}
+
     def __init__(self, *args):
         QtWidgets.QTreeWidgetItem.__init__(self, *args)
 
         self._path = ""
         self._bold = None
+        self._iconVisible = True
         self._iconPath = None
         self._iconColor = None
         self._textColor = None
+        self._iconKey = None
         self._expandedIconPath = None
         self._collapsedIconPath = None
 
@@ -49,13 +54,59 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         return self._iconPath or self.defaultIconPath()
 
+    def createPixmap(self, path, color):
+        """
+        Create a new Pixmap from the given path.
+
+        :type path: str
+        :type color: str or QtCore.QColor
+        :rtype: QtCore.QPixmap
+        """
+        dpi = self.treeWidget().dpi()
+        key = path + color + "DPI-" + str(dpi)
+        pixmap = self.PIXMAP_CACHE.get(key)
+
+        if not pixmap:
+
+            width = 20 * dpi
+            height = 18 * dpi
+
+            if "/" not in path and "\\" not in path:
+                path = studiolibrary.resource.get("icons", path)
+
+            if not os.path.exists(path):
+                path = self.defaultIconPath()
+
+            pixmap2 = studioqt.Pixmap(path)
+            pixmap2.setColor(color)
+            pixmap2 = pixmap2.scaled(
+                16 * dpi,
+                16 * dpi,
+                QtCore.Qt.KeepAspectRatio,
+                QtCore.Qt.SmoothTransformation
+            )
+
+            x = (width - pixmap2.width()) / 2
+            y = (height - pixmap2.height()) / 2
+
+            pixmap = QtGui.QPixmap(QtCore.QSize(width, height))
+            pixmap.fill(QtCore.Qt.transparent)
+
+            painter = QtGui.QPainter(pixmap)
+            painter.drawPixmap(x, y, pixmap2)
+            painter.end()
+
+            self.PIXMAP_CACHE[key] = pixmap
+
+        return pixmap
+
     def expandedIconPath(self):
         """
         Return the icon path to be shown when expanded.
         
         :rtype: str 
         """
-        return self._expandedIconPath or studiolibrary.resource.get("icons", "folder_open")
+        return self._iconPath or studiolibrary.resource.get("icons", "folder_open.png")
 
     def collapsedIconPath(self):
         """
@@ -63,7 +114,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: str 
         """
-        return self._collapsedIconPath or studiolibrary.resource.get("icons", "folder_48")
+        return self._iconPath or self.defaultIconPath()
 
     def defaultIconPath(self):
         """
@@ -71,7 +122,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: str 
         """
-        return ""
+        return studiolibrary.resource.get("icons", "folder.svg")
 
     def setIconPath(self, path):
         """
@@ -82,6 +133,22 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         """
         self._iconPath = path
         self.updateIcon()
+
+    def setIconVisible(self, visible):
+        """
+        Set the icon visibility for the folder item
+
+        :type visible: bool
+        """
+        self._iconVisible = visible
+
+    def isIconVisible(self):
+        """
+        Check if the icon is visible.
+
+        :rtype: bool
+        """
+        return self._iconVisible
 
     def iconColor(self):
         """
@@ -180,20 +247,15 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         
         :rtype: None 
         """
-        path = self.iconPath()
-
-        if not path:
+        if self.isIconVisible():
             if self.isExpanded():
                 path = self.expandedIconPath()
             else:
                 path = self.collapsedIconPath()
 
-        color = self.iconColor()
+            pixmap = self.createPixmap(path, self.iconColor())
 
-        pixmap = studioqt.Pixmap(path)
-        pixmap.setColor(color)
-
-        self.setIcon(0, pixmap)
+            self.setIcon(0, pixmap)
 
     def bold(self):
         """
@@ -260,10 +322,6 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         if isExpanded:
             settings["expanded"] = isExpanded
 
-        iconPath = self.iconPath()
-        if iconPath != self.defaultIconPath():
-            settings["iconPath"] = iconPath
-
         bold = self._settings.get("bold")
         if bold:
             settings["bold"] = bold
@@ -307,21 +365,21 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         if text:
             self.setText(0, text)
 
-        iconPath = settings.get("iconPath")
-        if iconPath:
+        iconPath = settings.get("icon")
+        if iconPath is not None:
             self.setIconPath(iconPath)
 
-        iconColor = settings.get("iconColor") or settings.get("color")
+        iconColor = settings.get("color")
         if iconColor is not None:
             self.setIconColor(iconColor)
 
-        isSelected = settings.get("selected")
-        if isSelected is not None:
-            self.setSelected(isSelected)
+        selected = settings.get("selected")
+        if selected is not None:
+            self.setSelected(selected)
 
-        isExpanded = settings.get("expanded")
-        if isExpanded is not None and self.childCount() > 0:
-            self.setExpanded(isExpanded)
+        expanded = settings.get("expanded")
+        if expanded is not None and self.childCount() > 0:
+            self.setExpanded(expanded)
             self.updateIcon()
 
         bold = settings.get("bold")

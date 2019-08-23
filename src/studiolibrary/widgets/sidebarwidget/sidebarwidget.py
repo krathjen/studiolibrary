@@ -356,11 +356,15 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         :type dpi: float
         :rtype: None
         """
-        size = 24 * dpi
-        self.setIndentation(14 * dpi)
-        self.setMinimumWidth(22 * dpi)
-        self.setIconSize(QtCore.QSize(size, size))
-        self.setStyleSheet("height: {size}".format(size=size))
+        self._dpi = dpi
+
+        width = 20 * dpi
+        height = 18 * dpi
+
+        self.setIndentation(9 * dpi)
+        self.setMinimumWidth(20 * dpi)
+        self.setIconSize(QtCore.QSize(width, height))
+        self.setStyleSheet("height: {height}px;".format(height=height))
 
     def update(self, *args):
         """
@@ -654,10 +658,10 @@ class SidebarWidget(QtWidgets.QTreeWidget):
             self._index[path] = item
 
             if self.rootText():
-                item.setText(0, self.rootText())
+                item.setText(0, " " + self.rootText())
                 item.setBold(True)
-                item.setIconPath('none')
                 item.setExpanded(True)
+                item.setIconVisible(False)
 
             def _recursive(parent, children, split=None):
                 for text, val in sorted(children.iteritems()):
