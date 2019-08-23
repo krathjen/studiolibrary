@@ -38,7 +38,6 @@ MenuBarWidget  {
 }
 
 
-
 /*
 MenuBarWidget QToolButton {
     min-height: 24;
@@ -238,7 +237,7 @@ QTreeView, QListView, QPushButton {
 }
 
 QTreeView::item, QTreeView::branch {
-	height: 23px;
+	height: 22px;
 	show-decoration-selected: 1; /* make the selection span the entire width of the view */
 	background-color: BACKGROUND_COLOR;
 }
@@ -905,19 +904,73 @@ Preview Widget Color Picker
 
 PreviewWidget ColorPickerWidget {
    margin: 0px;
-   max-height: 18px;
-   min-height: 18px;
+   max-height: 14px;
+   min-height: 14px;
 }
 
 PreviewWidget ColorPickerWidget #colorButton {
-   max-width: 18px;
-   min-width: 18px;
-   border-radius: 9px;
+   max-width: 14px;
+   min-width: 14px;
+   border-radius: 7px;
 }
 
 PreviewWidget ColorPickerWidget #colorButton:checked {
     border: 2px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 255);
 }
+
+
+/*
+----------------------------------------
+Icon Picker Action
+----------------------------------------
+*/
+
+IconPickerWidget {
+   max-height: 156px;
+   min-height: 156px;
+}
+
+
+IconPickerWidget #iconButton {
+   margin: 0px;
+   max-width: 16px;
+   min-width: 16px;
+   max-height: 16px;
+   min-height: 16px;
+}
+
+#iconPickerAction {
+   max-height: 108px;
+   min-height: 108px;
+   margin-left: 10px;
+   margin-bottom: 10px;
+}
+
+#iconPickerAction #iconButton {
+   padding: 2px;
+   max-width: 12px;
+   min-width: 12px;
+   max-height: 12px;
+   min-height: 12px;
+}
+
+IconPickerWidget #iconButton {
+    margin: 5px;
+    align: center;
+    min-width: 22px;
+    min-height: 22px;
+    border-radius: 2px;
+    background-color: rgb(0,100,0,0);
+}
+
+IconPickerWidget #iconButton:checked {
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 50);
+}
+
+IconPickerWidget #iconButton:hover {
+    background-color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 75);
+}
+
 
 /*
 ----------------------------------------
@@ -942,7 +995,6 @@ Color Picker Action
 #colorPickerAction #colorButton:checked {
     border: 2px solid rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 255);
 }
-
 
 Lightbox {
     background-color: rgb(0, 0, 0, 100);
