@@ -34,16 +34,14 @@ class ExampleItem(baseitem.BaseItem):
 
         :rtype: list[dict]
         """
-        schema = [
+        return [
             {
-                "name": "myOption",
+                "name": "option",
                 "type": "bool",
                 "default": False,
                 "persistent": True,
             },
         ]
-
-        return schema
 
     def load(self, **kwargs):
         """
