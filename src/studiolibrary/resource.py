@@ -15,6 +15,8 @@ import os
 from studioqt import Icon
 from studioqt import Pixmap
 
+from . import utils
+
 
 PATH = os.path.abspath(__file__)
 DIRNAME = os.path.dirname(PATH)
@@ -75,7 +77,8 @@ class Resource(object):
 
         :rtype: str
         """
-        return os.path.join(self.dirname(), *args)
+        path = os.path.join(self.dirname(), *args)
+        return utils.normPath(path)
 
     def icon(self, name, extension="png", color=None):
         """
@@ -97,10 +100,18 @@ class Resource(object):
         :type extension: str
         :rtype: QtWidgets.QPixmap
         """
+        if name.endswith(".svg"):
+            extension = ""
+
+        path = ""
+
         if os.path.exists(name):
             path = name
-        else:
+
+        elif extension:
             path = self.get(scope, name + "." + extension)
+            if not os.path.exists(path):
+                path = self.get(scope, name + ".svg")
 
         p = Pixmap(path)
 

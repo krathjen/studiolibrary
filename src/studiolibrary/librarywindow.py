@@ -816,15 +816,9 @@ class LibraryWindow(QtWidgets.QWidget):
         queries = [{'filters': [('type', 'is', 'Folder')]}]
 
         items = self.library().findItems(queries)
-        trashIconPath = studiolibrary.resource.get("icons", "delete_96.png")
 
         for item in items:
-            path = item.path()
-
-            if item.path().endswith('Trash'):
-                data[path] = {'iconPath': trashIconPath}
-            else:
-                data[path] = item.itemData()
+            data[item.path()] = item.itemData()
 
         self.sidebarWidget().setData(data, root=root)
 

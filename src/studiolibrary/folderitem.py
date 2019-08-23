@@ -30,10 +30,12 @@ class FolderItem(studiolibrary.LibraryItem):
     LOAD_WIDGET_CLASS = studiolibrary.widgets.PreviewWidget
     ENABLE_NESTED_ITEMS = True
 
-    ICON_PATH = studiolibrary.resource.get("icons/folder.png")
+    ICON_PATH = studiolibrary.resource.get("icons", "folder.svg")
     TYPE_ICON_PATH = ""  # Don't show a type icon for the folder item
-    TRASH_ICON_PATH = studiolibrary.resource.get("icons", "delete_96.png")
-    THUMBNAIL_PATH = studiolibrary.resource.get("icons/folder_item.png")
+    TRASH_ICON_PATH = studiolibrary.resource.get("icons", "trash.svg")
+    THUMBNAIL_PATH = studiolibrary.resource.get("icons", "folder_item.png")
+
+    DEFAULT_ICON_COLOR = "rgb(220,220,220)"
 
     DEFAULT_ICON_COLORS = [
         "rgb(239, 112, 99)",
@@ -41,7 +43,34 @@ class FolderItem(studiolibrary.LibraryItem):
         "rgb(136, 200, 101)",
         "rgb(111, 183, 239)",
         "rgb(199, 142, 220)",
-        "rgb(200, 200, 200)",
+        DEFAULT_ICON_COLOR,
+    ]
+
+    DEFAULT_ICONS = [
+        "folder.svg",
+        "user.svg",
+        "character.svg",
+        "users.svg",
+        "inbox.svg",
+        "favorite.svg",
+        "shot.svg",
+        "asset.svg",
+        "assets.svg",
+        "cloud.svg",
+        "book.svg",
+        "archive.svg",
+        "circle.svg",
+        "share.svg",
+        "tree.svg",
+        "environment.svg",
+        "vehicle.svg",
+        "trash.svg",
+        "layers.svg",
+        "database.svg",
+        "video.svg",
+        "face.svg",
+        "hand.svg",
+        "globe.svg",
     ]
 
     @classmethod
@@ -63,8 +92,18 @@ class FolderItem(studiolibrary.LibraryItem):
         """
         pass
 
+    def _showPreviewFromMenu(self):
+
+        self.libraryWindow().itemsWidget().clearSelection()
+        self.showPreviewWidget(self.libraryWindow())
+
     def contextEditMenu(self, menu, items=None):
         super(FolderItem, self).contextEditMenu(menu, items=items)
+
+        action = QtWidgets.QAction("Show in Preview", menu)
+
+        action.triggered.connect(self._showPreviewFromMenu)
+        menu.addAction(action)
 
         action = studiolibrary.widgets.colorpicker.ColorPickerAction(menu)
 
@@ -72,12 +111,22 @@ class FolderItem(studiolibrary.LibraryItem):
         action.picker().colorChanged.connect(self.setIconColor)
         action.picker().setCurrentColor(self.iconColor())
         action.picker().menuButton().hide()
+        menu.addAction(action)
+
+        iconName = self.readMetadata().get("icon", "")
+
+        action = studiolibrary.widgets.iconpicker.IconPickerAction(menu)
+
+        action.picker().setIcons(self.DEFAULT_ICONS)
+        action.picker().setCurrentIcon(iconName)
+        action.picker().iconChanged.connect(self.setCustomIcon)
+        action.picker().menuButton().hide()
 
         menu.addAction(action)
 
     def iconColor(self):
         """
-        Get the icon color for the folder.
+        Get the icon color for the folder item.
 
         :rtype: str
         """
@@ -85,19 +134,60 @@ class FolderItem(studiolibrary.LibraryItem):
 
     def setIconColor(self, color):
         """
-        Set the icon color for the folder.
+        Set the icon color for the folder item.
 
         :type color: str
         """
-        if color == "rgb(200, 200, 200)":
+        if color == self.DEFAULT_ICON_COLOR:
             color = ""
 
-        self.saveMetadata({"color": color})
-        self.syncItemData(emitDataChanged=False)
+        self.updateMetadata({"color": color})
 
-        if self.libraryWindow():
-            self.libraryWindow().setFolderSettings(self.path(), self.itemData())
-            self.updateIcon()
+    def customIconPath(self):
+        """
+        Get the icon for the folder item.
+
+        :rtype: str
+        """
+        return self.readMetadata().get("icon", "")
+
+    def setCustomIcon(self, name):
+        """
+        Set the icon for the folder item.
+
+        :type name: str
+        """
+        if name == "folder.svg":
+            name = ""
+
+        self.updateMetadata({"icon": name})
+
+    def thumbnailIcon(self):
+        """
+        Overriding this method add support for dynamic icon colors.
+
+        :rtype: QtGui.QIcon
+        """
+        iconPath = self.customIconPath()
+
+        if iconPath and "/" not in iconPath and "\\" not in iconPath:
+            iconPath = studiolibrary.resource.get("icons", iconPath)
+
+        if not iconPath or not os.path.exists(iconPath):
+            iconPath = self.THUMBNAIL_PATH
+
+        icon = studioqt.Icon(iconPath)
+        color = self.iconColor()
+
+        # We use the default color for SVG files
+        if not color and iconPath.endswith(".svg"):
+            color = self.DEFAULT_ICON_COLOR
+
+        if color:
+            color = studioqt.Color.fromString(color)
+            icon.setColor(color)
+
+        return icon
 
     def loadValidator(self, **kwargs):
         """
@@ -108,20 +198,8 @@ class FolderItem(studiolibrary.LibraryItem):
         if kwargs.get("fieldChanged") == "color":
             self.setIconColor(kwargs.get("color"))
 
-    def thumbnailIcon(self):
-        """
-        Overriding this method add support for dynamic icon colors.
-
-        :rtype: QtGui.QIcon
-        """
-        path = studiolibrary.resource.get("icons/folder_item.png")
-        icon = studioqt.Icon(path)
-
-        if self.iconColor():
-            color = studioqt.Color.fromString(self.iconColor())
-            icon.setColor(color)
-
-        return icon
+        if kwargs.get("fieldChanged") == "icon":
+            self.setCustomIcon(kwargs.get("icon"))
 
     def loadSchema(self):
         """
@@ -134,6 +212,8 @@ class FolderItem(studiolibrary.LibraryItem):
 
         modified = os.stat(self.path()).st_mtime
         modified = datetime.fromtimestamp(modified).strftime("%Y-%m-%d %H:%M %p")
+
+        iconName = self.readMetadata().get("icon", "")
 
         return [
             {
@@ -171,7 +251,17 @@ class FolderItem(studiolibrary.LibraryItem):
                 "type": "color",
                 "value": self.iconColor(),
                 "layout": "vertical",
+                "label": {"visible": False},
                 "colors": self.DEFAULT_ICON_COLORS,
+            },
+
+            {
+                "name": "icon",
+                "type": "iconPicker",
+                "value": iconName,
+                "layout": "vertical",
+                "label": {"visible": False},
+                "items": self.DEFAULT_ICONS,
             }
         ]
 
@@ -202,10 +292,16 @@ class FolderItem(studiolibrary.LibraryItem):
                 libraryWindow.refresh()
                 libraryWindow.selectFolderPath(path)
 
+    def updateMetadata(self, metadata):
+        super(FolderItem, self).updateMetadata(metadata)
+
+        if self.libraryWindow():
+            self.libraryWindow().setFolderSettings(self.path(), self.itemData())
+            self.updateIcon()
+
     def createItemData(self):
 
         data = self.readMetadata()
-
         data.update(super(FolderItem, self).createItemData())
         data["type"] = "Folder"
 
@@ -216,7 +312,7 @@ class FolderItem(studiolibrary.LibraryItem):
         data = super(FolderItem, self).itemData()
 
         if data.get("path", "").endswith("Trash"):
-            data["iconPath"] = self.TRASH_ICON_PATH
+            data["icon"] = self.TRASH_ICON_PATH
 
         return data
 
@@ -227,6 +323,3 @@ class FolderItem(studiolibrary.LibraryItem):
     def save(self, *args, **kwargs):
         """Adding this method to avoid NotImpementedError."""
         pass
-
-
-studiolibrary.registerItem(FolderItem)

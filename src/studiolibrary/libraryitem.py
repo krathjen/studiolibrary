@@ -55,6 +55,7 @@ class LibraryItemSignals(QtCore.QObject):
 class LibraryItem(studiolibrary.widgets.Item):
 
     NAME = ""
+    TYPE = ""
     THUMBNAIL_PATH = studiolibrary.resource.get("icons", "thumbnail.png")
 
     EXTENSION = ""
@@ -190,6 +191,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         self._library = None
         self._metadata = None
         self._libraryWindow = None
+        self._metadata = None
 
         self._readOnly = False
         self._ignoreExistsDialog = False
@@ -576,6 +578,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         path = studiolibrary.formatPath(formatString, self.path())
         studiolibrary.saveJson(path, metadata)
         self.setMetadata(metadata)
+        self.syncItemData(emitDataChanged=False)
         self.dataChanged.emit(self)
 
     def readMetadata(self):
@@ -584,10 +587,12 @@ class LibraryItem(studiolibrary.widgets.Item):
         
         :rtype: dict
         """
-        formatString = studiolibrary.config.get('metadataPath')
-        path = studiolibrary.formatPath(formatString, self.path())
-        metadata = studiolibrary.readJson(path)
-        return metadata
+        if self._metadata is None:
+            formatString = studiolibrary.config.get('metadataPath')
+            path = studiolibrary.formatPath(formatString, self.path())
+            self._metadata = studiolibrary.readJson(path)
+
+        return self._metadata
 
     def syncItemData(self, emitDataChanged=True):
         """Sync the item data to the database."""
