@@ -132,9 +132,10 @@ class ColorPickerWidget(QtWidgets.QFrame):
 
         :type event: QtCore.QEvent
         """
-        menu = self.parent().parent()
-        if isinstance(menu, QtWidgets.QMenu):
-            menu.setActiveAction(None)
+        if self.parent():
+            menu = self.parent().parent()
+            if isinstance(menu, QtWidgets.QMenu):
+                menu.setActiveAction(None)
 
     def _colorChanged(self, color):
         """
