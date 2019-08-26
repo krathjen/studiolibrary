@@ -1049,30 +1049,48 @@ def relPath(data, start):
     return data
 
 
-def absPath(data, start):
+def absPath(data, start, depth=3):
     """
     Return an absolute version of all the paths in data using the start path.
     
     :type data: str 
     :type start: str
+    :type depth: int
     :rtype: str 
     """
-    relPath1 = normPath(os.path.dirname(start))
-    relPath2 = normPath(os.path.dirname(relPath1))
-    relPath3 = normPath(os.path.dirname(relPath2))
+    token = ".."
+    pairs = []
+    path = normPath(os.path.dirname(start))
 
-    if not relPath1.endswith("/"):
-        relPath1 += "/"
+    # First create a list of tokens and paths.
+    for i in range(1, depth+1):
+        rel = ((token + "/") * i)
+        pairs.append((rel, path))
+        path = normPath(os.path.dirname(path))
 
-    if not relPath2.endswith("/"):
-        relPath2 += "/"
+    # Second replace the token with the paths.
+    for pair in reversed(pairs):
+        rel, path = pair
 
-    if not relPath3.endswith("/"):
-        relPath3 += "/"
+        # Replace with the trailing slash
+        # '../../', 'P:/LibraryData/'
+        if not rel.endswith("/"):
+            rel += "/"
 
-    data = data.replace('../../../', relPath3)
-    data = data.replace('../../', relPath2)
-    data = data.replace('../', relPath1)
+        if not path.endswith("/"):
+            path += "/"
+
+        data = data.replace(rel, path)
+
+        # Replace without the trailing slash
+        # '../..', 'P:/LibraryData'
+        if rel.endswith("/"):
+            rel = rel[:-1]
+
+        if path.endswith("/"):
+            path = path[:-1]
+
+        data = data.replace(rel, path)
 
     return data
 
@@ -1610,6 +1628,42 @@ def testRelativePaths():
     result = absPath(result, start)
     msg = 'Data does not match "{}" "{}"'.format(result, path)
     assert result == path, msg
+
+    data = """
+    {
+    "P:/LibraryData": {},
+    }
+    """
+
+    expected = """
+    {
+    "../..": {},
+    }
+    """
+
+    data_ = relPath(data, "P:/LibraryData/.studiolibrary/database.json")
+
+    print(data_)
+    msg = "Data does not match {} {}".format(expected, data_)
+    assert data_ == expected, msg
+
+    data = """
+    {
+    "../..": {},
+    }
+    """
+
+    expected = """
+    {
+    "P:/LibraryData": {},
+    }
+    """
+
+    data_ = absPath(data, "P:/LibraryData/.studiolibrary/database.json")
+
+    print(data_)
+    msg = "Data does not match {} {}".format(expected, data_)
+    assert data_ == expected, msg
 
 
 def runTests():
