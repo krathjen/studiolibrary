@@ -153,23 +153,31 @@ class ItemsWidget(QtWidgets.QWidget):
     def updateItems(self):
         """Sets the items to the widget."""
         selectedItems = self.selectedItems()
-        self.clearSelection()
 
-        results = self.dataset().groupedResults()
+        self.treeWidget().blockSignals(True)
 
-        items = []
+        try:
+            self.clearSelection()
 
-        for group in results:
-            if group != "None":
-                groupItem = self.createGroupItem(group)
-                items.append(groupItem)
-            items.extend(results[group])
+            results = self.dataset().groupedResults()
 
-        self.treeWidget().setItems(items)
+            items = []
 
-        if selectedItems:
-            self.selectItems(selectedItems)
-            self.scrollToSelectedItem()
+            for group in results:
+                if group != "None":
+                    groupItem = self.createGroupItem(group)
+                    items.append(groupItem)
+                items.extend(results[group])
+
+            self.treeWidget().setItems(items)
+
+            if selectedItems:
+                self.selectItems(selectedItems)
+                self.scrollToSelectedItem()
+
+        finally:
+            self.treeWidget().blockSignals(False)
+            self.itemSelectionChanged.emit()
 
     def createGroupItem(self, text, children=None):
         """
