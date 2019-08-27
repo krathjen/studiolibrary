@@ -13,6 +13,8 @@
 import os
 from datetime import datetime
 
+from studiovendor.Qt import QtGui
+from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
 
 import studioqt
@@ -35,7 +37,7 @@ class FolderItem(studiolibrary.LibraryItem):
     TRASH_ICON_PATH = studiolibrary.resource.get("icons", "trash.svg")
     THUMBNAIL_PATH = studiolibrary.resource.get("icons", "folder_item.png")
 
-    DEFAULT_ICON_COLOR = "rgb(220,220,220)"
+    DEFAULT_ICON_COLOR = "rgb(150,150,150,100)"
 
     DEFAULT_ICON_COLORS = [
         "rgb(239, 112, 99)",
@@ -72,6 +74,8 @@ class FolderItem(studiolibrary.LibraryItem):
         "hand.svg",
         "globe.svg",
     ]
+
+    _THUMBNAIL_ICON_CACHE = {}
 
     @classmethod
     def match(cls, path):
@@ -168,26 +172,51 @@ class FolderItem(studiolibrary.LibraryItem):
 
         :rtype: QtGui.QIcon
         """
-        iconPath = self.customIconPath()
+        customPath = self.customIconPath()
 
-        if iconPath and "/" not in iconPath and "\\" not in iconPath:
-            iconPath = studiolibrary.resource.get("icons", iconPath)
+        if customPath and "/" not in customPath and "\\" not in customPath:
+            customPath = studiolibrary.resource.get("icons", customPath)
 
-        if not iconPath or not os.path.exists(iconPath):
-            iconPath = self.THUMBNAIL_PATH
-
-        icon = studioqt.Icon(iconPath)
         color = self.iconColor()
-
-        # We use the default color for SVG files
-        if not color and iconPath.endswith(".svg"):
+        if not color:
             color = self.DEFAULT_ICON_COLOR
 
-        if color:
-            color = studioqt.Color.fromString(color)
-            icon.setColor(color)
+        key = customPath + color
+        icon = self._THUMBNAIL_ICON_CACHE.get(key)
 
-        return icon
+        if not icon:
+            color1 = studioqt.Color.fromString(color)
+            pixmap1 = studioqt.Pixmap(self.THUMBNAIL_PATH)
+            pixmap1.setColor(color1)
+            pixmap1 = pixmap1.scaled(
+                128,
+                128,
+                QtCore.Qt.KeepAspectRatio,
+                QtCore.Qt.SmoothTransformation
+            )
+
+            color2 = studioqt.Color.fromString("rgb(255,255,255,150)")
+            pixmap2 = studioqt.Pixmap(customPath)
+            pixmap2.setColor(color2)
+            pixmap2 = pixmap2.scaled(
+                64,
+                64,
+                QtCore.Qt.KeepAspectRatio,
+                QtCore.Qt.SmoothTransformation
+            )
+
+            x = (128 - pixmap2.width()) / 2
+            y = (128 - pixmap2.height()) / 2
+
+            painter = QtGui.QPainter(pixmap1)
+            painter.drawPixmap(x, y+5, pixmap2)
+            painter.end()
+
+            icon = studioqt.Icon(pixmap1)
+
+            self._THUMBNAIL_ICON_CACHE[key] = icon
+
+        return self._THUMBNAIL_ICON_CACHE.get(key)
 
     def loadValidator(self, **kwargs):
         """
