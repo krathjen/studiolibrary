@@ -1415,10 +1415,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :rtype:  None
         """
-        print(len(self.items()))
-
         self.library().saveItemData(self.library()._items, emitDataChanged=True)
-        # self.library().search()
 
     # -------------------------------------------------------------------
     # Support for moving items with drag and drop
