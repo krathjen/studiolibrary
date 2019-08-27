@@ -191,7 +191,6 @@ class LibraryItem(studiolibrary.widgets.Item):
         self._library = None
         self._metadata = None
         self._libraryWindow = None
-        self._metadata = None
 
         self._readOnly = False
         self._ignoreExistsDialog = False

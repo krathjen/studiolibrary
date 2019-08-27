@@ -329,8 +329,12 @@ class FolderItem(studiolibrary.LibraryItem):
             self.updateIcon()
 
     def createItemData(self):
+        """
+        Overriding this method to add the metadata to the item data.
 
-        data = self.readMetadata()
+        :rtype: dict
+        """
+        data = dict(self.readMetadata())
         data.update(super(FolderItem, self).createItemData())
         data["type"] = "Folder"
 
