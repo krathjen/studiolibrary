@@ -1478,7 +1478,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         # Check if the items are moving to another folder.
         for item in items:
-            if item.dirname() == dst:
+            if os.path.dirname(item.path()) == dst:
                 return
 
         dialog = self.createMoveItemsDialog()

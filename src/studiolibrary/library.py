@@ -512,7 +512,7 @@ class Library(QtCore.QObject):
             item = self.itemFromPath(path, **kwargs)
 
             if item:
-                data = item.createItemData(path)
+                data = item.createItemData()
                 item.setItemData(data)
 
                 items.append(item)
