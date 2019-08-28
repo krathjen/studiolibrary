@@ -25,6 +25,7 @@ import studiolibrary.widgets
 class FolderItem(studiolibrary.LibraryItem):
 
     NAME = "Folder"
+    TYPE = "Folder"
 
     MENU_ORDER = 0  # Show at the top of the menu
     SYNC_ORDER = 100  # Last item to run when syncing
@@ -34,7 +35,6 @@ class FolderItem(studiolibrary.LibraryItem):
 
     ICON_PATH = studiolibrary.resource.get("icons", "folder.svg")
     TYPE_ICON_PATH = ""  # Don't show a type icon for the folder item
-    TRASH_ICON_PATH = studiolibrary.resource.get("icons", "trash.svg")
     THUMBNAIL_PATH = studiolibrary.resource.get("icons", "folder_item.png")
 
     DEFAULT_ICON_COLOR = "rgb(150,150,150,100)"
@@ -88,6 +88,35 @@ class FolderItem(studiolibrary.LibraryItem):
         if os.path.isdir(path):
             return True
 
+    def itemData(self):
+        """
+        Reimplementing this method to set a trash folder icon.
+
+        :rtype: dict
+        """
+        data = super(FolderItem, self).itemData()
+
+        if self.path().endswith("Trash") and not data.get("icon"):
+            data["icon"] = "trash.svg"
+
+        return data
+
+    def updateMetadata(self, metadata):
+        """
+        Overriding this method to support updating the library widget directly.
+
+        :type metadata: dict
+        """
+        super(FolderItem, self).updateMetadata(metadata)
+
+        if self.libraryWindow():
+            self.libraryWindow().setFolderSettings(self.path(), self.itemData())
+            self.updateIcon()
+
+    def doubleClicked(self):
+        """Overriding this method to show the items contained in the folder."""
+        self.libraryWindow().selectFolderPath(self.path())
+
     def createOverwriteMenu(self, menu):
         """
         Overwriting this method to ignore/hide the overwrite menu action.
@@ -102,6 +131,12 @@ class FolderItem(studiolibrary.LibraryItem):
         self.showPreviewWidget(self.libraryWindow())
 
     def contextEditMenu(self, menu, items=None):
+        """
+        Called when creating the context menu for the item.
+
+        :type menu: QtWidgets.QMenu
+        :type items: list[FolderItem] or None
+        """
         super(FolderItem, self).contextEditMenu(menu, items=items)
 
         action = QtWidgets.QAction("Show in Preview", menu)
@@ -110,17 +145,15 @@ class FolderItem(studiolibrary.LibraryItem):
         menu.addAction(action)
 
         action = studiolibrary.widgets.colorpicker.ColorPickerAction(menu)
-
         action.picker().setColors(self.DEFAULT_ICON_COLORS)
         action.picker().colorChanged.connect(self.setIconColor)
         action.picker().setCurrentColor(self.iconColor())
         action.picker().menuButton().hide()
         menu.addAction(action)
 
-        iconName = self.readMetadata().get("icon", "")
+        iconName = self.itemData().get("icon", "")
 
         action = studiolibrary.widgets.iconpicker.IconPickerAction(menu)
-
         action.picker().setIcons(self.DEFAULT_ICONS)
         action.picker().setCurrentIcon(iconName)
         action.picker().iconChanged.connect(self.setCustomIcon)
@@ -134,7 +167,7 @@ class FolderItem(studiolibrary.LibraryItem):
 
         :rtype: str
         """
-        return self.readMetadata().get("color", "")
+        return self.itemData().get("color", "")
 
     def setIconColor(self, color):
         """
@@ -153,7 +186,7 @@ class FolderItem(studiolibrary.LibraryItem):
 
         :rtype: str
         """
-        return self.readMetadata().get("icon", "")
+        return self.itemData().get("icon", "")
 
     def setCustomIcon(self, name):
         """
@@ -242,7 +275,7 @@ class FolderItem(studiolibrary.LibraryItem):
         modified = os.stat(self.path()).st_mtime
         modified = datetime.fromtimestamp(modified).strftime("%Y-%m-%d %H:%M %p")
 
-        iconName = self.readMetadata().get("icon", "")
+        iconName = self.itemData().get("icon", "")
 
         return [
             {
@@ -320,38 +353,6 @@ class FolderItem(studiolibrary.LibraryItem):
             if libraryWindow:
                 libraryWindow.refresh()
                 libraryWindow.selectFolderPath(path)
-
-    def updateMetadata(self, metadata):
-        super(FolderItem, self).updateMetadata(metadata)
-
-        if self.libraryWindow():
-            self.libraryWindow().setFolderSettings(self.path(), self.itemData())
-            self.updateIcon()
-
-    def createItemData(self):
-        """
-        Overriding this method to add the metadata to the item data.
-
-        :rtype: dict
-        """
-        data = dict(self.readMetadata())
-        data.update(super(FolderItem, self).createItemData())
-        data["type"] = "Folder"
-
-        return data
-
-    def itemData(self):
-        """Overriding this method to set the trash icon"""
-        data = super(FolderItem, self).itemData()
-
-        if data.get("path", "").endswith("Trash"):
-            data["icon"] = self.TRASH_ICON_PATH
-
-        return data
-
-    def doubleClicked(self):
-        """Overriding this method to show the items contained in the folder."""
-        self.libraryWindow().selectFolderPath(self.path())
 
     def save(self, *args, **kwargs):
         """Adding this method to avoid NotImpementedError."""

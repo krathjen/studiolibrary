@@ -843,11 +843,12 @@ class LibraryWindow(QtWidgets.QWidget):
         items = []
 
         if path:
-            item = self.library().itemFromPath(path, libraryWindow=self)
+            queries = [{"filters": [("path", "is", path)]}]
 
-            if item:
-                items = [item]
-                self._item_ = item
+            items = self.library().findItems(queries)
+
+            if items:
+                self._items_ = items
 
         return self.createItemContextMenu(items)
 

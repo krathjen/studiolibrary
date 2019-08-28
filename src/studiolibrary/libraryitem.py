@@ -87,6 +87,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         :rtype: dict
         """
         path = self.path()
+        itemData = dict(self.readMetadata())
 
         dirname, basename, extension = studiolibrary.splitPath(path)
 
@@ -97,15 +98,15 @@ class LibraryItem(studiolibrary.widgets.Item):
         if os.path.exists(path):
             modified = os.path.getmtime(path)
 
-        itemData = {
+        itemData.update({
             "name": name,
             "path": path,
-            "type": extension,
+            "type": self.TYPE or extension,
             "folder": dirname,
             "category": category,
             "modified": modified,
             "__class__": self.__class__.__module__ + "." + self.__class__.__name__
-        }
+        })
 
         return itemData
 
@@ -589,7 +590,11 @@ class LibraryItem(studiolibrary.widgets.Item):
         if self._metadata is None:
             formatString = studiolibrary.config.get('metadataPath')
             path = studiolibrary.formatPath(formatString, self.path())
-            self._metadata = studiolibrary.readJson(path)
+
+            if os.path.exists(path):
+                self._metadata = studiolibrary.readJson(path)
+            else:
+                self._metadata = {}
 
         return self._metadata
 
