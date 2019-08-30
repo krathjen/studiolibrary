@@ -372,6 +372,8 @@ class BaseSaveWidget(QtWidgets.QWidget):
     def accept(self):
         """Triggered when the user clicks the save button."""
         try:
+            self.formWidget().validate()
+
             if self.formWidget().hasErrors():
                 raise Exception("\n".join(self.formWidget().errors()))
 
