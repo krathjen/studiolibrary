@@ -304,7 +304,7 @@ class FolderItem(studiolibrary.LibraryItem):
             },
             {
                 "name": "optionsGroup",
-                "title": "options",
+                "title": "Options",
                 "type": "group",
             },
 
