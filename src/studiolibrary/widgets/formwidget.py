@@ -192,9 +192,8 @@ class FormWidget(QtWidgets.QFrame):
             else:
                 value = defaultValues.get(name)
 
-            if value:
+            if value is not None:
                 values[name] = value
-
 
         self.setValues(values)
 

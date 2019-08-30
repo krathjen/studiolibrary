@@ -33,13 +33,14 @@ class PreviewWidget(QtWidgets.QWidget):
         iconGroupBoxWidget.setPersistent(True)
         self.ui.iconTitleFrame.layout().addWidget(iconGroupBoxWidget)
 
-        self._formWidget = studiolibrary.widgets.FormWidget(self)
-        self.ui.formFrame.layout().addWidget(self._formWidget)
-
         schema = item.loadSchema()
         if schema:
+            self._formWidget = studiolibrary.widgets.FormWidget(self)
+            self._formWidget.setObjectName(item.__class__.__name__ + "Form")
             self._formWidget.setSchema(item.loadSchema())
             self._formWidget.setValidator(self.validator)
+
+            self.ui.formFrame.layout().addWidget(self._formWidget)
 
         self.ui.acceptButton.hide()
         self.ui.acceptButton.setText("Load")
@@ -118,7 +119,6 @@ class PreviewWidget(QtWidgets.QWidget):
         """
         if self._formWidget:
             self._formWidget.savePersistentValues()
-
         QtWidgets.QWidget.close(self)
 
     def resizeEvent(self, event):
