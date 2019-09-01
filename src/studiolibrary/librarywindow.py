@@ -588,7 +588,7 @@ class LibraryWindow(QtWidgets.QWidget):
         library.setPath(path)
 
         if not os.path.exists(library.databasePath()):
-            library.sync()
+            self.sync()
 
         self.refresh()
         self.library().search()
