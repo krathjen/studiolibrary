@@ -468,9 +468,12 @@ class Library(QtCore.QObject):
                     item.setItemData(data[path])
                     self._items.append(item)
                 else:
-                    msg = 'No "__class__" field found for "{0}"'
-                    msg = msg.format(path)
-                    logger.debug(msg)
+                    # This is to support the older database data before v2.6.
+                    # Will remove in a later version.
+                    item = self.itemFromPath(path, library=self, libraryWindow=self._libraryWindow)
+                    if item:
+                        item.setItemData(data[path])
+                        self._items.append(item)
 
         return self._items
 
