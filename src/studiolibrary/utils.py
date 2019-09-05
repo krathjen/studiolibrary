@@ -1114,11 +1114,18 @@ def normPath(path):
     :type path: str
     :rtype: unicode
     """
+    # Check and support the UNC path structure
+    unc = path.startswith("//") or path.startswith("\\")
+
     path = path.replace("//", "/")
     path = path.replace("\\", "/")
 
     if path.endswith("/") and not path.endswith(":/"):
         path = path.rstrip("/")
+
+    # Make sure we retain the UNC path structure
+    if unc and not path.startswith("//"):
+        path = "/" + path
 
     return path
 
@@ -1488,6 +1495,13 @@ def showInFolder(path):
     cmd(*args)
 
 
+def testNormPath():
+    path = "//win - q9t8ucbldlu/Library Data"
+
+    print(normPath(path))
+
+
+
 def testUpdate():
     """
     Test the update dictionary command
@@ -1672,6 +1686,7 @@ def runTests():
     testSplitPath()
     testFormatPath()
     testRelativePaths()
+    testNormPath()
 
 
 if __name__ == "__main__":
