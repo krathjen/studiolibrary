@@ -1115,7 +1115,7 @@ def normPath(path):
     :rtype: unicode
     """
     # Check and support the UNC path structure
-    unc = path.startswith("//") or path.startswith("\\")
+    unc = path.startswith("//") or path.startswith("\\\\")
 
     path = path.replace("//", "/")
     path = path.replace("\\", "/")
@@ -1124,7 +1124,7 @@ def normPath(path):
         path = path.rstrip("/")
 
     # Make sure we retain the UNC path structure
-    if unc and not path.startswith("//"):
+    if unc and not path.startswith("//") and path.startswith("/"):
         path = "/" + path
 
     return path
@@ -1496,15 +1496,29 @@ def showInFolder(path):
 
 
 def testNormPath():
-    path = "//win - q9t8ucbldlu/Library Data"
+    """Test the norm path utility function. """
 
-    print(normPath(path))
+    assert normPath("//win-q9lu/Library Data") == "//win-q9lu/Library Data"
 
+    assert normPath("////win-q9lu/Library Data/") == "//win-q9lu/Library Data"
+
+    assert normPath("\\\\win-q9l\\Library Data\\") == "//win-q9l/Library Data"
+
+    assert normPath(r"C:\folder//Library Data/") == "C:/folder/Library Data"
+
+    assert normPath(r"\folder//Library Data/") == "/folder/Library Data"
+
+    assert normPath("C:\\folder//Library Data/") == "C:/folder/Library Data"
+
+    assert normPath("\\folder//Library Data/") == "/folder/Library Data"
+
+    assert normPath("C:/") == "C:/"
 
 
 def testUpdate():
     """
     Test the update dictionary command
+
     :rtype: None 
     """
     testData1 = {
