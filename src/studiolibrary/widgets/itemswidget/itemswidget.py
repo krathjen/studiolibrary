@@ -44,7 +44,7 @@ class ItemsWidget(QtWidgets.QWidget):
     DEFAULT_MIN_SPACING = 0
     DEFAULT_MAX_SPACING = 50
 
-    DEFAULT_MIN_LIST_SIZE = 12
+    DEFAULT_MIN_LIST_SIZE = 25
     DEFAULT_MIN_ICON_SIZE = 50
 
     LABEL_DISPLAY_OPTION = LabelDisplayOption.Under
