@@ -110,7 +110,7 @@ class FolderItem(studiolibrary.LibraryItem):
         super(FolderItem, self).updateMetadata(metadata)
 
         if self.libraryWindow():
-            self.libraryWindow().setFolderSettings(self.path(), self.itemData())
+            self.libraryWindow().setFolderData(self.path(), self.itemData())
             self.updateIcon()
 
     def doubleClicked(self):
@@ -143,6 +143,7 @@ class FolderItem(studiolibrary.LibraryItem):
 
         action.triggered.connect(self._showPreviewFromMenu)
         menu.addAction(action)
+        menu.addSeparator()
 
         action = studiolibrary.widgets.colorpicker.ColorPickerAction(menu)
         action.picker().setColors(self.DEFAULT_ICON_COLORS)
