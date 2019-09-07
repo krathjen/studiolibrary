@@ -1,5 +1,6 @@
 # Studio Library Items
 
+Items are used for loading and saving data.
 
 
 ### Pose Item
@@ -77,3 +78,32 @@ setsitem.save(path, objects=objects)
 # Loading a selection sets item
 setsitem.load(path, objects=objects, namespaces=[])
 ```
+
+
+### Maya File Item (Development)
+
+Saving and loading a Maya file item
+
+This item can be used to load and save any Maya nodes. For example:
+locators and geometry.
+
+```python
+from studiolibrarymaya import mayafileitem
+
+path = "/AnimLibrary/Characters/Malcolm/malcolm.mayafile"
+objects = maya.cmds.ls(selection=True) or []
+
+# Saving the item to disc
+mayafileitem.save(path, objects=objects)
+
+# Loading the item from disc
+mayafileitem.load(path)
+```
+
+### Example Item
+
+If you would like to create a custom item for saving and loading different data types, then please have a look at the [exampleitem.py](exampleitem.py)
+
+When developing a new item you can "Shift + Click" on the shelf icon which will reload all Studio Library modules including your changes to the item.
+
+Make sure you register any new items using either the "itemRegistry" key in the [config file](../studiolibrary/config/default.json) or by calling `studiolibrary.registerItem(cls)`.

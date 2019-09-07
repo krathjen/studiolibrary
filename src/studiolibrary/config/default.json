@@ -52,7 +52,10 @@
 
   // A list of the default item plugins
   "itemRegistry": [
+    // This is an example item for development
     // "studiolibrarymaya.exampleitem.ExampleItem",
+    // The maya file item is in development
+    // "studiolibrarymaya.mayafileitem.MayaFileItem",
     "studiolibrarymaya.poseitem.PoseItem",
     "studiolibrarymaya.animitem.AnimItem",
     "studiolibrarymaya.mirroritem.MirrorItem",
