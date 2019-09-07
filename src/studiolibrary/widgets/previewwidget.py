@@ -28,6 +28,11 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self._item = item
 
+        widget = self.createTitleWidget()
+        widget.ui.menuButton.clicked.connect(self.showMenu)
+
+        self.ui.titleFrame.layout().addWidget(widget)
+
         iconGroupBoxWidget = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconGroup)
         iconGroupBoxWidget.setObjectName("iconGroupBoxWidget")
         iconGroupBoxWidget.setPersistent(True)
@@ -48,21 +53,75 @@ class PreviewWidget(QtWidgets.QWidget):
 
         self.createSequenceWidget()
 
-        if item.NAME:
-            self.ui.titleFrame.setVisible(True)
-            self.ui.titleLabel.setText(item.NAME)
-        else:
-            self.ui.titleFrame.setVisible(False)
-
-        if item.TYPE_ICON_PATH:
-            self.ui.titleIcon.setVisible(True)
-            self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.TYPE_ICON_PATH))
-        else:
-            self.ui.titleIcon.setVisible(False)
-
         self._item.dataChanged.connect(self._itemDataChanged)
 
         self.updateThumbnailSize()
+
+    def item(self):
+        """
+        Get the current item in preview.
+
+        :rtype: studiolibrary.LibraryItem
+        """
+        return self._item
+
+    def showMenu(self):
+        """
+        Show the edit menu at the current cursor position.
+
+        :rtype: QtWidgets.QAction
+        """
+        menu = QtWidgets.QMenu(self)
+
+        self.item().contextEditMenu(menu)
+
+        point = QtGui.QCursor.pos()
+        point.setX(point.x() + 3)
+        point.setY(point.y() + 3)
+
+        return menu.exec_(point)
+
+    def createTitleWidget(self):
+        """
+        Create a new instance of the title bar widget.
+
+        :rtype: QtWidgets.QFrame
+        """
+        class UI(object):
+            """Proxy class for attaching ui widgets as properties."""
+            pass
+
+        titleWidget = QtWidgets.QFrame(self)
+        titleWidget.setObjectName("titleWidget")
+        titleWidget.ui = UI()
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+        vlayout.setSpacing(0)
+        vlayout.setContentsMargins(0, 0, 0, 0)
+
+        hlayout = QtWidgets.QHBoxLayout(self)
+        hlayout.setSpacing(0)
+        hlayout.setContentsMargins(0, 0, 0, 0)
+
+        vlayout.addLayout(hlayout)
+
+        titleButton = QtWidgets.QLabel(self)
+        titleButton.setText(self.item().NAME)
+        titleButton.setObjectName("titleButton")
+        titleWidget.ui.titleButton = titleButton
+
+        hlayout.addWidget(titleButton)
+
+        menuButton = QtWidgets.QPushButton(self)
+        menuButton.setText("...")
+        menuButton.setObjectName("menuButton")
+        titleWidget.ui.menuButton = menuButton
+
+        hlayout.addWidget(menuButton)
+
+        titleWidget.setLayout(vlayout)
+
+        return titleWidget
 
     def _itemDataChanged(self, *args, **kwargs):
         """

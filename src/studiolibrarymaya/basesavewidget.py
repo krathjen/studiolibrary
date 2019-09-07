@@ -47,9 +47,13 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         studioqt.loadUi(self)
 
-        self._item = None
+        self._item = item
         self._scriptJob = None
         self._formWidget = None
+
+        widget = self.createTitleWidget()
+        widget.ui.menuButton.hide()
+        self.ui.titleFrame.layout().addWidget(widget)
 
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
@@ -62,6 +66,57 @@ class BaseSaveWidget(QtWidgets.QWidget):
         self.createSequenceWidget()
         self.updateThumbnailSize()
         self.setItem(item)
+
+    def showMenu(self):
+        """
+        Show the edit menu at the current cursor position.
+
+        :rtype: QtWidgets.QAction
+        """
+        raise NotImplementedError("The title menu is not implemented")
+
+    def createTitleWidget(self):
+        """
+        Create a new instance of the title bar widget.
+
+        :rtype: QtWidgets.QFrame
+        """
+
+        class UI(object):
+            """Proxy class for attaching ui widgets as properties."""
+            pass
+
+        titleWidget = QtWidgets.QFrame(self)
+        titleWidget.setObjectName("titleWidget")
+        titleWidget.ui = UI()
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+        vlayout.setSpacing(0)
+        vlayout.setContentsMargins(0, 0, 0, 0)
+
+        hlayout = QtWidgets.QHBoxLayout(self)
+        hlayout.setSpacing(0)
+        hlayout.setContentsMargins(0, 0, 0, 0)
+
+        vlayout.addLayout(hlayout)
+
+        titleButton = QtWidgets.QLabel(self)
+        titleButton.setText(self.item().NAME)
+        titleButton.setObjectName("titleButton")
+        titleWidget.ui.titleButton = titleButton
+
+        hlayout.addWidget(titleButton)
+
+        menuButton = QtWidgets.QPushButton(self)
+        menuButton.setText("...")
+        menuButton.setObjectName("menuButton")
+        titleWidget.ui.menuButton = menuButton
+
+        hlayout.addWidget(menuButton)
+
+        titleWidget.setLayout(vlayout)
+
+        return titleWidget
 
     def createSequenceWidget(self):
         """Create a sequence widget to replace the static thumbnail widget."""
@@ -142,9 +197,6 @@ class BaseSaveWidget(QtWidgets.QWidget):
         :type item: studiolibrarymaya.BaseItem
         """
         self._item = item
-
-        self.ui.titleLabel.setText(item.NAME)
-        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
 
         if os.path.exists(item.imageSequencePath()):
             self.setThumbnailPath(item.imageSequencePath())

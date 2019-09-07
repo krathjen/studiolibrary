@@ -52,11 +52,10 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._scriptJob = None
         self._formWidget = None
 
-        self.ui.titleLabel.setText(item.NAME)
-        self.ui.titleIcon.setPixmap(QtGui.QPixmap(item.typeIconPath()))
+        widget = self.createTitleWidget()
+        widget.ui.menuButton.clicked.connect(self.showMenu)
 
-        self.ui.editButton.setHidden(item.isReadOnly())
-        self.ui.editButton.clicked.connect(self.showEditMenu)
+        self.ui.titleFrame.layout().addWidget(widget)
 
         # Create the icon group box
         groupBox = studiolibrary.widgets.GroupBoxWidget("Icon", self.ui.iconFrame)
@@ -96,6 +95,48 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
 
+    def createTitleWidget(self):
+        """
+        Create a new instance of the title bar widget.
+
+        :rtype: QtWidgets.QFrame
+        """
+        class UI(object):
+            """Proxy class for attaching ui widgets as properties."""
+            pass
+
+        titleWidget = QtWidgets.QFrame(self)
+        titleWidget.setObjectName("titleWidget")
+        titleWidget.ui = UI()
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+        vlayout.setSpacing(0)
+        vlayout.setContentsMargins(0, 0, 0, 0)
+
+        hlayout = QtWidgets.QHBoxLayout(self)
+        hlayout.setSpacing(0)
+        hlayout.setContentsMargins(0, 0, 0, 0)
+
+        vlayout.addLayout(hlayout)
+
+        titleButton = QtWidgets.QLabel(self)
+        titleButton.setText(self.item().NAME)
+        titleButton.setObjectName("titleButton")
+        titleWidget.ui.titleButton = titleButton
+
+        hlayout.addWidget(titleButton)
+
+        menuButton = QtWidgets.QPushButton(self)
+        menuButton.setText("...")
+        menuButton.setObjectName("menuButton")
+        titleWidget.ui.menuButton = menuButton
+
+        hlayout.addWidget(menuButton)
+
+        titleWidget.setLayout(vlayout)
+
+        return titleWidget
+
     def _itemValueChanged(self, field, value):
         """
         Triggered when the a field value has changed.
@@ -105,7 +146,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         """
         self._formWidget.setValue(field, value)
 
-    def showEditMenu(self):
+    def showMenu(self):
         """
         Show the edit menu at the current cursor position.
 

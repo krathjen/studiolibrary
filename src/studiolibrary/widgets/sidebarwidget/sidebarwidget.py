@@ -110,7 +110,8 @@ def findRoot(paths, separator=None):
     return result
 
 
-class SidebarWidget(QtWidgets.QTreeWidget):
+
+class SidebarWidget(QtWidgets.QWidget):
 
     itemDropped = QtCore.Signal(object)
     itemRenamed = QtCore.Signal(str, str)
@@ -119,12 +120,151 @@ class SidebarWidget(QtWidgets.QTreeWidget):
     def __init__(self, *args):
         super(SidebarWidget, self).__init__(*args)
 
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0,0,0,0)
+
+        self.setLayout(layout)
+
+        self._titleWidget = self.createTitleWidget()
+        self._titleWidget.ui.menuButton.hide()
+        self._titleWidget.ui.titleButton.clicked.connect(self.clearSelection)
+
+        self.layout().addWidget(self._titleWidget)
+
+        self._treeWidget = TreeWidget(self)
+        self._treeWidget.itemDropped = self.itemDropped
+        self._treeWidget.itemRenamed = self.itemRenamed
+        self._treeWidget.itemSelectionChanged = self.itemSelectionChanged
+
+        self.layout().addWidget(self._treeWidget)
+
+    def createTitleWidget(self):
+        """
+        Create a new instance of the title bar widget.
+
+        :rtype: QtWidgets.QFrame
+        """
+
+        class UI(object):
+            """Proxy class for attaching ui widgets as properties."""
+            pass
+
+        titleWidget = QtWidgets.QFrame(self)
+        titleWidget.setObjectName("titleWidget")
+        titleWidget.ui = UI()
+
+        vlayout = QtWidgets.QVBoxLayout(self)
+        vlayout.setSpacing(0)
+        vlayout.setContentsMargins(0,0,0,0)
+
+        hlayout = QtWidgets.QHBoxLayout(self)
+        hlayout.setSpacing(0)
+        hlayout.setContentsMargins(0,0,0,0)
+
+        vlayout.addLayout(hlayout)
+
+        titleButton = QtWidgets.QPushButton(self)
+        titleButton.setText("Folders")
+        titleButton.setObjectName("titleButton")
+        titleWidget.ui.titleButton = titleButton
+
+        hlayout.addWidget(titleButton)
+
+        menuButton = QtWidgets.QPushButton(self)
+        menuButton.setText("...")
+        menuButton.setObjectName("menuButton")
+        titleWidget.ui.menuButton = menuButton
+
+        hlayout.addWidget(menuButton)
+
+        lineEdit = QtWidgets.QLineEdit(self)
+        lineEdit.setObjectName("searchEdit")
+        lineEdit.textChanged.connect(self.searchChanged)
+        lineEdit.hide()
+
+        vlayout.addWidget(lineEdit)
+
+        titleWidget.setLayout(vlayout)
+
+        return titleWidget
+
+    def searchChanged(self, text):
+        """
+        Triggered when the search filter has changed.
+
+        :type text: str
+        """
+        items = self.treeWidget().items()
+
+        for item in items:
+            if text.lower() in item.text(0).lower():
+                item.setHidden(False)
+                for parent in item.parents():
+                    parent.setHidden(False)
+            else:
+                item.setHidden(True)
+
+    def treeWidget(self):
+        return self._treeWidget
+
+    def setDpi(self, dpi):
+        self.treeWidget().setDpi(dpi)
+
+    def setRecursive(self, enabled):
+        self.treeWidget().setRecursive(enabled)
+
+    def isRecursive(self):
+        return self.treeWidget().isRecursive()
+
+    def setSettings(self, settings):
+        self.treeWidget().setSettings(settings)
+
+    def setItemData(self, id, data):
+        self.treeWidget().setPathSettings(id, data)
+
+    def settings(self):
+        return self.treeWidget().settings()
+
+    def setData(self, *args, **kwargs):
+        self.treeWidget().setData(*args, **kwargs)
+
+    def setLocked(self, locked):
+        self.treeWidget().setLocked(locked)
+
+    def setDataset(self, dataset):
+        self.treeWidget().setDataset(dataset)
+
+    def selectedPath(self):
+        return self.treeWidget().selectedPath()
+
+    def selectPaths(self, paths):
+        self.treeWidget().selectPaths(paths)
+
+    def selectedPaths(self):
+        return self.treeWidget().selectedPaths()
+
+    def clearSelection(self):
+        self.treeWidget().clearSelection()
+
+
+class TreeWidget(QtWidgets.QTreeWidget):
+
+    itemDropped = QtCore.Signal(object)
+    itemRenamed = QtCore.Signal(str, str)
+    itemSelectionChanged = QtCore.Signal()
+
+    def __init__(self, *args):
+        super(TreeWidget, self).__init__(*args)
+
         self._dpi = 1
         self._items = []
         self._index = {}
         self._locked = False
         self._dataset = None
         self._recursive = True
+        self._visibleRoot = False
+
         self._options = {
                 'field': 'path',
                 'separator': '/',
@@ -151,7 +291,7 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         """Clear all the items from the tree widget."""
         self._items = []
         self._index = {}
-        super(SidebarWidget, self).clear()
+        super(TreeWidget, self).clear()
 
     def selectionChanged(self, *args):
         """Triggered the current selection has changed."""
@@ -508,7 +648,7 @@ class SidebarWidget(QtWidgets.QTreeWidget):
         """
         Return the last selected item
         
-        :rtype: SidebarWidgetItem 
+        :rtype: SidebarWidgetItem
         """
         path = self.selectedPath()
         return self.itemFromPath(path)
@@ -648,37 +788,49 @@ class SidebarWidget(QtWidgets.QTreeWidget):
 
         self._index = {}
 
+        # parent = self
+
         for key in data:
 
-            path = split.join([key])
+            root = split.join([key])
 
-            item = SidebarWidgetItem(self)
-            item.setText(0, unicode(key))
-            item.setPath(path)
-            self._index[path] = item
+            item = None
 
-            if self.rootText():
-                item.setText(0, " " + self.rootText())
+            if self._visibleRoot:
+
+                text = key.split(split)
+                if text:
+                    text = text[-1]
+                else:
+                    text = key
+
+                item = SidebarWidgetItem(self)
+                item.setText(0, unicode(text))
+                item.setPath(root)
                 item.setBold(True)
                 item.setExpanded(True)
                 item.setIconVisible(False)
 
-            def _recursive(parent, children, split=None):
+                self._index[root] = item
+
+            def _recursive(parent, children, split=None, root=""):
                 for text, val in sorted(children.iteritems()):
 
-                    path = parent.path()
-                    path = split.join([path, text])
+                    if not parent:
+                        parent = self
 
-                    child = SidebarWidgetItem()
+                    path = split.join([root, text])
+
+                    child = SidebarWidgetItem(parent)
                     child.setText(0, unicode(text))
                     child.setPath(path)
 
-                    parent.addChild(child)
+                    # parent.addChild(child)
                     self._index[path] = child
 
-                    _recursive(child, val, split=split)
+                    _recursive(child, val, split=split, root=path)
 
-            _recursive(item, data[key], split=split)
+            _recursive(item, data[key], split=split, root=root)
 
         self.update()
 
@@ -693,7 +845,7 @@ class ExampleWindow(QtWidgets.QWidget):
 
         self._lineEdit = QtWidgets.QLineEdit()
         self._lineEdit.textChanged.connect(self.searchChanged)
-        self._treeWidget = SidebarWidget(self)
+        self._treeWidget = TreeWidget(self)
 
         self._slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self._slider.valueChanged.connect(self._valueChanged)
