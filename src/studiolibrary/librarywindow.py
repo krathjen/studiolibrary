@@ -89,7 +89,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
     DPI_ENABLED = studiolibrary.config.get("scaleFactorEnabled", False)
 
-    ICON_COLOR = QtGui.QColor(255, 255, 255, 210)
+    ICON_COLOR = QtGui.QColor(255, 255, 255, 200)
     ICON_BADGE_COLOR = QtGui.QColor(230, 230, 0)
 
     # Customize widget classes
@@ -822,14 +822,14 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self.sidebarWidget().setData(data, root=root)
 
-    def setFolderSettings(self, path, data):
+    def setFolderData(self, path, data):
         """
         Convenience method for setting folder data.
 
         :type path: str
         :type data: dict
         """
-        self.sidebarWidget().setPathSettings(path, data)
+        self.sidebarWidget().setItemData(path, data)
 
     def createFolderContextMenu(self):
         """
@@ -1144,13 +1144,15 @@ class LibraryWindow(QtWidgets.QWidget):
                     "type": "color",
                     "value": accentColor,
                     "colors": [
-                        "rgb(230, 80, 80, 255)",
-                        "rgb(230, 125, 100, 255)",
-                        "rgb(230, 120, 40, 255)",
-                        "rgb(240, 180, 0, 255)",
-                        "rgb(80, 200, 140, 255)",
-                        "rgb(50, 180, 240, 255)",
-                        "rgb(110, 110, 240, 255)",
+                        "rgb(195, 80, 90, 255)",
+                        # "rgb(220, 135, 100, 255)",
+                        "rgb(220, 120, 80, 255)",
+                        "rgb(220, 160, 30, 255)",
+                        "rgb(90, 175, 120, 255)",
+                        "rgb(100, 175, 160, 255)",
+                        "rgb(80, 150, 180, 255)",
+                        "rgb(110, 125, 220, 255)",
+                        "rgb(100, 120, 150, 255)",
                     ]
                 },
                 {
@@ -1158,8 +1160,9 @@ class LibraryWindow(QtWidgets.QWidget):
                     "type": "color",
                     "value": backgroundColor,
                     "colors": [
-                        "rgb(40, 40, 40, 255)",
-                        "rgb(68, 68, 68, 255)",
+                        "rgb(45, 45, 48, 255)",
+                        "rgb(55, 55, 60, 255)",
+                        "rgb(68, 68, 70, 255)",
                         "rgb(80, 60, 80, 255)",
                         "rgb(85, 60, 60, 255)",
                         "rgb(60, 75, 75, 255)",
