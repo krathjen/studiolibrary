@@ -250,16 +250,15 @@ class AnimItem(baseitem.BaseItem):
 
         return fields
 
-    def save(self, objects, thumbnail="", sequencePath="", **kwargs):
+    def save(self, objects, sequencePath="", **kwargs):
         """
         Save the animation from the given objects to the item path.
         
         :type objects: list[str]
-        :type thumbnail: str
         :type sequencePath: str
         :type kwargs: dict
         """
-        super(AnimItem, self).save(objects, thumbnail, **kwargs)
+        super(AnimItem, self).save(**kwargs)
 
         # Save the animation to the given path location on disc
         mutils.saveAnim(
@@ -267,7 +266,7 @@ class AnimItem(baseitem.BaseItem):
             self.path(),
             time=kwargs.get("frameRange"),
             fileType=kwargs.get("fileType"),
-            iconPath=thumbnail,
+            iconPath=kwargs.get("thumbnail"),
             metadata={"description": kwargs.get("comment", "")},
             sequencePath=sequencePath,
             bakeConnected=kwargs.get("bake")

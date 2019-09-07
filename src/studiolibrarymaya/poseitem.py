@@ -489,15 +489,14 @@ class PoseItem(baseitem.BaseItem):
 
         logger.debug(u'Loaded: {0}'.format(self.path()))
 
-    def save(self, objects, *args, **kwargs):
+    def save(self, objects, **kwargs):
         """
         Save all the given object data to the item path on disc.
 
         :type objects: list[str]
-        :type args: list
         :type kwargs: dict
         """
-        super(PoseItem, self).save(objects, *args, **kwargs)
+        super(PoseItem, self).save(**kwargs)
 
         # Save the pose to the temp location
         mutils.savePose(

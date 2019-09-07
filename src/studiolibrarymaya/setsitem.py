@@ -55,7 +55,7 @@ class SetsItem(baseitem.BaseItem):
         :type objects: list[str]
         :type kwargs: dict
         """
-        super(SetsItem, self).save(objects, **kwargs)
+        super(SetsItem, self).save(**kwargs)
 
         # Save the selection set to the given path
         mutils.saveSelectionSet(

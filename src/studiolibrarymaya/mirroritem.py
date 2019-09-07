@@ -218,7 +218,7 @@ class MirrorItem(baseitem.BaseItem):
         :type objects: list[str]
         :type kwargs: dict
         """
-        super(MirrorItem, self).save(objects, **kwargs)
+        super(MirrorItem, self).save(**kwargs)
 
         # Save the mirror table to the given location
         mutils.saveMirrorTable(

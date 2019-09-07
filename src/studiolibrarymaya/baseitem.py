@@ -421,11 +421,10 @@ class BaseItem(studiolibrary.LibraryItem):
 
         return fields
 
-    def save(self, objects, thumbnail="", **kwargs):
+    def save(self, thumbnail="", **kwargs):
         """
         Save all the given object data to the item path on disc.
 
-        :type objects: list[str]
         :type thumbnail: str
         :type kwargs: dict
         """
