@@ -148,7 +148,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
 
         :rtype: bool
         """
-        return self._iconVisible
+        return self.treeWidget().iconsVisible() and self._iconVisible
 
     def iconColor(self):
         """

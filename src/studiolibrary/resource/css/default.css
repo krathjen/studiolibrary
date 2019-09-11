@@ -1422,17 +1422,19 @@ TITLE WIDGET
     padding-left: 4px;
     text-align: left;
     font-size: 14px;
-    max-height: 22px;
+    min-height: 28px;
     color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 210);
     background-color: transparent;
 }
+
 
 #titleWidget #titleButton:hover {
     background-color: rgb(250,250,250,0);
 }
 
 #titleWidget #menuButton {
-    margin: 2px;
+    margin-left: 4px;
+    margin-right: 4px;
     font-size: 14px;
     max-height: 22px;
     max-width: 22px;
@@ -1443,16 +1445,24 @@ TITLE WIDGET
     background-color: rgb(250,250,250,25);
 }
 
-#titleWidget #searchEdit {
-    margin: 4px;
-    max-height: 22px;
-}
+
 
 #titleWidget
 {
     margin: 0px;
     min-height: 26px;
-    max-height: 26px;
     background-color: rgb(0,0,0,15);
     border-bottom: 1px solid rgb(250, 250, 250, 20);
+}
+
+#titleWidget #filterEdit {
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    min-height: 22px;
+}
+
+SidebarWidget #titleWidget #filterEdit {
+    border: 0px solid rbg(0,0,0,0);
+    border-radius: 3px;
 }

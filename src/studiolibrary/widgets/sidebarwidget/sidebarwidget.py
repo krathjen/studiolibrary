@@ -9,8 +9,10 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
+
 import time
 import logging
+import functools
 import collections
 
 from studiovendor.Qt import QtGui
@@ -120,24 +122,53 @@ class SidebarWidget(QtWidgets.QWidget):
     def __init__(self, *args):
         super(SidebarWidget, self).__init__(*args)
 
+        self._previousFilterText = ""
+
         layout = QtWidgets.QVBoxLayout(self)
         layout.setSpacing(0)
         layout.setContentsMargins(0,0,0,0)
 
         self.setLayout(layout)
 
-        self._titleWidget = self.createTitleWidget()
-        self._titleWidget.ui.menuButton.hide()
-        self._titleWidget.ui.titleButton.clicked.connect(self.clearSelection)
-
-        self.layout().addWidget(self._titleWidget)
-
         self._treeWidget = TreeWidget(self)
         self._treeWidget.itemDropped = self.itemDropped
         self._treeWidget.itemRenamed = self.itemRenamed
         self._treeWidget.itemSelectionChanged = self.itemSelectionChanged
+        self._treeWidget.keyPressed.connect(self._keyPressTrigger)
 
+        self._titleWidget = self.createTitleWidget()
+        self._titleWidget.ui.menuButton.clicked.connect(self.showSettingsMenu)
+        self._titleWidget.ui.titleButton.clicked.connect(self.clearSelection)
+
+        self.layout().addWidget(self._titleWidget)
         self.layout().addWidget(self._treeWidget)
+
+    def _keyPressTrigger(self, event):
+        """
+        Triggered from the tree widget key press event.
+
+        :type event: QKeyEvent
+        """
+        text = event.text().strip()
+
+        if event.key() == QtCore.Qt.Key_Backspace:
+            return
+
+        if text and not self._titleWidget.ui.filterEdit.hasFocus():
+                self._titleWidget.ui.filterEdit.setText(text)
+
+        self.setFilterVisible(True)
+
+        self._previousFilterText = text
+
+    def _filterVisibleTrigger(self, visible):
+        """
+        Triggered by the filter visible action.
+
+        :type visible: bool
+        """
+        self.setFilterVisible(visible)
+        self._titleWidget.ui.filterEdit.selectAll()
 
     def createTitleWidget(self):
         """
@@ -179,9 +210,11 @@ class SidebarWidget(QtWidgets.QWidget):
         hlayout.addWidget(menuButton)
 
         lineEdit = QtWidgets.QLineEdit(self)
-        lineEdit.setObjectName("searchEdit")
-        lineEdit.textChanged.connect(self.searchChanged)
         lineEdit.hide()
+        lineEdit.setObjectName("filterEdit")
+        lineEdit.setText(self.treeWidget().filterText())
+        lineEdit.textChanged.connect(self.searchChanged)
+        titleWidget.ui.filterEdit = lineEdit
 
         vlayout.addWidget(lineEdit)
 
@@ -195,15 +228,126 @@ class SidebarWidget(QtWidgets.QWidget):
 
         :type text: str
         """
-        items = self.treeWidget().items()
+        self.refreshFilter()
+        if text:
+            self.setFilterVisible(True)
+        else:
+            self.treeWidget().setFocus()
+            self.setFilterVisible(False)
 
-        for item in items:
-            if text.lower() in item.text(0).lower():
-                item.setHidden(False)
-                for parent in item.parents():
-                    parent.setHidden(False)
-            else:
-                item.setHidden(True)
+    def showSettingsMenu(self):
+        """Create and show a new settings menu instance."""
+        menu = self.createSettingsMenu()
+        point = QtGui.QCursor.pos()
+        point.setX(point.x() + 3)
+        point.setY(point.y() + 3)
+        action = menu.exec_(point)
+        menu.close()
+
+    def createSettingsMenu(self):
+        """Create a new settings menu instance."""
+
+        menu = studioqt.Menu(self)
+
+        import studiolibrary.widgets
+        action = studiolibrary.widgets.SeparatorAction("Folders View", menu)
+        menu.addAction(action)
+
+        action = menu.addAction("Filter")
+        action.setCheckable(True)
+        action.setChecked(self.isFilterVisible())
+
+        callback = functools.partial(self._filterVisibleTrigger, not self.isFilterVisible())
+        action.triggered.connect(callback)
+
+        menu.addSeparator()
+
+        action = menu.addAction("Icons")
+        action.setCheckable(True)
+        action.setChecked(self.iconsVisible())
+
+        callback = functools.partial(self.setIconsVisible, not self.iconsVisible())
+        action.triggered.connect(callback)
+
+        action = menu.addAction("Root Folder")
+        action.setCheckable(True)
+        action.setChecked(self.isRootVisible())
+
+        callback = functools.partial(self.setRootVisible, not self.isRootVisible())
+        action.triggered.connect(callback)
+
+        return menu
+
+    def setFilterVisible(self, visible):
+        """
+        Set the filter widget visible
+
+        :type visible: bool
+        """
+        self._titleWidget.ui.filterEdit.setVisible(visible)
+        self._titleWidget.ui.filterEdit.setFocus()
+
+        if not visible and bool(self.treeWidget().filterText()):
+            self.treeWidget().setFilterText("")
+        else:
+            self.refreshFilter()
+
+    def setSettings(self, settings):
+        """
+        Set the settings for the widget.
+
+        :type settings: dict
+        """
+        self.treeWidget().setSettings(settings)
+
+        value = settings.get("filterVisible")
+        if value is not None:
+            self.setFilterVisible(value)
+
+        value = settings.get("filterText")
+        if value is not None:
+            self.setFilterText(value)
+
+    def settings(self):
+        """
+        Get the settings for the widget.
+
+        :rtype: dict
+        """
+        settings = self.treeWidget().settings()
+
+        settings["filterText"]  = self.filterText()
+        settings["filterVisible"]  = self.isFilterVisible()
+
+        return settings
+
+    # --------------------------------
+    # convenience methods
+    # --------------------------------
+
+    def filterText(self):
+        return self.treeWidget().filterText()
+
+    def setFilterText(self, text):
+        self._titleWidget.ui.filterEdit.setText(text)
+
+    def refreshFilter(self):
+        self.treeWidget().setFilterText(self._titleWidget.ui.filterEdit.text())
+
+    def isFilterVisible(self):
+        return bool(self.treeWidget().filterText()) or self._titleWidget.ui.filterEdit.isVisible()
+
+    def setIconsVisible(self, visible):
+        self.treeWidget().setIconsVisible(visible)
+
+    def iconsVisible(self):
+        return self.treeWidget().iconsVisible()
+
+    def setRootVisible(self, visible):
+        self.treeWidget().setRootVisible(visible)
+
+    def isRootVisible(self):
+        return self.treeWidget().isRootVisible()
 
     def treeWidget(self):
         return self._treeWidget
@@ -217,14 +361,8 @@ class SidebarWidget(QtWidgets.QWidget):
     def isRecursive(self):
         return self.treeWidget().isRecursive()
 
-    def setSettings(self, settings):
-        self.treeWidget().setSettings(settings)
-
     def setItemData(self, id, data):
         self.treeWidget().setPathSettings(id, data)
-
-    def settings(self):
-        return self.treeWidget().settings()
 
     def setData(self, *args, **kwargs):
         self.treeWidget().setData(*args, **kwargs)
@@ -253,17 +391,21 @@ class TreeWidget(QtWidgets.QTreeWidget):
     itemDropped = QtCore.Signal(object)
     itemRenamed = QtCore.Signal(str, str)
     itemSelectionChanged = QtCore.Signal()
+    keyPressed = QtCore.Signal(object)
 
     def __init__(self, *args):
         super(TreeWidget, self).__init__(*args)
 
         self._dpi = 1
+        self._data = []
         self._items = []
         self._index = {}
         self._locked = False
         self._dataset = None
         self._recursive = True
-        self._visibleRoot = False
+        self._filterText = ""
+        self._rootVisible = False
+        self._iconsVisible = True
 
         self._options = {
                 'field': 'path',
@@ -287,11 +429,77 @@ class TreeWidget(QtWidgets.QTreeWidget):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
 
+    def filterText(self):
+        """
+        Get the current filter text.
+
+        :rtype: bool
+        """
+        return self._filterText
+
+    def setFilterText(self, text):
+        """
+        Triggered when the search filter has changed.
+
+        :type text: str
+        """
+        self._filterText = text.strip()
+        self.refreshFilter()
+
+    def refreshFilter(self):
+        """Refresh the current item filter."""
+        items = self.items()
+
+        for item in items:
+            if self._filterText.lower() in item.text(0).lower():
+                item.setHidden(False)
+                for parent in item.parents():
+                    parent.setHidden(False)
+            else:
+                item.setHidden(True)
+
     def clear(self):
         """Clear all the items from the tree widget."""
         self._items = []
         self._index = {}
         super(TreeWidget, self).clear()
+
+    def keyPressEvent(self, event):
+        self.keyPressed.emit(event)
+
+    def setRootVisible(self, visible):
+        """
+        Set the root item visible.
+
+        :type visible: bool
+        """
+        self._rootVisible = visible
+        self.refreshData()
+
+    def isRootVisible(self):
+        """
+        Check if the root item is visible
+
+        :rtype: bool
+        """
+        return self._rootVisible
+
+    def setIconsVisible(self, visible):
+        """
+        Set all icons visible.
+
+        :type visible: bool
+        """
+        self._iconsVisible = visible
+        self.refreshData()
+
+    def iconsVisible(self):
+        """
+        Check if all the icons are visible.
+
+        :rtype: bool
+        """
+        return self._iconsVisible
 
     def selectionChanged(self, *args):
         """Triggered the current selection has changed."""
@@ -582,12 +790,12 @@ class TreeWidget(QtWidgets.QTreeWidget):
             self.setPathSettings(path, s)
 
         scrollBarSettings = settings.get("verticalScrollBar", {})
-        value = scrollBarSettings.get("value", None)
+        value = scrollBarSettings.get("value")
         if value:
             self.verticalScrollBar().setValue(value)
 
         scrollBarSettings = settings.get("horizontalScrollBar", {})
-        value = scrollBarSettings.get("value", None)
+        value = scrollBarSettings.get("value")
         if value:
             self.horizontalScrollBar().setValue(value)
 
@@ -735,6 +943,9 @@ class TreeWidget(QtWidgets.QTreeWidget):
         logger.warning("This method has been deprecated!")
         self.setData(*args, **kwargs)
 
+    def refreshData(self):
+        self.setData(self._data)
+
     def setData(self, data, root="", split=None):
         """
         Set the items to the given items.
@@ -744,6 +955,8 @@ class TreeWidget(QtWidgets.QTreeWidget):
         :type split: str
         :rtype: None
         """
+        self._data = data
+
         settings = self.settings()
 
         self.blockSignals(True)
@@ -788,15 +1001,13 @@ class TreeWidget(QtWidgets.QTreeWidget):
 
         self._index = {}
 
-        # parent = self
-
         for key in data:
 
             root = split.join([key])
 
             item = None
 
-            if self._visibleRoot:
+            if self.isRootVisible():
 
                 text = key.split(split)
                 if text:
@@ -807,9 +1018,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
                 item = SidebarWidgetItem(self)
                 item.setText(0, unicode(text))
                 item.setPath(root)
-                item.setBold(True)
                 item.setExpanded(True)
-                item.setIconVisible(False)
 
                 self._index[root] = item
 
@@ -825,7 +1034,6 @@ class TreeWidget(QtWidgets.QTreeWidget):
                     child.setText(0, unicode(text))
                     child.setPath(path)
 
-                    # parent.addChild(child)
                     self._index[path] = child
 
                     _recursive(child, val, split=split, root=path)
@@ -833,6 +1041,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
             _recursive(item, data[key], split=split, root=root)
 
         self.update()
+        self.refreshFilter()
 
 
 class ExampleWindow(QtWidgets.QWidget):
