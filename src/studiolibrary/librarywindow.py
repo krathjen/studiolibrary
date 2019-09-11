@@ -58,8 +58,8 @@ class LibraryWindow(QtWidgets.QWidget):
             "sortBy": ["name:asc"],
             "groupBy": ["category:asc"]
         },
-        "paneSizes": [160, 280, 180],
-        "geometry": [-1, -1, 860, 720],
+        "paneSizes": [130, 280, 180],
+        "geometry": [-1, -1, 820, 780],
         "trashFolderVisible": False,
         "sidebarWidgetVisible": True,
         "previewWidgetVisible": True,
