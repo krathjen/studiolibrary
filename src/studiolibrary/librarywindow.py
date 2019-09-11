@@ -79,7 +79,7 @@ class LibraryWindow(QtWidgets.QWidget):
             "Folder": False
         },
         "theme": {
-            "accentColor": "rgb(0, 175, 240, 255)",
+            "accentColor": "rgb(70, 160, 210, 255)",
             "backgroundColor": "rgb(60, 64, 79, 255)",
         }
     }
@@ -1146,11 +1146,11 @@ class LibraryWindow(QtWidgets.QWidget):
                     "colors": [
                         "rgb(195, 80, 90, 255)",
                         # "rgb(220, 135, 100, 255)",
-                        "rgb(220, 120, 80, 255)",
+                        "rgb(220, 120, 70, 255)",
                         "rgb(220, 160, 30, 255)",
-                        "rgb(90, 175, 120, 255)",
+                        "rgb(90, 175, 130, 255)",
                         "rgb(100, 175, 160, 255)",
-                        "rgb(80, 150, 180, 255)",
+                        "rgb(70, 160, 210, 255)",
                         "rgb(110, 125, 220, 255)",
                         "rgb(100, 120, 150, 255)",
                     ]
