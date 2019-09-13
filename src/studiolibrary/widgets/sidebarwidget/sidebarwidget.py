@@ -21,6 +21,7 @@ from studiovendor.Qt import QtWidgets
 
 import studioqt
 import studiolibrary
+import studiolibrary.widgets
 
 from sidebarwidgetitem import SidebarWidgetItem
 
@@ -118,6 +119,7 @@ class SidebarWidget(QtWidgets.QWidget):
     itemDropped = QtCore.Signal(object)
     itemRenamed = QtCore.Signal(str, str)
     itemSelectionChanged = QtCore.Signal()
+    settingsMenuRequested = QtCore.Signal(object)
 
     def __init__(self, *args):
         super(SidebarWidget, self).__init__(*args)
@@ -237,39 +239,40 @@ class SidebarWidget(QtWidgets.QWidget):
 
     def showSettingsMenu(self):
         """Create and show a new settings menu instance."""
-        menu = self.createSettingsMenu()
+
+        menu = studioqt.Menu(self)
+
+        self.settingsMenuRequested.emit(menu)
+
+        self.createSettingsMenu(menu)
+
         point = QtGui.QCursor.pos()
         point.setX(point.x() + 3)
         point.setY(point.y() + 3)
         action = menu.exec_(point)
         menu.close()
 
-    def createSettingsMenu(self):
-        """Create a new settings menu instance."""
+    def createSettingsMenu(self, menu):
+        """
+        Create a new settings menu instance.
 
-        menu = studioqt.Menu(self)
-
-        import studiolibrary.widgets
-        action = studiolibrary.widgets.SeparatorAction("Folders View", menu)
-        menu.addAction(action)
-
-        action = menu.addAction("Filter")
+        :rtype: QMenu
+        """
+        action = menu.addAction("Show Filter")
         action.setCheckable(True)
         action.setChecked(self.isFilterVisible())
 
         callback = functools.partial(self._filterVisibleTrigger, not self.isFilterVisible())
         action.triggered.connect(callback)
 
-        menu.addSeparator()
-
-        action = menu.addAction("Icons")
+        action = menu.addAction("Show Icons")
         action.setCheckable(True)
         action.setChecked(self.iconsVisible())
 
         callback = functools.partial(self.setIconsVisible, not self.iconsVisible())
         action.triggered.connect(callback)
 
-        action = menu.addAction("Root Folder")
+        action = menu.addAction("Show Root Folder")
         action.setCheckable(True)
         action.setChecked(self.isRootVisible())
 
@@ -1029,6 +1032,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
                         parent = self
 
                     path = split.join([root, text])
+                    path = path.replace("//", "/")
 
                     child = SidebarWidgetItem(parent)
                     child.setText(0, unicode(text))
