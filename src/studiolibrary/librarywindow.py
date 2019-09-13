@@ -400,6 +400,7 @@ class LibraryWindow(QtWidgets.QWidget):
         sidebarWidget.itemDropped.connect(self._itemDropped)
         sidebarWidget.itemSelectionChanged.connect(self._folderSelectionChanged)
         sidebarWidget.customContextMenuRequested.connect(self.showFolderMenu)
+        sidebarWidget.settingsMenuRequested.connect(self._foldersMenuRequested)
 
         self.folderSelectionChanged.connect(self.updateLock)
 
@@ -414,6 +415,18 @@ class LibraryWindow(QtWidgets.QWidget):
 
     def _searchFinished(self):
         self.showRefreshMessage()
+
+    def _foldersMenuRequested(self, menu):
+        """
+        Triggered when the folders settings menu has been requested.
+
+        :type menu: QtWidgets.QMenu
+        """
+        action = QtWidgets.QAction("Change Path", menu)
+        action.triggered.connect(self.showChangePathDialog)
+
+        menu.addAction(action)
+        menu.addSeparator()
 
     def _itemMoved(self, item):
         """
