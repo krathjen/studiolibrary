@@ -21,6 +21,7 @@ import studioqt
 from . import groupboxwidget
 from . import colorpicker
 from . import iconpicker
+from . import sequencewidget
 
 
 logger = logging.getLogger(__name__)
