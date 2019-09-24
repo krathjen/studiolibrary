@@ -302,8 +302,12 @@ class BaseSaveWidget(QtWidgets.QWidget):
             self.formWidget().validate()
 
     def showByFrameDialog(self):
-        """Show the by frame dialog."""
+        """
+        Show the by frame dialog.
 
+        :rtype: None or QtWidgets.QMessageBox.StandardButton
+        """
+        result = None
         text = 'To help speed up the playblast you can set the "by frame" ' \
                'to a number greater than 1. For example if the "by frame" ' \
                'is set to 2 it will playblast every second frame.'
@@ -322,14 +326,13 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
             result = studiolibrary.widgets.MessageBox.question(
                 self.libraryWindow(),
-                title="Anim Item Tip",
+                title="Playblast Tip",
                 text=text,
                 buttons=buttons,
                 enableDontShowCheckBox=True,
             )
 
-            if result != QtWidgets.QMessageBox.Ok:
-                raise Exception("Canceled!")
+        return result
 
     def showBrowseImageDialog(self):
         """Show a file dialog for choosing an image from disc."""
@@ -376,7 +379,9 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         # Ignore the by frame dialog when the control modifier is pressed.
         if not studioqt.isControlModifier():
-            self.showByFrameDialog()
+            result = self.showByFrameDialog()
+            if result != QtWidgets.QMessageBox.Ok:
+                return
 
         try:
             path = studiolibrary.tempPath("sequence", "thumbnail.jpg")
