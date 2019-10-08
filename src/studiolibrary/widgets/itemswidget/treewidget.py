@@ -123,7 +123,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         :rtype: None
         """
         for item in items:
-            self.setItemSelected(item, value)
+            item.setSelected(value)
 
         if scrollTo:
             self.itemsWidget().scrollToSelectedItem()
@@ -488,7 +488,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         self.setItemsCustomOrder(orderedItems)
 
         for item in items:
-            self.setItemSelected(item, True)
+            item.setSelected(True)
 
         self.itemsWidget().scrollToSelectedItem()
 

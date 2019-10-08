@@ -217,7 +217,7 @@ class ListView(ItemViewMixin, QtWidgets.QListView):
         """
         self.treeWidget().blockSignals(True)
         for item in items:
-            self.treeWidget().setItemSelected(item, value)
+            item.setSelected(value)
         self.treeWidget().blockSignals(False)
 
     def moveItems(self, items, itemAt):
@@ -309,7 +309,7 @@ class ListView(ItemViewMixin, QtWidgets.QListView):
         ItemViewMixin.mousePressEvent(self, event)
         if event.isAccepted():
             QtWidgets.QListView.mousePressEvent(self, event)
-            self.itemsWidget().treeWidget().setItemSelected(item, True)
+            item.setSelected(True)
 
         self.endDrag()
         self._dragStartPos = event.pos()
