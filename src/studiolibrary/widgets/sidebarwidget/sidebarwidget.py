@@ -124,6 +124,8 @@ class SidebarWidget(QtWidgets.QWidget):
     def __init__(self, *args):
         super(SidebarWidget, self).__init__(*args)
 
+        self._dataset = None
+        self._lineEdit = None
         self._previousFilterText = ""
 
         layout = QtWidgets.QVBoxLayout(self)
@@ -136,7 +138,6 @@ class SidebarWidget(QtWidgets.QWidget):
         self._treeWidget.itemDropped = self.itemDropped
         self._treeWidget.itemRenamed = self.itemRenamed
         self._treeWidget.itemSelectionChanged = self.itemSelectionChanged
-        self._treeWidget.keyPressed.connect(self._keyPressTrigger)
 
         self._titleWidget = self.createTitleWidget()
         self._titleWidget.ui.menuButton.clicked.connect(self.showSettingsMenu)
@@ -145,7 +146,16 @@ class SidebarWidget(QtWidgets.QWidget):
         self.layout().addWidget(self._titleWidget)
         self.layout().addWidget(self._treeWidget)
 
-    def _keyPressTrigger(self, event):
+        self._treeWidget.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        """Using an event filter to show the search widget on key press."""
+        if event.type() == QtCore.QEvent.KeyPress:
+            self._keyPressEvent(event)
+
+        return super(SidebarWidget, self).eventFilter(obj, event)
+
+    def _keyPressEvent(self, event):
         """
         Triggered from the tree widget key press event.
 
@@ -153,7 +163,7 @@ class SidebarWidget(QtWidgets.QWidget):
         """
         text = event.text().strip()
 
-        if event.key() == QtCore.Qt.Key_Backspace:
+        if not text.isalpha() and not text.isdigit():
             return
 
         if text and not self._titleWidget.ui.filterEdit.hasFocus():
@@ -211,18 +221,68 @@ class SidebarWidget(QtWidgets.QWidget):
 
         hlayout.addWidget(menuButton)
 
-        lineEdit = QtWidgets.QLineEdit(self)
-        lineEdit.hide()
-        lineEdit.setObjectName("filterEdit")
-        lineEdit.setText(self.treeWidget().filterText())
-        lineEdit.textChanged.connect(self.searchChanged)
-        titleWidget.ui.filterEdit = lineEdit
+        self._lineEdit = studiolibrary.widgets.LineEdit(self)
+        self._lineEdit.hide()
+        self._lineEdit.setObjectName("filterEdit")
+        self._lineEdit.setText(self.treeWidget().filterText())
+        self._lineEdit.textChanged.connect(self.searchChanged)
+        titleWidget.ui.filterEdit = self._lineEdit
 
-        vlayout.addWidget(lineEdit)
+        vlayout.addWidget(self._lineEdit)
 
         titleWidget.setLayout(vlayout)
 
         return titleWidget
+
+    def _dataChanged(self):
+        pass
+
+    def setDataset(self, dataset):
+        """
+        Set the dataset for the search widget:
+
+        :type dataset: studioqt.Dataset
+        """
+        self._dataset = dataset
+        self._dataset.dataChanged.connect(self._dataChanged)
+        self._dataChanged()
+
+    def dataset(self):
+        """
+        Get the dataset for the search widget.
+
+        :rtype: studioqt.Dataset
+        """
+        return self._dataset
+
+    def search(self):
+        """Run the dataset search."""
+        if self.dataset():
+            self.dataset().addQuery(self.query())
+            self.dataset().search()
+        else:
+            logger.info('No dataset found for the sidebar widget.')
+
+    def query(self):
+        """
+        Get the query for the sidebar widget.
+
+        :rtype: dict
+        """
+        filters = []
+
+        for path in self.selectedPaths():
+            if self.isRecursive():
+                suffix = "" if path.endswith("/") else "/"
+
+                filter_ = ('folder', 'startswith', path + suffix)
+                filters.append(filter_)
+
+            filter_ = ('folder', 'is', path)
+            filters.append(filter_)
+
+        uniqueName = 'sidebar_widget_' + str(id(self))
+        return {'name': uniqueName, 'operator': 'or', 'filters': filters}
 
     def searchChanged(self, text):
         """
@@ -364,17 +424,14 @@ class SidebarWidget(QtWidgets.QWidget):
     def isRecursive(self):
         return self.treeWidget().isRecursive()
 
-    def setItemData(self, id, data):
-        self.treeWidget().setPathSettings(id, data)
-
     def setData(self, *args, **kwargs):
         self.treeWidget().setData(*args, **kwargs)
 
+    def setItemData(self, id, data):
+        self.treeWidget().setPathSettings(id, data)
+
     def setLocked(self, locked):
         self.treeWidget().setLocked(locked)
-
-    def setDataset(self, dataset):
-        self.treeWidget().setDataset(dataset)
 
     def selectedPath(self):
         return self.treeWidget().selectedPath()
@@ -394,7 +451,6 @@ class TreeWidget(QtWidgets.QTreeWidget):
     itemDropped = QtCore.Signal(object)
     itemRenamed = QtCore.Signal(str, str)
     itemSelectionChanged = QtCore.Signal()
-    keyPressed = QtCore.Signal(object)
 
     def __init__(self, *args):
         super(TreeWidget, self).__init__(*args)
@@ -467,9 +523,6 @@ class TreeWidget(QtWidgets.QTreeWidget):
         self._index = {}
         super(TreeWidget, self).clear()
 
-    def keyPressEvent(self, event):
-        self.keyPressed.emit(event)
-
     def setRootVisible(self, visible):
         """
         Set the root item visible.
@@ -506,7 +559,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
 
     def selectionChanged(self, *args):
         """Triggered the current selection has changed."""
-        self.search()
+        self.parent().search()
 
     def setRecursive(self, enable):
         """
@@ -515,7 +568,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
         :type enable: bool
         """
         self._recursive = enable
-        self.search()
+        self.parent().search()
 
     def isRecursive(self):
         """
@@ -573,54 +626,6 @@ class TreeWidget(QtWidgets.QTreeWidget):
         # if data:
         #     root = findRoot(data.keys(), separator=self.separator())
         #     self.setPaths(data, root=root)
-
-    def setDataset(self, dataset):
-        """
-        Set the dataset for the search widget:
-        
-        :type dataset: studioqt.Dataset
-        """
-        self._dataset = dataset
-        self._dataset.dataChanged.connect(self._dataChanged)
-        self._dataChanged()
-
-    def dataset(self):
-        """
-        Get the dataset for the search widget.
-        
-        :rtype: studioqt.Dataset 
-        """
-        return self._dataset
-
-    def search(self):
-        """Run the dataset search."""
-        if self.dataset():
-            self.dataset().addQuery(self.query())
-            self.dataset().search()
-        else:
-            logger.info('No dataset found for the sidebar widget.')
-
-    def query(self):
-        """
-        Get the query for the sidebar widget.
-        
-        :rtype: dict
-        """
-        filters = []
-
-        for path in self.selectedPaths():
-            if self.isRecursive():
-
-                suffix = "" if path.endswith("/") else "/"
-
-                filter_ = ('folder', 'startswith', path + suffix)
-                filters.append(filter_)
-
-            filter_ = ('folder', 'is', path)
-            filters.append(filter_)
-
-        uniqueName = 'sidebar_widget_' + str(id(self))
-        return {'name': uniqueName, 'operator': 'or', 'filters': filters}
 
     def setLocked(self, locked):
         """
@@ -975,7 +980,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
 
         self.blockSignals(False)
 
-        self.search()
+        self.parent().search()
 
     def addPaths(self, paths, root="", split=None):
         """
