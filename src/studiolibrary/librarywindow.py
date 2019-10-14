@@ -251,6 +251,8 @@ class LibraryWindow(QtWidgets.QWidget):
         self._previewFrame = PreviewFrame(self)
 
         self._itemsWidget = self.ITEMS_WIDGET_CLASS(self)
+        self._itemsWidget.installEventFilter(self)
+        self._itemsWidget.keyPressed.connect(self._keyPressed)
 
         tip = "Search all current items."
         self._searchWidget = self.SEARCH_WIDGET_CLASS(self)
@@ -412,6 +414,21 @@ class LibraryWindow(QtWidgets.QWidget):
 
         if path:
             self.setPath(path)
+
+    def _keyPressed(self, event):
+        """
+        Triggered from the items widget on key press event.
+
+        :type event: QKeyEvent
+        """
+        text = event.text().strip()
+
+        if not text.isalpha() and not text.isdigit():
+            return
+
+        if text and not self.searchWidget().hasFocus():
+            self.searchWidget().setFocus()
+            self.searchWidget().setText(text)
 
     def _searchFinished(self):
         self.showRefreshMessage()
@@ -1157,10 +1174,10 @@ class LibraryWindow(QtWidgets.QWidget):
                     "type": "color",
                     "value": accentColor,
                     "colors": [
-                        "rgb(195, 80, 90, 255)",
+                        "rgb(225, 110, 110, 255)",
                         # "rgb(220, 135, 100, 255)",
-                        "rgb(220, 120, 70, 255)",
-                        "rgb(220, 160, 30, 255)",
+                        "rgb(225, 150, 70, 255)",
+                        "rgb(225, 180, 35, 255)",
                         "rgb(90, 175, 130, 255)",
                         "rgb(100, 175, 160, 255)",
                         "rgb(70, 160, 210, 255)",
