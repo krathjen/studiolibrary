@@ -59,7 +59,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>../resource/icons/logo_transparent_256.png</pixmap>
+         <pixmap>../resource/icons/preview_placeholder.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
