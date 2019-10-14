@@ -49,6 +49,8 @@ class ItemsWidget(QtWidgets.QWidget):
 
     LABEL_DISPLAY_OPTION = LabelDisplayOption.Under
 
+    keyPressed = QtCore.Signal(object)
+
     itemClicked = QtCore.Signal(object)
     itemDoubleClicked = QtCore.Signal(object)
 
@@ -76,12 +78,14 @@ class ItemsWidget(QtWidgets.QWidget):
 
         self._listView = ListView(self)
         self._listView.setTreeWidget(self._treeWidget)
+        self._listView.installEventFilter(self)
 
         self._delegate = ItemDelegate()
         self._delegate.setItemsWidget(self)
 
         self._listView.setItemDelegate(self._delegate)
         self._treeWidget.setItemDelegate(self._delegate)
+        self._treeWidget.installEventFilter(self)
 
         self._toastWidget = ToastWidget(self)
         self._toastWidget.hide()
@@ -112,6 +116,12 @@ class ItemsWidget(QtWidgets.QWidget):
         self.itemMoved = self._listView.itemMoved
         self.itemDropped = self._listView.itemDropped
         self.itemSelectionChanged = self._treeWidget.itemSelectionChanged
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            self.keyPressed.emit(event)
+
+        return super(ItemsWidget, self).eventFilter(obj, event)
 
     def _sortIndicatorChanged(self):
         """
