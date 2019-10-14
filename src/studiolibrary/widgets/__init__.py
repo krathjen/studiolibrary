@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 from .lightbox import Lightbox
+from .lineedit import LineEdit
 from .sortbymenu import SortByMenu
 from .groupbymenu import GroupByMenu
 from .filterbymenu import FilterByMenu
