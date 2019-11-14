@@ -309,7 +309,8 @@ class ListView(ItemViewMixin, QtWidgets.QListView):
         ItemViewMixin.mousePressEvent(self, event)
         if event.isAccepted():
             QtWidgets.QListView.mousePressEvent(self, event)
-            item.setSelected(True)
+            if item:
+                item.setSelected(True)
 
         self.endDrag()
         self._dragStartPos = event.pos()
