@@ -305,7 +305,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         """
         Show the by frame dialog.
 
-        :rtype: None or QtWidgets.QMessageBox.StandardButton
+        :rtype: None or QtWidgets.QDialogButtonBox.StandardButton
         """
         result = None
         text = 'To help speed up the playblast you can set the "by frame" ' \
@@ -322,7 +322,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         if duration > 100 and byFrame == 1:
 
-            buttons = QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel
+            buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
 
             result = studiolibrary.widgets.MessageBox.question(
                 self.libraryWindow(),
@@ -380,7 +380,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         # Ignore the by frame dialog when the control modifier is pressed.
         if not studioqt.isControlModifier():
             result = self.showByFrameDialog()
-            if result != QtWidgets.QMessageBox.Ok:
+            if result != QtWidgets.QDialogButtonBox.Ok:
                 return
 
         try:
@@ -409,9 +409,9 @@ class BaseSaveWidget(QtWidgets.QWidget):
         title = "Create a thumbnail"
         text = "Would you like to capture a thumbnail?"
 
-        buttons = QtWidgets.QMessageBox.Yes | \
-                  QtWidgets.QMessageBox.Ignore | \
-                  QtWidgets.QMessageBox.Cancel
+        buttons = QtWidgets.QDialogButtonBox.Yes | \
+                  QtWidgets.QDialogButtonBox.Ignore | \
+                  QtWidgets.QDialogButtonBox.Cancel
 
         parent = self.item().libraryWindow()
         button = studiolibrary.widgets.MessageBox.question(
@@ -421,7 +421,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
             buttons=buttons
         )
 
-        if button == QtWidgets.QMessageBox.Yes:
+        if button == QtWidgets.QDialogButtonBox.Yes:
             self.thumbnailCapture()
 
         return button
@@ -437,7 +437,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
             hasFrames = self.ui.thumbnailButton.hasFrames()
             if not hasFrames:
                 button = self.showThumbnailCaptureDialog()
-                if button == QtWidgets.QMessageBox.Cancel:
+                if button == QtWidgets.QDialogButtonBox.Cancel:
                     return
 
             name = self.formWidget().value("name")

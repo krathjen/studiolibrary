@@ -822,8 +822,8 @@ class LibraryItem(studiolibrary.widgets.Item):
         text = 'Would you like to move the existing item "{}" to the trash?'
         text = text.format(os.path.basename(self.path()))
 
-        buttons = QtWidgets.QMessageBox.Yes | \
-                  QtWidgets.QMessageBox.Cancel
+        buttons = QtWidgets.QDialogButtonBox.Yes | \
+                  QtWidgets.QDialogButtonBox.Cancel
 
         try:
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.ArrowCursor)
@@ -831,7 +831,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         finally:
              QtWidgets.QApplication.restoreOverrideCursor()
 
-        if button == QtWidgets.QMessageBox.Yes:
+        if button == QtWidgets.QDialogButtonBox.Yes:
             self._moveToTrash()
         else:
             raise ItemSaveError("You cannot save over an existing item.")

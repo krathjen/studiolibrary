@@ -2378,7 +2378,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
             result = self.showQuestionDialog(title, text)
 
-            if result == QtWidgets.QMessageBox.Yes:
+            if result == QtWidgets.QDialogButtonBox.Yes:
                 self.moveItemsToTrash(items)
 
     # -----------------------------------------------------------------------
@@ -2447,7 +2447,7 @@ class LibraryWindow(QtWidgets.QWidget):
         :type text: str
         :rtype: QMessageBox.StandardButton
         """
-        buttons = QtWidgets.QMessageBox.Ok
+        buttons = QtWidgets.QDialogButtonBox.Ok
 
         return studiolibrary.widgets.MessageBox.question(self, title, text, buttons=buttons)
 
@@ -2483,9 +2483,9 @@ class LibraryWindow(QtWidgets.QWidget):
         :rtype: QMessageBox.StandardButton
         """
         buttons = buttons or \
-                  QtWidgets.QMessageBox.Yes | \
-                  QtWidgets.QMessageBox.No | \
-                  QtWidgets.QMessageBox.Cancel
+                  QtWidgets.QDialogButtonBox.Yes | \
+                  QtWidgets.QDialogButtonBox.No | \
+                  QtWidgets.QDialogButtonBox.Cancel
 
         return studiolibrary.widgets.MessageBox.question(self, title, text, buttons=buttons)
 
