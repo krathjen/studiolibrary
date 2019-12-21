@@ -380,7 +380,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
         # Ignore the by frame dialog when the control modifier is pressed.
         if not studioqt.isControlModifier():
             result = self.showByFrameDialog()
-            if result != QtWidgets.QDialogButtonBox.Ok:
+            if result == QtWidgets.QDialogButtonBox.Cancel:
                 return
 
         try:
