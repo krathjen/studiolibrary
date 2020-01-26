@@ -1400,36 +1400,6 @@ def sendAnalytics(
     ul = ul or ""
     ul = ul.replace("_", "-").lower()
 
-    # -- Legacy begin --
-    # This can be removed after October 2019
-    url = "http://www.google-analytics.com/collect?" \
-          "v=1" \
-          "&ul=en-us" \
-          "&a=448166238" \
-          "&_u=.sB" \
-          "&_v=ma1b3" \
-          "&qt=2500" \
-          "&z=185" \
-          "&tid={tid}" \
-          "&an={an}" \
-          "&av={av}" \
-          "&cid={cid}" \
-          "&t=appview" \
-          "&cd={name}"
-
-    url = url.format(
-        tid=tid,
-        an=an,
-        av=version,
-        cid=cid,
-        name=name,
-    )
-
-    t = threading.Thread(target=_send, args=(url,))
-    t.start()
-    # -- Legacy end --
-
-    # Page View
     tid = "UA-50172384-3"
     url = "https://www.google-analytics.com/collect?" \
           "v=1" \
