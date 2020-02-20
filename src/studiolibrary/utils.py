@@ -1556,10 +1556,10 @@ def testFormatPath():
 
     :rtype: None 
     """
-    formatString = "{dirname}/vesions/{name}{extension}"
+    formatString = "{dirname}/versions/{name}{extension}"
 
     result = formatPath(formatString, path="P:/production/rigs/database.json")
-    expected = "P:/production/rigs/vesions/database.json"
+    expected = "P:/production/rigs/versions/database.json"
 
     msg = "Data does not match {} {}".format(expected, result)
     assert expected == result, msg
