@@ -344,6 +344,7 @@ class Pose(mutils.TransferObject):
             blend=100,
             key=False,
             mirror=False,
+            additive=False,
             refresh=False,
             batchMode=False,
             clearCache=False,
@@ -363,6 +364,7 @@ class Pose(mutils.TransferObject):
         :type key: bool
         :type refresh: bool
         :type mirror: bool
+        :type additive: bool
         :type mirrorTable: mutils.MirrorTable
         :type batchMode: bool
         :type clearCache: bool
@@ -393,7 +395,8 @@ class Pose(mutils.TransferObject):
         self.beforeLoad(clearSelection=clearSelection)
 
         try:
-            self.loadCache(blend=blend, key=key, mirror=mirror)
+            self.loadCache(blend=blend, key=key, mirror=mirror,
+                           additive=additive)
         finally:
             if not batchMode:
                 self.afterLoad()
@@ -562,7 +565,7 @@ class Pose(mutils.TransferObject):
 
             self._cache.append((srcAttribute, dstAttribute, srcMirrorValue))
 
-    def loadCache(self, blend=100, key=False, mirror=False):
+    def loadCache(self, blend=100, key=False, mirror=False, additive=False):
         """
         Load the pose from the current cache.
         
@@ -581,7 +584,8 @@ class Pose(mutils.TransferObject):
                 else:
                     value = srcAttribute.value()
                 try:
-                    dstAttribute.set(value, blend=blend, key=key)
+                    dstAttribute.set(value, blend=blend, key=key,
+                                     additive=additive)
                 except (ValueError, RuntimeError):
                     cache[i] = (None, None)
                     logger.debug('Ignoring %s', dstAttribute.fullname())
