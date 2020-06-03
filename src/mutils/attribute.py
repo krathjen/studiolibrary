@@ -276,7 +276,7 @@ class Attribute(object):
         :type blend: float
         """
         try:
-            if additive:
+            if additive and self.type() != 'bool':
                 if self.attr().startswith('scale'):
                     value = self.value() * (1 + (value - 1) * (blend/100.0))
                 else:

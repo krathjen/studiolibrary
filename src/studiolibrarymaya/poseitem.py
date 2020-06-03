@@ -306,15 +306,15 @@ class PoseItem(baseitem.BaseItem):
                 "persistent": True,
             },
             {
-                "name": "searchAndReplaceEnabled",
-                "title": "Search and Replace",
+                "name": "additive",
                 "type": "bool",
                 "inline": True,
                 "default": False,
                 "persistent": True,
             },
             {
-                "name": "additive",
+                "name": "searchAndReplaceEnabled",
+                "title": "Search and Replace",
                 "type": "bool",
                 "inline": True,
                 "default": False,
