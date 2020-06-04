@@ -266,7 +266,7 @@ class Attribute(object):
 
         return self._type
 
-    def set(self, value, blend=100, key=False, clamp=True):
+    def set(self, value, blend=100, key=False, clamp=True, additive=False):
         """
         Set the value for the attribute.
 
@@ -276,13 +276,18 @@ class Attribute(object):
         :type blend: float
         """
         try:
-            if int(blend) == 0:
+            if additive and self.type() != 'bool':
+                if self.attr().startswith('scale'):
+                    value = self.value() * (1 + (value - 1) * (blend/100.0))
+                else:
+                    value = self.value() + value * (blend/100.0)
+            elif int(blend) == 0:
                 value = self.value()
             else:
                 _value = (value - self.value()) * (blend/100.00)
                 value = self.value() + _value
         except TypeError as error:
-            msg = 'Cannot BLEND attribute {0}: Error: {1}'
+            msg = 'Cannot BLEND or ADD attribute {0}: Error: {1}'
             msg = msg.format(self.fullname(), error)
             logger.debug(msg)
 

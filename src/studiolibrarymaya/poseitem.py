@@ -122,7 +122,8 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
     def accept(self):
         """Triggered when the user clicks the apply button."""
-        self.item().loadFromCurrentValues(clearSelection=False)
+        self.item().loadFromCurrentValues(clearCache=True,
+            clearSelection=False)
 
 
 class PoseItem(baseitem.BaseItem):
@@ -305,6 +306,13 @@ class PoseItem(baseitem.BaseItem):
                 "persistent": True,
             },
             {
+                "name": "additive",
+                "type": "bool",
+                "inline": True,
+                "default": False,
+                "persistent": True,
+            },
+            {
                 "name": "searchAndReplaceEnabled",
                 "title": "Search and Replace",
                 "type": "bool",
@@ -379,6 +387,7 @@ class PoseItem(baseitem.BaseItem):
         blend=100.0,
         refresh=True,
         batchMode=False,
+        clearCache=False,
         clearSelection=True,
         showBlendMessage=False,
     ):
@@ -397,6 +406,7 @@ class PoseItem(baseitem.BaseItem):
             # self._options['namespaces'] = self.currentLoadValue("namespaces")
             self._options['mirrorTable'] = self.mirrorTable()
             self._options['objects'] = maya.cmds.ls(selection=True) or []
+            self._options['additive'] = self.currentLoadValue("additive")
 
         searchAndReplace = None
         if self.currentLoadValue("searchAndReplaceEnabled"):
@@ -407,6 +417,7 @@ class PoseItem(baseitem.BaseItem):
                 blend=blend,
                 refresh=refresh,
                 batchMode=batchMode,
+                clearCache=clearCache,
                 clearSelection=clearSelection,
                 showBlendMessage=showBlendMessage,
                 searchAndReplace=searchAndReplace,
@@ -424,8 +435,10 @@ class PoseItem(baseitem.BaseItem):
         key=False,
         attrs=None,
         mirror=None,
+        additive=False,
         refresh=True,
         batchMode=False,
+        clearCache=False,
         mirrorTable=None,
         clearSelection=False,
         showBlendMessage=False,
@@ -472,8 +485,10 @@ class PoseItem(baseitem.BaseItem):
                 blend=blend,
                 attrs=attrs,
                 mirror=mirror,
+                additive=additive,
                 refresh=refresh,
                 batchMode=batchMode,
+                clearCache=clearCache,
                 mirrorTable=mirrorTable,
                 clearSelection=clearSelection,
                 searchAndReplace=searchAndReplace
