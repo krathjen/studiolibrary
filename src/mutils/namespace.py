@@ -83,4 +83,4 @@ def getAll():
     namespaces = list(set(namespaces) - set(IGNORE_NAMESPACES))
     namespaces = sorted(namespaces)
 
-    return namespaces + [':']
+    return namespaces
