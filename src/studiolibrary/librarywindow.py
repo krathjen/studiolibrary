@@ -1346,7 +1346,6 @@ class LibraryWindow(QtWidgets.QWidget):
         point = self.menuBarWidget().rect().bottomLeft()
         point = self.menuBarWidget().mapToGlobal(point)
 
-        menu.show()
         return menu.exec_(point)
 
     def showSettingsMenu(self):
@@ -1361,6 +1360,7 @@ class LibraryWindow(QtWidgets.QWidget):
         point = self.menuBarWidget().mapToGlobal(point)
 
         # Align menu to the left of the cursor.
+        menu.move(-1000, -1000)  # Fix display bug on linux
         menu.show()
         x = point.x() - menu.width()
         point.setX(x)
