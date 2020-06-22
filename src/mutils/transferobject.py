@@ -1,11 +1,11 @@
 # Copyright 2019 by Kurt Rathjen. All Rights Reserved.
 #
-# This library is free software: you can redistribute it and/or modify it 
-# under the terms of the GNU Lesser General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. This library is distributed in the 
-# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# This library is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version. This library is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
@@ -14,14 +14,14 @@ Base object for saving poses, animation, selection sets and mirror tables.
 
 Example:
     import mutils
-    
+
     t = mutils.TransferObject.fromPath("/tmp/pose.json")
     t = mutils.TransferObject.fromObjects(["object1", "object2"])
-    
+
     t.load(selection=True)
     t.load(objects=["obj1", "obj2"])
     t.load(namespaces=["namespace1", "namespace2"])
-    
+
     t.save("/tmp/pose.json")
     t.read("/tmp/pose.json")
 """
@@ -51,7 +51,7 @@ class TransferObject(object):
     def fromPath(cls, path):
         """
         Return a new transfer instance for the given path.
-        
+
         :type path: str
         :rtype: TransferObject
         """
@@ -64,7 +64,7 @@ class TransferObject(object):
     def fromObjects(cls, objects, **kwargs):
         """
         Return a new transfer instance for the given objects.
-        
+
         :type objects: list[str]
         :rtype: TransferObject
         """
@@ -93,7 +93,7 @@ class TransferObject(object):
         """
         Legacy method for reading older .list file type.
 
-        :rtype: dict 
+        :rtype: dict
         """
         with open(path, "r") as f:
             data = f.read()
@@ -110,7 +110,7 @@ class TransferObject(object):
         """
         Legacy method for reading older .dict file type.
 
-        :rtype: dict 
+        :rtype: dict
         """
         with open(path, "r") as f:
             data = f.read()
@@ -133,7 +133,7 @@ class TransferObject(object):
     def path(self):
         """
         Return the disc location for the transfer object.
-        
+
         :rtype: str
         """
         return self._path
@@ -160,12 +160,12 @@ class TransferObject(object):
     def validate(self, **kwargs):
         """
         Validate the given kwargs for the current IO object.
-        
-        :type kwargs: dict 
+
+        :type kwargs: dict
         """
         namespaces = kwargs.get("namespaces")
         if namespaces is not None:
-            sceneNamespaces = mutils.namespace.getAll()
+            sceneNamespaces = mutils.namespace.getAll() + [":"]
             for namespace in namespaces:
                 if namespace and namespace not in sceneNamespaces:
                     msg = 'The namespace "{0}" does not exist in the scene! ' \
@@ -176,7 +176,7 @@ class TransferObject(object):
     def mtime(self):
         """
         Return the modification datetime of self.path().
-        
+
         :rtype: float
         """
         return os.path.getmtime(self.path())
@@ -184,7 +184,7 @@ class TransferObject(object):
     def ctime(self):
         """
         Return the creation datetime of self.path().
-        
+
         :rtype: float
         """
         return os.path.getctime(self.path())
@@ -192,7 +192,7 @@ class TransferObject(object):
     def data(self):
         """
         Return all the data for the transfer object.
-        
+
         :rtype: dict
         """
         return self._data
@@ -200,7 +200,7 @@ class TransferObject(object):
     def setData(self, data):
         """
         Set the data for the transfer object.
-        
+
         :type data:
         """
         self._data = data
@@ -224,7 +224,7 @@ class TransferObject(object):
     def objects(self):
         """
         Return all the object data.
-        
+
         :rtype: dict
         """
         return self.data().get("objects", {})
@@ -232,7 +232,7 @@ class TransferObject(object):
     def object(self, name):
         """
         Return the data for the given object name.
-        
+
         :type name: str
         :rtype: dict
         """
@@ -241,7 +241,7 @@ class TransferObject(object):
     def createObjectData(self, name):
         """
         Create the object data for the given object name.
-        
+
         :type name: str
         :rtype: dict
         """
@@ -262,7 +262,7 @@ class TransferObject(object):
     def objectCount(self):
         """
         Return the number of objects in the transfer object.
-        
+
         :rtype: int
         """
         return len(self.objects() or [])
@@ -294,7 +294,7 @@ class TransferObject(object):
     def setMetadata(self, key, value):
         """
         Set the given key and value in the metadata.
-        
+
         :type key: str
         :type value: int | str | float | dict
         """
@@ -303,7 +303,7 @@ class TransferObject(object):
     def updateMetadata(self, metadata):
         """
         Update the given key and value in the metadata.
-        
+
         :type metadata: dict
         """
         self.data()["metadata"].update(metadata)
@@ -311,7 +311,7 @@ class TransferObject(object):
     def metadata(self):
         """
         Return the current metadata for the transfer object.
-        
+
         Example: print self.metadata()
             Result # {
                 "User": "",
@@ -319,7 +319,7 @@ class TransferObject(object):
                 "Reference": {"filename": "", "namespace": ""},
                 "Description": "",
             }
-        
+
         :rtype: dict
         """
         return self.data().get("metadata", {})
@@ -352,7 +352,7 @@ class TransferObject(object):
     def save(self, path):
         """
         Save the current metadata and object data to the given path.
-        
+
         :type path: str
         :rtype: None
         """
