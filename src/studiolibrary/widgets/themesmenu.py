@@ -245,7 +245,7 @@ def showThemesMenu(parent=None, themes=None):
     """
     theme = Theme()
     menu = ThemesMenu(parent=parent, theme=theme, themes=themes)
-    position = QtWidgets.QCursor().pos()
+    position = QtGui.QCursor().pos()
     action = menu.exec_(position)
     return theme
 
