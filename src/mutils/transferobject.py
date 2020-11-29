@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by
@@ -32,6 +32,8 @@ import time
 import locale
 import getpass
 import logging
+
+from studiovendor import six
 
 import mutils
 
@@ -273,7 +275,7 @@ class TransferObject(object):
 
         :type objects: str | list[str]
         """
-        if isinstance(objects, basestring):
+        if isinstance(objects, six.string_types):
             objects = [objects]
 
         for name in objects:
@@ -285,7 +287,7 @@ class TransferObject(object):
 
         :type objects: str | list[str]
         """
-        if isinstance(objects, basestring):
+        if isinstance(objects, six.string_types):
             objects = [objects]
 
         for obj in objects:
@@ -312,7 +314,7 @@ class TransferObject(object):
         """
         Return the current metadata for the transfer object.
 
-        Example: print self.metadata()
+        Example: print(self.metadata())
             Result # {
                 "User": "",
                 "Scene": "",

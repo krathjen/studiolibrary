@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -16,6 +16,7 @@ from functools import partial
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
+from studiovendor import six
 
 import studioqt
 
@@ -376,7 +377,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         :type value: bool
         :rtype: None
         """
-        if isinstance(column, basestring):
+        if isinstance(column, six.string_types):
             column = self.columnFromLabel(column)
 
         label = self.labelFromColumn(column)

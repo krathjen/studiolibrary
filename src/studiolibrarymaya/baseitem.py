@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -208,7 +208,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type enableSelectContent: bool
         :rtype: QtWidgets.QMenu
         """
-        import setsmenu
+        from . import setsmenu
 
         parent = parent or self.libraryWindow()
 

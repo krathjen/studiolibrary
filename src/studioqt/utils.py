@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -167,7 +167,7 @@ def fadeIn(widget, duration=200, onFinished=None):
     """
     widget._fadeInEffect_ = QtWidgets.QGraphicsOpacityEffect()
     widget.setGraphicsEffect(widget._fadeInEffect_)
-    animation = QtCore.QPropertyAnimation(widget._fadeInEffect_, "opacity")
+    animation = QtCore.QPropertyAnimation(widget._fadeInEffect_, b"opacity")
     animation.setDuration(duration)
     animation.setStartValue(0.0)
     animation.setEndValue(1.0)
@@ -193,7 +193,7 @@ def fadeOut(widget, duration=200, onFinished=None):
     """
     widget._fadeOutEffect_ = QtWidgets.QGraphicsOpacityEffect()
     widget.setGraphicsEffect(widget._fadeOutEffect_)
-    animation = QtCore.QPropertyAnimation(widget._fadeOutEffect_, "opacity")
+    animation = QtCore.QPropertyAnimation(widget._fadeOutEffect_, b"opacity")
     animation.setDuration(duration)
     animation.setStartValue(1.0)
     animation.setEndValue(0.0)

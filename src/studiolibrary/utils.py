@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -159,7 +159,7 @@ def reload():
 
     names = modules()
 
-    for mod in sys.modules.keys():
+    for mod in list(sys.modules.keys()):
         for name in names:
             if mod in sys.modules and mod.startswith(name):
                 logger.info('Removing module: %s', mod)
@@ -565,15 +565,16 @@ def formatPath(formatString, path="", **kwargs):
 
     temp = tempfile.gettempdir()
     if temp:
-        temp = temp.decode(encoding)
+
+        temp = six.u(temp, encoding)
 
     username = user()
     if username:
-        username = username.decode(encoding)
+        username = six.u(username, encoding)
 
     local = os.getenv('APPDATA') or os.getenv('HOME')
     if local:
-        local = local.decode(encoding)
+        local = six.u(local, encoding)
 
     kwargs.update(os.environ)
 

@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -78,7 +78,7 @@ class StyleSheet(object):
         :rtype: str
         """
         if options is not None:
-            keys = options.keys()
+            keys = list(options.keys())
             keys.sort(key=len, reverse=True)
             for key in keys:
                 data = data.replace(key, options[key])

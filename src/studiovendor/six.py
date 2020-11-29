@@ -638,8 +638,8 @@ if PY3:
     def b(s):
         return s.encode("latin-1")
 
-    def u(s):
-        return s
+    def u(s, encoding=None):
+        return str(s)
     unichr = chr
     import struct
     int2byte = struct.Struct(">B").pack
@@ -662,12 +662,12 @@ else:
         return s
     # Workaround for standalone backslash
 
-    def u(s):
+    def u(s, encoding="unicode_escape"):
         s = s.replace(r'\\', r'\\\\')
         if isinstance(s, unicode):
             return s
         else:
-            return unicode(s, "unicode_escape")
+            return unicode(s, encoding)
     unichr = unichr
     int2byte = chr
 

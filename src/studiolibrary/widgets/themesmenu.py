@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -13,6 +13,7 @@
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
+from studiovendor import six
 
 import studioqt
 import studiolibrary
@@ -446,7 +447,7 @@ class Theme(QtCore.QObject):
 
         :type color: studioqt.Color | QtGui.QColor
         """
-        if isinstance(color, basestring):
+        if isinstance(color, six.string_types):
             color = studioqt.Color.fromString(color)
 
         if isinstance(color, QtGui.QColor):
@@ -462,7 +463,7 @@ class Theme(QtCore.QObject):
 
         :type color: studioqt.Color | QtGui.QColor
         """
-        if isinstance(color, basestring):
+        if isinstance(color, six.string_types):
             color = studioqt.Color.fromString(color)
 
         if isinstance(color, QtGui.QColor):

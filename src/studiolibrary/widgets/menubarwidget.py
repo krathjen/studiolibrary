@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -12,6 +12,7 @@
 
 import logging
 
+from studiovendor import six
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
@@ -220,7 +221,7 @@ class MenuBarWidget(QtWidgets.QToolBar):
         """
         action.setParent(self)
 
-        if isinstance(before, basestring):
+        if isinstance(before, six.string_types):
             before = self.findAction(before)
 
         action = QtWidgets.QToolBar.insertAction(self, before, action)

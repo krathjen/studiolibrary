@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -10,21 +10,21 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-from cmds import *
-from decorators import *
+from .cmds import *
+from .decorators import *
 
-import playblast
-import namespace
+from . import playblast
+from . import namespace
 
-from scriptjob import ScriptJob
-from matchnames import matchNames, groupObjects
+from .scriptjob import ScriptJob
+from .matchnames import matchNames, groupObjects
 
-from node import Node
-from attribute import Attribute
+from .node import Node
+from .attribute import Attribute
 
-from transferobject import TransferObject
+from .transferobject import TransferObject
 
-from selectionset import SelectionSet, saveSelectionSet
-from pose import Pose, savePose, loadPose
-from animation import Animation, PasteOption, saveAnim, loadAnims
-from mirrortable import MirrorTable, MirrorOption, saveMirrorTable
+from .selectionset import SelectionSet, saveSelectionSet
+from .pose import Pose, savePose, loadPose
+from .animation import Animation, PasteOption, saveAnim, loadAnims
+from .mirrortable import MirrorTable, MirrorOption, saveMirrorTable

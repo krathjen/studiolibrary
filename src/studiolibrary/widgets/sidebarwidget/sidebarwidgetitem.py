@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -13,6 +13,7 @@
 import os
 import logging
 
+from studiovendor import six
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
@@ -183,7 +184,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
             if isinstance(color, QtGui.QColor):
                 color = studioqt.Color.fromColor(color)
 
-            elif isinstance(color, basestring):
+            elif isinstance(color, six.string_types):
                 color = studioqt.Color.fromString(color)
 
             self._iconColor = color.toString()
@@ -288,7 +289,7 @@ class SidebarWidgetItem(QtWidgets.QTreeWidgetItem):
         if isinstance(color, QtGui.QColor):
             color = studioqt.Color.fromColor(color)
 
-        elif isinstance(color, basestring):
+        elif isinstance(color, six.string_types):
             color = studioqt.Color.fromString(color)
 
         self._settings["textColor"] = color.toString()

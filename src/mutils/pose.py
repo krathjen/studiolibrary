@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -79,7 +79,7 @@ def savePose(path, objects, metadata=None):
     Example:
         path = "C:/example.pose"
         pose = savePose(path, metadata={'description': 'Example pose'})
-        print pose.metadata()
+        print(pose.metadata())
         # {
         'user': 'Hovel', 
         'mayaVersion': '2016', 

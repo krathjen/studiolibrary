@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -100,7 +100,7 @@ class ItemViewMixin(object):
             indexes2 = deselected.indexes()
             deselectedItems = self.itemsFromIndexes(indexes2)
 
-            items = selectedItems + deselectedItems
+            items = list(selectedItems) + list(deselectedItems)
             for item in items:
                 item.selectionChanged()
             #

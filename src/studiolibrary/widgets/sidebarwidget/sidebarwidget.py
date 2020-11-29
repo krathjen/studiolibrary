@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by
@@ -15,6 +15,7 @@ import logging
 import functools
 import collections
 
+from studiovendor import six
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
@@ -23,7 +24,7 @@ import studioqt
 import studiolibrary
 import studiolibrary.widgets
 
-from sidebarwidgetitem import SidebarWidgetItem
+from .sidebarwidgetitem import SidebarWidgetItem
 
 
 __all__ = ["SidebarWidget"]
@@ -87,7 +88,7 @@ def findRoot(paths, separator=None):
     :rtype: str 
     """
     if paths:
-        path = paths[0]  # Only need one from the list to verify the common path.
+        path = list(paths)[0]  # Only need one from the list to verify the common path.
     else:
         path = ""
 
@@ -1024,14 +1025,14 @@ class TreeWidget(QtWidgets.QTreeWidget):
                     text = key
 
                 item = SidebarWidgetItem(self)
-                item.setText(0, unicode(text))
+                item.setText(0, six.u(text))
                 item.setPath(root)
                 item.setExpanded(True)
 
                 self._index[root] = item
 
             def _recursive(parent, children, split=None, root=""):
-                for text, val in sorted(children.iteritems()):
+                for text, val in sorted(children.items()):
 
                     if not parent:
                         parent = self
@@ -1040,7 +1041,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
                     path = path.replace("//", "/")
 
                     child = SidebarWidgetItem(parent)
-                    child.setText(0, unicode(text))
+                    child.setText(0, six.u(text))
                     child.setPath(path)
 
                     self._index[path] = child
@@ -1126,7 +1127,7 @@ class ExampleWindow(QtWidgets.QWidget):
             else:
                 item.setHidden(True)
 
-        print time.time() - t
+        print(time.time() - t)
 
 
 def runTests():

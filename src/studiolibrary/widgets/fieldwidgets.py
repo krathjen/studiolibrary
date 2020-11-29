@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by
@@ -14,6 +14,7 @@ import re
 import logging
 import functools
 
+from studiovendor import six
 from studiovendor.Qt import QtGui, QtCore, QtWidgets
 
 import studioqt
@@ -656,7 +657,7 @@ class LabelFieldWidget(FieldWidget):
         
         :rtype: str 
         """
-        return unicode(self.widget().text())
+        return six.u(self.widget().text())
 
     def setValue(self, value):
         """
@@ -664,7 +665,7 @@ class LabelFieldWidget(FieldWidget):
         
         :type value: str 
         """
-        self.widget().setText(unicode(value))
+        self.widget().setText(six.u(value))
         super(LabelFieldWidget, self).setValue(value)
 
 
@@ -723,7 +724,7 @@ class StringFieldWidget(FieldWidget):
         
         :rtype: unicode 
         """
-        return unicode(self.widget().text())
+        return six.u(self.widget().text())
 
     def setValue(self, value):
         """
@@ -790,7 +791,7 @@ class TextFieldWidget(FieldWidget):
         
         :rtype: unicode 
         """
-        return unicode(self.widget().toPlainText())
+        return six.u(self.widget().toPlainText())
 
     def setValue(self, value):
         """
@@ -1009,7 +1010,7 @@ class EnumFieldWidget(FieldWidget):
         
         :rtype: unicode 
         """
-        return unicode(self.widget().currentText())
+        return six.u(self.widget().currentText())
 
     def setState(self, state):
         """

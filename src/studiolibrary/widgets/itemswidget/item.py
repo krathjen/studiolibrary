@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -14,6 +14,7 @@ import os
 import math
 import logging
 
+from studiovendor import six
 from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
@@ -70,7 +71,7 @@ class ImageWorker(QtCore.QRunnable):
         """The starting point for the thread."""
         try:
             if self._path:
-                image = QtGui.QImage(unicode(self._path))
+                image = QtGui.QImage(six.u(self._path))
                 self.signals.triggered.emit(image)
         except Exception as error:
             logger.exception("Cannot load thumbnail image.")
@@ -156,6 +157,9 @@ class Item(QtWidgets.QTreeWidgetItem):
     def __ne__(self, other):
         return id(other) != id(self)
 
+    def __hash__(self):
+        return hash(id(self))
+
     def __del__(self):
         """
         Make sure the sequence is stopped when deleted.
@@ -235,14 +239,14 @@ class Item(QtWidgets.QTreeWidgetItem):
         if not isAppRunning:
             return
 
-        if isinstance(icon, basestring):
+        if isinstance(icon, six.string_types):
             if not os.path.exists(icon):
                 color = color or studioqt.Color(255, 255, 255, 20)
                 icon = studiolibrary.resource.icon("image", color=color)
             else:
                 icon = QtGui.QIcon(icon)
 
-        if isinstance(column, basestring):
+        if isinstance(column, six.string_types):
             self._icon[column] = icon
         else:
             self._pixmap[column] = None
@@ -293,7 +297,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type label: str
         :rtype: str
         """
-        return unicode(self.itemData().get(label, ''))
+        return six.u(self.itemData().get(label, ''))
 
     def sortText(self, label):
         """
@@ -302,7 +306,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type label: str
         :rtype: str
         """
-        return unicode(self.itemData().get(label, ''))
+        return six.u(self.itemData().get(label, ''))
 
     def update(self):
         """
@@ -430,7 +434,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :rtype: str
         """
         if not self._searchText:
-            self._searchText = unicode(self._data)
+            self._searchText = six.u(self._data)
 
         return self._searchText
 
@@ -1383,7 +1387,7 @@ class Item(QtWidgets.QTreeWidgetItem):
             self.setImageSequence(movie)
             self.imageSequence().start()
 
-    def _frameChanged(self, frame):
+    def _frameChanged(self, frame=None):
         """Triggered when the movie object updates to the given frame."""
         if not studioqt.isControlModifier():
             self.updateFrame()

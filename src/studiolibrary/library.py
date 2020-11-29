@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -16,9 +16,10 @@ import time
 import logging
 import collections
 
-import studiolibrary
-
+from studiovendor import six
 from studiovendor.Qt import QtCore
+
+import studiolibrary
 
 
 __all__ = [
@@ -847,14 +848,14 @@ class Library(QtCore.QObject):
             for key, cond, value in filters:
 
                 if key == '*':
-                    itemValue = unicode(data)
+                    itemValue = six.u(data)
                 else:
                     itemValue = data.get(key)
 
-                if isinstance(value, basestring):
+                if isinstance(value, six.string_types):
                     value = value.lower()
 
-                if isinstance(itemValue, basestring):
+                if isinstance(itemValue, six.string_types):
                     itemValue = itemValue.lower()
 
                 if not itemValue:

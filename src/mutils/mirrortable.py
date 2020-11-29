@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -67,6 +67,8 @@ import re
 import mutils
 import logging
 import traceback
+
+from studiovendor import six
 
 try:
     import maya.cmds
@@ -155,7 +157,7 @@ class MirrorTable(mutils.TransferObject):
         """
         mirrorPlane = mirrorPlane or MirrorPlane.YZ
 
-        if isinstance(mirrorPlane, basestring):
+        if isinstance(mirrorPlane, six.string_types):
 
             if mirrorPlane.lower() == "yz":
                 mirrorPlane = MirrorPlane.YZ
@@ -211,7 +213,7 @@ class MirrorTable(mutils.TransferObject):
         :type reSides: str or list[str]
         :rtype: str
         """
-        if isinstance(reSides, basestring):
+        if isinstance(reSides, six.string_types):
             reSides = reSides.split("|")
 
         # Compile the list of regular expressions into a re.object

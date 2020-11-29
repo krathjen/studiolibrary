@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -11,6 +11,8 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import mutils
+
+from studiovendor import six
 
 try:
     import maya.cmds
@@ -43,7 +45,7 @@ class Node(object):
         :type name: str
         """
         try:
-            self._name = name.encode('ascii')
+            self._name = six.u(name) # .encode('ascii')
         except UnicodeEncodeError:
             raise UnicodeEncodeError('Not a valid ascii name "%s".' % name)
 
@@ -101,7 +103,7 @@ class Node(object):
         """
         n = Node("|pSphere")
         n.stripFirstPipe()
-        print n.name()
+        print(n.name())
         # Result: pSphere
         """
         if self.name().startswith("|"):

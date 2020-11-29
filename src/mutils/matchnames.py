@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -30,7 +30,7 @@ def rotateSequence(seq, current):
     :rtype:
     """
     n = len(seq)
-    for i in xrange(n):
+    for i in range(n):
         yield seq[(i + current) % n]
 
 

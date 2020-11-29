@@ -1,4 +1,4 @@
-# Copyright 2019 by Kurt Rathjen. All Rights Reserved.
+# Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
 # This library is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU Lesser General Public License as published by 
@@ -10,6 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+from studiovendor import six
 from studiovendor.Qt import QtGui
 
 import studioqt
@@ -27,7 +28,7 @@ class Pixmap(QtGui.QPixmap):
         :type color: QtGui.QColor
         :rtype: None
         """
-        if isinstance(color, basestring):
+        if isinstance(color, six.string_types):
             color = studioqt.Color.fromString(color)
 
         if not self.isNull():
