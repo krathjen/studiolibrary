@@ -663,6 +663,10 @@ else:
     # Workaround for standalone backslash
 
     def u(s, encoding="unicode_escape"):
+
+        if not isinstance(s, basestring):
+            s = unicode(s, encoding)
+
         s = s.replace(r'\\', r'\\\\')
         if isinstance(s, unicode):
             return s
