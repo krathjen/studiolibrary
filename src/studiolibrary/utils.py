@@ -116,7 +116,7 @@ class PathError(IOError):
         """
         :type: str or unicode 
         """
-        msg = six.u(msg)
+        msg = six.text_type(msg)
         super(PathError, self).__init__(msg)
         self._msg = msg
 
@@ -126,7 +126,7 @@ class PathError(IOError):
         
         :rtype: unicode 
         """
-        msg = six.u(self._msg).decode('unicode_escape')
+        msg = six.text_type(self._msg).decode('unicode_escape')
         return msg
 
 
@@ -566,15 +566,15 @@ def formatPath(formatString, path="", **kwargs):
     temp = tempfile.gettempdir()
     if temp:
 
-        temp = six.u(temp, encoding)
+        temp = six.text_type(temp, encoding)
 
     username = user()
     if username:
-        username = six.u(username, encoding)
+        username = six.text_type(username, encoding)
 
     local = os.getenv('APPDATA') or os.getenv('HOME')
     if local:
-        local = six.u(local, encoding)
+        local = six.text_type(local, encoding)
 
     kwargs.update(os.environ)
 
@@ -592,7 +592,7 @@ def formatPath(formatString, path="", **kwargs):
 
     kwargs.update(labels)
 
-    resolvedString = six.u(formatString).format(**kwargs)
+    resolvedString = six.text_type(formatString).format(**kwargs)
 
     logger.debug("Resolved String: %s", resolvedString)
 
@@ -655,7 +655,7 @@ def movePath(src, dst):
     :type dst: str
     :rtype: str
     """
-    src = six.u(src)
+    src = six.text_type(src)
     dirname, name, extension = splitPath(src)
 
     if not os.path.exists(src):

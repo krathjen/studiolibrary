@@ -212,7 +212,7 @@ class StatusWidget(QtWidgets.QFrame):
             self._button.hide()
 
         if message:
-            self._label.setText(six.u(message))
+            self._label.setText(six.text_type(message))
             self._timer.stop()
             self._timer.start(msecs)
         else:
