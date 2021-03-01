@@ -1038,7 +1038,7 @@ class TreeWidget(QtWidgets.QTreeWidget):
                         parent = self
 
                     path = split.join([root, text])
-                    path = path.replace("//", "/")
+                    path = studiolibrary.normPath(path)
 
                     child = SidebarWidgetItem(parent)
                     child.setText(0, six.text_type(text))
