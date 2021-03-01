@@ -577,7 +577,7 @@ class MessageBox(QtWidgets.QDialog):
         :type text: str
         :rtype: None 
         """
-        text = six.u(text)
+        text = six.text_type(text)
         self._message.setText(text)
 
     def inputText(self):

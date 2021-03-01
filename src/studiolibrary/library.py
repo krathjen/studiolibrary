@@ -848,7 +848,7 @@ class Library(QtCore.QObject):
             for key, cond, value in filters:
 
                 if key == '*':
-                    itemValue = six.u(data)
+                    itemValue = six.text_type(data)
                 else:
                     itemValue = data.get(key)
 

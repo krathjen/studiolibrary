@@ -657,7 +657,7 @@ class LabelFieldWidget(FieldWidget):
         
         :rtype: str 
         """
-        return six.u(self.widget().text())
+        return six.text_type(self.widget().text())
 
     def setValue(self, value):
         """
@@ -665,7 +665,7 @@ class LabelFieldWidget(FieldWidget):
         
         :type value: str 
         """
-        self.widget().setText(six.u(value))
+        self.widget().setText(six.text_type(value))
         super(LabelFieldWidget, self).setValue(value)
 
 
@@ -724,7 +724,7 @@ class StringFieldWidget(FieldWidget):
         
         :rtype: unicode 
         """
-        return six.u(self.widget().text())
+        return six.text_type(self.widget().text())
 
     def setValue(self, value):
         """
@@ -791,7 +791,7 @@ class TextFieldWidget(FieldWidget):
         
         :rtype: unicode 
         """
-        return six.u(self.widget().toPlainText())
+        return six.text_type(self.widget().toPlainText())
 
     def setValue(self, value):
         """
@@ -1010,7 +1010,7 @@ class EnumFieldWidget(FieldWidget):
         
         :rtype: unicode 
         """
-        return six.u(self.widget().currentText())
+        return six.text_type(self.widget().currentText())
 
     def setState(self, state):
         """

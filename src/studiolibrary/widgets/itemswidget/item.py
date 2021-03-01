@@ -71,7 +71,7 @@ class ImageWorker(QtCore.QRunnable):
         """The starting point for the thread."""
         try:
             if self._path:
-                image = QtGui.QImage(six.u(self._path))
+                image = QtGui.QImage(six.text_type(self._path))
                 self.signals.triggered.emit(image)
         except Exception as error:
             logger.exception("Cannot load thumbnail image.")
@@ -297,7 +297,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type label: str
         :rtype: str
         """
-        return six.u(self.itemData().get(label, ''))
+        return six.text_type(self.itemData().get(label, ''))
 
     def sortText(self, label):
         """
@@ -306,7 +306,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type label: str
         :rtype: str
         """
-        return six.u(self.itemData().get(label, ''))
+        return six.text_type(self.itemData().get(label, ''))
 
     def update(self):
         """
@@ -434,7 +434,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :rtype: str
         """
         if not self._searchText:
-            self._searchText = six.u(self._data)
+            self._searchText = six.text_type(self._data)
 
         return self._searchText
 
