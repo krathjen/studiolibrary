@@ -177,7 +177,7 @@ class BaseItem(studiolibrary.LibraryItem):
         :type items: list[BaseItem]
         :rtype: None
         """
-        import setsmenu
+        from studiolibrarymaya import setsmenu
 
         action = setsmenu.selectContentAction(self, parent=menu)
         menu.addAction(action)

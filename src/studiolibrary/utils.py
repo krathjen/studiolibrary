@@ -126,8 +126,7 @@ class PathError(IOError):
         
         :rtype: unicode 
         """
-        msg = six.text_type(self._msg).decode('unicode_escape')
-        return msg
+        return six.text_type(self._msg)
 
 
 class MovePathError(PathError):
@@ -566,15 +565,15 @@ def formatPath(formatString, path="", **kwargs):
     temp = tempfile.gettempdir()
     if temp:
 
-        temp = six.text_type(temp, encoding)
+        temp = six.text_type(temp)
 
     username = user()
     if username:
-        username = six.text_type(username, encoding)
+        username = six.text_type(username)
 
     local = os.getenv('APPDATA') or os.getenv('HOME')
     if local:
-        local = six.text_type(local, encoding)
+        local = six.text_type(local)
 
     kwargs.update(os.environ)
 
@@ -980,8 +979,8 @@ def replaceJson(path, old, new, count=-1):
     :type count: int
     :rtype: dict
     """
-    old = old.encode("unicode_escape")
-    new = new.encode("unicode_escape")
+    old = six.text_type(old)
+    new = six.text_type(new)
 
     data = read(path) or "{}"
     data = data.replace(old, new, count)

@@ -360,10 +360,9 @@ class TransferObject(object):
         """
         logger.info("Saving pose: %s" % path)
 
-        encoding = locale.getpreferredencoding()
         user = getpass.getuser()
         if user:
-            user = user.decode(encoding)
+            user = six.text_type(user)
 
         ctime = str(time.time()).split(".")[0]
         references = mutils.getReferenceData(self.objects())
