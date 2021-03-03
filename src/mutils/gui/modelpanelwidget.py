@@ -78,12 +78,12 @@ class ModelPanelWidget(QtWidgets.QWidget):
 
     def modelPanel(self):
         ptr = mui.MQtUtil.findControl(self._modelPanel)
-        return mutils.gui.wrapInstance(long(ptr), QtWidgets.QWidget)
+        return mutils.gui.wrapInstance(int(ptr), QtWidgets.QWidget)
 
     def barLayout(self):
         name = maya.cmds.modelPanel(self._modelPanel, query=True, barLayout=True)
         ptr = mui.MQtUtil.findControl(name)
-        return mutils.gui.wrapInstance(long(ptr), QtCore.QObject)
+        return mutils.gui.wrapInstance(int(ptr), QtCore.QObject)
 
     def hideBarLayout(self):
         self.barLayout().hide()
