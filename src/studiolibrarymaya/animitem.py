@@ -269,5 +269,5 @@ class AnimItem(baseitem.BaseItem):
             iconPath=kwargs.get("thumbnail"),
             metadata={"description": kwargs.get("comment", "")},
             sequencePath=sequencePath,
-            bakeConnected=kwargs.get("bake")
+            bakeConnected=kwargs.get("bakeConnected")
         )
