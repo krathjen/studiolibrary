@@ -18,6 +18,7 @@ attr = mutils.Attribute("sphere1", "translateX")
 attr.set(100)
 """
 import logging
+from studiovendor import six
 
 try:
     import maya.cmds
@@ -94,13 +95,8 @@ class Attribute(object):
             msg = "Cannot initialise attribute instance without a given attr."
             raise AttributeError(msg)
 
-        try:
-            self._name = name.encode('ascii')
-            self._attr = attr.encode('ascii')
-        except UnicodeEncodeError:
-            msg = 'Not a valid ascii name "{0}.{1}"'.format(name, attr)
-            raise UnicodeEncodeError(msg)
-
+        self._name = six.text_type(name)
+        self._attr = six.text_type(attr)
         self._type = type
         self._value = value
         self._cache = cache

@@ -41,7 +41,7 @@ def timing(fn):
         time1 = time.time()
         ret = fn(*args, **kwargs)
         time2 = time.time()
-        logger.debug('%s function took %0.5f sec' % (fn.func_name, (time2 - time1)))
+        logger.debug('%s function took %0.5f sec' % (fn.__name__, (time2 - time1)))
         return ret
 
     return wrapped

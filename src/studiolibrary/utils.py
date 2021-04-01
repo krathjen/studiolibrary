@@ -1449,7 +1449,7 @@ def showInFolder(path):
         args = [u'xdg-open "{path}"&']
 
     elif isWindows():
-        args = [None, u'open', u'explorer.exe', u'/n,/select, "{path}"', None, 1]
+        args = [None, u'open', u'explorer', u'/select, "{path}"', None, 1]
 
     elif isMac():
         args = [u'open -R "{path}"']

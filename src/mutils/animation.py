@@ -573,7 +573,7 @@ class Animation(mutils.Pose):
         
         :rtype: None
         """
-        objects = self.objects().keys()
+        objects = list(self.objects().keys())
 
         fileType = fileType or DEFAULT_FILE_TYPE
 
