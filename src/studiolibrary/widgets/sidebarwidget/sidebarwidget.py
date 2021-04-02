@@ -138,7 +138,7 @@ class SidebarWidget(QtWidgets.QWidget):
         self._treeWidget = TreeWidget(self)
         self._treeWidget.itemDropped = self.itemDropped
         self._treeWidget.itemRenamed = self.itemRenamed
-        self._treeWidget.itemSelectionChanged = self.itemSelectionChanged
+        self._treeWidget.itemSelectionChanged.connect(self._itemSelectionChanged)
 
         self._titleWidget = self.createTitleWidget()
         self._titleWidget.ui.menuButton.clicked.connect(self.showSettingsMenu)
@@ -148,6 +148,9 @@ class SidebarWidget(QtWidgets.QWidget):
         self.layout().addWidget(self._treeWidget)
 
         self._treeWidget.installEventFilter(self)
+
+    def _itemSelectionChanged(self, *args):
+        self.itemSelectionChanged.emit()
 
     def eventFilter(self, obj, event):
         """Using an event filter to show the search widget on key press."""
