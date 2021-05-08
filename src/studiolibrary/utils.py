@@ -253,6 +253,8 @@ def isLatestRelease():
 
     :rtype: bool
     """
+    return False
+
     url = "https://api.github.com/repos/krathjen/studiolibrary/releases/latest"
     try:
         f = urllib.request.urlopen(url)
