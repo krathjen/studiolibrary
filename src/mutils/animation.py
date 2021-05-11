@@ -60,6 +60,9 @@ def validateAnimLayers():
     
     :raise: AnimationTransferError
     """
+    if maya.cmds.about(q=True, batch=True):
+        return
+
     animLayers = maya.mel.eval('$gSelectedAnimLayers=$gSelectedAnimLayers')
 
     # Check if more than one animation layer has been selected.
