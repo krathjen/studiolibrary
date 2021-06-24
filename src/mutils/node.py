@@ -45,7 +45,7 @@ class Node(object):
         :type name: str
         """
         try:
-            self._name = six.text_type(name) # .encode('ascii')
+            self._name = six.text_type(name)  # .encode('ascii')
         except UnicodeEncodeError:
             raise UnicodeEncodeError('Not a valid ascii name "%s".' % name)
 

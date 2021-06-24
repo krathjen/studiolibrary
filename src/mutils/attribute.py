@@ -254,7 +254,7 @@ class Attribute(object):
 
             try:
                 self._type = maya.cmds.getAttr(self.fullname(), type=True)
-                self._type = self._type.encode('ascii')
+                self._type = six.text_type(self._type)
             except Exception:
                 msg = 'Cannot GET attribute TYPE for "{0}"'
                 msg = msg.format(self.fullname())
