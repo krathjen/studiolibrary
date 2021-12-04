@@ -32,7 +32,7 @@ path = "/AnimLibrary/Characters/Malcolm/malcolm.anim"
 objects = maya.cmds.ls(selection=True) or []
 
 # Saving an animation item
-animitem.save(path, objects=objects, startFrame=0, endFrame=200, bakeConnected=False)
+animitem.save(path, objects=objects, frameRange=(0, 200), bakeConnected=False)
 
 # Loading an animation item
 animitem.load(path, objects=objects, option="replace all", connect=False, currentTime=False)
