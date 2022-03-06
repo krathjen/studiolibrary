@@ -564,17 +564,16 @@ class Animation(mutils.Pose):
         :rtype: str
         """
         if maya.cmds.nodeType(node_path) == "transform":
-            dup = maya.cmds.duplicate(node_path, name=duplicate_name, parentOnly=True)
+            duplicated_node = maya.cmds.duplicate(node_path,
+                                                  name=duplicate_name,
+                                                  parentOnly=True)[0]
         else:
-            dup = maya.cmds.duplicate(node_path, name=duplicate_name)
-            shapes = maya.cmds.listRelatives(dup, shapes=True) or []
+            duplicated_node = maya.cmds.duplicate(node_path,
+                                                  name=duplicate_name)[0]
+            duplicated_node = maya.cmds.listRelatives(duplicated_node,
+                                                      shapes=True)[0] or []
 
-            try:
-                dup = shapes[0]
-            except IndexError:
-                raise RuntimeError("Duplicated node: '{}' does not have shapes.".format(dup))
-
-        return dup
+        return duplicated_node
 
     @mutils.timing
     @mutils.unifyUndo
@@ -644,6 +643,7 @@ class Animation(mutils.Pose):
             for name in objects:
                 if maya.cmds.copyKey(name, time=(start, end), includeUpperBound=False, option="keys"):
                     dup_node = self._duplicate_node(name, "CURVE")
+                    # dup_node, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
 
                     if not FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR:
                         mutils.disconnectAll(dup_node)
