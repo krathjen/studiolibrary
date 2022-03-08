@@ -553,6 +553,28 @@ class Animation(mutils.Pose):
         with open(path, "w") as f:
             f.writelines(results)
 
+    def _duplicate_node(self, node_path, duplicate_name):
+        """Duplicate given node.
+
+        :param node_path: Maya path.
+        :type node_path: str
+        :param duplicate_name: Name for the duplicated node.
+        :type duplicate_name: str
+        :returns: Duplicated node.
+        :rtype: str
+        """
+        if maya.cmds.nodeType(node_path) == "transform":
+            duplicated_node = maya.cmds.duplicate(node_path,
+                                                  name=duplicate_name,
+                                                  parentOnly=True)[0]
+        else:
+            duplicated_node = maya.cmds.duplicate(node_path,
+                                                  name=duplicate_name)[0]
+            duplicated_node = maya.cmds.listRelatives(duplicated_node,
+                                                      shapes=True)[0] or []
+
+        return duplicated_node
+
     @mutils.timing
     @mutils.unifyUndo
     @mutils.showWaitCursor
@@ -620,21 +642,20 @@ class Animation(mutils.Pose):
 
             for name in objects:
                 if maya.cmds.copyKey(name, time=(start, end), includeUpperBound=False, option="keys"):
-
-                    # Might return more than one object when duplicating shapes or blendshapes
-                    transform, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
+                    dup_node = self._duplicate_node(name, "CURVE")
+                    # dup_node, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
 
                     if not FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR:
-                        mutils.disconnectAll(transform)
+                        mutils.disconnectAll(dup_node)
 
-                    deleteObjects.append(transform)
-                    maya.cmds.pasteKey(transform)
+                    deleteObjects.append(dup_node)
+                    maya.cmds.pasteKey(dup_node)
 
-                    attrs = maya.cmds.listAttr(transform, unlocked=True, keyable=True) or []
+                    attrs = maya.cmds.listAttr(dup_node, unlocked=True, keyable=True) or []
                     attrs = list(set(attrs) - set(['translate', 'rotate', 'scale']))
 
                     for attr in attrs:
-                        dstAttr = mutils.Attribute(transform, attr)
+                        dstAttr = mutils.Attribute(dup_node, attr)
                         dstCurve = dstAttr.animCurve()
 
                         if dstCurve:
