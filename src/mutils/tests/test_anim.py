@@ -1,20 +1,23 @@
 # Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
-# This library is free software: you can redistribute it and/or modify it 
-# under the terms of the GNU Lesser General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. This library is distributed in the 
-# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# This library is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version. This library is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+import shutil
 
 import mutils
 
 import test_base
+
+from maya import cmds
 
 
 class TestAnim(test_base.TestBase):
@@ -103,6 +106,33 @@ class TestAnim(test_base.TestBase):
 
         anim = mutils.Animation.fromPath(self.dstPath)
         anim.load(self.dstObjects, option=mutils.PasteOption.Insert, startFrame=5)
+
+    def test_proxy_animated(self):
+        srcPath = self.dataPath("sphere.ma")
+        self.open(path=srcPath)
+
+        expected_keys = len(
+            cmds.keyframe(
+                "pCube1.scaleX", time=(0, 100), query=True, timeChange=True
+            )
+        )
+
+        objects = ["pCube1", "sphere"]
+        dstPath = self.dataPath("test_proxy_animated.anim")
+        mutils.saveAnim(
+            objects, dstPath, time=(0, 10), metadata={}, bakeConnected=False
+        )
+
+        shutil.rmtree(dstPath)
+
+        current_keys = len(
+            cmds.keyframe(
+                "pCube1.scaleX", time=(0, 100), query=True, timeChange=True
+            )
+        )
+
+        msg = "Additional keys added on proxy animation save."
+        self.assertEqual(expected_keys, current_keys, msg)
 
 
 def testSuite():
