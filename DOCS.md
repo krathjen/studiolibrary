@@ -18,6 +18,7 @@ Please feel free to improve this page as needed. Thank you.
 * [How to fix a scene that has unknown nodes](#ufj2oi4)
 * [How to lock and unlock specific folders](#we7zm9m)
 * [How to install & run for Maya 2011-2015](#qiot1k3)
+* [How to use relative posing](#4251ca)
 
 
 ### FAQ
@@ -255,5 +256,44 @@ Use ⌘+Shift+G in the finder and copy the studiolibrary folder to
 import studiolibrary
 studiolibrary.main()
 ```
+
+[Top](#top)
+
+<br>
+
+### <a name="4251ca"></a> How to use relative posing
+
+Relative posing allows users to place a control, for example the ik foot, and then apply
+a pose so that the selected control, in this example the ik foot,
+remains in place and the pose is applied relative to that location.
+
+In order for this to work, two new options were added:
+
+- A boolean toggle called "relativeTo" to enable this functionality
+
+- A file path to a text file listing all the controls in evaluation order.
+
+The text file listing the controls is required in order to properly place
+all controls. It should list a control per line in evaluation order. For
+example:
+
+```
+spine_01
+spine_02
+spine_03
+clavicle_l
+shoulder_l
+elbow_l
+hand_l
+```
+
+The control list definition file could not be automated because
+controls could be driven by arbitrary networks.
+
+To use the functionality, enable the relativeTo option and set the
+path to the control list. Then select the control you want to use
+as the "anchor" and apply the pose. If you get an unexpected
+result, verify that the controls are listed in evaulation order.
+Relative posing also works with mirroring.
 
 [Top](#top)
