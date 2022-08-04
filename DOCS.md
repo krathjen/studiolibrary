@@ -19,6 +19,7 @@ Please feel free to improve this page as needed. Thank you.
 * [How to lock and unlock specific folders](#we7zm9m)
 * [How to install & run for Maya 2011-2015](#qiot1k3)
 * [How to use relative posing](#4251ca)
+* [How to auto specify the relative posing control list file](#2afb7a)
 
 
 ### FAQ
@@ -295,5 +296,33 @@ path to the control list. Then select the control you want to use
 as the "anchor" and apply the pose. If you get an unexpected
 result, verify that the controls are listed in evaulation order.
 Relative posing also works with mirroring.
+
+[Top](#top)
+ 
+<br>
+
+### <a name="2afb7a"></a> How to auto specify the relative posing control list file
+ 
+Rather than setting the relative pose control list file path manually in the UI,
+you can set up a callback to query for the file path based on the current selection.
+
+```python
+import studiolibrary
+import maya.cmds as cmds
+
+def get_control_list_file(selection):
+    # Maybe the path is saved on an attribute in this namespace
+    if not selection:
+        return None
+    namespace = selection[0].split(":")[0]
+    attribute = "controlListAttribute"
+    attr = cmds.ls("{}:*.{}".format(namespace, attribute))
+    if not attr:
+        return None
+    return cmds.getAttr(attr[0])
+
+studiolibrary.setRelativePoseControlListCallback(get_control_list_file)
+studiolibrary.main()
+```
 
 [Top](#top)

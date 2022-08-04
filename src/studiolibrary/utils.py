@@ -99,6 +99,8 @@ __all__ = [
     "registeredItems",
     "runTests",
     "findItemsInFolders",
+    "setRelativePoseControlListCallback",
+    "relativePoseControlListCallback",
 ]
 
 
@@ -1465,6 +1467,27 @@ def showInFolder(path):
 
     logger.info("Call: '%s' with arguments: %s", cmd.__name__, args)
     cmd(*args)
+
+
+_relativePoseControlListCallback = None
+
+
+def setRelativePoseControlListCallback(func):
+    """Users can use this to auto query for a control list definition file
+    used with relative posing.
+
+    :type func: function with a single list argument representing the current
+    selection. This function should use the selection to return the associated
+    control list file path.
+    """
+    global _relativePoseControlListCallback
+    _relativePoseControlListCallback = func
+
+
+def relativePoseControlListCallback():
+    """Get the relative pose control list query callback"""
+    global _relativePoseControlListCallback
+    return _relativePoseControlListCallback
 
 
 def testNormPath():

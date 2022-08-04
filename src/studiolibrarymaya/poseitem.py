@@ -428,7 +428,11 @@ class PoseItem(baseitem.BaseItem):
 
         relativeTo = None
         if self.currentLoadValue("relativeTo"):
-            relativeTo = self.currentLoadValue("relativeToControlList")
+            callback = studiolibrary.relativePoseControlListCallback()
+            if callback:
+                relativeTo = callback(maya.cmds.ls(selection=True))
+            else:
+                relativeTo = self.currentLoadValue("relativeToControlList")
 
         searchAndReplace = None
         if self.currentLoadValue("searchAndReplaceEnabled"):
