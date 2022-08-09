@@ -272,20 +272,30 @@ In order for this to work, two new options were added:
 
 - A boolean toggle called "relativeTo" to enable this functionality
 
-- A file path to a text file listing all the controls in evaluation order.
+- A file path to a text file listing the top level controls and controls that have a
+world space constraint.
 
 The text file listing the controls is required in order to properly place
-all controls. It should list a control per line in evaluation order. For
-example:
+controls. It should list a control per line and list the top level controls
+and controls with a world space constraint option. For
+example with the Mery rig, we list the main torso control, the upper arm fk
+controls because they have a global space switch option, the pole vector controls,
+the ik controls, the head, and eyes.
 
 ```
-spine_01
-spine_02
-spine_03
-clavicle_l
-shoulder_l
-elbow_l
-hand_l
+Mery_ac_cn_torso
+Mery_ac_lf_uparm
+Mery_ac_rg_uparm
+Mery_ac_lf_elbowPivot
+Mery_ac_rg_elbowPivot
+Mery_ac_lf_ikhand
+Mery_ac_rg_ikhand
+Mery_ac_cn_head
+Mery_ac_cn_eyes
+Mery_ac_lf_kneePivot
+Mery_ac_lf_ikfoot
+Mery_ac_rg_kneePivot
+Mery_ac_rg_ikfoot
 ```
 
 The control list definition file could not be automated because
