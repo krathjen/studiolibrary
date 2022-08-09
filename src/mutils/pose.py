@@ -620,7 +620,7 @@ class Pose(mutils.TransferObject):
                 try:
                     index = nodes.index(nodeName)
                 except ValueError:
-                    index = 100000
+                    index = -1
                 node.sortIndex = index
             dstNodes = sorted(dstNodes, key=lambda x: x.sortIndex)
         else:
@@ -640,6 +640,9 @@ class Pose(mutils.TransferObject):
             xforms[name] = newXform
 
         for node in dstNodes:
+            if getattr(node, "sortIndex", -1) == -1:
+                # Don't update nodes not specified in the control list
+                continue
             name = node.name()
             if not maya.cmds.objectType(name, isAType="transform"):
                 continue
