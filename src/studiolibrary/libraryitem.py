@@ -782,9 +782,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         title = "Move To..."
         path = os.path.dirname(os.path.dirname(self.path()))
 
-        dst = QtWidgets.QFileDialog.getExistingDirectory(parent, title, path)
+        dst = QtWidgets.QFileDialog.getExistingDirectory(None, title, path)
 
         if dst:
+            dst = "{}/{}".format(dst, os.path.basename(self.path()))
             try:
                 self.move(dst)
             except Exception as error:
