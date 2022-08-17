@@ -47,7 +47,7 @@ class SearchWidget(QtWidgets.QLineEdit):
         self._clearButton.setIcon(icon)
         self._clearButton.setToolTip("Clear all search text")
         self._clearButton.clicked.connect(self._clearClicked)
-        self._clearButton.setStyleSheet("background-color: transparent;")
+        self._clearButton.setStyleSheet("QFrame {background-color: transparent;}")
 
         self.setPlaceholderText(self.PLACEHOLDER_TEXT)
         self.textChanged.connect(self._textChanged)
