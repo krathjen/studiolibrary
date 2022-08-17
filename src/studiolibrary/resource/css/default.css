@@ -472,23 +472,27 @@ SearchWidget {
     max-height: 22;
     border-radius: 2px;
 }
-
 */
 SearchWidget, SearchWidget QLabel {
 	font: 18px;
 	padding: 0px;
 	padding-top:2px;
 	color: ACCENT_FOREGROUND_COLOR;
-	background-color: rgb(255, 255, 255, 0);;
+	background-color: rgba(255, 255, 255, 0);
 	selection-background-color: rgb(ACCENT_FOREGROUND_COLOR_R, ACCENT_FOREGROUND_COLOR_G, ACCENT_FOREGROUND_COLOR_B, 210);
 	selection-color: ACCENT_COLOR;
 }
 
+SearchWidget[hasText=true] {
+	background-color: rgba(255, 255, 255, 30);
+	border-bottom: 2px solid rgba(255, 255, 255, 80);
+}
+
 SearchWidget:focus {
 	border: 0px;
-	border-bottom: 0px solid rgb(255, 255, 255, 0);
-	background-color: rgb(255, 255, 255, 50);
-	selection-background-color: rgb(255, 255, 255, 240);
+	border-bottom: 2px solid rgba(255, 255, 255, 180);
+	background-color: rgba(255, 255, 255, 30);
+	selection-background-color: rgba(255, 255, 255, 240);
 	selection-color: ACCENT_COLOR;
 }
 
@@ -501,7 +505,7 @@ SearchWidget QPushButton, SearchWidget QPushButton:hover {
 	border: 0px;
 	padding: 0px;
 	color: ACCENT_FOREGROUND_COLOR;
-	background-color: rgb(255, 255, 255, 0);
+	background-color: rgba(255, 255, 255, 0);
 }
 
 

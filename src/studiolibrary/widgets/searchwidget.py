@@ -145,6 +145,9 @@ class SearchWidget(QtWidgets.QLineEdit):
         else:
             self._clearButton.hide()
 
+        self.setProperty('hasText', bool(self.text()))
+        self.setStyleSheet(self.styleSheet())
+
     def contextMenuEvent(self, event):
         """
         Triggered when the user right clicks on the search widget.
