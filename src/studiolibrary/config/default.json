@@ -35,7 +35,7 @@
   "settingsPath": "{local}/StudioLibrary/LibraryWidget.json",
 
   // The maximum walking depth from the root directory
-  "recursiveSearchDepth": 4,
+  "recursiveSearchDepth": 5,
 
   // A list of paths to ignore when walking the root directory
   "ignorePaths": ["/."],
