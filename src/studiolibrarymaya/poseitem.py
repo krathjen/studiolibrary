@@ -320,6 +320,14 @@ class PoseItem(baseitem.BaseItem):
                 "persistent": True,
             },
             {
+                "name": "minimizeRotations",
+                "title": "Minimize Rotations",
+                "type": "bool",
+                "inline": True,
+                "default": True,
+                "persistent": True,
+            },
+            {
                 "name": "relativeToControlList",
                 "title": "Control List",
                 "type": "path",
@@ -391,6 +399,10 @@ class PoseItem(baseitem.BaseItem):
                 "visible": values.get("searchAndReplaceEnabled")
             },
             {
+                "name": "minimizeRotations",
+                "visible": values.get("relativeTo")
+            },
+            {
                 "name": "relativeToControlList",
                 "visible": values.get("relativeTo")
             },
@@ -427,12 +439,14 @@ class PoseItem(baseitem.BaseItem):
             self._options['additive'] = self.currentLoadValue("additive")
 
         relativeTo = None
+        minimizeRotations = True
         if self.currentLoadValue("relativeTo"):
             callback = studiolibrary.relativePoseControlListCallback()
             if callback:
                 relativeTo = callback(maya.cmds.ls(selection=True))
             else:
                 relativeTo = self.currentLoadValue("relativeToControlList")
+            minimizeRotations = self.currentLoadValue("minimizeRotations")
 
         searchAndReplace = None
         if self.currentLoadValue("searchAndReplaceEnabled"):
@@ -448,6 +462,7 @@ class PoseItem(baseitem.BaseItem):
                 showBlendMessage=showBlendMessage,
                 searchAndReplace=searchAndReplace,
                 relativeTo=relativeTo,
+                minimizeRotations=minimizeRotations,
                 **self._options
             )
         except Exception as error:
@@ -464,6 +479,7 @@ class PoseItem(baseitem.BaseItem):
         mirror=None,
         additive=False,
         relativeTo=None,
+        minimizeRotations=True,
         refresh=True,
         batchMode=False,
         clearCache=False,
@@ -483,6 +499,7 @@ class PoseItem(baseitem.BaseItem):
         :type attrs: list[str] or None
         :type mirror: bool or None
         :type relativeTo: str or None
+        :type minimizeRotations: bool
         :type batchMode: bool
         :type showBlendMessage: bool
         :type clearSelection: bool
@@ -516,6 +533,7 @@ class PoseItem(baseitem.BaseItem):
                 mirror=mirror,
                 additive=additive,
                 relativeTo=relativeTo,
+                minimizeRotations=minimizeRotations,
                 refresh=refresh,
                 batchMode=batchMode,
                 clearCache=clearCache,

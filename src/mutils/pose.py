@@ -349,6 +349,7 @@ class Pose(mutils.TransferObject):
             mirror=False,
             additive=False,
             relativeTo=None,
+            minimizeRotations=True,
             refresh=False,
             batchMode=False,
             clearCache=False,
@@ -370,6 +371,7 @@ class Pose(mutils.TransferObject):
         :type mirror: bool
         :type additive: bool
         :type relativeTo: str or None
+        :type minimizeRotations: bool
         :type mirrorTable: mutils.MirrorTable
         :type batchMode: bool
         :type clearCache: bool
@@ -396,6 +398,7 @@ class Pose(mutils.TransferObject):
             onlyConnected=onlyConnected,
             ignoreConnected=ignoreConnected,
             relativeTo=relativeTo,
+            minimizeRotations=minimizeRotations,
             searchAndReplace=searchAndReplace,
         )
 
@@ -426,6 +429,7 @@ class Pose(mutils.TransferObject):
             batchMode=False,
             clearCache=True,
             relativeTo=False,
+            minimizeRotations=True,
             searchAndReplace=None,
     ):
         """
@@ -441,6 +445,7 @@ class Pose(mutils.TransferObject):
         :type mirror: bool
         :type mirrorTable: mutils.MirrorTable
         :type relativeTo: str or None
+        :type minimizeRotations: bool
         :type searchAndReplace: (str, str) or None
         """
         if clearCache or not batchMode or not self._mtime:
@@ -503,7 +508,8 @@ class Pose(mutils.TransferObject):
                 self._makeCacheRelative(objects[0],
                                         dstNodes,
                                         controlListFile=relativeTo,
-                                        mirror=mirror)
+                                        mirror=mirror,
+                                        minimizeRotations=minimizeRotations)
 
         if not self.cache():
             text = "No objects match when loading data. " \
@@ -586,7 +592,7 @@ class Pose(mutils.TransferObject):
 
             self._cache.append((srcAttribute, dstAttribute, srcMirrorValue))
 
-    def _makeCacheRelative(self, rootNode, dstNodes, controlListFile, mirror):
+    def _makeCacheRelative(self, rootNode, dstNodes, controlListFile, mirror, minimizeRotations=True):
         """
         Modifies the cache to be relative to the specified node
 
@@ -594,6 +600,7 @@ class Pose(mutils.TransferObject):
         :type dstNodes: list[str]
         :type controlListFile: str
         :type mirror: bool
+        :type minimizeRotations: bool
         :rtype: None
         """
         selectionList = OpenMaya.MSelectionList()
@@ -648,6 +655,8 @@ class Pose(mutils.TransferObject):
                 continue
             m = xforms[name]
             maya.cmds.xform(name, ws=True, m=m)
+            if minimizeRotations:
+                self.minimizeEulerRotations(name)
             for i, values in enumerate(self.cache()):
                 srcAttribute, dstAttribute, srcMirrorValue = values
                 if srcAttribute and dstAttribute and dstAttribute.name() == name:
@@ -660,6 +669,23 @@ class Pose(mutils.TransferObject):
                             srcAttribute._value = value
         maya.cmds.undoInfo(closeChunk=True)
         maya.cmds.undo()
+
+    def minimizeEulerRotations(self, node):
+        """Sets the euler rotation solution on the given transform to the minimal
+        solve.
+
+        :type node: str
+        """
+        selectionList = OpenMaya.MSelectionList()
+        selectionList.add(node)
+        pathNode = selectionList.getDagPath(0)
+        fnTransform = OpenMaya.MFnTransform(pathNode)
+        rotation = fnTransform.rotation()
+        alternate = rotation.alternateSolution()
+        v1 = sum([abs(x) for x in rotation])
+        v2 = sum([abs(x) for x in alternate])
+        if v1 > v2:
+            fnTransform.setRotation(alternate, OpenMaya.MSpace.kTransform)
 
     def loadCache(self, blend=100, key=False, mirror=False, additive=False):
         """
