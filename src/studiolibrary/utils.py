@@ -28,6 +28,11 @@ import distutils.version
 
 from datetime import datetime
 
+try:
+    from collections import Mapping
+except ImportError:
+    from collections.abc import Mapping
+
 # Use the built-in version of scandir/walk if possible,
 # otherwise use the scandir module version
 try:
@@ -862,7 +867,7 @@ def update(data, other):
     :rtype: dict 
     """
     for key, value in other.items():
-        if isinstance(value, collections.Mapping):
+        if isinstance(value, Mapping):
             data[key] = update(data.get(key, {}), value)
         else:
             data[key] = value
