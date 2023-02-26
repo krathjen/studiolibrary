@@ -169,7 +169,8 @@ class MayaLibraryWindow(MayaQWidgetDockableMixin, librarywindow.LibraryWindow):
         :rtype: None 
         """
         if event.isAccepted():
-            self.fixBorder()
+            if not self.isLoaded():
+                self.fixBorder()
 
     def floatingChanged(self, isFloating):
         """        
