@@ -1238,8 +1238,12 @@ class LibraryWindow(QtWidgets.QWidget):
         menu = studioqt.Menu("", self)
         menu.setTitle("Settings")
 
+        # Adding a blank icon fixes the text alignment issue
+        icon = studiolibrary.resource.icon("blank")
+
         action = menu.addAction("Sync")
         action.triggered.connect(self.sync)
+        action.setIcon(icon)
 
         menu.addSeparator()
         action = menu.addAction("Settings")

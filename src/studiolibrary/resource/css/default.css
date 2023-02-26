@@ -436,14 +436,16 @@ QMenu::icon {
 QMenu::indicator:non-exclusive {
 	width: 14px;
 	height: 14px;
-	padding-left: 2px;
+	margin-left: 3px;
 }
 
 QMenu::item {
+    min-width: 124px;
 	color: FOREGROUND_COLOR;
-	padding: 3px 25px 3px 25px;
+	padding: 3px;
 	border: 1px solid rgb(0, 0, 0, 0);
 }
+
 
 QMenu::item:disabled {
 	color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 50);
