@@ -396,8 +396,12 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type menu: QtWidgets.QMenu
         :type items: list[LibraryItem] or None
         """
+        # Adding a blank icon fixes the text alignment issue when using Qt 5.12.+
+        icon = studiolibrary.resource.icon("blank")
+
         action = QtWidgets.QAction("Rename", menu)
         action.triggered.connect(self.showRenameDialog)
+        action.setIcon(icon)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Move to", menu)

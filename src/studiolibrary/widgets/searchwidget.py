@@ -220,8 +220,13 @@ class SearchWidget(QtWidgets.QLineEdit):
         """
         menu = QtWidgets.QMenu(self)
 
+        # Adding a blank icon fixes the text alignment issue when using Qt 5.12.+
+        icon = studiolibrary.resource.icon("blank")
+
         subMenu = self.createStandardContextMenu()
         subMenu.setTitle("Edit")
+        subMenu.setIcon(icon)
+
         menu.addMenu(subMenu)
 
         subMenu = self.createSpaceOperatorMenu(menu)

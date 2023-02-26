@@ -439,8 +439,12 @@ class LibraryWindow(QtWidgets.QWidget):
 
         :type menu: QtWidgets.QMenu
         """
+        # Adding a blank icon fixes the text alignment issue when using Qt 5.12.+
+        icon = studiolibrary.resource.icon("blank")
+
         action = QtWidgets.QAction("Change Path", menu)
         action.triggered.connect(self.showChangePathDialog)
+        action.setIcon(icon)
 
         menu.addAction(action)
         menu.addSeparator()
@@ -1238,7 +1242,7 @@ class LibraryWindow(QtWidgets.QWidget):
         menu = studioqt.Menu("", self)
         menu.setTitle("Settings")
 
-        # Adding a blank icon fixes the text alignment issue
+        # Adding a blank icon fixes the text alignment issue when using Qt 5.12.+
         icon = studiolibrary.resource.icon("blank")
 
         action = menu.addAction("Sync")
