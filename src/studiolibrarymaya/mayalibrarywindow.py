@@ -119,7 +119,7 @@ class MayaLibraryWindow(MayaQWidgetDockableMixin, librarywindow.LibraryWindow):
 
     def isFloating(self):
         """
-        Return True if the the widget is a floating window.
+        Return True if the widget is a floating window.
         
         :rtype: bool 
         """
