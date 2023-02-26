@@ -31,6 +31,16 @@ def get(*args):
     return _config.get(*args)
 
 
+def set(key, value):
+
+    global _config
+
+    if not _config:
+        _config = read(paths())
+
+    _config[key] = value
+
+
 def paths():
     """
     Return all possible config paths.

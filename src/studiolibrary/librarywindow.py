@@ -268,6 +268,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._updateAvailableButton = QtWidgets.QPushButton(self._statusWidget)
         self._updateAvailableButton.setObjectName("updateAvailableButton")
         self._updateAvailableButton.setText("Update Available")
+        self._updateAvailableButton.setCursor(QtCore.Qt.PointingHandCursor)
         self._updateAvailableButton.hide()
         self._updateAvailableButton.clicked.connect(self.openReleasesUrl)
 
@@ -502,29 +503,12 @@ class LibraryWindow(QtWidgets.QWidget):
 
     def checkForUpdate(self):
         """Check if there are any new versions available."""
-        class _Thread(QtCore.QThread):
-            def __init__(self, parent, func):
-                super(_Thread, self).__init__(parent)
-                self._func = func
-                self._result = None
-
-            def run(self):
-                try:
-                    self._result = self._func()
-                except Exception as error:
-                    logger.exception(error)
-
-            def result(self):
-                return self._result
-
         if studiolibrary.config.get("checkForUpdateEnabled"):
-            self._checkForUpdateThread = _Thread(self, studiolibrary.isLatestRelease)
-            self._checkForUpdateThread.finished.connect(self.checkForUpdateFinished)
-            self._checkForUpdateThread.start()
+            studiolibrary.isLatestRelease(callback=self.checkForUpdateFinished)
 
-    def checkForUpdateFinished(self):
+    def checkForUpdateFinished(self, isReleaseLatest):
         """Triggered when the check for update thread has finished."""
-        if self._checkForUpdateThread.result():
+        if isReleaseLatest:
             self._updateAvailableButton.show()
         else:
             self._updateAvailableButton.hide()

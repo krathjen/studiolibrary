@@ -9,6 +9,11 @@
 // 2. The other way is to create an environment variable with the name
 // STUDIO_LIBRARY_CONFIG_PATH. The value of this variable should be the
 // full path to your config.json file.
+//
+// 3. Or you could use code to modify the config before loading the window.
+// import studiolibrary
+// studiolibrary.config.set("recursiveSearchDepth", 6)
+// studiolibrary.main()
 
 {
   // The database path is used for caching the library items.

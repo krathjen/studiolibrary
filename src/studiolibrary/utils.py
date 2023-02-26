@@ -252,19 +252,24 @@ def setLibraries(libraries):
         removeLibrary(name)
 
 
-def isLatestRelease():
+def isLatestRelease(callback=None):
+    thread = threading.Thread(target=_isLatestRelease, args=(callback,))
+    thread.start()
+
+
+def _isLatestRelease(callback=None):
     """
     Check if the installed version of the Studio Library is the latest.
 
     :rtype: bool
     """
-    return False
-
     url = "https://api.github.com/repos/krathjen/studiolibrary/releases/latest"
+
     try:
         f = urllib.request.urlopen(url)
         result = json.load(f)
     except Exception:
+        callback(False)
         return False
 
     if result:
@@ -273,13 +278,16 @@ def isLatestRelease():
 
         # Ignore beta releases if the current version is not beta
         if "b" in latestVersion and "b" not in currentVersion:
+            callback(False)
             return False
 
         v1 = distutils.version.LooseVersion(latestVersion)
         v2 = distutils.version.LooseVersion(currentVersion)
 
+        callback(v1 > v2)
         return v1 > v2
 
+    callback(False)
     return False
 
 
@@ -1309,15 +1317,15 @@ def timeAgo(timeStamp):
         if secondsDiff < 10:
             return "just now"
         if secondsDiff < 60:
-            return str(secondsDiff) + " seconds ago"
+            return "{:.0f} seconds ago".format(secondsDiff)
         if secondsDiff < 120:
             return "a minute ago"
         if secondsDiff < 3600:
-            return str(secondsDiff / 60) + " minutes ago"
+            return "{:.0f} minutes ago".format(secondsDiff / 60)
         if secondsDiff < 7200:
             return "an hour ago"
         if secondsDiff < 86400:
-            return str(secondsDiff / 3600) + " hours ago"
+            return "{:.0f} hours ago".format(secondsDiff / 3600)
 
     if dayDiff == 1:
         return "yesterday"
