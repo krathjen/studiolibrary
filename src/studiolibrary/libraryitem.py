@@ -11,6 +11,8 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import random
+import string
 import shutil
 import logging
 from functools import partial
@@ -627,6 +629,19 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         return []
 
+    def createTempPath(self, folder):
+
+        # generate a random string of six alphanumeric characters
+        id_ = ''.join(random.sample(string.ascii_letters + string.digits, 6))
+
+        # construct the full path to the temporary directory
+        tmp = os.path.join(folder, ".sl_" + self.__class__.__name__ + "_" + id_)
+
+        # create the directory
+        os.makedirs(tmp)
+
+        return tmp
+
     @studioqt.showWaitCursor
     def safeSave(self, *args, **kwargs):
         """
@@ -648,7 +663,8 @@ class LibraryItem(studiolibrary.widgets.Item):
             else:
                 self.showAlreadyExistsDialog()
 
-        tmp = studiolibrary.createTempPath(self.__class__.__name__)
+        dirname = os.path.dirname(dst)
+        tmp = self.createTempPath(dirname)
 
         self.setPath(tmp)
 

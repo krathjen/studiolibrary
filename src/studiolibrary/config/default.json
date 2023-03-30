@@ -29,7 +29,7 @@
   // Report issue url
   "reportIssueUrl": "https://github.com/krathjen/studiolibrary/issues/new",
 
-  // The temp location used for saving out items and thumbnails
+  // The temp location used for saving out thumbnails
   "tempPath": "{temp}/StudioLibrary/{user}",
 
   // The metadata path used for each item. Used for tags, item color etc

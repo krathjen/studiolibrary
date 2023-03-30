@@ -11,7 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 __version__ = "2.9.11"
-
+__version__ += ".test2"
 
 def version():
     """
