@@ -409,7 +409,7 @@ def getReferenceData(objects):
         data.append({
             "filename": path,
             "unresolved": maya.cmds.referenceQuery(path, filename=True, withoutCopyNumber=True),
-            "namespace": maya.cmds.referenceQuery(path, namespace=True),
+            "namespace": maya.cmds.file(path, q=True, namespace=True),
             "node": maya.cmds.referenceQuery(path, referenceNode=True)
         })
 
