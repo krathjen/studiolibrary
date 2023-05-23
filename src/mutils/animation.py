@@ -563,7 +563,7 @@ class Animation(mutils.Pose):
         :returns: Duplicated node.
         :rtype: str
         """
-        if maya.cmds.nodeType(node_path) == "transform":
+        if maya.cmds.nodeType(node_path) in ["transform", "joint"]:
             duplicated_node = maya.cmds.duplicate(node_path,
                                                   name=duplicate_name,
                                                   parentOnly=True)[0]
