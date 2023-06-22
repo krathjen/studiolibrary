@@ -1185,7 +1185,7 @@ def showExampleWindow():
             "isExpanded": True,
             "iconPath": "none",
             "iconColor": "rgb(100, 100, 150)",
-            "textColor": "rgb(100, 100, 150, 150)"
+            "textColor": "rgba(100, 100, 150, 150)"
         },
 
         "P:/production/shared/anim/walks/fast.anim": {},
@@ -1218,7 +1218,7 @@ def showExampleWindow():
             "isExpanded": True,
             "iconPath": "none",
             "iconColor": "rgb(100, 100, 150)",
-            "textColor": "rgb(100, 100, 150, 150)"
+            "textColor": "rgba(100, 100, 150, 150)"
         },
         "tags/red": {
             "iconColor": "rgb(200, 50, 50)",

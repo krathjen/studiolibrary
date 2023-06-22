@@ -25,7 +25,7 @@ STYLE = """
 QToolBar {
     border: 0px solid black; 
     border-radius:2px;
-    background-color: rgb(0,0,0,100);
+    background-color: rgba(0,0,0,100);
 }
 
 QToolButton {
@@ -113,9 +113,9 @@ class ImageSequenceWidget(QtWidgets.QToolButton):
         """
         icon = studioqt.Icon.fa(
             path,
-            color="rgb(250,250,250,160)",
-            color_active="rgb(250,250,250,250)",
-            color_disabled="rgb(0,0,0,20)"
+            color="rgba(250,250,250,160)",
+            color_active="rgba(250,250,250,250)",
+            color_disabled="rgba(0,0,0,20)"
         )
 
         action = QtWidgets.QAction(icon, text, self._toolBar)

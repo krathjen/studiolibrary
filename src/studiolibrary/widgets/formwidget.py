@@ -670,24 +670,24 @@ FieldWidget #menuButton {
     min-width: 25px;
     max-height: 25px;
     text-align: center;
-    background-color: rgb(0,0,0,20);
+    background-color: rgba(0,0,0,20);
 }
 
 FieldWidget #label {
     min-width: 72px;
-    color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
+    color: rgba(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 100);
 }
 
 FormWidget #titleWidget {
     font-size: 12px;
     padding: 2px;
     padding-left: 5px;
-    background-color: rgb(255, 255, 255, 20);
-    border-bottom: 0px solid rgb(255, 255, 255, 20);
+    background-color: rgba(255, 255, 255, 20);
+    border-bottom: 0px solid rgba(255, 255, 255, 20);
 }
 
 FormWidget #titleWidget:checked {
-    background-color: rgb(255, 255, 255, 5);
+    background-color: rgba(255, 255, 255, 5);
 }
 
 FormWidget #optionsFrame {

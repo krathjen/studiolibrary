@@ -20,7 +20,7 @@ class Color(QtGui.QColor):
         """
         :type color: QtGui.QColor
         """
-        color = ('rgb(%d, %d, %d, %d)' % color.getRgb())
+        color = ('rgba(%d, %d, %d, %d)' % color.getRgb())
         return cls.fromString(color)
 
     @classmethod
@@ -32,7 +32,7 @@ class Color(QtGui.QColor):
         text = text.replace(";", "")
 
         try:
-            r, g, b, a = text.replace("rgb(", "").replace(")", "").split(",")
+            r, g, b, a = text.replace("rgb(", "").replace("rgba(", "").replace(")", "").split(",")
         except ValueError:
             r, g, b = text.replace("rgb(", "").replace(")", "").split(",")
 
@@ -48,7 +48,7 @@ class Color(QtGui.QColor):
         """
         :type: str
         """
-        return 'rgb(%d, %d, %d, %d)' % self.getRgb()
+        return 'rgba(%d, %d, %d, %d)' % self.getRgb()
 
     def isDark(self):
         """

@@ -276,7 +276,7 @@ def example():
         margin: 2px;
         min-width: 18px;
         min-height: 18px;
-        background-color: rgb(0,0,0,0);
+        background-color: rgba(0,0,0,0);
     }
     """
 
