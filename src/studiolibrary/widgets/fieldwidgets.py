@@ -65,6 +65,7 @@ class FieldWidget(QtWidgets.QFrame):
         self._menuButton = None
         self._actionResult = None
         self._formWidget = None
+        self._validateEnabled = True
 
         if formWidget:
             self.setFormWidget(formWidget)
@@ -103,6 +104,12 @@ class FieldWidget(QtWidgets.QFrame):
         widget = self.createWidget()
         if widget:
             self.setWidget(widget)
+
+    def setValidateEnabled(self, v):
+        self._validateEnabled = v
+
+    def validateEnabled(self):
+        return self._validateEnabled
 
     def name(self):
         """
@@ -563,6 +570,7 @@ class GroupFieldWidget(FieldWidget):
         widget.toggled.connect(self.setValue)
 
         self.setWidget(widget)
+        self.setValidateEnabled(False)
 
         self.label().hide()
 
@@ -650,6 +658,7 @@ class LabelFieldWidget(FieldWidget):
         widget.setAlignment(QtCore.Qt.AlignVCenter)
         widget.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
         self.setWidget(widget)
+        self.setValidateEnabled(False)
 
     def value(self):
         """
@@ -1399,9 +1408,7 @@ class IconPickerFieldWidget(FieldWidget):
     def __init__(self, *args, **kwargs):
         super(IconPickerFieldWidget, self).__init__(*args, **kwargs)
 
-        self._value = "rgb(100,100,100)"
-
-        widget = iconpicker.IconPickerWidget()
+        widget = iconpicker.IconPickerWidget(self)
         widget.setObjectName('widget')
         widget.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding,
@@ -1409,18 +1416,6 @@ class IconPickerFieldWidget(FieldWidget):
         )
         widget.iconChanged.connect(self._iconChanged)
         self.setWidget(widget)
-
-    def setData(self, data):
-        """
-        Overriding this method to add support for a "colors" key.
-
-        :type data: dict
-        """
-        colors = data.get("colors")
-        if colors:
-            self.widget().setColors(colors)
-
-        super(IconPickerFieldWidget, self).setData(data)
 
     def _iconChanged(self, icon):
         """

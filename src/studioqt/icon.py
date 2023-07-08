@@ -142,21 +142,34 @@ class Icon(QtGui.QIcon):
         icon = QtGui.QIcon(pixmap)
         self.swap(icon)
 
-    def setBadge(self, x, y, w, h, color=None):
-        """
-        Set a for the icon.
-        
-        :type x: int 
-        :type y: int 
-        :type w: int
-        :type h: int 
-        :type color: QtGui.QColor or None
-        """
-        color = color or QtGui.QColor(240, 100, 100)
+        if self._badgeEnabled:
+            self.updateBadge()
 
+    def __init__(self, *args, **kwargs):
+        super(Icon, self).__init__(*args, **kwargs)
+
+        self._badgeColor = None
+        self._badgeEnabled = False
+
+    def badgeColor(self):
+        return self._badgeColor
+
+    def setBadgeColor(self, color):
+        self._badgeColor = color
+
+    def badgeEnabled(self):
+        return self._badgeEnabled
+
+    def setBadgeEnabled(self, enabled):
+        self._badgeEnabled = enabled
+
+    def updateBadge(self):
+        """
+        """
+        color = self.badgeColor() or QtGui.QColor(240, 240, 100)
         size = self.actualSize(QtCore.QSize(256, 256))
-        pixmap = self.pixmap(size)
 
+        pixmap = self.pixmap(size)
         painter = QtGui.QPainter(pixmap)
 
         pen = QtGui.QPen(color)
@@ -165,8 +178,7 @@ class Icon(QtGui.QIcon):
 
         painter.setBrush(color)
         painter.setRenderHint(QtGui.QPainter.Antialiasing)
-
-        painter.drawEllipse(x, y, w, h)
+        painter.drawEllipse(0, 0, size.height()/3.0, size.width()/3.0)
         painter.end()
 
         icon = QtGui.QIcon(pixmap)

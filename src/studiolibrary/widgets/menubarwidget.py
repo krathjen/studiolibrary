@@ -28,7 +28,7 @@ class MenuBarWidget(QtWidgets.QToolBar):
 
     DEFAULT_EXPANDED_HEIGHT = 32
     DEFAULT_COLLAPSED_HEIGHT = 10
-    ICON_SIZE = 32
+    ICON_SIZE = 28
 
     def __init__(self, parent=None):
         QtWidgets.QToolBar.__init__(self, parent)
@@ -129,9 +129,6 @@ class MenuBarWidget(QtWidgets.QToolBar):
         height = self.expandHeight()
         self.setFixedHeight(height)
         self.setChildrenHidden(False)
-        iconSize = self.ICON_SIZE * self.dpi()
-        self.setIconSize(QtCore.QSize(iconSize, iconSize))
-        self.setStyleSheet(self.styleSheet())
 
     def collapse(self):
         """
@@ -144,19 +141,21 @@ class MenuBarWidget(QtWidgets.QToolBar):
         self.setFixedHeight(height)
         self.setChildrenHeight(0)
         self.setChildrenHidden(True)
-        self.setIconSize(QtCore.QSize(0, 0))
-        self.setStyleSheet(self.styleSheet())
 
-    def setIconColor(self, color):
-        """
-        Set the icon colors to the current foregroundRole.
+    def updateIconColor(self):
+        color = self.palette().color(self.foregroundRole())
+        color = studioqt.Color.fromColor(color)
 
-        :type color: QtGui.QColor
-        :rtype: None
-        """
         for action in self.actions():
-            icon = action.icon()
-            icon = studioqt.Icon(icon)
+
+            icon = studioqt.Icon(action.icon())
+
+            try:
+                icon.setBadgeColor(action._badgeColor)
+                icon.setBadgeEnabled(action._badgeEnabled)
+            except AttributeError as error:
+                pass
+
             icon.setColor(color)
             action.setIcon(icon)
 

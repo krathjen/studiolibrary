@@ -259,8 +259,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self._searchWidget.setToolTip(tip)
         self._searchWidget.setStatusTip(tip)
 
-        self._sortByMenu = self.SORTBY_MENU_CLASS(self)
-        self._groupByMenu = self.GROUPBY_MENU_CLASS(self)
         self._filterByMenu = self.FILTERBY_MENU_CLASS(self)
         self._statusWidget = self.STATUS_WIDGET_CLASS(self)
 
@@ -277,8 +275,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self._menuBarWidget = self.MENUBAR_WIDGET_CLASS(self)
         self._sidebarWidget = self.SIDEBAR_WIDGET_CLASS(self)
 
-        self._sortByMenu.setDataset(library)
-        self._groupByMenu.setDataset(library)
         self._filterByMenu.setDataset(library)
         self._itemsWidget.setDataset(library)
         self._searchWidget.setDataset(library)
@@ -293,54 +289,35 @@ class LibraryWindow(QtWidgets.QWidget):
         iconColor = self.iconColor()
 
         name = "New Item"
-        icon = studiolibrary.resource.icon("add_28")
-        icon.setColor(iconColor)
+        icon = studiolibrary.resource.icon("plus")
         tip = "Add a new item to the selected folder"
         self.addMenuBarAction(name, icon, tip, callback=self.showNewMenu)
-
         self._menuBarWidget.addWidget(self._searchWidget)
 
         name = "Filters"
         icon = studiolibrary.resource.icon("filter")
-        icon.setColor(iconColor)
         tip = "Filter the current results by type.\n" \
               "CTRL + Click will hide the others and show the selected one."
-        self.addMenuBarAction(name, icon, tip, callback=self.showFilterByMenu)
+        action = self.addMenuBarAction(name, icon, tip, callback=self.showFilterByMenu)
 
         name = "Item View"
-        icon = studiolibrary.resource.icon("view_settings")
-        icon.setColor(iconColor)
+        icon = studiolibrary.resource.icon("sliders")
         tip = "Change the style of the item view"
         self.addMenuBarAction(name, icon, tip, callback=self.showItemViewMenu)
 
-        name = "Group By"
-        icon = studiolibrary.resource.icon("groupby")
-        icon.setColor(iconColor)
-        tip = "Group the current items in the view by column"
-        self.addMenuBarAction(name, icon, tip, callback=self.showGroupByMenu)
-
-        name = "Sort By"
-        icon = studiolibrary.resource.icon("sortby")
-        icon.setColor(iconColor)
-        tip = "Sort the current items in the view by column"
-        self.addMenuBarAction(name, icon, tip, callback=self.showSortByMenu)
-
         name = "View"
-        icon = studiolibrary.resource.icon("view")
-        icon.setColor(iconColor)
+        icon = studiolibrary.resource.icon("columns-3")
         tip = "Choose to show/hide both the preview and navigation pane.\n" \
               "CTRL + Click will hide the menu bar as well."
         self.addMenuBarAction(name, icon, tip, callback=self.toggleView)
 
         name = "Sync items"
-        icon = studiolibrary.resource.icon("sync")
-        icon.setColor(iconColor)
+        icon = studiolibrary.resource.icon("arrows-rotate")
         tip = "Sync with the filesystem"
         self.addMenuBarAction(name, icon, tip, callback=self.sync)
 
         name = "Settings"
-        icon = studiolibrary.resource.icon("settings")
-        icon.setColor(iconColor)
+        icon = studiolibrary.resource.icon("bars")
         tip = "Settings menu"
         self.addMenuBarAction(name, icon, tip, callback=self.showSettingsMenu)
 
@@ -407,8 +384,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self.folderSelectionChanged.connect(self.updateLock)
 
-        self.updateViewButton()
-        self.updateFiltersButton()
+        self.updateMenuBar()
         self.updatePreviewWidget()
 
         self.checkForUpdate()
@@ -1036,7 +1012,7 @@ class LibraryWindow(QtWidgets.QWidget):
         widget = self.menuBarWidget().findToolButton("Filters")
         point = widget.mapToGlobal(QtCore.QPoint(0, widget.height()))
         self._filterByMenu.show(point)
-        self.updateFiltersButton()
+        self.updateMenuBar()
 
     def showGroupByMenu(self):
         """
@@ -1169,6 +1145,8 @@ class LibraryWindow(QtWidgets.QWidget):
                         "rgb(90, 175, 130)",
                         "rgb(100, 175, 160)",
                         "rgb(70, 160, 210)",
+                        # "rgb(5, 135, 245)",
+                        "rgb(30, 145, 245)",
                         "rgb(110, 125, 220)",
                         "rgb(100, 120, 150)",
                     ]
@@ -1431,6 +1409,14 @@ class LibraryWindow(QtWidgets.QWidget):
                     editMenu.addAction(action)
 
         menu.addSeparator()
+
+        sortByMenu = self.SORTBY_MENU_CLASS("Sort By", menu, self.library())
+        menu.addMenu(sortByMenu)
+
+        groupByMenu = self.GROUPBY_MENU_CLASS("Group By", menu, self.library())
+        menu.addMenu(groupByMenu)
+
+        menu.addSeparator()
         menu.addMenu(self.createSettingsMenu())
 
         return menu
@@ -1606,7 +1592,7 @@ class LibraryWindow(QtWidgets.QWidget):
         else:
             self._previewFrame.hide()
 
-        self.updateViewButton()
+        self.updateMenuBar()
 
     def setFoldersWidgetVisible(self, value):
         """
@@ -1622,7 +1608,7 @@ class LibraryWindow(QtWidgets.QWidget):
         else:
             self._sidebarFrame.hide()
 
-        self.updateViewButton()
+        self.updateMenuBar()
 
     def setMenuBarWidgetVisible(self, value):
         """
@@ -1937,7 +1923,7 @@ class LibraryWindow(QtWidgets.QWidget):
 
         self.itemsWidget().setToastEnabled(True)
 
-        self.updateFiltersButton()
+        self.updateMenuBar()
 
     def updateSettings(self, settings):
         """
@@ -2499,24 +2485,6 @@ class LibraryWindow(QtWidgets.QWidget):
     # Support for locking via regex
     # -----------------------------------------------------------------------
 
-    def updateCreateItemButton(self):
-        """
-        Update the plus icon depending on if the library widget is locked.
-
-        :rtype: None
-        """
-        action = self.menuBarWidget().findAction("New Item")
-
-        if self.isLocked():
-            icon = studiolibrary.resource.icon("lock")
-            action.setEnabled(False)
-        else:
-            icon = studiolibrary.resource.icon("add_28")
-            action.setEnabled(True)
-
-        icon.setColor(self.iconColor())
-        action.setIcon(icon)
-
     def isLocked(self):
         """
         Return lock state of the library.
@@ -2537,7 +2505,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self.sidebarWidget().setLocked(value)
         self.itemsWidget().setLocked(value)
 
-        self.updateCreateItemButton()
+        self.updateMenuBar()
         self.updateWindowTitle()
 
         self.lockChanged.emit(value)
@@ -2689,37 +2657,43 @@ class LibraryWindow(QtWidgets.QWidget):
         self.setPreviewWidgetVisible(compact)
         self.setFoldersWidgetVisible(compact)
 
-    def updateViewButton(self):
-        """
-        Update the icon for the view action.
+    def updateMenuBar(self):
 
-        :rtype: None
-        """
-        compact = self.isCompactView()
-        action = self.menuBarWidget().findAction("View")
+        # Update view icon
+        action = self.menuBarWidget().findAction("New Item")
 
-        if not compact:
-            icon = studiolibrary.resource.icon("view_all")
+        if self.isLocked():
+            icon = studiolibrary.resource.icon("lock")
+            action.setEnabled(False)
         else:
-            icon = studiolibrary.resource.icon("view_compact")
+            icon = studiolibrary.resource.icon("plus-large")
+            action.setEnabled(True)
 
-        icon.setColor(self.iconColor())
         action.setIcon(icon)
 
-    def updateFiltersButton(self):
-        """Update the icon for the filters menu."""
+        # Update view icon
+        action = self.menuBarWidget().findAction("View")
 
+        if not self.isCompactView():
+            icon = studiolibrary.resource.icon("eye")
+        else:
+            icon = studiolibrary.resource.icon("eye-slash")
+
+        action.setIcon(icon)
+
+        # Update filters icon
         action = self.menuBarWidget().findAction("Filters")
 
         if self._filterByMenu.isActive():
             icon = studiolibrary.resource.icon("filter")
-            icon.setColor(self.iconColor())
-            icon.setBadge(18, 1, 9, 9, color=self.ICON_BADGE_COLOR)
+            action._badgeColor = self.ICON_BADGE_COLOR
+            action._badgeEnabled = True
         else:
             icon = studiolibrary.resource.icon("filter")
-            icon.setColor(self.iconColor())
 
         action.setIcon(icon)
+
+        self.menuBarWidget().updateIconColor()
 
     def isRecursiveSearchEnabled(self):
         """

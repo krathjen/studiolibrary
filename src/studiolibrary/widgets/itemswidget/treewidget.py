@@ -29,6 +29,9 @@ logger = logging.getLogger(__name__)
 
 class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
+    itemSliderMoved = QtCore.Signal(object, object)
+    itemSliderReleased = QtCore.Signal(object, object)
+
     def __init__(self, *args):
         QtWidgets.QTreeWidget.__init__(self, *args)
         ItemViewMixin.__init__(self)
@@ -48,6 +51,12 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
 
         self.itemClicked.connect(self._itemClicked)
         self.itemDoubleClicked.connect(self._itemDoubleClicked)
+
+    def _itemSliderMoved(self, item, value):
+        self.itemSliderMoved.emit(item, value)
+
+    def _itemSliderReleased(self, item, value):
+        self.itemSliderReleased.emit(item, value)
 
     def drawRow(self, painter, options, index):
         item = self.itemFromIndex(index)

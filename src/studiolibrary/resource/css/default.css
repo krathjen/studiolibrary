@@ -24,9 +24,10 @@ QLineEdit, QPushButton, QToolBar, QToolButton, QTabBar, QTabBar::tab {
     background-color: BACKGROUND_COLOR;
 }
 
-MenuBarWidget, QToolBar , QToolButton  {
+MenuBarWidget, MenuBarWidget QToolButton  {
 	color: ACCENT_FOREGROUND_COLOR;
 	background-color: ACCENT_COLOR;
+	qproperty-iconSize: 24px;
 }
 
 QToolBar {
@@ -37,21 +38,20 @@ MenuBarWidget  {
 	spacing: 2px;
 }
 
-
-/*
 MenuBarWidget QToolButton {
-    min-height: 24;
-    max-height: 24;
-    min-width: 24;
-    max-width: 24;
-    border-radius: 2px;
+    min-height: 28px;
+    max-height: 28px;
+    min-width: 28px;
+    max-width: 28px;
+    border-radius: 4px;
+	margin-left: 2px;
+	margin-right: 2px;
 }
-*/
+
+
 MenuBarWidget QToolButton:Hover {
     background-color: rgba(255,255,255,55);
 }
-
-
 
 QToolTip {
     background-color: rgb(255, 255, 204);
@@ -510,7 +510,9 @@ SearchWidget QPushButton, SearchWidget QPushButton:hover {
 	background-color: rgba(255, 255, 255, 0);
 }
 
-
+SearchWidget QPushButton {
+	qproperty-iconSize: 24px;
+}
 /*
  --------------------------------------------------------------------------
  QSplitter
@@ -950,14 +952,6 @@ IconPickerWidget {
 }
 
 
-IconPickerWidget #iconButton {
-   margin: 0px;
-   max-width: 16px;
-   min-width: 16px;
-   max-height: 16px;
-   min-height: 16px;
-}
-
 #iconPickerAction {
    max-height: 108px;
    min-height: 108px;
@@ -965,28 +959,29 @@ IconPickerWidget #iconButton {
    margin-bottom: 10px;
 }
 
-#iconPickerAction #iconButton {
-   padding: 2px;
-   max-width: 12px;
-   min-width: 12px;
-   max-height: 12px;
-   min-height: 12px;
+#iconPickerAction QToolButton {
+	qproperty-iconSize: 14px;
 }
 
-IconPickerWidget #iconButton {
+IconPickerWidget QToolButton {
     margin: 5px;
+	padding: 2px;
     align: center;
     min-width: 22px;
     min-height: 22px;
     border-radius: 2px;
-    background-color: rgba(0,100,0,0);
+	qproperty-iconSize: 18px;
 }
 
-IconPickerWidget #iconButton:checked {
+IconPickerWidget QToolButton {
+    color: rgb(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B);
+}
+
+IconPickerWidget QToolButton:checked {
     background-color: rgba(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 50);
 }
 
-IconPickerWidget #iconButton:hover {
+IconPickerWidget QToolButton:hover {
     background-color: rgba(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 75);
 }
 
@@ -1183,29 +1178,6 @@ BaseLoadWidget #blendEdit {
     max-width: 32px;
 }
 
-/*
-PreviewWidget QWidget,
-BaseSaveWidget QWidget,
-BaseLoadWidget QWidget {
-    font-size: 12px;
-}
-*/
-
-PreviewWidget QLineEdit,
-PreviewWidget QTextEdit,
-PreviewWidget QComboBox,
-PreviewWidget #thumbnailButton,
-BaseLoadWidget QLineEdit,
-BaseLoadWidget QTextEdit,
-BaseLoadWidget QComboBox,
-BaseLoadWidget #thumbnailButton,
-BaseSaveWidget QLineEdit,
-BaseSaveWidget QTextEdit,
-BaseSaveWidget QComboBox,
-BaseSaveWidget #thumbnailButton {
-    border-radius: 2px;
-}
-
 BaseSaveWidget #acceptButton,
 BaseLoadWidget #acceptButton {
     min-width: 80px;
@@ -1227,16 +1199,8 @@ BaseLoadWidget #selectionSetButton {
     border-bottom-right-radius: 2px;
 }
 
-BaseSaveWidget QLineEdit,
-BaseSaveWidget QLineEdit:focus,
-BaseSaveWidget QLineEdit:hover,
-BaseSaveWidget QTextEdit,
-BaseSaveWidget QTextEdit:focus,
-BaseSaveWidget QTextEdit:hover,
-BaseSaveWidget QPlainTextEdit,
-BaseSaveWidget QPlainTextEdit:focus,
-BaseSaveWidget QPlainTextEdit:hover,
 BaseSaveWidget ImageSequenceWidget {
+	border-radius: 2px;
     color: rgb(40, 40, 40);
     border: 1px solid rgba(254, 255, 230, 200);
     background-color: rgba(254, 255, 230, 200);
@@ -1246,12 +1210,50 @@ BaseSaveWidget ImageSequenceWidget {
     border: 0px solid rgba(254, 255, 230, 200);
 }
 
-
 /*
 ---------------------------
 Form Widget
 ---------------------------
 */
+
+FormWidget #fieldWidget {
+    margin-top: 4px;
+}
+
+FormWidget #titleLabel,
+FormWidget #titleLabel,
+FormWidget #titleLabel {
+    font-size: 14px;
+}
+
+FormWidget QLineEdit,
+FormWidget QTextEdit,
+FormWidget QComboBox,
+FormWidget #thumbnailButton,
+FormWidget QLineEdit,
+FormWidget QTextEdit,
+FormWidget QComboBox,
+FormWidget #thumbnailButton,
+FormWidget QLineEdit,
+FormWidget QTextEdit,
+FormWidget QComboBox,
+FormWidget #thumbnailButton {
+    border-radius: 2px;
+}
+
+FormWidget QLineEdit,
+FormWidget QLineEdit:focus,
+FormWidget QLineEdit:hover,
+FormWidget QTextEdit,
+FormWidget QTextEdit:focus,
+FormWidget QTextEdit:hover,
+FormWidget QPlainTextEdit,
+FormWidget QPlainTextEdit:focus,
+FormWidget QPlainTextEdit:hover {
+    color: rgb(40, 40, 40);
+    border: 1px solid rgba(254, 255, 230, 200);
+    background-color: rgba(254, 255, 230, 200);
+}
 
 FormDialog {
     padding: 5px;
@@ -1275,7 +1277,7 @@ FormDialog #description {
     padding: 4px;
     padding-bottom: 9px;
     margin-bottom: 10px;
-    border-bottom: 1px solid rgba(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B,15);
+    border-bottom: 1px solid rgba(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 15);
 }
 
 FormDialog #acceptButton,
@@ -1295,14 +1297,24 @@ FormDialog #rejectButton {
 
 FormDialog #acceptButton:disabled,
 FormDialog #rejectButton:disabled {
+	color: rgba(250, 250, 250, 50);
+}
+
+#acceptButton,
+#rejectButton {
+    background-color: rgba(0,0,0,0);
+}
+
+#acceptButton:disabled,
+#rejectButton:disabled {
     color: rgba(250,250,250,50);
 }
 
-FormDialog #acceptButton {
+#acceptButton {
     color: FOREGROUND_COLOR;
 }
 
-FormDialog #acceptButton:hover {
+#acceptButton:hover {
     color: ACCENT_FOREGROUND_COLOR;
     background-color: rgba(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 220);
 }
@@ -1312,6 +1324,14 @@ FormDialog #acceptButton:pressed {
 }
 
 FormDialog #rejectButton:hover {
+	background-color: rgba(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B, 50);
+}
+
+#acceptButton:pressed {
+    background-color: rgba(ACCENT_COLOR_R, ACCENT_COLOR_G, ACCENT_COLOR_B, 220);
+}
+
+#rejectButton:hover {
     background-color: rgba(FOREGROUND_COLOR_R, FOREGROUND_COLOR_G, FOREGROUND_COLOR_B,50);
 }
 
@@ -1486,6 +1506,6 @@ TITLE WIDGET
 }
 
 SidebarWidget #titleWidget LineEdit {
-    border: 0px solid rbg(0,0,0,0);
+    border: 0px solid rbga(0,0,0,0);
     border-radius: 3px;
 }

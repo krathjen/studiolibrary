@@ -20,10 +20,11 @@ from .separatoraction import SeparatorAction
 
 class GroupByMenu(QtWidgets.QMenu):
 
-    def __init__(self, *args, **kwargs):
-        super(GroupByMenu, self).__init__(*args, **kwargs)
+    def __init__(self, name, parent, dataset):
+        super(GroupByMenu, self).__init__(name, parent)
 
-        self._dataset = None
+        self._dataset = dataset
+        self.aboutToShow.connect(self.populateMenu)
 
     def setDataset(self, dataset):
         """
@@ -56,11 +57,9 @@ class GroupByMenu(QtWidgets.QMenu):
         self.dataset().setGroupBy(value)
         self.dataset().search()
 
-    def show(self, point=None):
+    def populateMenu(self):
         """
         Show the menu options.
-        
-        :type point: QtGui.QPoint or None
         """
         self.clear()
 
@@ -120,8 +119,3 @@ class GroupByMenu(QtWidgets.QMenu):
 
         callback = partial(self.setGroupBy, currentField, "dsc")
         action.triggered.connect(callback)
-
-        if not point:
-            point = QtGui.QCursor.pos()
-
-        self.exec_(point)

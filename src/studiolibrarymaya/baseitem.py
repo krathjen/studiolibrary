@@ -51,8 +51,18 @@ class BaseItem(studiolibrary.LibraryItem):
     TRANSFER_CLASS = None
     TRANSFER_BASENAME = ""
 
+    def createLoadWidget(self, parent=None):
+        widget = self.LOAD_WIDGET_CLASS(item=self, parent=parent)
+        return widget
+
     @classmethod
-    def showSaveWidget(cls, libraryWindow, item=None):
+    def createSaveWidget(cls, parent=None, item=None):
+        item = item or cls()
+        widget = cls.SAVE_WIDGET_CLASS(item=item, parent=parent)
+        return widget
+
+    @classmethod
+    def showSaveWidget(cls, libraryWindow=None, item=None):
         """
         Overriding this method to set the destination location
         for the save widget.
@@ -65,13 +75,14 @@ class BaseItem(studiolibrary.LibraryItem):
         item = item or cls()
         widget = cls.SAVE_WIDGET_CLASS(item=item, parent=libraryWindow)
 
-        path = libraryWindow.selectedFolderPath()
+        if libraryWindow:
+            path = libraryWindow.selectedFolderPath()
 
-        widget.setFolderPath(path)
-        widget.setLibraryWindow(libraryWindow)
+            widget.setFolderPath(path)
+            widget.setLibraryWindow(libraryWindow)
 
-        libraryWindow.setCreateWidget(widget)
-        libraryWindow.folderSelectionChanged.connect(widget.setFolderPath)
+            libraryWindow.setCreateWidget(widget)
+            libraryWindow.folderSelectionChanged.connect(widget.setFolderPath)
 
     def __init__(self, *args, **kwargs):
         """

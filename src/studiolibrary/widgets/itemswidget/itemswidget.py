@@ -59,6 +59,9 @@ class ItemsWidget(QtWidgets.QWidget):
 
     groupClicked = QtCore.Signal(object)
 
+    itemSliderMoved = QtCore.Signal(object)
+    itemSliderReleased = QtCore.Signal()
+
     def __init__(self, *args):
         QtWidgets.QWidget.__init__(self, *args)
 
@@ -112,10 +115,18 @@ class ItemsWidget(QtWidgets.QWidget):
 
         self.treeWidget().itemClicked.connect(self._itemClicked)
         self.treeWidget().itemDoubleClicked.connect(self._itemDoubleClicked)
+        self.treeWidget().itemSliderMoved.connect(self._itemSliderMoved)
+        self.treeWidget().itemSliderReleased.connect(self._itemSliderReleased)
 
         self.itemMoved = self._listView.itemMoved
         self.itemDropped = self._listView.itemDropped
         self.itemSelectionChanged = self._treeWidget.itemSelectionChanged
+
+    def _itemSliderMoved(self, item, value):
+        self.itemSliderMoved.emit(value)
+
+    def _itemSliderReleased(self, item, value):
+        self.itemSliderReleased.emit()
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress:

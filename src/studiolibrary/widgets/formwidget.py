@@ -71,6 +71,7 @@ class FormWidget(QtWidgets.QFrame):
         self._schema = []
         self._widgets = []
         self._validator = None
+        self._validatorEnabled = True
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -311,6 +312,9 @@ class FormWidget(QtWidgets.QFrame):
         """
         return bool(self.errors())
 
+    def setValidatorEnabled(self, enabled):
+        self._validatorEnabled = enabled
+
     def setValidator(self, validator):
         """
         Set the validator for the options.
@@ -330,7 +334,7 @@ class FormWidget(QtWidgets.QFrame):
     def validate(self, widget=None):
         """Validate the current options using the validator."""
 
-        if self._validator:
+        if self._validator and self._validatorEnabled:
 
             logger.debug("Running validator: form.validate(widget=%s)", widget)
 
@@ -433,7 +437,7 @@ class FormWidget(QtWidgets.QFrame):
         values = {}
         for widget in self._widgets:
             name = widget.data().get("name")
-            if name:
+            if name and widget.validateEnabled():
                 values[name] = widget.value()
         return values
 

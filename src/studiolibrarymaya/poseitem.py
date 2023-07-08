@@ -32,36 +32,44 @@ except ImportError as error:
 logger = logging.getLogger(__name__)
 
 
-def save(path, *args, **kwargs):
-    """Convenience function for saving a PoseItem."""
-    PoseItem(path).safeSave(*args, **kwargs)
-
-
-def load(path, *args, **kwargs):
-    """Convenience function for loading a PoseItem."""
-    PoseItem(path).load(*args, **kwargs)
-
-
 class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
+    @classmethod
+    def createFromPath(cls, path, theme=None):
+
+        item = PoseItem(path)
+        widget = cls(item)
+
+        if not theme:
+            import studiolibrary.widgets
+            theme = studiolibrary.widgets.Theme()
+            widget.setStyleSheet(theme.styleSheet())
+
+        widget.show()
+
     def __init__(self, *args, **kwargs):
-        """
-        Using a custom load widget to support nicer blending.
-        """
         super(PoseLoadWidget, self).__init__(*args, **kwargs)
+
+        self._options = None
+        self._pose = mutils.Pose.fromPath(self.item().transferPath())
 
         self.ui.blendFrame = QtWidgets.QFrame(self)
 
         layout = QtWidgets.QHBoxLayout(self)
         self.ui.blendFrame.setLayout(layout)
 
+        if self.item().libraryWindow():
+            self.item().libraryWindow().itemsWidget().itemSliderMoved.connect(self._sliderMoved)
+            self.item().libraryWindow().itemsWidget().itemSliderReleased.connect(self._sliderReleased)
+            self.item().libraryWindow().itemsWidget().itemDoubleClicked.connect(self._itemDoubleClicked)
+
         self.ui.blendSlider = QtWidgets.QSlider(self)
         self.ui.blendSlider.setObjectName("blendSlider")
         self.ui.blendSlider.setMinimum(-30)
         self.ui.blendSlider.setMaximum(130)
         self.ui.blendSlider.setOrientation(QtCore.Qt.Horizontal)
-        self.ui.blendSlider.sliderMoved.connect(self.sliderMoved)
-        self.ui.blendSlider.sliderReleased.connect(self.sliderReleased)
+        self.ui.blendSlider.sliderMoved.connect(self._sliderMoved)
+        self.ui.blendSlider.sliderReleased.connect(self._sliderReleased)
 
         self.ui.blendEdit = QtWidgets.QLineEdit(self)
         self.ui.blendEdit.setObjectName("blendEdit")
@@ -76,54 +84,112 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
         self.setCustomWidget(self.ui.blendFrame)
 
-        self.item().sliderChanged.connect(self.setSliderValue)
+    def accept(self):
+        """Triggered when the user clicks the apply button."""
+        self.load(clearCache=True,  clearSelection=False)
 
-    def selectionChanged(self):
-        """Overriding to avoid validating when the selection changes."""
-        if not self.item().isBatchModeEnabled():
-            super(PoseLoadWidget, self).selectionChanged()
+    def _itemDoubleClicked(self):
+        """Triggered when the user double-clicks a pose."""
+        self.accept()
+
+    def _sliderMoved(self, value):
+        """Triggered when the user moves the slider handle."""
+        self.load(blend=value, batchMode=True)
+
+    def _sliderReleased(self):
+        """Triggered when the user releases the slider handle."""
+        self.load(blend=self.ui.blendSlider.value(), refresh=False)
 
     def _blendEditChanged(self, *args):
         """Triggered when the user changes the blend edit value."""
-        blend = int(self.ui.blendEdit.text())
-        self.item().loadFromCurrentValues(
-            blend=blend,
-            batchMode=False,
-            showBlendMessage=True,
-            clearSelection=False,
-        )
+        self.load(blend=int(self.ui.blendEdit.text()), clearSelection=False)
 
-    def setSliderValue(self, value):
+    def load(
+        self,
+        blend=100.0,
+        refresh=True,
+        batchMode=False,
+        clearCache=False,
+        clearSelection=True,
+    ):
         """
-        Trigger when the item changes blend value.
+        Load the pose item with the current user settings from disc.
 
-        :type value: int
+        :type blend: float
+        :type refresh: bool
+        :type batchMode: bool
+        :type clearCache: bool
+        :type clearSelection: bool
         """
+        if batchMode:
+            self.formWidget().setValidatorEnabled(False)
+        else:
+            self._options = {}
+            self.formWidget().setValidatorEnabled(True)
+
+        if not self._options:
+
+            self._options = self.formWidget().values()
+            self._options['mirrorTable'] = self.item().mirrorTable()
+            self._options['objects'] = maya.cmds.ls(selection=True) or []
+
+            if not self._options["searchAndReplaceEnabled"]:
+                self._options["searchAndReplace"] = None
+
+            del self._options["namespaceOption"]
+            del self._options["searchAndReplaceEnabled"]
+
         self.ui.blendEdit.blockSignals(True)
-        self.ui.blendSlider.setValue(value)
-        self.ui.blendEdit.setText(str(int(value)))
+        self.ui.blendSlider.setValue(blend)
+        self.ui.blendEdit.setText(str(int(blend)))
         self.ui.blendEdit.blockSignals(False)
 
-    def sliderReleased(self):
-        """Triggered when the user releases the slider handle."""
-        self.item().loadFromCurrentValues(
-            blend=self.ui.blendSlider.value(),
-            refresh=False,
-            showBlendMessage=True
+        if self.item().libraryWindow():
+
+            self.item().libraryWindow().itemsWidget().blockSignals(True)
+            self.item().setSliderValue(blend)
+            self.item().libraryWindow().itemsWidget().blockSignals(False)
+
+            if batchMode:
+                self.item().libraryWindow().showToastMessage("Blend: {0}%".format(blend))
+
+        try:
+            self._pose.load(
+                blend=blend,
+                refresh=refresh,
+                batchMode=batchMode,
+                clearCache=clearCache,
+                clearSelection=clearSelection,
+                **self._options
+            )
+        finally:
+            self.item().setSliderDown(batchMode)
+
+
+def findMirrorTable(path):
+    """
+    Get the mirror table object for this item.
+
+    :rtype: mutils.MirrorTable or None
+    """
+    mirrorTable = None
+
+    mirrorTablePaths = list(studiolibrary.walkup(
+            path,
+            match=lambda path: path.endswith(".mirror"),
+            depth=10,
         )
+    )
 
-    def sliderMoved(self, value):
-        """
-        Triggered when the user moves the slider handle.
+    if mirrorTablePaths:
+        mirrorTablePath = mirrorTablePaths[0]
 
-        :type value: float
-        """
-        self.item().setSliderValue(value)
+        path = os.path.join(mirrorTablePath, "mirrortable.json")
 
-    def accept(self):
-        """Triggered when the user clicks the apply button."""
-        self.item().loadFromCurrentValues(clearCache=True,
-            clearSelection=False)
+        if path:
+            mirrorTable = mutils.MirrorTable.fromPath(path)
+
+    return mirrorTable
 
 
 class PoseItem(baseitem.BaseItem):
@@ -145,43 +211,7 @@ class PoseItem(baseitem.BaseItem):
         """
         super(PoseItem, self).__init__(*args, **kwargs)
 
-        self._options = None
-        self._batchMode = False
-
         self.setSliderEnabled(True)
-
-    def isBatchModeEnabled(self):
-        """
-        Check if the pose is currently blending.
-
-        :rtype: bool
-        """
-        return self._batchMode
-
-    def mirrorTable(self):
-        """
-        Get the mirror table object for this item.
-
-        :rtype: mutils.MirrorTable or None
-        """
-        mirrorTable = None
-
-        mirrorTablePaths = list(studiolibrary.walkup(
-                self.path(),
-                match=lambda path: path.endswith(".mirror"),
-                depth=10,
-            )
-        )
-
-        if mirrorTablePaths:
-            mirrorTablePath = mirrorTablePaths[0]
-
-            path = os.path.join(mirrorTablePath, "mirrortable.json")
-
-            if path:
-                mirrorTable = mutils.MirrorTable.fromPath(path)
-
-        return mirrorTable
 
     def mirrorTableSearchAndReplace(self):
         """
@@ -189,7 +219,9 @@ class PoseItem(baseitem.BaseItem):
 
         :rtype: (str, str)
         """
-        return self.mirrorTable().leftSide(), self.mirrorTable().rightSide()
+        mirrorTable = findMirrorTable(self.path())
+
+        return mirrorTable.leftSide(), mirrorTable.rightSide()
 
     def switchSearchAndReplace(self):
         """
@@ -208,75 +240,9 @@ class PoseItem(baseitem.BaseItem):
         """
         return '', ''
 
-    def keyPressEvent(self, event):
-        """
-        Called when a key press event for the item is triggered.
-
-        :type event: QtGui.QEvent
-        """
-        super(PoseItem, self).keyPressEvent(event)
-
-        if not event.isAutoRepeat():
-            if event.key() == QtCore.Qt.Key_M:
-
-                # Toggle the value of the mirror option
-                mirror = self.currentLoadValue("mirror")
-                self.emitLoadValueChanged("mirror", not mirror)
-
-                blend = self.sliderValue()
-
-                if self.isSliderDown():
-                    self.loadFromCurrentValues(
-                        blend=blend,
-                        batchMode=True,
-                        showBlendMessage=True
-                    )
-                else:
-                    self.loadFromCurrentValues(
-                        blend=blend,
-                        refresh=True,
-                        batchMode=False,
-                    )
-
-    def mouseReleaseEvent(self, event):
-        """
-        Triggered when the mouse button is released on this item.
-
-        :type event: QtCore.QMouseEvent
-        """
-        if self.isSliderDown():
-            self.loadFromCurrentValues(blend=self.sliderValue(), refresh=False)
-
     def doubleClicked(self):
-        """Triggered when the user double clicks the item."""
-        self.loadFromCurrentValues(clearSelection=False)
-
-    def selectionChanged(self):
-        """Triggered when the item is selected or deselected."""
-        self._transferObject = None
-        super(PoseItem, self).selectionChanged()
-
-    def setSliderDown(self, down):
-        """This method is called from the base class to stop blending."""
-        if not down:
-            self._options = None
-        super(PoseItem, self).setSliderDown(down)
-
-    def setSliderValue(self, value, load=True):
-        """
-        This method is called from the base class to set the blend amount.
-
-        :type value: float
-        :type load: bool
-        """
-        super(PoseItem, self).setSliderValue(value)
-
-        if load:
-            self.loadFromCurrentValues(
-                blend=value,
-                batchMode=True,
-                showBlendMessage=True
-            )
+        """Triggered when the user double-click the item."""
+        pass
 
     def loadSchema(self):
         """
@@ -338,7 +304,7 @@ class PoseItem(baseitem.BaseItem):
                     },
                     {
                         "name": "From Mirror Table",
-                        "enabled": bool(self.mirrorTable()),
+                        "enabled": bool(findMirrorTable(self.path())),
                         "callback": self.mirrorTableSearchAndReplace,
                     },
                 ]
@@ -348,6 +314,9 @@ class PoseItem(baseitem.BaseItem):
         schema.extend(super(PoseItem, self).loadSchema())
 
         return schema
+    
+    def mirrorTable(self):
+        return findMirrorTable(self.path())
 
     def loadValidator(self, **values):
         """
@@ -356,13 +325,9 @@ class PoseItem(baseitem.BaseItem):
         :type values: dict
         :rtype: list[dict]
         """
-        # Ignore the validator while blending
-        if self.isBatchModeEnabled():
-            return None
-
         # Mirror check box
         mirrorTip = "Cannot find a mirror table!"
-        mirrorTable = self.mirrorTable()
+        mirrorTable = findMirrorTable(self.path())
         if mirrorTable:
             mirrorTip = "Using mirror table: %s" % mirrorTable.path()
 
@@ -382,128 +347,6 @@ class PoseItem(baseitem.BaseItem):
 
         return fields
 
-    def loadFromCurrentValues(
-        self,
-        blend=100.0,
-        refresh=True,
-        batchMode=False,
-        clearCache=False,
-        clearSelection=True,
-        showBlendMessage=False,
-    ):
-        """
-        Load the pose item with the current user settings from disc.
-
-        :type blend: float
-        :type refresh: bool
-        :type batchMode: bool
-        :type clearSelection: bool
-        :type showBlendMessage: bool
-        """
-        if self._options is None:
-            self._options = dict()
-            self._options["key"] = self.currentLoadValue("key")
-            # self._options['namespaces'] = self.currentLoadValue("namespaces")
-            self._options['mirrorTable'] = self.mirrorTable()
-            self._options['objects'] = maya.cmds.ls(selection=True) or []
-            self._options['additive'] = self.currentLoadValue("additive")
-
-        searchAndReplace = None
-        if self.currentLoadValue("searchAndReplaceEnabled"):
-            searchAndReplace = self.currentLoadValue("searchAndReplace")
-
-        try:
-            self.load(
-                blend=blend,
-                refresh=refresh,
-                batchMode=batchMode,
-                clearCache=clearCache,
-                clearSelection=clearSelection,
-                showBlendMessage=showBlendMessage,
-                searchAndReplace=searchAndReplace,
-                **self._options
-            )
-        except Exception as error:
-            self.showErrorDialog("Item Error", str(error))
-            raise
-
-    def load(
-        self,
-        objects=None,
-        namespaces=None,
-        blend=100.0,
-        key=False,
-        attrs=None,
-        mirror=None,
-        additive=False,
-        refresh=True,
-        batchMode=False,
-        clearCache=False,
-        mirrorTable=None,
-        clearSelection=False,
-        showBlendMessage=False,
-        searchAndReplace=None,
-    ):
-        """
-        Load the pose item to the given objects or namespaces.
-        
-        :type objects: list[str]
-        :type blend: float
-        :type key: bool
-        :type namespaces: list[str] or None
-        :type refresh: bool
-        :type attrs: list[str] or None
-        :type mirror: bool or None
-        :type batchMode: bool
-        :type showBlendMessage: bool
-        :type clearSelection: bool
-        :type mirrorTable: mutils.MirrorTable
-        :type searchAndReplace: (str, str) or None
-        """
-        logger.debug(u'Loading: {0}'.format(self.path()))
-
-        self._batchMode = batchMode
-
-        # The mirror option can change during blending, so we always get
-        # the value instead of caching it. This might make blending slower.
-        if mirror is None:
-            mirror = self.currentLoadValue("mirror")
-
-        if namespaces is None:
-            namespaces = self.currentLoadValue("namespaces")
-
-        self.setSliderValue(blend, load=False)
-
-        if showBlendMessage:
-            self.showToastMessage("Blend: {0}%".format(blend))
-
-        try:
-            self.transferObject().load(
-                objects=objects,
-                namespaces=namespaces,
-                key=key,
-                blend=blend,
-                attrs=attrs,
-                mirror=mirror,
-                additive=additive,
-                refresh=refresh,
-                batchMode=batchMode,
-                clearCache=clearCache,
-                mirrorTable=mirrorTable,
-                clearSelection=clearSelection,
-                searchAndReplace=searchAndReplace
-            )
-
-        except Exception:
-            self.setSliderDown(False)
-            raise
-
-        finally:
-            if not batchMode:
-                self.setSliderDown(False)
-
-        logger.debug(u'Loaded: {0}'.format(self.path()))
-
     def save(self, objects, **kwargs):
         """
         Save all the given object data to the item path on disc.
@@ -515,7 +358,7 @@ class PoseItem(baseitem.BaseItem):
 
         # Save the pose to the temp location
         mutils.savePose(
-            self.path() + "/pose.json",
+            self.transferPath(),
             objects,
             metadata={"description": kwargs.get("comment", "")}
         )

@@ -36,14 +36,15 @@ class SearchWidget(QtWidgets.QLineEdit):
         self._dataset = None
         self._spaceOperator = "and"
         self._iconButton = QtWidgets.QPushButton(self)
+        self._iconButton.setObjectName("searchIconWidget")
         self._iconButton.clicked.connect(self._iconClicked)
 
-        icon = studiolibrary.resource.icon("search")
+        icon = studiolibrary.resource.icon("magnifying-glass.svg")
         self.setIcon(icon)
 
         self._clearButton = QtWidgets.QPushButton(self)
         self._clearButton.setCursor(QtCore.Qt.ArrowCursor)
-        icon = studiolibrary.resource.icon("cross")
+        icon = studiolibrary.resource.icon("xmark")
         self._clearButton.setIcon(icon)
         self._clearButton.setToolTip("Clear all search text")
         self._clearButton.clicked.connect(self._clearClicked)
@@ -311,10 +312,7 @@ class SearchWidget(QtWidgets.QLineEdit):
         self.setTextMargins(self.height(), 0, 0, 0)
         size = QtCore.QSize(self.height(), self.height())
 
-        self._iconButton.setIconSize(size)
         self._iconButton.setFixedSize(size)
-
-        self._clearButton.setIconSize(size)
 
         x = self.width() - self.height()
         self._clearButton.setGeometry(x, 0, self.height(), self.height())
