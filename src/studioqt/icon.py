@@ -29,7 +29,7 @@ class Icon(QtGui.QIcon):
             icon = studioqt.Icon.fa(
                 path,
                 color="rgb(255,255,255)"
-                color_disabled="rgb(0,200,200,20)",
+                color_disabled="rgba(0,200,200,20)",
             )
 
         :type path: str

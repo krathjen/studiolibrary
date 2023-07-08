@@ -46,7 +46,7 @@ class LineEdit(QtWidgets.QLineEdit):
 
         self.textChanged.connect(self._textChanged)
 
-        color = studioqt.Color.fromString("rgb(250,250,250,115)")
+        color = studioqt.Color.fromString("rgba(250,250,250,115)")
         self.setIconColor(color)
 
         self.update()

@@ -27,12 +27,12 @@ __all__ = ["Theme", "ThemeAction", "ThemesMenu"]
 THEME_PRESETS = [
     {
         "name": "Blue",
-        "accentColor": "rgb(50, 180, 240, 255)",
+        "accentColor": "rgba(50, 180, 240, 255)",
         "backgroundColor": None,
     },
     {
         "name": "Green",
-        "accentColor": "rgb(80, 200, 140, 255)",
+        "accentColor": "rgba(80, 200, 140, 255)",
         "backgroundColor": None,
     },
     {

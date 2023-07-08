@@ -79,8 +79,8 @@ class LibraryWindow(QtWidgets.QWidget):
             "Folder": False
         },
         "theme": {
-            "accentColor": "rgb(70, 160, 210, 255)",
-            "backgroundColor": "rgb(60, 64, 79, 255)",
+            "accentColor": "rgb(70, 160, 210)",
+            "backgroundColor": "rgb(60, 64, 79)",
         }
     }
 
@@ -1162,15 +1162,15 @@ class LibraryWindow(QtWidgets.QWidget):
                     "type": "color",
                     "value": accentColor,
                     "colors": [
-                        "rgb(225, 110, 110, 255)",
-                        # "rgb(220, 135, 100, 255)",
-                        "rgb(225, 150, 70, 255)",
-                        "rgb(225, 180, 35, 255)",
-                        "rgb(90, 175, 130, 255)",
-                        "rgb(100, 175, 160, 255)",
-                        "rgb(70, 160, 210, 255)",
-                        "rgb(110, 125, 220, 255)",
-                        "rgb(100, 120, 150, 255)",
+                        "rgb(225, 110, 110)",
+                        # "rgb(220, 135, 100)",
+                        "rgb(225, 150, 70)",
+                        "rgb(225, 180, 35)",
+                        "rgb(90, 175, 130)",
+                        "rgb(100, 175, 160)",
+                        "rgb(70, 160, 210)",
+                        "rgb(110, 125, 220)",
+                        "rgb(100, 120, 150)",
                     ]
                 },
                 {
@@ -1178,14 +1178,14 @@ class LibraryWindow(QtWidgets.QWidget):
                     "type": "color",
                     "value": backgroundColor,
                     "colors": [
-                        "rgb(45, 45, 48, 255)",
-                        "rgb(55, 55, 60, 255)",
-                        "rgb(68, 68, 70, 255)",
-                        "rgb(80, 60, 80, 255)",
-                        "rgb(85, 60, 60, 255)",
-                        "rgb(60, 75, 75, 255)",
-                        "rgb(60, 64, 79, 255)",
-                        "rgb(245, 245, 255, 255)",
+                        "rgb(45, 45, 48)",
+                        "rgb(55, 55, 60)",
+                        "rgb(68, 68, 70)",
+                        "rgb(80, 60, 80)",
+                        "rgb(85, 60, 60)",
+                        "rgb(60, 75, 75)",
+                        "rgb(60, 64, 79)",
+                        "rgb(245, 245, 255)",
                     ]
                 },
             ],
