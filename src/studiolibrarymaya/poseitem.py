@@ -84,10 +84,6 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
         self.setCustomWidget(self.ui.blendFrame)
 
-    def accept(self):
-        """Triggered when the user clicks the apply button."""
-        self.load(clearCache=True,  clearSelection=False)
-
     def _itemDoubleClicked(self):
         """Triggered when the user double-clicks a pose."""
         self.accept()
@@ -103,6 +99,14 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
     def _blendEditChanged(self, *args):
         """Triggered when the user changes the blend edit value."""
         self.load(blend=int(self.ui.blendEdit.text()), clearSelection=False)
+
+    def accept(self):
+        """Triggered when the user clicks the apply button."""
+        try:
+            self.load(clearCache=True,  clearSelection=False)
+        except Exception as error:
+            self.item().showErrorDialog("Item Error", str(error))
+            raise
 
     def load(
         self,

@@ -227,7 +227,10 @@ class LibraryWindow(QtWidgets.QWidget):
         self._lockRegExp = None
         self._unlockRegExp = None
         self._settingsWidget = None
+
+        self._updateAvailable = False
         self._checkForUpdateThread = None
+        self._checkForUpdateEnabled = True
 
         self._trashEnabled = self.TRASH_ENABLED
 
@@ -387,8 +390,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self.updateMenuBar()
         self.updatePreviewWidget()
 
-        self.checkForUpdate()
-
         if path:
             self.setPath(path)
 
@@ -477,14 +478,19 @@ class LibraryWindow(QtWidgets.QWidget):
         self.folderSelectionChanged.emit(path)
         self.globalSignal.folderSelectionChanged.emit(self, path)
 
+    def isUpdateAvailable(self):
+        return self._updateAvailable
+
     def checkForUpdate(self):
         """Check if there are any new versions available."""
-        if studiolibrary.config.get("checkForUpdateEnabled"):
+        self._updateAvailableButton.hide()
+        if self.isCheckForUpdateEnabled():
             studiolibrary.isLatestRelease(callback=self.checkForUpdateFinished)
 
-    def checkForUpdateFinished(self, isReleaseLatest):
+    def checkForUpdateFinished(self, updateAvailable):
         """Triggered when the check for update thread has finished."""
-        if isReleaseLatest:
+        self._updateAvailable = updateAvailable
+        if updateAvailable:
             self._updateAvailableButton.show()
         else:
             self._updateAvailableButton.hide()
@@ -1289,6 +1295,12 @@ class LibraryWindow(QtWidgets.QWidget):
 
         menu.addSeparator()
 
+        action = QtWidgets.QAction("Check For Updates", menu)
+        action.setCheckable(True)
+        action.setChecked(self.isCheckForUpdateEnabled())
+        action.triggered[bool].connect(self.setCheckForUpdateEnabled)
+        menu.addAction(action)
+
         action = QtWidgets.QAction("Debug Mode", menu)
         action.setCheckable(True)
         action.setChecked(self.isDebug())
@@ -1832,6 +1844,7 @@ class LibraryWindow(QtWidgets.QWidget):
         settings['searchWidget'] = self.searchWidget().settings()
         settings['sidebarWidget'] = self.sidebarWidget().settings()
         settings["recursiveSearchEnabled"] = self.isRecursiveSearchEnabled()
+        settings["checkForUpdateEnabled"] = self.isCheckForUpdateEnabled()
 
         settings['filterByMenu'] = self._filterByMenu.settings()
 
@@ -1897,6 +1910,10 @@ class LibraryWindow(QtWidgets.QWidget):
             value = settings.get("recursiveSearchEnabled")
             if value is not None:
                 self.setRecursiveSearchEnabled(value)
+
+            value = settings.get("checkForUpdateEnabled") or studiolibrary.config.get("checkForUpdateEnabled")
+            if value is not None:
+                self.setCheckForUpdateEnabled(value)
 
             value = settings.get('filterByMenu')
             if value is not None:
@@ -2734,6 +2751,13 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         self._isDebug = value
         studiolibrary.setDebugMode(value)
+
+    def setCheckForUpdateEnabled(self, value):
+        self._checkForUpdateEnabled = value
+        self.checkForUpdate()
+
+    def isCheckForUpdateEnabled(self):
+        return self._checkForUpdateEnabled
 
     def isDebug(self):
         """
