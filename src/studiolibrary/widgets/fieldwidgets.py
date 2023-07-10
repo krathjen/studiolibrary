@@ -10,6 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import re
 import logging
 import functools
@@ -765,11 +766,19 @@ class PathFieldWidget(StringFieldWidget):
     def browse(self):
         """Open the file dialog."""
         path = self.value()
-        path = QtWidgets.QFileDialog.getExistingDirectory(
-            None,
-            "Browse Folder",
-            path
-        )
+        pathType = self.data().get("pathType")
+        if pathType == "file":
+            path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                None,
+                "Browse File",
+                os.path.dirname(path)
+            )
+        else:
+            path = QtWidgets.QFileDialog.getExistingDirectory(
+                None,
+                "Browse Folder",
+                path
+            )
         if path:
             self.setValue(path)
 

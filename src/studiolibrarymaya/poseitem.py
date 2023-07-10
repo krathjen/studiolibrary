@@ -313,6 +313,28 @@ class PoseItem(baseitem.BaseItem):
                 "persistent": True,
             },
             {
+                "name": "relativeTo",
+                "type": "bool",
+                "inline": True,
+                "default": False,
+                "persistent": True,
+            },
+            {
+                "name": "minimizeRotations",
+                "title": "Minimize Rotations",
+                "type": "bool",
+                "inline": True,
+                "default": True,
+                "persistent": True,
+            },
+            {
+                "name": "relativeToControlList",
+                "title": "Control List",
+                "type": "path",
+                "pathType": "file",
+                "persistent": True,
+            },
+            {
                 "name": "searchAndReplaceEnabled",
                 "title": "Search and Replace",
                 "type": "bool",
@@ -376,6 +398,14 @@ class PoseItem(baseitem.BaseItem):
                 "name": "searchAndReplace",
                 "visible": values.get("searchAndReplaceEnabled")
             },
+            {
+                "name": "minimizeRotations",
+                "visible": values.get("relativeTo")
+            },
+            {
+                "name": "relativeToControlList",
+                "visible": values.get("relativeTo")
+            },
         ]
 
         fields.extend(super(PoseItem, self).loadValidator(**values))
@@ -408,6 +438,16 @@ class PoseItem(baseitem.BaseItem):
             self._options['objects'] = maya.cmds.ls(selection=True) or []
             self._options['additive'] = self.currentLoadValue("additive")
 
+        relativeTo = None
+        minimizeRotations = True
+        if self.currentLoadValue("relativeTo"):
+            callback = studiolibrary.relativePoseControlListCallback()
+            if callback:
+                relativeTo = callback(maya.cmds.ls(selection=True))
+            else:
+                relativeTo = self.currentLoadValue("relativeToControlList")
+            minimizeRotations = self.currentLoadValue("minimizeRotations")
+
         searchAndReplace = None
         if self.currentLoadValue("searchAndReplaceEnabled"):
             searchAndReplace = self.currentLoadValue("searchAndReplace")
@@ -421,6 +461,8 @@ class PoseItem(baseitem.BaseItem):
                 clearSelection=clearSelection,
                 showBlendMessage=showBlendMessage,
                 searchAndReplace=searchAndReplace,
+                relativeTo=relativeTo,
+                minimizeRotations=minimizeRotations,
                 **self._options
             )
         except Exception as error:
@@ -436,6 +478,8 @@ class PoseItem(baseitem.BaseItem):
         attrs=None,
         mirror=None,
         additive=False,
+        relativeTo=None,
+        minimizeRotations=True,
         refresh=True,
         batchMode=False,
         clearCache=False,
@@ -454,6 +498,8 @@ class PoseItem(baseitem.BaseItem):
         :type refresh: bool
         :type attrs: list[str] or None
         :type mirror: bool or None
+        :type relativeTo: str or None
+        :type minimizeRotations: bool
         :type batchMode: bool
         :type showBlendMessage: bool
         :type clearSelection: bool
@@ -486,6 +532,8 @@ class PoseItem(baseitem.BaseItem):
                 attrs=attrs,
                 mirror=mirror,
                 additive=additive,
+                relativeTo=relativeTo,
+                minimizeRotations=minimizeRotations,
                 refresh=refresh,
                 batchMode=batchMode,
                 clearCache=clearCache,

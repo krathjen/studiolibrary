@@ -55,11 +55,14 @@ pose.load(objects=["Character1:Hand_L", "Character1:Finger_L"])
 
 """
 import logging
+import os
+import re
 
 import mutils
 
 try:
     import maya.cmds
+    import maya.api.OpenMaya as OpenMaya
 except ImportError:
     import traceback
     traceback.print_exc()
@@ -345,6 +348,8 @@ class Pose(mutils.TransferObject):
             key=False,
             mirror=False,
             additive=False,
+            relativeTo=None,
+            minimizeRotations=True,
             refresh=False,
             batchMode=False,
             clearCache=False,
@@ -365,6 +370,8 @@ class Pose(mutils.TransferObject):
         :type refresh: bool
         :type mirror: bool
         :type additive: bool
+        :type relativeTo: str or None
+        :type minimizeRotations: bool
         :type mirrorTable: mutils.MirrorTable
         :type batchMode: bool
         :type clearCache: bool
@@ -386,9 +393,12 @@ class Pose(mutils.TransferObject):
             attrs=attrs,
             batchMode=batchMode,
             clearCache=clearCache,
+            mirror=mirror,
             mirrorTable=mirrorTable,
             onlyConnected=onlyConnected,
             ignoreConnected=ignoreConnected,
+            relativeTo=relativeTo,
+            minimizeRotations=minimizeRotations,
             searchAndReplace=searchAndReplace,
         )
 
@@ -414,9 +424,12 @@ class Pose(mutils.TransferObject):
             attrs=None,
             ignoreConnected=False,
             onlyConnected=False,
+            mirror=False,
             mirrorTable=None,
             batchMode=False,
             clearCache=True,
+            relativeTo=False,
+            minimizeRotations=True,
             searchAndReplace=None,
     ):
         """
@@ -429,7 +442,10 @@ class Pose(mutils.TransferObject):
         :type onlyConnected: bool
         :type clearCache: bool
         :type batchMode: bool
+        :type mirror: bool
         :type mirrorTable: mutils.MirrorTable
+        :type relativeTo: str or None
+        :type minimizeRotations: bool
         :type searchAndReplace: (str, str) or None
         """
         if clearCache or not batchMode or not self._mtime:
@@ -453,7 +469,7 @@ class Pose(mutils.TransferObject):
             self._cache = []
             self._cacheKey = cacheKey
 
-            dstObjects = objects
+            dstObjects = [] if relativeTo else objects
             srcObjects = self.objects()
             usingNamespaces = not objects and namespaces
 
@@ -474,6 +490,8 @@ class Pose(mutils.TransferObject):
                 replace=replace,
             )
 
+            # Store the dstNodes in case we need them for relative posing
+            dstNodes = []
             for srcNode, dstNode in matches:
                 self.cacheNode(
                     srcNode,
@@ -483,6 +501,15 @@ class Pose(mutils.TransferObject):
                     ignoreConnected=ignoreConnected,
                     usingNamespaces=usingNamespaces,
                 )
+                dstNodes.append(dstNode)
+
+            if relativeTo and objects:
+                # Update cache to contain values relative to the selected node
+                self._makeCacheRelative(objects[0],
+                                        dstNodes,
+                                        controlListFile=relativeTo,
+                                        mirror=mirror,
+                                        minimizeRotations=minimizeRotations)
 
         if not self.cache():
             text = "No objects match when loading data. " \
@@ -564,6 +591,101 @@ class Pose(mutils.TransferObject):
             dstAttribute.update()
 
             self._cache.append((srcAttribute, dstAttribute, srcMirrorValue))
+
+    def _makeCacheRelative(self, rootNode, dstNodes, controlListFile, mirror, minimizeRotations=True):
+        """
+        Modifies the cache to be relative to the specified node
+
+        :type rootNode: str
+        :type dstNodes: list[str]
+        :type controlListFile: str
+        :type mirror: bool
+        :type minimizeRotations: bool
+        :rtype: None
+        """
+        selectionList = OpenMaya.MSelectionList()
+        selectionList.add(rootNode)
+        pathRootNode = selectionList.getDagPath(0)
+        rootStart = pathRootNode.inclusiveMatrix()
+
+        # Open undo chunk
+        maya.cmds.undoInfo(openChunk=True)
+        # Go to the pose and calculate the delta xform to keep the root node in place
+        self.loadCache(mirror=mirror)
+        # Get the offset of the rootNode
+        rootEnd = pathRootNode.inclusiveMatrix()
+        rootOffset = (rootEnd.inverse() * rootStart)
+
+        # Sort dstNodes based on control list file
+        # They need to be in evalution order so we can calculate proper local channels
+        if os.path.isfile(controlListFile):
+            with open(controlListFile, "r") as fh:
+                nodes = [node.strip() for node in fh.readlines() if node]
+
+            for node in dstNodes:
+                nodeName = node.name().split(":")[-1]
+                try:
+                    index = nodes.index(nodeName)
+                except ValueError:
+                    index = -1
+                node.sortIndex = index
+            dstNodes = sorted(dstNodes, key=lambda x: x.sortIndex)
+        else:
+            maya.cmds.warning("Control file does not exist. Relative posing may be inaccurate.")
+
+        xforms = {}
+        for node in dstNodes:
+            name = node.name()
+            if not maya.cmds.objectType(name, isAType="transform"):
+                continue
+
+            selectionList = OpenMaya.MSelectionList()
+            selectionList.add(name)
+            path = selectionList.getDagPath(0)
+            currentXform = path.inclusiveMatrix()
+            newXform = currentXform * rootOffset
+            xforms[name] = newXform
+
+        for node in dstNodes:
+            if getattr(node, "sortIndex", -1) == -1:
+                # Don't update nodes not specified in the control list
+                continue
+            name = node.name()
+            if not maya.cmds.objectType(name, isAType="transform"):
+                continue
+            m = xforms[name]
+            maya.cmds.xform(name, ws=True, m=m)
+            if minimizeRotations:
+                self.minimizeEulerRotations(name)
+            for i, values in enumerate(self.cache()):
+                srcAttribute, dstAttribute, srcMirrorValue = values
+                if srcAttribute and dstAttribute and dstAttribute.name() == name:
+                    if re.search("(translate|rotate|scale)", srcAttribute.fullname()):
+                        value = maya.cmds.getAttr(dstAttribute.fullname())
+                        # Update the cache with the new value
+                        if mirror:
+                            self._cache[i] = (srcAttribute, dstAttribute, value)
+                        else:
+                            srcAttribute._value = value
+        maya.cmds.undoInfo(closeChunk=True)
+        maya.cmds.undo()
+
+    def minimizeEulerRotations(self, node):
+        """Sets the euler rotation solution on the given transform to the minimal
+        solve.
+
+        :type node: str
+        """
+        selectionList = OpenMaya.MSelectionList()
+        selectionList.add(node)
+        pathNode = selectionList.getDagPath(0)
+        fnTransform = OpenMaya.MFnTransform(pathNode)
+        rotation = fnTransform.rotation()
+        alternate = rotation.alternateSolution()
+        v1 = sum([abs(x) for x in rotation])
+        v2 = sum([abs(x) for x in alternate])
+        if v1 > v2:
+            fnTransform.setRotation(alternate, OpenMaya.MSpace.kTransform)
 
     def loadCache(self, blend=100, key=False, mirror=False, additive=False):
         """
