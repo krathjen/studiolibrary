@@ -1247,7 +1247,7 @@ class Item(QtWidgets.QTreeWidgetItem):
 
         :param event: QtGui.QMouseEvent
         """
-        if self.isSliderDown():
+        if self.isSliderDown() and self.sliderPosition():
             value = (event.pos().x() - self.sliderPosition().x()) / 1.5
             value = math.ceil(value) + self.sliderPreviousValue()
             if value != self.sliderValue():

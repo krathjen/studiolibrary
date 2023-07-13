@@ -309,6 +309,9 @@ class Pose(mutils.TransferObject):
         logger.debug('Before Load "%s"', self.path())
 
         if not self._isLoading:
+
+            maya.cmds.refresh(cv=True)
+
             self._isLoading = True
             maya.cmds.undoInfo(openChunk=True)
 
@@ -403,9 +406,7 @@ class Pose(mutils.TransferObject):
 
                 # Return the focus to the Maya window
                 maya.cmds.setFocus("MayaWindow")
-
-        if refresh:
-            maya.cmds.refresh(cv=True)
+                maya.cmds.refresh(cv=True)
 
     def updateCache(
             self,
