@@ -94,15 +94,26 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
     def _sliderReleased(self):
         """Triggered when the user releases the slider handle."""
-        self.load(blend=self.ui.blendSlider.value(), refresh=False)
+        try:
+            self.load(blend=self.ui.blendSlider.value(), refresh=False)
+            self._options = {}
+        except Exception as error:
+            self.item().showErrorDialog("Item Error", str(error))
+            raise
 
     def _blendEditChanged(self, *args):
         """Triggered when the user changes the blend edit value."""
-        self.load(blend=int(self.ui.blendEdit.text()), clearSelection=False)
+        try:
+            self._options = {}
+            self.load(blend=int(self.ui.blendEdit.text()), clearSelection=False)
+        except Exception as error:
+            self.item().showErrorDialog("Item Error", str(error))
+            raise
 
     def accept(self):
         """Triggered when the user clicks the apply button."""
         try:
+            self._options = {}
             self.load(clearCache=True,  clearSelection=False)
         except Exception as error:
             self.item().showErrorDialog("Item Error", str(error))
@@ -128,7 +139,6 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
         if batchMode:
             self.formWidget().setValidatorEnabled(False)
         else:
-            self._options = {}
             self.formWidget().setValidatorEnabled(True)
 
         if not self._options:
