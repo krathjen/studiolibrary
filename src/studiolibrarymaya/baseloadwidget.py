@@ -78,7 +78,7 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._formWidget = studiolibrary.widgets.FormWidget(self)
         self._formWidget.setObjectName(item.__class__.__name__ + "Form")
         self._formWidget.setSchema(item.loadSchema())
-        self._formWidget.setValidator(item.loadValidator)
+        self._formWidget.setValidator(self.loadValidator)
         self._formWidget.validate()
 
         self.ui.formFrame.layout().addWidget(self._formWidget)
@@ -94,6 +94,9 @@ class BaseLoadWidget(QtWidgets.QWidget):
         self._item.loadValueChanged.connect(self._itemValueChanged)
         self.ui.acceptButton.clicked.connect(self.accept)
         self.ui.selectionSetButton.clicked.connect(self.showSelectionSetsMenu)
+
+    def loadValidator(self, *args, **kwargs):
+        return self.item().loadValidator(*args, **kwargs)
 
     def createTitleWidget(self):
         """
