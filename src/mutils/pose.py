@@ -544,7 +544,6 @@ class Pose(mutils.TransferObject):
                 return
             except mutils.MoreThanOneObjectFoundError as msg:
                 logger.debug(msg)
-                return
 
         for attr in self.attrs(srcName):
 

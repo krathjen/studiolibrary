@@ -87,7 +87,8 @@ class Node(object):
         if len(names) == 1:
             return Node(names[0])
         elif len(names) > 1:
-            raise mutils.MoreThanOneObjectFoundError("More than one object found %s" % str(names))
+            # Return the original name if the short name is not unique
+            return Node(self.name())
         else:
             raise mutils.NoObjectFoundError("No object found %s" % str(self.shortname()))
 

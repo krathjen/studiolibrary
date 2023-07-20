@@ -110,6 +110,10 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
             self.item().showErrorDialog("Item Error", str(error))
             raise
 
+    def loadValidator(self, *args, **kwargs):
+        self._options = {}
+        return super(PoseLoadWidget, self).loadValidator(*args, **kwargs)
+
     def accept(self):
         """Triggered when the user clicks the apply button."""
         try:
