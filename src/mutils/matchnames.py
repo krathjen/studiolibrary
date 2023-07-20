@@ -106,11 +106,9 @@ def matchNames(srcObjects, dstObjects=None, dstNamespaces=None, search=None, rep
 
     dstIndex = indexObjects(dstObjects)
     # DESTINATION NAMESPACES NOT IN SOURCE OBJECTS
-    # dstNamespaces2 = list(set(dstNamespaces) - set(srcNamespaces))
     dstNamespaces2 = [x for x in dstNamespaces if x not in srcNamespaces]
 
     # DESTINATION NAMESPACES IN SOURCE OBJECTS
-    # dstNamespaces1 = list(set(dstNamespaces) - set(dstNamespaces2))
     dstNamespaces1 = [x for x in dstNamespaces if x not in dstNamespaces2]
 
     # CACHE DESTINATION OBJECTS WITH NAMESPACES IN SOURCE OBJECTS

@@ -41,7 +41,6 @@ def getFromDagPaths(dagPaths):
         namespace = getFromDagPath(dagPath)
         namespaces.append(namespace)
 
-    # return list(set(namespaces))
     return namespaces
 
 
@@ -70,7 +69,6 @@ def getFromSelection():
         # Catch any errors when running this command outside of Maya
         logger.exception(error)
 
-    # return namespaces
     return list(OrderedDict.fromkeys(namespaces))
 
 
