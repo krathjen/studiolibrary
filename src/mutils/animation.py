@@ -542,6 +542,9 @@ class Animation(mutils.Pose):
         """
         results = []
 
+        if path.endswith(".mb"):
+            return
+
         with open(path, "r") as f:
             for line in f.readlines():
                 if not line.startswith("select -ne"):
