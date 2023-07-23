@@ -48,6 +48,19 @@ class GlobalSignal(QtCore.QObject):
     folderSelectionChanged = QtCore.Signal(object, object)
 
 
+class CheckForUpdate(QtCore.QThread):
+
+    finished = QtCore.Signal(bool)
+
+    def __init__(self, url):
+        super(CheckForUpdate, self).__init__()
+        self.url = url
+
+    def run(self):
+        updateFound = studiolibrary.updateFound()
+        self.finished.emit(updateFound)
+
+
 class LibraryWindow(QtWidgets.QWidget):
 
     _instances = {}
@@ -204,7 +217,6 @@ class LibraryWindow(QtWidgets.QWidget):
         self.setObjectName("studiolibrary")
 
         version = studiolibrary.version()
-        studiolibrary.sendAnalytics("MainWindow", version=version)
 
         self.setWindowIcon(studiolibrary.resource.icon("icon_black"))
 
@@ -228,8 +240,9 @@ class LibraryWindow(QtWidgets.QWidget):
         self._unlockRegExp = None
         self._settingsWidget = None
 
-        self._updateAvailable = False
-        self._checkForUpdateThread = None
+        self._updateFound = False
+        self._checkForUpdateThread = CheckForUpdate(self)
+        self._checkForUpdateThread.finished.connect(self.checkForUpdateFinished)
         self._checkForUpdateEnabled = True
 
         self._trashEnabled = self.TRASH_ENABLED
@@ -485,12 +498,12 @@ class LibraryWindow(QtWidgets.QWidget):
         """Check if there are any new versions available."""
         self._updateAvailableButton.hide()
         if self.isCheckForUpdateEnabled():
-            studiolibrary.isLatestRelease(callback=self.checkForUpdateFinished)
+            self._checkForUpdateThread.start()
 
-    def checkForUpdateFinished(self, updateAvailable):
+    def checkForUpdateFinished(self, updateFound):
         """Triggered when the check for update thread has finished."""
-        self._updateAvailable = updateAvailable
-        if updateAvailable:
+        self._updateFound = updateFound
+        if updateFound:
             self._updateAvailableButton.show()
         else:
             self._updateAvailableButton.hide()

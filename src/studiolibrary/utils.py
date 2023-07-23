@@ -23,6 +23,7 @@ import getpass
 import tempfile
 import platform
 import threading
+import traceback
 import collections
 import distutils.version
 
@@ -57,7 +58,7 @@ __all__ = [
     "setLibraries",
     "removeLibrary",
     "defaultLibrary",
-    "isLatestRelease",
+    "updateFound",
     "read",
     "write",
     "update",
@@ -250,45 +251,6 @@ def setLibraries(libraries):
     remove = set(old) - set(new)
     for name in remove:
         removeLibrary(name)
-
-
-def isLatestRelease(callback=None):
-    thread = threading.Thread(target=_isLatestRelease, args=(callback,))
-    thread.start()
-
-
-def _isLatestRelease(callback=None):
-    """
-    Check if the installed version of the Studio Library is the latest.
-
-    :rtype: bool
-    """
-    url = "https://api.github.com/repos/krathjen/studiolibrary/releases/latest"
-
-    try:
-        f = urllib.request.urlopen(url)
-        result = json.load(f)
-    except Exception:
-        callback(False)
-        return False
-
-    if result:
-        latestVersion = result.get('tag_name', '0.0.0')
-        currentVersion = studiolibrary.__version__
-
-        # Ignore beta releases if the current version is not beta
-        if "b" in latestVersion and "b" not in currentVersion:
-            callback(False)
-            return False
-
-        v1 = distutils.version.LooseVersion(latestVersion)
-        v2 = distutils.version.LooseVersion(currentVersion)
-
-        callback(v1 > v2)
-        return v1 > v2
-
-    callback(False)
-    return False
 
 
 def modules():
@@ -1353,7 +1315,7 @@ def timeAgo(timeStamp):
 
 def userUuid():
     """
-    Return a uuid4 for the user.
+    Return a unique uuid4 for each user.
     
     This does not compromise privacy as it generates a random uuid4 string
     for the current user.
@@ -1370,74 +1332,6 @@ def userUuid():
         updateJson(path, data)
 
     return userUuid_
-
-
-def sendAnalytics(
-        name,
-        version="1.0.0",
-        an="StudioLibrary",
-        tid=None,
-):
-    """
-    Send an analytic event to google analytics.
-    
-    This is only used once and is not used to send any personal/user data.
-
-    Example:
-        # logs an event named "mainWindow"
-        sendAnalytics("mainWindow")
-
-    :type name: str
-    :type version: str
-    :type an: str
-    :type tid: str
-    :rtype: None
-    """
-    def _send(url):
-        try:
-            url = url.replace(" ", "")
-            f = urllib.request.urlopen(url)
-        except Exception:
-            pass
-
-    # Ignore analytics when reloading
-    if os.environ.get("STUDIO_LIBRARY_RELOADED") == "1":
-        return
-
-    if not studiolibrary.config.get('analyticsEnabled'):
-        return
-
-    tid = tid or studiolibrary.config.get('analyticsId')
-    cid = userUuid()
-
-    # In python 2.7 the getdefaultlocale function could return a None "ul"
-    ul, _ = locale.getdefaultlocale()
-    ul = ul or ""
-    ul = ul.replace("_", "-").lower()
-
-    tid = "UA-50172384-3"
-    url = "https://www.google-analytics.com/collect?" \
-          "v=1" \
-          "&ul={ul}" \
-          "&tid={tid}" \
-          "&an={an}" \
-          "&av={av}" \
-          "&cid={cid}" \
-          "&t=pageview" \
-          "&dp=/{name}" \
-          "&dt={av}" \
-
-    url = url.format(
-        tid=tid,
-        an=an,
-        av=version,
-        cid=cid,
-        name=name,
-        ul=ul,
-    )
-
-    t = threading.Thread(target=_send, args=(url,))
-    t.start()
 
 
 def showInFolder(path):
@@ -1478,6 +1372,38 @@ def showInFolder(path):
 
     logger.info("Call: '%s' with arguments: %s", cmd.__name__, args)
     cmd(*args)
+
+
+def updateFound():
+    """
+    This function should only be used once every session unless specified by the user.
+
+    Returns True if a newer release is found for download.
+
+    :rtype: bool
+    """
+    if os.environ.get("STUDIO_LIBRARY_RELOADED") == "1":
+        return
+
+    if not studiolibrary.config.get('checkForUpdateEnabled', True):
+        return
+
+    try:
+        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}"
+        url = url.format(uid=userUuid(), v=studiolibrary.__version__)
+        response = urllib.request.urlopen(url)
+
+        # Check the HTTP status code
+        if response.getcode() == 200:
+            json_content = response.read().decode('utf-8')
+            data = json.loads(json_content)
+            return data.get("updateFound", False)
+
+    except Exception as error:
+        logger.debug("Exception occurred:\n%s", traceback.format_exc())
+        pass
+
+    return False
 
 
 def testNormPath():
