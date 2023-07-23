@@ -96,7 +96,6 @@ __all__ = [
     "timeAgo",
     "modules",
     "setDebugMode",
-    "sendAnalytics",
     "showInFolder",
     "stringToList",
     "listToString",
