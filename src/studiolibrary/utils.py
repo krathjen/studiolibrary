@@ -1373,18 +1373,19 @@ def showInFolder(path):
     cmd(*args)
 
 
-def dccInfo():
-    try:
-        import maya.cmds
-        return {
-            "name": "maya",
-            "version": maya.cmds.about(q=True, version=True),
-        }
-    except Exception as error:
-        return {
-            "name": "undefined",
-            "version": "undefined",
-        }
+global DCC_INFO
+
+try:
+    import maya.cmds
+    DCC_INFO = {
+        "name": "maya",
+        "version": maya.cmds.about(q=True, version=True)
+    }
+except Exception as error:
+    DCC_INFO = {
+        "name": "undefined",
+        "version": "undefined",
+    }
 
 
 def updateFound():
@@ -1403,13 +1404,13 @@ def updateFound():
 
     try:
         uid = userUuid() or "undefined"
-        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn};os={os}"
+        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn}&os={os}"
         url = url.format(
             uid=uid,
             v=studiolibrary.__version__,
-            dn=dccInfo().get("name"),
-            dv=dccInfo().get("version"),
-            os=platform.system().lower(),
+            dn=DCC_INFO.get("name").replace(' ', '%20'),
+            dv=DCC_INFO.get("version").replace(' ', '%20'),
+            os=platform.system().lower().replace(' ', '%20'),
         )
 
         response = urllib.request.urlopen(url)

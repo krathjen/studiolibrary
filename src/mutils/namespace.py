@@ -41,7 +41,8 @@ def getFromDagPaths(dagPaths):
         namespace = getFromDagPath(dagPath)
         namespaces.append(namespace)
 
-    return namespaces
+    # Remove any duplicates while retaining the order
+    return list(OrderedDict.fromkeys(namespaces))
 
 
 def getFromDagPath(dagPath):
@@ -69,7 +70,7 @@ def getFromSelection():
         # Catch any errors when running this command outside of Maya
         logger.exception(error)
 
-    return list(OrderedDict.fromkeys(namespaces))
+    return namespaces
 
 
 def getAll():
