@@ -1322,13 +1322,13 @@ def userUuid():
     :rtype: str
     """
     path = os.path.join(localPath(), "settings.json")
-    data = readJson(path)
-    userUuid_ = data.get("userUuid")
+    userUuid_ = readJson(path).get("userUuid")
 
     if not userUuid_:
-        userUuid_ = str(uuid.uuid4())
-        data = {"userUuid": userUuid_}
-        updateJson(path, data)
+        updateJson(path, {"userUuid": str(uuid.uuid4())})
+
+        # Read the uuid again to make sure its persistent
+        userUuid_ = readJson(path).get("userUuid")
 
     return userUuid_
 
@@ -1373,6 +1373,20 @@ def showInFolder(path):
     cmd(*args)
 
 
+def dccInfo():
+    try:
+        import maya.cmds
+        return {
+            "name": "maya",
+            "version": maya.cmds.about(q=True, version=True),
+        }
+    except Exception as error:
+        return {
+            "name": "undefined",
+            "version": "undefined",
+        }
+
+
 def updateFound():
     """
     This function should only be used once every session unless specified by the user.
@@ -1382,14 +1396,22 @@ def updateFound():
     :rtype: bool
     """
     if os.environ.get("STUDIO_LIBRARY_RELOADED") == "1":
-        return
+        return False
 
     if not studiolibrary.config.get('checkForUpdateEnabled', True):
-        return
+        return False
 
     try:
-        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}"
-        url = url.format(uid=userUuid(), v=studiolibrary.__version__)
+        uid = userUuid() or "undefined"
+        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn}"
+        url = url.format(
+            uid=uid,
+            v=studiolibrary.__version__,
+            dn=dccInfo().get("name"),
+            dv=dccInfo().get("version"),
+            os=platform.system().lower(),
+        )
+
         response = urllib.request.urlopen(url)
 
         # Check the HTTP status code
