@@ -11,6 +11,7 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 import logging
 import traceback
+from collections import OrderedDict
 
 try:
     import maya.cmds
@@ -40,7 +41,7 @@ def getFromDagPaths(dagPaths):
         namespace = getFromDagPath(dagPath)
         namespaces.append(namespace)
 
-    return list(set(namespaces))
+    return namespaces
 
 
 def getFromDagPath(dagPath):
@@ -68,7 +69,7 @@ def getFromSelection():
         # Catch any errors when running this command outside of Maya
         logger.exception(error)
 
-    return namespaces
+    return list(OrderedDict.fromkeys(namespaces))
 
 
 def getAll():
