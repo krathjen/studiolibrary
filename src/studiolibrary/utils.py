@@ -1403,7 +1403,7 @@ def updateFound():
 
     try:
         uid = userUuid() or "undefined"
-        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn}"
+        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn};os={os}"
         url = url.format(
             uid=uid,
             v=studiolibrary.__version__,
