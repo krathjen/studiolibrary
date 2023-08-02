@@ -1392,7 +1392,7 @@ def updateFound():
     """
     This function should only be used once every session unless specified by the user.
 
-    Returns True if a newer release is found for download.
+    Returns True if a newer release is found for the given platform.
 
     :rtype: bool
     """
@@ -1404,13 +1404,15 @@ def updateFound():
 
     try:
         uid = userUuid() or "undefined"
-        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn}&os={os}"
+        url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn}&os={os}&ov={ov}&pv={pv}"
         url = url.format(
             uid=uid,
             v=studiolibrary.__version__,
             dn=DCC_INFO.get("name").replace(' ', '%20'),
             dv=DCC_INFO.get("version").replace(' ', '%20'),
             os=platform.system().lower().replace(' ', '%20'),
+            ov=platform.release().replace(' ', '%20'),
+            pv=platform.python_version().replace(' ', '%20'),
         )
 
         response = urllib.request.urlopen(url)

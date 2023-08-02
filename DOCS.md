@@ -17,7 +17,7 @@ Please feel free to improve this page as needed. Thank you.
 * [How to debug "No object match when loading data"](#zi20df5)
 * [How to fix a scene that has unknown nodes](#ufj2oi4)
 * [How to lock and unlock specific folders](#we7zm9m)
-* [How to install & run for Maya 2011-2015](#qiot1k3)
+* [How to install manually install](#qiot1k3)
 
 
 ### FAQ
@@ -62,11 +62,11 @@ studiolibrary.main()
 
 ### <a name="nc2dokp"></a> How to set the name and path from code
 
-Create and show a library with the name "Figaro Pho - Anim" that points to a custom path.
+Create and show a library with the name "MY_PROJECT - Anim" that points to a custom path.
 
 ```python
 import studiolibrary
-studiolibrary.main(name="Figaro Pho - Anim", path="P:/figaro/studiolibrary/anim")
+studiolibrary.main(name="MY_PROJECT - Anim", path="P:/MY_PROJECT/studiolibrary/anim")
 ```
 
 [Top](#top)
@@ -99,8 +99,8 @@ Create three libraries and only show the third one. You can access the others vi
 import studiolibrary
 
 studiolibrary.main(name="Local", path="C:/temp/studiolibrary", show=False)
-studiolibrary.main(name="Figaro Pho - Anim", path="P:/figaro/studiolibrary/anim", show=False)
-studiolibrary.main(name="Figaro Pho - Previs", path="P:/figaro/studiolibrary/previs")
+studiolibrary.main(name="MY_PROJECT - Anim", path="P:/MY_PROJECT/studiolibrary/anim", show=False)
+studiolibrary.main(name="MY_PROJECT - Previs", path="P:/MY_PROJECT/studiolibrary/previs")
 ```
 
 [Top](#top)
@@ -116,9 +116,9 @@ When implementing the Studio Library for several projects we can get the current
 import studiolibrary
 
 # You could use an environment variable or an in-house python module to get the project name.
-project = "MyProject"
+project = "MY_PROJECT"
 
-path = "/shared/libraries/" + project + "Library"
+path = "/shared/libraries/" + project + "_Library"
 name = project + " Library"
 
 studiolibrary.main(name=name, path=path)
@@ -128,14 +128,14 @@ studiolibrary.main(name=name, path=path)
 
 <br>
 
-### <a name="h2rz6Km"></a> How to set a library for several projects (version 2.5.0.b7+)
+### <a name="h2rz6Km"></a> How to set a library for several projects
 
 ```python
 import studiolibrary
 
 libraries = [
-    {"name":"Project1", "path":r"D:\Library Data", "default":True, "theme":{"accentColor":"rgb(0,200,100)"}},
-    {"name":"Project2", "path":r"D:\Library Data2"},
+    {"name":"Project1", "path":r"D:\Library_Data", "default":True, "theme":{"accentColor":"rgb(0,200,100)"}},
+    {"name":"Project2", "path":r"D:\Library_Data2"},
     {"name":"Temp", "path":r"C:\temp"},
 ]
 
@@ -147,11 +147,9 @@ studiolibrary.main()
 
 <br>
 
-### <a name="zi20df5"></a> How to debug "No object match when loading data": (version 1.3.9+)
+### <a name="zi20df5"></a> How to debug "No object match when loading data"
 
-In version 1.3.9+ you can now switch on debug mode which should log any strange behavior in the script editor.
-
-Make sure “Debug mode” is checked under the settings menu. Apply the pose and It should print any strange behavior in the script editor. This can make applying poses much slower.
+Make sure “Debug mode” is checked under the settings menu. Apply the pose and it should print any strange behavior in the script editor. This can make applying poses much slower.
 
 You might see something like...
 
@@ -188,8 +186,8 @@ if n:
 ```python
 import studiolibrary
 
-path= "P:/figaro/studiolibrary/anim"
-name = "Figaro Pho - Anim"
+path= "C:/MY_PROJECT/studiolibrary/anim"
+name = "MY_PROJECT - Anim"
 superusers = ["kurt.rathjen"]
 
 # Unlock all folders. This is the default behaviour.
@@ -210,23 +208,14 @@ studiolibrary.main(name=name, path=path, superusers=superusers, unlockFolder="Us
 
 <br>
 
-### <a name="qiot1k3"></a> How to install & run for Maya 2011-2015
+### <a name="qiot1k3"></a> How to manually install
 
 
 #### Download
 
 1 . Download and unzip the studiolibrary.zip file from the following link.
 
-Version 1.32.0 for Maya __2014__, __2015__.
-
-[studiolibrary.1.32.0.zip](https://github.com/krathjen/studiolibrary/releases/download/1.32.0/studiolibrary.zip)
-
-
-Version 1.6.14 for Maya __2011__, __2012__ and __2013__.
-
-[studiolibrary.1.6.14.zip](https://www.dropbox.com/s/ow968cm5su94ozb/studiolibrary.zip?dl=1) (Requires PyQt4 or PySide)
-
-[studiolibrary.1.6.14.exe](https://www.dropbox.com/s/fh4vl1fzsj1xv3o/studiolibrary.exe?dl=1) (Windows Installer) 
+www.studiolibrary.com
 
 #### Installation
 

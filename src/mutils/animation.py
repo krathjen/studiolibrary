@@ -683,7 +683,7 @@ class Animation(mutils.Pose):
                             if maya.cmds.keyframe(dstCurve, query=True, time=(start, end), keyframeCount=True):
                                 self.setAnimCurve(name, attr, dstCurve)
                                 maya.cmds.cutKey(dstCurve, time=(MIN_TIME_LIMIT, start - 1))
-                                maya.cmds.cutKey(dstCurve, time=(end + 1, MAX_TIME_LIMIT))
+                                maya.cmds.cutKey(dstCurve, time=(end + 1, end + MAX_TIME_LIMIT))
                                 validCurves.append(dstCurve)
 
             fileName = "animation.ma"
