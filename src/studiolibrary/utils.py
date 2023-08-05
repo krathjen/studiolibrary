@@ -1388,6 +1388,15 @@ except Exception as error:
     }
 
 
+def osVersion():
+    try:
+        # Fix for Windows 11 returning the wrong version
+        if platform.system().lower() == "windows" and platform.release() == "10" and sys.getwindowsversion().build >= 22000:
+            return "11"
+    finally:
+        return platform.release().replace(' ', '%20')
+
+
 def updateFound():
     """
     This function should only be used once every session unless specified by the user.
@@ -1411,7 +1420,7 @@ def updateFound():
             dn=DCC_INFO.get("name").replace(' ', '%20'),
             dv=DCC_INFO.get("version").replace(' ', '%20'),
             os=platform.system().lower().replace(' ', '%20'),
-            ov=platform.release().replace(' ', '%20'),
+            ov=osVersion(),
             pv=platform.python_version().replace(' ', '%20'),
         )
 

@@ -322,7 +322,10 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         if duration > 100 and byFrame == 1:
 
-            buttons = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+            buttons = [
+                QtWidgets.QDialogButtonBox.Ok,
+                QtWidgets.QDialogButtonBox.Cancel
+            ]
 
             result = studiolibrary.widgets.MessageBox.question(
                 self.libraryWindow(),
@@ -409,9 +412,12 @@ class BaseSaveWidget(QtWidgets.QWidget):
         title = "Create a thumbnail"
         text = "Would you like to capture a thumbnail?"
 
-        buttons = QtWidgets.QDialogButtonBox.Yes | \
-                  QtWidgets.QDialogButtonBox.Ignore | \
-                  QtWidgets.QDialogButtonBox.Cancel
+        buttons = [
+            QtWidgets.QDialogButtonBox.Yes,
+            QtWidgets.QDialogButtonBox.Ignore,
+            QtWidgets.QDialogButtonBox.Cancel
+        ]
+
 
         parent = self.item().libraryWindow()
         button = studiolibrary.widgets.MessageBox.question(

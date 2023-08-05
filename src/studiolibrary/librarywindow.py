@@ -2384,9 +2384,14 @@ class LibraryWindow(QtWidgets.QWidget):
             text = "Are you sure you want to move the selected" \
                    "item/s to the trash?"
 
-            result = self.showQuestionDialog(title, text)
+            buttons = [
+                ("Move to Trash", QtWidgets.QDialogButtonBox.AcceptRole),
+                QtWidgets.QDialogButtonBox.Cancel
+            ]
 
-            if result == QtWidgets.QDialogButtonBox.Yes:
+            result = studiolibrary.widgets.MessageBox.question(self, title, text, buttons=buttons)
+
+            if result != QtWidgets.QDialogButtonBox.Cancel:
                 self.moveItemsToTrash(items)
 
     # -----------------------------------------------------------------------
@@ -2490,10 +2495,11 @@ class LibraryWindow(QtWidgets.QWidget):
         :type buttons: list[QMessageBox.StandardButton] 
         :rtype: QMessageBox.StandardButton
         """
-        buttons = buttons or \
-                  QtWidgets.QDialogButtonBox.Yes | \
-                  QtWidgets.QDialogButtonBox.No | \
-                  QtWidgets.QDialogButtonBox.Cancel
+        buttons = buttons or [
+            QtWidgets.QDialogButtonBox.Yes,
+            QtWidgets.QDialogButtonBox.No,
+            QtWidgets.QDialogButtonBox.Cancel
+        ]
 
         return studiolibrary.widgets.MessageBox.question(self, title, text, buttons=buttons)
 

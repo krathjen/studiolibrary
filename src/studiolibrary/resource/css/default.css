@@ -816,8 +816,10 @@ MessageBox {
 #messageBox QPushButton {
     font: 12px;
     color: rgba(250, 250, 250, 250);
-    min-width: 92px;
+    min-width: 72px;
     min-height: 32px;
+    padding-left: 9px;
+    padding-right: 9px;
     border-radius: 16px;
     background-color: rgba(180, 180, 180, 230);
 }

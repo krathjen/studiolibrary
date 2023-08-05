@@ -176,9 +176,10 @@ class MessageBox(QtWidgets.QDialog):
         :type headerColor: str
         :rtype: QMessageBox.StandardButton
         """
-        buttons = buttons or \
-                  QtWidgets.QDialogButtonBox.Ok | \
-                  QtWidgets.QDialogButtonBox.Cancel
+        buttons = buttons or [
+            QtWidgets.QDialogButtonBox.Ok,
+            QtWidgets.QDialogButtonBox.Cancel
+        ]
 
         dialog = createMessageBox(
             parent,
@@ -195,9 +196,7 @@ class MessageBox(QtWidgets.QDialog):
         dialog.setInputText(inputText)
         dialog.exec_()
 
-        clickedButton = dialog.clickedStandardButton()
-
-        return dialog.inputText(), clickedButton
+        return dialog.inputText(), dialog.clickedText()
 
     @staticmethod
     def question(
@@ -223,10 +222,11 @@ class MessageBox(QtWidgets.QDialog):
 
         :rtype: QMessageBox.StandardButton
         """
-        buttons = buttons or \
-            QtWidgets.QDialogButtonBox.Yes | \
-            QtWidgets.QDialogButtonBox.No | \
+        buttons = buttons or [
+            QtWidgets.QDialogButtonBox.Yes,
+            QtWidgets.QDialogButtonBox.No,
             QtWidgets.QDialogButtonBox.Cancel
+        ]
 
         clickedButton = showMessageBox(
             parent,
@@ -269,9 +269,10 @@ class MessageBox(QtWidgets.QDialog):
 
         :rtype: (QMessageBox.StandardButton, bool)
         """
-        buttons = buttons or \
-                  QtWidgets.QDialogButtonBox.Yes | \
-                  QtWidgets.QDialogButtonBox.No
+        buttons = buttons or [
+                QtWidgets.QDialogButtonBox.Yes,
+                QtWidgets.QDialogButtonBox.No
+            ]
 
         clickedButton = showMessageBox(
             parent,
@@ -603,7 +604,11 @@ class MessageBox(QtWidgets.QDialog):
         :type buttons: QMessageBox.StandardButton
         :rtype: None 
         """
-        self.buttonBox().setStandardButtons(buttons)
+        for button in buttons:
+            if isinstance(button, list) or isinstance(button, tuple):
+                self.buttonBox().addButton(button[0], button[1])
+            else:
+                self.buttonBox().addButton(button)
 
     def setHeaderColor(self, color):
         """
@@ -652,6 +657,9 @@ class MessageBox(QtWidgets.QDialog):
         """
         return self._clickedButton
 
+    def clickedText(self):
+        return self._clickedButton.text()
+
     def clickedStandardButton(self):
         """
         Return the button that was clicked by the user.
@@ -688,9 +696,11 @@ def testMessageBox():
         title = "Test question dialog"
         text = "Would you like to create a snapshot icon?"
 
-        buttons = QtWidgets.QDialogButtonBox.Yes | \
-                  QtWidgets.QDialogButtonBox.Ignore | \
-                  QtWidgets.QDialogButtonBox.Cancel
+        buttons = [
+            QtWidgets.QDialogButtonBox.Yes,
+            QtWidgets.QDialogButtonBox.Ignore,
+            QtWidgets.QDialogButtonBox.Cancel
+        ]
 
         result = MessageBox.question(None, title, text, buttons=buttons)
         print(result)
@@ -702,9 +712,11 @@ def testMessageBox():
                "This is to test a very long message. " \
                "This is to test a very long message. "
 
-        buttons = QtWidgets.QDialogButtonBox.Yes | \
-                  QtWidgets.QDialogButtonBox.Ignore | \
-                  QtWidgets.QDialogButtonBox.Cancel
+        buttons = [
+            QtWidgets.QDialogButtonBox.Yes,
+            QtWidgets.QDialogButtonBox.Ignore,
+            QtWidgets.QDialogButtonBox.Cancel
+        ]
 
         result = MessageBox.question(None, title, text, buttons=buttons)
         print(result)
@@ -712,8 +724,10 @@ def testMessageBox():
         title = "Test checkbox"
         text = "Testing the don't show check box. "
 
-        buttons = QtWidgets.QDialogButtonBox.Ok | \
-                  QtWidgets.QDialogButtonBox.Cancel
+        buttons = [
+            QtWidgets.QDialogButtonBox.Ok,
+            QtWidgets.QDialogButtonBox.Cancel
+        ]
 
         print(studiolibrary.widgets.MessageBox.input(
             None,
@@ -735,8 +749,10 @@ def testMessageBox():
         text = "This will override the existing thumbnail. " \
                "Are you sure you would like to continue?"
 
-        buttons = QtWidgets.QDialogButtonBox.Yes | \
-                  QtWidgets.QDialogButtonBox.No
+        buttons = [
+            QtWidgets.QDialogButtonBox.Yes,
+            QtWidgets.QDialogButtonBox.No
+        ]
 
         result = MessageBox.warning(
             None,

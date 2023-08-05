@@ -341,11 +341,15 @@ class FolderItem(studiolibrary.LibraryItem):
             libraryWindow,
             "Create folder",
             "Create a new folder with the name:",
+            buttons=[
+                ("Create", QtWidgets.QDialogButtonBox.AcceptRole),
+                ("Cancel", QtWidgets.QDialogButtonBox.RejectRole)
+            ]
         )
 
         name = name.strip()
 
-        if name and button == QtWidgets.QDialogButtonBox.Ok:
+        if name and button == "Create":
             path = os.path.join(path, name)
 
             item = cls(path, libraryWindow=libraryWindow)

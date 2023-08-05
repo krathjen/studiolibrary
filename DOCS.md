@@ -17,7 +17,7 @@ Please feel free to improve this page as needed. Thank you.
 * [How to debug "No object match when loading data"](#zi20df5)
 * [How to fix a scene that has unknown nodes](#ufj2oi4)
 * [How to lock and unlock specific folders](#we7zm9m)
-* [How to install manually install](#qiot1k3)
+* [How to manually install Studio Library](#qiot1k3)
 
 
 ### FAQ
