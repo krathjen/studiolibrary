@@ -57,7 +57,7 @@ def createMessageBox(
 
     mb.setText(text)
 
-    buttons = buttons or QtWidgets.QDialogButtonBox.Ok
+    buttons = buttons or [QtWidgets.QDialogButtonBox.Ok]
     mb.setButtons(buttons)
 
     if headerIcon:
@@ -312,7 +312,7 @@ class MessageBox(QtWidgets.QDialog):
 
         :rtype: QMessageBox.StandardButton
         """
-        buttons = buttons or QtWidgets.QDialogButtonBox.Ok
+        buttons = buttons or [QtWidgets.QDialogButtonBox.Ok]
 
         clickedButton = showMessageBox(
             parent,
