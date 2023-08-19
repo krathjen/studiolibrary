@@ -68,6 +68,7 @@ class AttributeError(Exception):
 
 class Attribute(object):
 
+
     @classmethod
     def listAttr(cls, name, **kwargs):
         """
@@ -79,6 +80,14 @@ class Attribute(object):
         """
         attrs = maya.cmds.listAttr(name, **kwargs) or []
         return [cls(name, attr) for attr in attrs]
+
+    @classmethod
+    def deleteProxyAttrs(cls, name):
+        """Delete all the proxy attributes for the given object name."""
+        attrs = cls.listAttr(name, unlocked=True, keyable=True) or []
+        for attr in attrs:
+            if attr.isProxy():
+                attr.delete()
 
     def __init__(self, name, attr=None, value=None, type=None, cache=True):
         """
@@ -160,6 +169,21 @@ class Attribute(object):
         :rtype: bool
         """
         return self.type() in VALID_ATTRIBUTE_TYPES
+
+    def isProxy(self):
+        """
+       Return true if the attribute is a proxy
+
+       :rtype: bool
+       """
+        if not maya.cmds.addAttr(self.fullname(), query=True, exists=True):
+            return False
+
+        return maya.cmds.addAttr(self.fullname(), query=True, usedAsProxy=True)
+
+    def delete(self):
+        """Delete the attribute"""
+        maya.cmds.deleteAttr(self.fullname())
 
     def exists(self):
         """
@@ -396,6 +420,10 @@ class Attribute(object):
         """
         fullname = self.fullname()
         startTime, endTime = time
+
+        if self.isProxy():
+            logger.debug("Cannot set anim curve for proxy attribute")
+            return
 
         if not self.exists():
             logger.debug("Attr does not exists")

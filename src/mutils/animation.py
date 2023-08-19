@@ -646,12 +646,15 @@ class Animation(mutils.Pose):
             for name in objects:
                 if maya.cmds.copyKey(name, time=(start, end), includeUpperBound=False, option="keys"):
                     dup_node = self._duplicate_node(name, "CURVE")
+                    deleteObjects.append(dup_node)
+
                     # dup_node, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
 
                     if not FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR:
                         mutils.disconnectAll(dup_node)
 
-                    deleteObjects.append(dup_node)
+                    # Make sure we delete all proxy attributes, otherwise pasteKey will duplicate keys
+                    mutils.Attribute.deleteProxyAttrs(dup_node)
                     maya.cmds.pasteKey(dup_node)
 
                     attrs = maya.cmds.listAttr(dup_node, unlocked=True, keyable=True) or []
@@ -805,13 +808,16 @@ class Animation(mutils.Pose):
                         continue
 
                     dstAttr = mutils.Attribute(dstNode.name(), attr)
-                    srcCurve = self.animCurve(srcNode.name(), attr, withNamespace=True)
 
-                    # Skip if the destination attribute does not exists.
                     if not dstAttr.exists():
-                        logger.debug('Skipping attribute: The destination attribute "%s.%s" does not exist!' %
-                                     (dstAttr.name(), dstAttr.attr()))
+                        logger.debug('Skipping attribute: The destination attribute "%s" does not exist!' % dstAttr.fullname())
                         continue
+
+                    if dstAttr.isProxy():
+                        logger.debug('Skipping attribute: The destination attribute "%s" is a proxy attribute!', dstAttr.fullname())
+                        continue
+
+                    srcCurve = self.animCurve(srcNode.name(), attr, withNamespace=True)
 
                     if srcCurve:
                         dstAttr.setAnimCurve(
