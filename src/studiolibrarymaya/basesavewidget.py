@@ -120,7 +120,14 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
     def createSequenceWidget(self):
         """Create a sequence widget to replace the static thumbnail widget."""
-        self.ui.thumbnailButton = studiolibrary.widgets.ImageSequenceWidget(self)
+        theme = None
+        if self.parent():
+            try:
+                theme = self.parent().theme()
+            except AttributeError as error:
+                logger.debug("Cannot find theme for parent.")
+
+        self.ui.thumbnailButton = studiolibrary.widgets.ImageSequenceWidget(self, theme=theme)
         self.ui.thumbnailButton.setObjectName("thumbnailButton")
         self.ui.thumbnailFrame.layout().insertWidget(0, self.ui.thumbnailButton)
         self.ui.thumbnailButton.clicked.connect(self.thumbnailCapture)
