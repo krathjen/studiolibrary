@@ -226,7 +226,7 @@ class BaseSaveWidget(QtWidgets.QWidget):
 
         :rtype: None
         """
-        import setsmenu
+        from studiolibrarymaya import setsmenu
 
         path = self.folderPath()
         position = QtGui.QCursor().pos()
