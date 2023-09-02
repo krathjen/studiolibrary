@@ -274,6 +274,27 @@ def insertStaticKeyframe(curve, time):
             maya.cmds.keyTangent(curve, time=(previousFrame, previousFrame), ott="step")
 
 
+def duplicateNode(node, name):
+    """Duplicate the given node.
+
+    :param node: Maya path.
+    :type node: str
+    :param name: Name for the duplicated node.
+    :type name: str
+    :returns: Duplicated node names.
+    :rtype: list[str]
+    """
+    if maya.cmds.nodeType(node) in ["transform", "joint"]:
+        new = maya.cmds.duplicate(node, name=name, parentOnly=True)[0]
+    else:
+        # Please let us know if this logic is causing issues.
+        new = maya.cmds.duplicate(node, name=name)[0]
+        shapes = maya.cmds.listRelatives(new, shapes=True) or []
+        if shapes:
+            return [shapes[0], new]
+    return [new]
+
+
 def loadAnims(
     paths,
     spacing=1,
@@ -556,28 +577,6 @@ class Animation(mutils.Pose):
         with open(path, "w") as f:
             f.writelines(results)
 
-    def _duplicate_node(self, node_path, duplicate_name):
-        """Duplicate given node.
-
-        :param node_path: Maya path.
-        :type node_path: str
-        :param duplicate_name: Name for the duplicated node.
-        :type duplicate_name: str
-        :returns: Duplicated node.
-        :rtype: str
-        """
-        if maya.cmds.nodeType(node_path) in ["transform", "joint"]:
-            duplicated_node = maya.cmds.duplicate(node_path,
-                                                  name=duplicate_name,
-                                                  parentOnly=True)[0]
-        else:
-            duplicated_node = maya.cmds.duplicate(node_path,
-                                                  name=duplicate_name)[0]
-            duplicated_node = maya.cmds.listRelatives(duplicated_node,
-                                                      shapes=True)[0] or []
-
-        return duplicated_node
-
     @mutils.timing
     @mutils.unifyUndo
     @mutils.showWaitCursor
@@ -622,7 +621,7 @@ class Animation(mutils.Pose):
             raise AnimationTransferError(msg)
 
         # Check if animation exists
-        if mutils.getDurationFromNodes(objects or []) <= 0:
+        if mutils.getDurationFromNodes(objects or [], time=time) <= 0:
             msg = "No animation was found on the specified object/s! " \
                   "Please create a pose instead!"
             raise AnimationTransferError(msg)
@@ -645,23 +644,22 @@ class Animation(mutils.Pose):
 
             for name in objects:
                 if maya.cmds.copyKey(name, time=(start, end), includeUpperBound=False, option="keys"):
-                    dup_node = self._duplicate_node(name, "CURVE")
-                    deleteObjects.append(dup_node)
-
-                    # dup_node, = maya.cmds.duplicate(name, name="CURVE", parentOnly=True)
+                    dstNodes = duplicateNode(name, "CURVE")
+                    dstNode = dstNodes[0]
+                    deleteObjects.extend(dstNodes)
 
                     if not FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR:
-                        mutils.disconnectAll(dup_node)
+                        mutils.disconnectAll(dstNode)
 
                     # Make sure we delete all proxy attributes, otherwise pasteKey will duplicate keys
-                    mutils.Attribute.deleteProxyAttrs(dup_node)
-                    maya.cmds.pasteKey(dup_node)
+                    mutils.Attribute.deleteProxyAttrs(dstNode)
+                    maya.cmds.pasteKey(dstNode)
 
-                    attrs = maya.cmds.listAttr(dup_node, unlocked=True, keyable=True) or []
+                    attrs = maya.cmds.listAttr(dstNode, unlocked=True, keyable=True) or []
                     attrs = list(set(attrs) - set(['translate', 'rotate', 'scale']))
 
                     for attr in attrs:
-                        dstAttr = mutils.Attribute(dup_node, attr)
+                        dstAttr = mutils.Attribute(dstNode, attr)
                         dstCurve = dstAttr.animCurve()
 
                         if dstCurve:

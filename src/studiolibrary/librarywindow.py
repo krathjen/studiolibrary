@@ -50,15 +50,15 @@ class GlobalSignal(QtCore.QObject):
 
 class CheckForUpdate(QtCore.QThread):
 
-    finished = QtCore.Signal(bool)
+    finished = QtCore.Signal(object)
 
     def __init__(self, url):
         super(CheckForUpdate, self).__init__()
         self.url = url
 
     def run(self):
-        updateFound = studiolibrary.updateFound()
-        self.finished.emit(updateFound)
+        info = studiolibrary.checkForUpdates()
+        self.finished.emit(info)
 
 
 class LibraryWindow(QtWidgets.QWidget):
@@ -92,8 +92,8 @@ class LibraryWindow(QtWidgets.QWidget):
             "Folder": False
         },
         "theme": {
-            "accentColor": "rgb(70, 160, 210)",
-            "backgroundColor": "rgb(60, 64, 79)",
+            "accentColor": "rgb(30, 145, 245)",
+            "backgroundColor": "rgb(50, 50, 60)",
         }
     }
 
@@ -240,7 +240,7 @@ class LibraryWindow(QtWidgets.QWidget):
         self._unlockRegExp = None
         self._settingsWidget = None
 
-        self._updateFound = False
+        self._updateInfo = {}
         self._checkForUpdateThread = CheckForUpdate(self)
         self._checkForUpdateThread.finished.connect(self.checkForUpdateFinished)
         self._checkForUpdateEnabled = True
@@ -500,10 +500,10 @@ class LibraryWindow(QtWidgets.QWidget):
         if self.isCheckForUpdateEnabled():
             self._checkForUpdateThread.start()
 
-    def checkForUpdateFinished(self, updateFound):
+    def checkForUpdateFinished(self, info):
         """Triggered when the check for update thread has finished."""
-        self._updateFound = updateFound
-        if updateFound:
+        self._updateInfo = info or {}
+        if self._updateInfo.get("updateFound"):
             self._updateAvailableButton.show()
         else:
             self._updateAvailableButton.hide()
@@ -641,12 +641,11 @@ class LibraryWindow(QtWidgets.QWidget):
 
         title = "Welcome"
         title = title.format(studiolibrary.version(), name)
-        icon = studiolibrary.resource.get('icons/icon_white.png')
         text = "Before you get started please choose a folder " \
                "location for storing the data. A network folder is " \
                "recommended for sharing within a studio."
 
-        dialog = studiolibrary.widgets.createMessageBox(self, title, text, headerIcon=icon)
+        dialog = studiolibrary.widgets.createMessageBox(self, title, text)
         dialog.show()
 
         dialog.accepted.connect(self.showChangePathDialog)
@@ -1320,12 +1319,14 @@ class LibraryWindow(QtWidgets.QWidget):
         action.triggered[bool].connect(self.setDebugMode)
         menu.addAction(action)
 
+        menu.addSeparator()
+
         action = QtWidgets.QAction("Report Issue", menu)
-        action.triggered.connect(self.reportIssue)
+        action.triggered.connect(self.openReportUrl)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Help", menu)
-        action.triggered.connect(self.help)
+        action.triggered.connect(self.openHelpUrl)
         menu.addAction(action)
 
         return menu
@@ -2749,20 +2750,17 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         self.sidebarWidget().setRecursive(value)
 
-    @staticmethod
-    def help():
-        """Open the help url from the config file in a web browser."""
-        webbrowser.open(studiolibrary.config.get("helpUrl"))
+    def openHelpUrl(self):
+        """Open the help URL in a web browse."""
+        webbrowser.open(self._updateInfo.get("helpUrl", "https://www.studiolibrary.com"))
 
-    @staticmethod
-    def reportIssue():
-        """Open the report issue url and submit a new issue."""
-        webbrowser.open(studiolibrary.config.get("reportIssueUrl"))
+    def openReportUrl(self):
+        """Open the report URL in a web browse."""
+        webbrowser.open(self._updateInfo.get("reportUrl", "https://www.studiolibrary.com"))
 
-    @staticmethod
-    def openReleasesUrl():
-        """Open the help url from the config file in a web browser."""
-        webbrowser.open(studiolibrary.config.get("releasesUrl"))
+    def openReleasesUrl(self):
+        """Open the releases URL in a web browser."""
+        webbrowser.open(self._updateInfo.get("releasesUrl", "https://www.studiolibrary.com"))
 
     def setDebugMode(self, value):
         """

@@ -4,6 +4,9 @@
 
 Studio Library is a python-based Qt tool for managing poses and animation in Maya.
 
+## Next Release
+
+The next major release is in active development! In order to ensure smooth progress, we kindly request that merge requests primarily focus on fixes or small changes. Thank you. 
 
 ## Features 
 

@@ -30,6 +30,7 @@ class IconButton(QtWidgets.QToolButton):
         self._iconPath = None
 
         self.setCheckable(True)
+        self.setCursor(QtCore.Qt.PointingHandCursor)
 
     def setIconPath(self, path):
         """

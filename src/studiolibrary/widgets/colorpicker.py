@@ -27,6 +27,7 @@ class ColorButton(QtWidgets.QPushButton):
         self._color = None
 
         self.setCheckable(True)
+        self.setCursor(QtCore.Qt.PointingHandCursor)
 
     def setColor(self, color):
         """

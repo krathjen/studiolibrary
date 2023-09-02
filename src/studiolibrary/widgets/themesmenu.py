@@ -258,8 +258,8 @@ class Theme(QtCore.QObject):
     DEFAULT_DARK_COLOR = QtGui.QColor(60, 60, 60)
     DEFAULT_LIGHT_COLOR = QtGui.QColor(220, 220, 220)
 
-    DEFAULT_ACCENT_COLOR = QtGui.QColor(0, 175, 255)
-    DEFAULT_BACKGROUND_COLOR = QtGui.QColor(60, 60, 80)
+    DEFAULT_ACCENT_COLOR = QtGui.QColor(30, 145, 245)
+    DEFAULT_BACKGROUND_COLOR = QtGui.QColor(50, 50, 60)
 
     def __init__(self):
         QtCore.QObject.__init__(self)
@@ -385,7 +385,7 @@ class Theme(QtCore.QObject):
 
         :rtype: studioqt.Color 
         """
-        return self.forgroundColor()
+        return self.foregroundColor()
 
     def accentForgroundColor(self):
         """
@@ -395,7 +395,7 @@ class Theme(QtCore.QObject):
         """
         return studioqt.Color(255, 255, 255, 255)
 
-    def forgroundColor(self):
+    def foregroundColor(self):
         """
         Return the foreground color for the theme.
 
@@ -585,7 +585,7 @@ class Theme(QtCore.QObject):
         accentColor = self.accentColor()
         accentForegroundColor = self.accentForgroundColor()
 
-        foregroundColor = self.forgroundColor()
+        foregroundColor = self.foregroundColor()
         backgroundColor = self.backgroundColor()
 
         itemBackgroundColor = self.itemBackgroundColor()

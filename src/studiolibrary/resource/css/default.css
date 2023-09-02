@@ -955,8 +955,8 @@ IconPickerWidget {
 
 
 #iconPickerAction {
-   max-height: 108px;
-   min-height: 108px;
+   max-height: 120px;
+   min-height: 120px;
    margin-left: 10px;
    margin-bottom: 10px;
 }
@@ -969,8 +969,10 @@ IconPickerWidget QToolButton {
     margin: 5px;
 	padding: 2px;
     align: center;
-    min-width: 22px;
-    min-height: 22px;
+    min-width: 20px;
+    min-height: 20px;
+    max-width: 20px;
+    max-height: 20px;
     border-radius: 2px;
 	qproperty-iconSize: 18px;
 }

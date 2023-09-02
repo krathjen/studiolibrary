@@ -20,15 +20,6 @@
   // You can use environment variables within the path. eg: {HOME}
   "databasePath": "{root}/.studiolibrary/database.json",
 
-  // Default website url
-  "helpUrl": "https://www.studiolibrary.com",
-
-  // Releases url
-  "releasesUrl": "https://github.com/krathjen/studiolibrary/releases",
-
-  // Report issue url
-  "reportIssueUrl": "https://github.com/krathjen/studiolibrary/issues/new",
-
   // The temp location used for saving out items and thumbnails
   "tempPath": "{temp}/StudioLibrary/{user}",
 
@@ -53,7 +44,7 @@
   "scaleFactorEnabled": true,
 
   // Check if there are any new versions available on start up
-  "checkForUpdateEnabled": true,
+  "checkForUpdatesEnabled": true,
 
   // A list of the default item plugins
   "itemRegistry": [
@@ -66,9 +57,5 @@
     "studiolibrarymaya.mirroritem.MirrorItem",
     "studiolibrarymaya.setsitem.SetsItem",
     "studiolibrary.folderitem.FolderItem"
-  ],
-
-  // Used for very basic analytics and does not send any personal information
-  "analyticsEnabled": true,
-  "analyticsId": "UA-50172384-1"
+  ]
 }

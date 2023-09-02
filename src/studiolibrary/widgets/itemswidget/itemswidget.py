@@ -497,7 +497,7 @@ class ItemsWidget(QtWidgets.QWidget):
         settings["spacing"] = self.spacing()
         settings["zoomAmount"] = self.zoomAmount()
         settings["selectedPaths"] = self.selectedPaths()
-        settings["labelDisplayOption"] = self.labelDisplayOption()
+        settings["labelDisplayOption"] = self._labelDisplayOption
         settings.update(self.treeWidget().settings())
 
         return settings

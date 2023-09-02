@@ -359,21 +359,30 @@ def selectedObjectsFrameRange(objects=None):
     return start, end
 
 
-def getDurationFromNodes(objects):
+def getDurationFromNodes(objects, time=None):
     """
     Get the duration of the animation from the given object names.
-    
+
+    :type time: [str, str]
     :type objects: list[str]
     :rtype: float
     """
     if objects:
+
         first = maya.cmds.findKeyframe(objects, which='first')
         last = maya.cmds.findKeyframe(objects, which='last')
+
+        if time:
+            startKey = maya.cmds.findKeyframe(objects, time=(time[0], time[0]), which="next")
+            if startKey > time[1] or startKey < time[0]:
+                return 0
+
         if first == last:
             if maya.cmds.keyframe(objects, query=True, keyframeCount=True) > 0:
                 return 1
             else:
                 return 0
+
         return last - first
     else:
         return 0

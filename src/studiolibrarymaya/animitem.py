@@ -239,7 +239,7 @@ class AnimItem(baseitem.BaseItem):
 
         # Validate the current selection field
         objects = kwargs.get("objects")
-        if objects and mutils.getDurationFromNodes(objects) <= 0:
+        if objects and mutils.getDurationFromNodes(objects, time=[start, end]) <= 0:
             fields.extend([
                 {
                     "name": "objects",
