@@ -563,7 +563,7 @@ class Animation(mutils.Pose):
         """
         file_extension = os.path.splitext(path)[1]
         if file_extension == ".mb":
-            logger.warning("Binary file detected: " + path + ". Skipping clean.")
+            logger.info("Binary file detected: " + path + ". Skipping clean.")
             return
 
         results = []
