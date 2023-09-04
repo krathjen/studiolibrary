@@ -561,6 +561,11 @@ class Animation(mutils.Pose):
         Clean up all commands in the exported maya file that are
         not createNode.
         """
+        file_extension = os.path.splitext(path)[1]
+        if file_extension == ".mb":
+            logger.warning("Binary file detected: " + path + ". Skipping clean.")
+            return
+
         results = []
 
         if path.endswith(".mb"):
