@@ -1411,12 +1411,15 @@ def checkForUpdates():
     if not studiolibrary.config.get('checkForUpdatesEnabled', True):
         return {}
 
+    # In python 2.7 the getdefaultlocale function could return a None "ul"
     try:
-        # In python 2.7 the getdefaultlocale function could return a None "ul"
         ul, _ = locale.getdefaultlocale()
-        ul = ul or ""
+        ul = ul or "undefined"
         ul = ul.replace("_", "-").lower()
+    except Exception as error:
+        ul = "undefined"
 
+    try:
         uid = userUuid() or "undefined"
         url = "https://app.studiolibrary.com/releases?uid={uid}&v={v}&dv={dv}&dn={dn}&os={os}&ov={ov}&pv={pv}&ul={ul}"
         url = url.format(

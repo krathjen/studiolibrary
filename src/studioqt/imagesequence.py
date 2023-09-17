@@ -29,7 +29,6 @@ class ImageSequence(QtCore.QObject):
     def __init__(self, path, *args):
         QtCore.QObject.__init__(self, *args)
 
-        self._fps = self.DEFAULT_FPS
         self._timer = None
         self._frame = 0
         self._frames = []
@@ -139,7 +138,9 @@ class ImageSequence(QtCore.QObject):
         """
         self.reset()
         if self._timer:
-            self._timer.start(1000.0 / self._fps)
+            import studiolibrary
+            fps = studiolibrary.config.get("playbackFrameRate", self.DEFAULT_FPS)
+            self._timer.start(1000.0 / fps)
 
     def frames(self):
         """

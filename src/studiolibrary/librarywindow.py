@@ -92,7 +92,7 @@ class LibraryWindow(QtWidgets.QWidget):
             "Folder": False
         },
         "theme": {
-            "accentColor": "rgb(30, 145, 245)",
+            "accentColor": "rgb(60, 160, 210)",
             "backgroundColor": "rgb(50, 50, 60)",
         }
     }
