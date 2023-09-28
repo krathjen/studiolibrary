@@ -1245,17 +1245,20 @@ def walkup(path, match=None, depth=3, sep="/"):
         depthCount += 1
 
         folder = os.path.sep.join(folders[:i*-1])
-        if not os.path.exists(folder):
+        if not os.path.isdir(folder):
             continue
         try:
-            for filename in os.listdir(folder):
-                path = os.path.join(folder, filename)
-                if match is None or match(path):
-                    yield normPath(path)
+            filenames = os.listdir(folder)
+        except PermissionError:
+            continue
         except OSError as e:
-            if 'An unexpected network error occurred' in e.strerror:
-                continue  # skip permission errors for '\\share\root'
+            if 'unexpected network error' in e.strerror:
+                continue  # skip specific permission errors on network shares
             raise
+        for filename in filenames:
+            path = os.path.join(folder, filename)
+            if match is None or match(path):
+                yield normPath(path)
 
 
 def timeAgo(timeStamp):
