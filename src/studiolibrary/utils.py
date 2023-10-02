@@ -1237,18 +1237,24 @@ def walkup(path, match=None, depth=3, sep="/"):
     depthCount = 0
 
     for i, folder in enumerate(folders):
-        if folder:
+        if not folder:
+            continue
 
-            if depthCount > depth:
-                break
-            depthCount += 1
+        if depthCount > depth:
+            break
+        depthCount += 1
 
-            folder = os.path.sep.join(folders[:i*-1])
-            if os.path.exists(folder):
-                for filename in os.listdir(folder):
-                    path = os.path.join(folder, filename)
-                    if match is None or match(path):
-                        yield normPath(path)
+        folder = os.path.sep.join(folders[:i*-1])
+        if not os.path.isdir(folder):
+            continue
+        try:
+            filenames = os.listdir(folder)
+        except PermissionError:
+            continue  # expected on network shares
+        for filename in filenames:
+            path = os.path.join(folder, filename)
+            if match is None or match(path):
+                yield normPath(path)
 
 
 def timeAgo(timeStamp):
