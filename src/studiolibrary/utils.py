@@ -1251,6 +1251,12 @@ def walkup(path, match=None, depth=3, sep="/"):
             filenames = os.listdir(folder)
         except PermissionError:
             continue  # expected on network shares
+        except OSError as e:
+            if 'unexpected network error' in e.strerror:
+                continue  # expected on network shares
+            if 'handle is invalid' in e.strerror:
+                continue  # something weird on network share
+            raise
         for filename in filenames:
             path = os.path.join(folder, filename)
             if match is None or match(path):
