@@ -213,34 +213,37 @@ studiolibrary.main(name=name, path=path, superusers=superusers, unlockFolder="Us
 
 #### Download
 
-1 . Download and unzip the studiolibrary.zip file from the following link.
+Download and unzip the studiolibrary.zip file from the following link.
 
 www.studiolibrary.com
 
 #### Installation
 
-2 . Move the unzipped studiolibrary folder to the following path depending on your OS.
+1. Unzip the downloaded studiolibrary.zip file.
 
+2. Copy the `Python code` below to the Maya Python script editor. Make sure the tab is Python and not MEL.
 
-##### Linux
+3. Change the path variable in the Python code to the studiolibrary folder.
 
-```~/maya/scripts```
+4. Press `Ctrl + Enter` to run.
 
-##### Windows
+5. Drag the Python code to the shelf.
 
-```C:/Users/USERNAME/Documents/maya/scripts```
+``` python
+# Python code
 
-##### OSX
-
-Use ⌘+Shift+G in the finder and copy the studiolibrary folder to
-
-```~/Library/Preferences/Autodesk/maya/scripts```
-
-#### Run
-
-3 . Start Maya and run the following code in the Python script editor.
-
-```
+import os
+import sys
+   
+# 3. REPLACE this path with the location to the unzipped `src` location. 
+path = r"C:\Users\USER\Downloads\studiolibrary\src"
+   
+if not os.path.exists(path):
+    raise IOError(r'The source path does not exist!')
+   
+if path not in sys.path:
+    sys.path.insert(0, path)
+   
 import studiolibrary
 studiolibrary.main()
 ```

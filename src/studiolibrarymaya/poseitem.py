@@ -32,6 +32,16 @@ except ImportError as error:
 logger = logging.getLogger(__name__)
 
 
+def save(path, *args, **kwargs):
+    """Convenience function for saving a PoseItem."""
+    PoseItem(path).safeSave(*args, **kwargs)
+
+
+def load(path, *args, **kwargs):
+    """Convenience function for loading a PoseItem."""
+    PoseItem(path).load(*args, **kwargs)
+
+
 class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
     @classmethod

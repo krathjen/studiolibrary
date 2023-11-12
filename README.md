@@ -41,11 +41,6 @@ place the unzipped "studiolibrary" folder on a network drive.
 Find the latest documentation [here](DOCS.md).
 
 
-## Merge Requests
-
-The next major release is in active development. In order to ensure smooth progress, we kindly request that merge requests primarily focus on fixes or small changes. Thank you. 
-
-
 ## Contributing
 
 Contributions to Studio Library are always welcome! Whether it's reporting bugs, feature requests, discussing ideas or committing code.
