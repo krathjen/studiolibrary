@@ -90,7 +90,8 @@ def saveAnim(
         metadata=None,
         iconPath="",
         sequencePath="",
-        bakeConnected=True
+        bakeConnected=True,
+        bakeBookmarks=False
 ):
     """
     Save the anim data for the given objects.
@@ -113,6 +114,7 @@ def saveAnim(
     :type sequencePath: str
     :type metadata: dict or None
     :type bakeConnected: bool
+    :type bakeBookmarks: bool
     
     :rtype: mutils.Animation
     """
@@ -132,7 +134,8 @@ def saveAnim(
         time=time,
         sampleBy=sampleBy,
         fileType=fileType,
-        bakeConnected=bakeConnected
+        bakeConnected=bakeConnected,
+        bakeBookmarks=bakeBookmarks
     )
     return anim
 
@@ -587,7 +590,8 @@ class Animation(mutils.Pose):
         time=None,
         sampleBy=1,
         fileType="",
-        bakeConnected=True
+        bakeConnected=True,
+        bakeBookmarks=False
     ):
         """
         Save all animation data from the objects set on the Anim object.
@@ -597,6 +601,7 @@ class Animation(mutils.Pose):
         :type sampleBy: int
         :type fileType: str
         :type bakeConnected: bool
+        :type bakeBookmarks: bool
         
         :rtype: None
         """

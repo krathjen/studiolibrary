@@ -286,4 +286,5 @@ class AnimItem(baseitem.BaseItem):
             metadata={"description": kwargs.get("comment", "")},
             sequencePath=sequencePath,
             bakeConnected=kwargs.get("bakeConnected")
+            #get the bookmark bool
         )
