@@ -91,6 +91,14 @@ class AnimItem(baseitem.BaseItem):
                 "label": {"name": ""}
             },
             {
+                "name": "testBool",
+                "type": "bool",
+                "inline": True,
+                "default": True,
+                "persistent": True,
+                "label": {"name": ""}
+            },
+            {
                 "name": "sourceTime",
                 "title": "source",
                 "type": "range",
@@ -193,6 +201,14 @@ class AnimItem(baseitem.BaseItem):
             },
             {
                 "name": "bakeConnected",
+                "type": "bool",
+                "default": False,
+                "persistent": True,
+                "inline": True,
+                "label": {"visible": False}
+            },
+            {
+                "name": "bakeBookmarks",
                 "type": "bool",
                 "default": False,
                 "persistent": True,
