@@ -131,7 +131,8 @@ class AnimItem(baseitem.BaseItem):
             option=kwargs.get("option"),
             connect=kwargs.get("connect"),
             mirrorTable=kwargs.get("mirrorTable"),
-            currentTime=kwargs.get("currentTime")
+            currentTime=kwargs.get("currentTime"),
+            bookmarks=kwargs.get("bookmarks")
         )
 
     def saveSchema(self):

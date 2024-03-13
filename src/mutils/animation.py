@@ -21,6 +21,7 @@ import mutils.gui
 
 try:
     import maya.cmds
+    import maya.plugin.timeSliderBookmark.timeSliderBookmark as timeSliderBookmark
 except ImportError:
     import traceback
     traceback.print_exc()
@@ -309,6 +310,7 @@ def loadAnims(
     mirrorTable=None,
     currentTime=None,
     showDialog=False,
+    bookmarks=None
 ):
     """
     Load the animations in the given order of paths with the spacing specified.
@@ -373,6 +375,7 @@ def loadAnims(
             namespaces=namespaces,
             currentTime=currentTime,
             mirrorTable=mirrorTable,
+            bookmarks=bookmarks
         )
 
         duration = anim.endFrame() - anim.startFrame()
@@ -442,6 +445,14 @@ class Animation(mutils.Pose):
         :rtype: int
         """
         return self.metadata().get("endFrame")
+    
+    def bookmarks(self):
+        """
+        Returns all associated bookmarks with anim
+
+        :rtype: list timesliderbookmarks
+        """
+        return self.metadata().get("bookmarks")
 
     def mayaPath(self):
         """
@@ -634,6 +645,15 @@ class Animation(mutils.Pose):
         self.setMetadata("endFrame", end)
         self.setMetadata("startFrame", start)
 
+        
+        #if bakeBookmarks:
+        #Load bookmark plugin
+        maya.cmds.loadPlugin('timeSliderBookmark')
+        bookmarks = maya.cmds.ls(type="timeSliderBookmark")
+        print("baking bookmarks")
+        self.setMetadata("bookmarks", bookmarks)
+        #pass
+
         end += 1
         validCurves = []
         deleteObjects = []
@@ -728,7 +748,8 @@ class Animation(mutils.Pose):
             option=None,
             connect=False,
             mirrorTable=None,
-            currentTime=None
+            currentTime=None,
+            bookmarks=None
     ):
         """
         Load the animation data to the given objects or namespaces.
@@ -755,6 +776,15 @@ class Animation(mutils.Pose):
 
         if option is None or option == PasteOption.ReplaceAll:
             option = PasteOption.ReplaceCompletely
+
+        #load animation bookmarks
+        maya.cmds.loadPlugin('timeSliderBookmark')
+        bookmarks = self.bookmarks() or []
+
+        if bookmarks is not None:
+            for bookmark in bookmarks:
+                print("WE FOUND A BOOKMARK")
+                timeSliderBookmark.createBookmark(name=bookmark, start=10, stop=11, color=(1, 0 ,0))
 
         self.validate(namespaces=namespaces)
 
