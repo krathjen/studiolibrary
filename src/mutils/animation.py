@@ -13,6 +13,7 @@
 import os
 import shutil
 import logging
+import re
 
 from studiovendor.Qt import QtWidgets
 
@@ -641,18 +642,34 @@ class Animation(mutils.Pose):
             msg = "No animation was found on the specified object/s! " \
                   "Please create a pose instead!"
             raise AnimationTransferError(msg)
+        
+        if bakeBookmarks:
+            #Load bookmark plugin
+            maya.cmds.loadPlugin('timeSliderBookmark')
+            bookmarks = maya.cmds.ls(type="timeSliderBookmark")
+            bookmarkSaves = []
+
+            for bookmark in bookmarks:
+                #Bookmarks stored in string values to be decoded later
+                #format = ({name}{start}{stop}{color r}{color b}{color c})
+                name = maya.cmds.getAttr(bookmark + ".name")
+                start = maya.cmds.getAttr(bookmark + ".timeRangeStart")
+                stop = maya.cmds.getAttr(bookmark + ".timeRangeStop")
+                colorR = maya.cmds.getAttr(bookmark + ".colorR")
+                colorG = maya.cmds.getAttr(bookmark + ".colorG")
+                colorB = maya.cmds.getAttr(bookmark + ".colorB")
+                bookmarkData = "{" + str(name) + "}" + "{" + str(start) + "}" + "{" + str(stop) + "}" + "{" + str(colorR) + "}" + "{" + str(colorG) + "}" + "{" + str(colorB) + "}"
+                bookmarkSaves.append(str(bookmarkData))
+                print('baked a bookmark of name ' + name)
+
+            print("baking bookmarks")
+            self.setMetadata("bookmarks", bookmarkSaves)
 
         self.setMetadata("endFrame", end)
         self.setMetadata("startFrame", start)
 
         
-        #if bakeBookmarks:
-        #Load bookmark plugin
-        maya.cmds.loadPlugin('timeSliderBookmark')
-        bookmarks = maya.cmds.ls(type="timeSliderBookmark")
-        print("baking bookmarks")
-        self.setMetadata("bookmarks", bookmarks)
-        #pass
+
 
         end += 1
         validCurves = []
@@ -666,6 +683,8 @@ class Animation(mutils.Pose):
             if bakeConnected:
                 maya.cmds.undoInfo(openChunk=True)
                 mutils.bakeConnected(objects, time=(start, end), sampleBy=sampleBy)
+
+            
 
             for name in objects:
                 if maya.cmds.copyKey(name, time=(start, end), includeUpperBound=False, option="keys"):
@@ -734,6 +753,8 @@ class Animation(mutils.Pose):
             elif deleteObjects:
                 maya.cmds.delete(deleteObjects)
 
+      
+
         self.setPath(path)
 
     @mutils.timing
@@ -749,7 +770,7 @@ class Animation(mutils.Pose):
             connect=False,
             mirrorTable=None,
             currentTime=None,
-            bookmarks=None
+            bookmarks=[]
     ):
         """
         Load the animation data to the given objects or namespaces.
@@ -777,15 +798,7 @@ class Animation(mutils.Pose):
         if option is None or option == PasteOption.ReplaceAll:
             option = PasteOption.ReplaceCompletely
 
-        #load animation bookmarks
-        maya.cmds.loadPlugin('timeSliderBookmark')
-        bookmarks = self.bookmarks() or []
-
-        if bookmarks is not None:
-            for bookmark in bookmarks:
-                print("WE FOUND A BOOKMARK")
-                timeSliderBookmark.createBookmark(name=bookmark, start=10, stop=11, color=(1, 0 ,0))
-
+        
         self.validate(namespaces=namespaces)
 
         objects = objects or []
@@ -826,6 +839,9 @@ class Animation(mutils.Pose):
             srcTime = findFirstLastKeyframes(srcCurves, sourceTime)
             dstTime = moveTime(srcTime, startFrame)
 
+           
+
+
             if option != PasteOption.ReplaceCompletely:
                 insertKeyframe(srcCurves, srcTime)
 
@@ -863,6 +879,21 @@ class Animation(mutils.Pose):
                     else:
                         value = self.attrValue(srcNode.name(), attr)
                         dstAttr.setStaticKeyframe(value, dstTime, option)
+                
+                 #load animation bookmarks
+            maya.cmds.loadPlugin('timeSliderBookmark')  
+            bookmarks = self.bookmarks()
+
+            if bookmarks is not None:
+                for bookmark in bookmarks:
+                    print("WE FOUND A BOOKMARK")
+                    #format = ({name}{start}{stop}{color r}{color b}{color c})
+                    split = re.findall('\{(.*?)\}', bookmark)
+
+                    startTime = float(split[1]) + dstTime[0]
+                    stopTime = float(split[2]) + dstTime[0]
+
+                    timeSliderBookmark.createBookmark(name=split[0], start= startTime, stop= stopTime, color=(float(split[3]), float(split[4]) , float(split[5])))
 
         finally:
             self.close()
