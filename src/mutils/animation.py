@@ -643,6 +643,7 @@ class Animation(mutils.Pose):
                   "Please create a pose instead!"
             raise AnimationTransferError(msg)
         
+        #Bake bookmark data into metadata
         if bakeBookmarks:
             #Load bookmark plugin
             maya.cmds.loadPlugin('timeSliderBookmark')
@@ -662,7 +663,6 @@ class Animation(mutils.Pose):
                 bookmarkSaves.append(str(bookmarkData))
                 print('baked a bookmark of name ' + name)
 
-            print("baking bookmarks")
             self.setMetadata("bookmarks", bookmarkSaves)
 
         self.setMetadata("endFrame", end)
@@ -880,13 +880,12 @@ class Animation(mutils.Pose):
                         value = self.attrValue(srcNode.name(), attr)
                         dstAttr.setStaticKeyframe(value, dstTime, option)
                 
-                 #load animation bookmarks
+            #load animation bookmarks
             maya.cmds.loadPlugin('timeSliderBookmark')  
             bookmarks = self.bookmarks()
 
             if bookmarks is not None:
                 for bookmark in bookmarks:
-                    print("WE FOUND A BOOKMARK")
                     #format = ({name}{start}{stop}{color r}{color b}{color c})
                     split = re.findall('\{(.*?)\}', bookmark)
 
