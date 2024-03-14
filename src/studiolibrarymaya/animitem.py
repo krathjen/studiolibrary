@@ -91,14 +91,6 @@ class AnimItem(baseitem.BaseItem):
                 "label": {"name": ""}
             },
             {
-                "name": "testBool",
-                "type": "bool",
-                "inline": True,
-                "default": True,
-                "persistent": True,
-                "label": {"name": ""}
-            },
-            {
                 "name": "sourceTime",
                 "title": "source",
                 "type": "range",
