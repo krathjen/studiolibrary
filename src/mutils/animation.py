@@ -654,12 +654,12 @@ class Animation(mutils.Pose):
                 #Bookmarks stored in string values to be decoded later
                 #format = ({name}{start}{stop}{color r}{color b}{color c})
                 name = maya.cmds.getAttr(bookmark + ".name")
-                start = maya.cmds.getAttr(bookmark + ".timeRangeStart")
-                stop = maya.cmds.getAttr(bookmark + ".timeRangeStop")
+                bookmarkStart = maya.cmds.getAttr(bookmark + ".timeRangeStart")
+                bookmarkStop = maya.cmds.getAttr(bookmark + ".timeRangeStop")
                 colorR = maya.cmds.getAttr(bookmark + ".colorR")
                 colorG = maya.cmds.getAttr(bookmark + ".colorG")
                 colorB = maya.cmds.getAttr(bookmark + ".colorB")
-                bookmarkData = "{" + str(name) + "}" + "{" + str(start) + "}" + "{" + str(stop) + "}" + "{" + str(colorR) + "}" + "{" + str(colorG) + "}" + "{" + str(colorB) + "}"
+                bookmarkData = "{" + str(name) + "}" + "{" + str(bookmarkStart) + "}" + "{" + str(bookmarkStop) + "}" + "{" + str(colorR) + "}" + "{" + str(colorG) + "}" + "{" + str(colorB) + "}"
                 bookmarkSaves.append(str(bookmarkData))
                 print('baked a bookmark of name ' + name)
 
@@ -889,10 +889,21 @@ class Animation(mutils.Pose):
                     #format = ({name}{start}{stop}{color r}{color b}{color c})
                     split = re.findall('\{(.*?)\}', bookmark)
 
-                    startTime = float(split[1]) + dstTime[0]
-                    stopTime = float(split[2]) + dstTime[0]
+                    startTime = float(split[1]) + startFrame
+                    stopTime = float(split[2]) + startFrame
 
-                    timeSliderBookmark.createBookmark(name=split[0], start= startTime, stop= stopTime, color=(float(split[3]), float(split[4]) , float(split[5])))
+                    #timeSliderBookmark.createBookmark(name=split[0], start= startTime, stop= stopTime, color=(float(split[3]), float(split[4]) , float(split[5])))
+                    maya.cmds.pluginInfo("timeSliderBookmark", edit=True, writeRequires=True)
+                    createdBookmark = maya.cmds.createNode("timeSliderBookmark", ss=True)
+                    priority = timeSliderBookmark.getNextPriority()
+
+                    maya.cmds.setAttr(createdBookmark + ".priority", priority)
+                    maya.cmds.setAttr(createdBookmark + ".name", split[0], type="string")
+                    maya.cmds.setAttr(createdBookmark + ".timeRangeStart", startTime)
+                    maya.cmds.setAttr(createdBookmark + ".timeRangeStop", stopTime)
+                    maya.cmds.setAttr(createdBookmark + ".colorR", float(split[3]))
+                    maya.cmds.setAttr(createdBookmark + ".colorG", float(split[4]))
+                    maya.cmds.setAttr(createdBookmark + ".colorB", float(split[5]))
 
         finally:
             self.close()
