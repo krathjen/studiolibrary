@@ -93,7 +93,7 @@ def saveAnim(
         iconPath="",
         sequencePath="",
         bakeConnected=True,
-        bakeBookmarks=False
+        bakeBookmarks=True
 ):
     """
     Save the anim data for the given objects.
@@ -449,9 +449,9 @@ class Animation(mutils.Pose):
     
     def bookmarks(self):
         """
-        Returns all associated bookmarks with anim
+        Returns all associated bookmarks with anim broken into string segements
 
-        :rtype: list timesliderbookmarks
+        :rtype: str[]
         """
         return self.metadata().get("bookmarks")
 
@@ -603,7 +603,7 @@ class Animation(mutils.Pose):
         sampleBy=1,
         fileType="",
         bakeConnected=True,
-        bakeBookmarks=False
+        bakeBookmarks=True
     ):
         """
         Save all animation data from the objects set on the Anim object.
@@ -664,6 +664,8 @@ class Animation(mutils.Pose):
                 print('baked a bookmark of name ' + name)
 
             self.setMetadata("bookmarks", bookmarkSaves)
+        else:
+            print('bookmark saving is disabled')
 
         self.setMetadata("endFrame", end)
         self.setMetadata("startFrame", start)
