@@ -355,7 +355,7 @@ class ListView(ItemViewMixin, QtWidgets.QListView):
         ItemViewMixin.mouseReleaseEvent(self, event)
 
         if item not in items:
-            if event.button() != QtCore.Qt.MidButton:
+            if event.button() != QtCore.Qt.MiddleButton:
                 QtWidgets.QListView.mouseReleaseEvent(self, event)
         elif not items:
             QtWidgets.QListView.mouseReleaseEvent(self, event)
@@ -577,7 +577,7 @@ class ListView(ItemViewMixin, QtWidgets.QListView):
                     self._drag.setPixmap(pixmap)
                     self._drag.setHotSpot(hotSpot)
                     self._drag.setMimeData(mimeData)
-                    self._drag.start(QtCore.Qt.MoveAction)
+                    self._drag.exec_(QtCore.Qt.MoveAction)
 
     def endDrag(self):
         """
@@ -603,8 +603,8 @@ class ListView(ItemViewMixin, QtWidgets.QListView):
         """
         rect = self.visualRect(self.indexFromItem(item))
 
-        pixmap = QtGui.QPixmap()
-        pixmap = pixmap.grabWidget(self, rect)
+        # pixmap = QtGui.QPixmap()
+        pixmap = self.grab(rect)
 
         if len(items) > 1:
             cWidth = 35

@@ -53,5 +53,6 @@ def main(*args, **kwargs):
 if __name__ == "__main__":
 
     # Run the Studio Library in a QApplication instance
-    with studiolibrary.app():
+    import studioqt
+    with studioqt.app():
         studiolibrary.main()

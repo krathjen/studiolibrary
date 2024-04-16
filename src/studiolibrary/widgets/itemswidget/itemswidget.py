@@ -1055,7 +1055,7 @@ class ItemsWidget(QtWidgets.QWidget):
         )
 
         if modifier in validModifiers:
-            numDegrees = event.delta() / 8
+            numDegrees = event.angleDelta().y() / 8
             numSteps = numDegrees / 15
 
             delta = (numSteps * self.wheelScrollStep())

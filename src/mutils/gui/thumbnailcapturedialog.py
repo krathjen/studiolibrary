@@ -20,6 +20,7 @@ print mutils.gui.capture("c:/temp/test.jpg", startFrame=1, endFrame=100)
 import os
 import shutil
 
+from studiovendor.Qt import QtGui
 from studiovendor.Qt import QtCore
 from studiovendor.Qt import QtWidgets
 
@@ -242,10 +243,9 @@ class ThumbnailCaptureDialog(QtWidgets.QDialog):
         :rtype: None
         """
         geometry = self.frameGeometry()
-        pos = QtWidgets.QApplication.desktop().cursor().pos()
-        screen = QtWidgets.QApplication.desktop().screenNumber(pos)
-        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(
-            screen).center()
+        pos = QtGui.QCursor.pos()
+        screen = QtWidgets.QApplication.screenAt(pos)
+        centerPoint = screen.availableGeometry().center()
         geometry.moveCenter(centerPoint)
         self.move(geometry.topLeft())
 

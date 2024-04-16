@@ -10,8 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "2.14.1"
-__build_date__ = "November 12, 2023"
+__version__ = "2.15.0"
 
 
 def version():

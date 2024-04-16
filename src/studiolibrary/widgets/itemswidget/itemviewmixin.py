@@ -126,7 +126,7 @@ class ItemViewMixin(object):
         else:
             QtWidgets.QAbstractItemView.wheelEvent(self, event)
 
-        item = self.itemAt(event.pos())
+        item = self.itemAt(QtCore.QPoint(event.position().toPoint()))
         self.itemUpdateEvent(item, event)
 
     def keyPressEvent(self, event):

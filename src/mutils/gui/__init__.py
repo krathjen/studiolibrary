@@ -11,20 +11,13 @@
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 from studiovendor.Qt import QtCore
+from studiovendor.Qt import QtCompat
 from studiovendor.Qt import QtWidgets
 
 try:
     import maya.OpenMayaUI as omui
 except ImportError as error:
     print(error)
-
-try:
-    from shiboken2 import wrapInstance
-except ImportError:
-    try:
-        from shiboken import wrapInstance
-    except ImportError as error:
-        print(error)
 
 from .framerangemenu import FrameRangeMenu
 from .framerangemenu import showFrameRangeMenu
@@ -40,7 +33,7 @@ def mayaWindow():
     :rtype: QMainWindow
     """
     mainWindowPtr = omui.MQtUtil.mainWindow()
-    return wrapInstance(int(mainWindowPtr), QtWidgets.QMainWindow)
+    return QtCompat.wrapInstance(int(mainWindowPtr), QtWidgets.QMainWindow)
 
 
 def makeMayaStandaloneWindow(w):

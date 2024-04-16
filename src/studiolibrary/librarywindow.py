@@ -1822,9 +1822,10 @@ class LibraryWindow(QtWidgets.QWidget):
         """
         x, y, width, height = settings
 
-        screenGeometry = QtWidgets.QApplication.desktop().screenGeometry()
-        screenWidth = screenGeometry.width()
-        screenHeight = screenGeometry.height()
+        pos = QtGui.QCursor.pos()
+        geometry = QtWidgets.QApplication.screenAt(pos).availableGeometry()
+        screenWidth = geometry.width()
+        screenHeight = geometry.height()
 
         if x <= 0 or y <= 0 or x >= screenWidth or y >= screenHeight:
             self.centerWindow(width, height)
@@ -2061,11 +2062,9 @@ class LibraryWindow(QtWidgets.QWidget):
         if height:
             geometry.setHeight(height)
 
-        desktop = QtWidgets.QApplication.desktop()
-
-        pos = desktop.cursor().pos()
-        screen = desktop.screenNumber(pos)
-        centerPoint = desktop.screenGeometry(screen).center()
+        pos = QtGui.QCursor.pos()
+        screen = QtWidgets.QApplication.screenAt(pos)
+        centerPoint = screen.availableGeometry().center()
 
         geometry.moveCenter(centerPoint)
         self.window().setGeometry(geometry)

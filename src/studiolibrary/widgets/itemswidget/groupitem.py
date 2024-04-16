@@ -197,7 +197,7 @@ class GroupItem(Item):
 
         text = self.name()
         metrics = QtGui.QFontMetricsF(self._font)
-        textWidth = metrics.width(text)
+        textWidth = metrics.boundingRect(text).width()
 
         padding = (25 * self.dpi())
 

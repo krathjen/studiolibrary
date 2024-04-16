@@ -141,7 +141,7 @@ def showMessageBox(
             # Save the button that was clicked by the user
             settings.set(key,
                 {
-                    "clickedButton": int(clickedButton),
+                    "clickedButton": mb.clickedIndex(),
                     "dontShowAgain":  bool(mb.isDontShowCheckboxChecked()),
                 }
             )

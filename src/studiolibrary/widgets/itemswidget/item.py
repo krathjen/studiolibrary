@@ -720,7 +720,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         :type event: QtWidgets.QMouseEvent
         :rtype: None
         """
-        if event.button() == QtCore.Qt.MidButton:
+        if event.button() == QtCore.Qt.MiddleButton:
             if self.isSliderEnabled():
                 self.setSliderDown(True)
                 self._sliderPosition = event.pos()
@@ -1183,7 +1183,7 @@ class Item(QtWidgets.QTreeWidgetItem):
         metrics = QtGui.QFontMetricsF(font)
 
         if text:
-            textWidth = metrics.width(text)
+            textWidth = metrics.boundingRect(text).width()
         else:
             textWidth = 1
 
