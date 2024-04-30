@@ -249,22 +249,12 @@ class MirrorTable(mutils.TransferObject):
         :rtype: bool
         """
         if side:
-            # Support for prefix naming convention.
-            if side.endswith("*"):
-                return MirrorTable.replacePrefix(name, side, "X") != name
-
-            # Support for suffix naming convention.
-            elif side.startswith("*"):
-                return MirrorTable.replaceSuffix(name, side, "X") != name
-
-            # Support for all other naming conventions.
-            else:
-                return side in name
+            return MirrorTable.rreplace(name, side, "X") != name
 
         return False
 
     @staticmethod
-    def rreplace(name, old, new, count=1):
+    def rreplace(name, old, new):
         """
         convenience method.
 
@@ -275,10 +265,24 @@ class MirrorTable(mutils.TransferObject):
         :type name: str
         :type old: str
         :type new: str
-        :type count: int
         :rtype: str
         """
-        return new.join(name.rsplit(old, count))
+        names = []
+
+        for n in name.split("|"):
+
+            namespaces = ''
+            if ':' in n:
+                namespaces, n = n.rsplit(':', 1)
+
+            other = mutils.mirrortable.MirrorTable.replace(n, old, new)
+
+            if namespaces:
+                other = ':'.join([namespaces, other])
+
+            names.append(other)
+
+        return "|".join(names)
 
     @staticmethod
     def replace(name, old, new):
@@ -322,25 +326,13 @@ class MirrorTable(mutils.TransferObject):
         :type new: str
         :rtype: str
         """
-        dstName = name
         old = old.replace("*", "")
         new = new.replace("*", "")
 
-        # Support for the prefix with namespaces
-        # Group|Character1:LfootRollExtra|Character1:LfootRoll
-        if ":" in name:
-            dstName = MirrorTable.rreplace(name, ":" + old, ":" + new, 1)
-            if name != dstName:
-                return dstName
+        if name.startswith(old):
+            name = name.replace(old, new, 1)
 
-        # Support for the prefix with long names
-        # Group|LfootRollExtra|LfootRoll
-        if "|" in name:
-            dstName = name.replace("|" + old, "|" + new)
-        elif dstName.startswith(old):
-            dstName = name.replace(old, new, 1)
-
-        return dstName
+        return name
 
     @staticmethod
     def replaceSuffix(name, old, new):
@@ -360,20 +352,13 @@ class MirrorTable(mutils.TransferObject):
         :type new: str
         :rtype: str
         """
-        dstName = name
         old = old.replace("*", "")
         new = new.replace("*", "")
 
-        # Support for the suffix with long name
-        # Group|Character1:footRollExtraR|Character1:footRollR
-        if "|" in name:
-            dstName = name.replace(old + "|", new + "|")
+        if name.endswith(old):
+            name = name[:-len(old)] + new
 
-        # Eg: Character1:footRollR
-        if dstName.endswith(old):
-            dstName = dstName[:-len(old)] + new
-
-        return dstName
+        return name
 
     def mirrorObject(self, obj):
         """
@@ -398,37 +383,13 @@ class MirrorTable(mutils.TransferObject):
         :type obj: str
         :rtype: str or None
         """
-        # Support for the prefix naming convention.
-        if leftSide.endswith("*") or rightSide.endswith("*"):
-            dstName = MirrorTable.replacePrefix(obj, leftSide, rightSide)
+        dstName = MirrorTable.rreplace(obj, leftSide, rightSide)
 
-            if obj == dstName:
-                dstName = MirrorTable.replacePrefix(obj, rightSide, leftSide)
+        if obj == dstName:
+            dstName = MirrorTable.rreplace(obj, rightSide, leftSide)
 
-            if dstName != obj:
-                return dstName
-
-        # Support for the suffix naming convention.
-        elif leftSide.startswith("*") or rightSide.startswith("*"):
-
-            dstName = MirrorTable.replaceSuffix(obj, leftSide, rightSide)
-
-            if obj == dstName:
-                dstName = MirrorTable.replaceSuffix(obj, rightSide, leftSide)
-
-            if dstName != obj:
-                return dstName
-
-        # Support for all other naming conventions.
-        else:
-
-            dstName = obj.replace(leftSide, rightSide)
-
-            if dstName == obj:
-                dstName = obj.replace(rightSide, leftSide)
-
-            if dstName != obj:
-                return dstName
+        if dstName != obj:
+            return dstName
 
         # Return None as the given name is probably a center control
         # and doesn't have an opposite side.

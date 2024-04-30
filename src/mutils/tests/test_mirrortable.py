@@ -111,8 +111,9 @@ class TestMirrorTable(unittest.TestCase):
         result = MirrorTable.matchSide("CHR1:RIG:LRollCON", "L*")
         assert result is True, msg
 
-        result = MirrorTable.matchSide("CHR1:RIG:LRollCON", "RIG:L*")
-        assert result is True, msg
+        # This is no longer supported!
+        # result = MirrorTable.matchSide("CHR1:RIG:LRollCON", "RIG:L*")
+        # assert result is True, msg
 
         result = MirrorTable.matchSide("Group|right_arm_car_ik", "right*")
         assert result is True, msg
@@ -148,12 +149,63 @@ class TestMirrorTable(unittest.TestCase):
         result = MirrorTable._mirrorObject("Group|Ch1:RIG:Offset|Ch1:RIG:RRoll", "R*", "L*")
         assert "Group|Ch1:RIG:Offset|Ch1:RIG:LRoll" == result, msg
 
-        result = MirrorTable._mirrorObject("Group|Ch1:RIG:RExtra|Ch1:RIG:RRoll", "RIG:R", "RIG:L")
+        # This is no longer supported!
+        # result = MirrorTable._mirrorObject("Group|Ch1:RIG:RExtra|Ch1:RIG:RRoll", "RIG:R", "RIG:L")
+        # assert "Group|Ch1:RIG:LExtra|Ch1:RIG:LRoll" == result, msg
+
+        result = MirrorTable._mirrorObject("Group|Ch1:RIG:RExtra|Ch1:RIG:RRoll", "R*", "L*")
         assert "Group|Ch1:RIG:LExtra|Ch1:RIG:LRoll" == result, msg
 
-        # # WARNING: The following condition is not supported yet!
-        # result = MirrorTable._mirrorObject("Group|Ch1:RIG:RExtra|Ch1:RIG:RRoll", "R*", "L*")
-        # assert "Group|Ch1:RIG:LExtra|Ch1:RIG:LRoll" == result, msg
+        result = MirrorTable._mirrorObject("hand_R0_ctl", "_R", "_L")
+        assert "hand_L0_ctl" == result, msg
+
+        result = MirrorTable._mirrorObject("Lyle_R001:hand_R0_ctl", "_R", "_L")
+        assert "Lyle_R001:hand_L0_ctl" == result, msg
+
+        result = MirrorTable._mirrorObject("Lyle_R001:other_R0_ctl|Lyle_R001:hand_R0_ctl", "_R", "_L")
+        assert "Lyle_R001:other_L0_ctl|Lyle_R001:hand_L0_ctl" == result, msg
+
+        result = MirrorTable._mirrorObject("Character1:LfootRoll", "L*", "R*")
+        assert "Character1:RfootRoll" == result, msg
+
+        result = MirrorTable._mirrorObject("Group|LyleCharacter1:LfootRollExtra|LyleCharacter1:LfootRoll", "R*", "L*")
+        assert "Group|LyleCharacter1:RfootRollExtra|LyleCharacter1:RfootRoll" == result, msg
+
+        result = MirrorTable._mirrorObject("Character3_Ctrl_RightForeArm", "Right", "Left")
+        assert "Character3_Ctrl_LeftForeArm" == result, msg
+
+        result = MirrorTable._mirrorObject("r_arm_car_r", "r_*", "l_*")
+        assert "l_arm_car_r" == result, msg
+
+        result = MirrorTable._mirrorObject("Character:r_arm_car_r", "r_*", "l_*")
+        assert "Character:l_arm_car_r" == result, msg
+
+        result = MirrorTable._mirrorObject("Group|r_arm_car_r", "r_*", "l_*")
+        assert "Group|l_arm_car_r" == result, msg
+
+        result = MirrorTable._mirrorObject("arm_car_r", "*_r", "*_l")
+        assert "arm_car_l" == result, msg
+
+        result = MirrorTable._mirrorObject("Group|right_arm_car_ik", "right*", "left*")
+        assert "Group|left_arm_car_ik" == result, msg
+
+        result = MirrorTable._mirrorObject("CHR1:RIG:RLegCON", "R*", "L*")
+        assert "CHR1:RIG:LLegCON" == result, msg
+
+        result = MirrorTable._mirrorObject("RhandCON", "R*", "L*")
+        assert "LhandCON" == result, msg
+
+        result = MirrorTable._mirrorObject("Group|ctlHandRt", "*Rt", "*Lt")
+        assert "Group|ctlHandLt" == result, msg
+
+        result = MirrorTable._mirrorObject("malcolm:ctlArmIkRt", "*Rt", "*Lt")
+        assert "malcolm:ctlArmIkLt" == result, msg
+
+        result = MirrorTable._mirrorObject("IKExtraLegFront_R|IKLegFront_R", "*_R", "*_L")
+        assert "IKExtraLegFront_L|IKLegFront_L" == result, msg
+
+        result = MirrorTable._mirrorObject("Rig_v01_ref:Rig_v01:leftArm1_UpperArmControl", "_R", "_L")
+        assert None == result, msg
 
 
 def testSuite():
