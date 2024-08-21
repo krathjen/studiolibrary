@@ -193,15 +193,20 @@ class Attribute(object):
 
         :rtype: None
         """
+        # Collect all the data before deleting the attribute, as that will require it to
+        # still be alive.
+        name = self.attr()
+        type_ = self.type()
+        value = self.value()
         if self.isProxy():
             self.delete()
         # Re-create the attribute in non-proxy mode.
         maya.cmds.addAttr(
             self.name(),
-            longName=self.attr(),
-            attributeType=self.type(),
-            defaultValue=self.value(),
-            keyable=True,  # TODO make sure this is not stupid, but it shouldn't
+            longName=name,
+            attributeType=type_,
+            defaultValue=value,
+            keyable=True,
         )
 
     def delete(self):
