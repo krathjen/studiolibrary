@@ -1,11 +1,11 @@
 # Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
-# This library is free software: you can redistribute it and/or modify it 
-# under the terms of the GNU Lesser General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. This library is distributed in the 
-# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# This library is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version. This library is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
@@ -82,12 +82,18 @@ class Attribute(object):
         return [cls(name, attr) for attr in attrs]
 
     @classmethod
-    def deleteProxyAttrs(cls, name):
-        """Delete all the proxy attributes for the given object name."""
+    def collectProxyAttrs(cls, name):
         attrs = cls.listAttr(name, unlocked=True, keyable=True) or []
         for attr in attrs:
             if attr.isProxy():
-                attr.delete()
+                yield attr
+
+    @classmethod
+    def deleteProxyAttrs(cls, name):
+        """Delete all the proxy attributes for the given object name."""
+        proxyAttrs = cls.collectProxyAttrs(name)
+        for attr in proxyAttrs:
+            attr.delete()
 
     def __init__(self, name, attr=None, value=None, type=None, cache=True):
         """
@@ -180,6 +186,23 @@ class Attribute(object):
             return False
 
         return maya.cmds.addAttr(self.fullname(), query=True, usedAsProxy=True)
+
+    def unProxy(self):
+        """
+        Converts the attribute from proxy back to dynamic.
+
+        :rtype: None
+        """
+        if self.isProxy():
+            self.delete()
+        # Re-create the attribute in non-proxy mode.
+        maya.cmds.addAttr(
+            self.name(),
+            longName=self.attr(),
+            attributeType=self.type(),
+            defaultValue=self.value(),
+            keyable=True,  # TODO make sure this is not stupid, but it shouldn't
+        )
 
     def delete(self):
         """Delete the attribute"""
@@ -421,9 +444,9 @@ class Attribute(object):
         fullname = self.fullname()
         startTime, endTime = time
 
-        if self.isProxy():
-            logger.debug("Cannot set anim curve for proxy attribute")
-            return
+        # if self.isProxy():
+        #     logger.debug("Cannot set anim curve for proxy attribute")
+        #     return
 
         if not self.exists():
             logger.debug("Attr does not exists")
@@ -492,7 +515,10 @@ class Attribute(object):
 
         if self.exists():
 
-            n = self.listConnections(plugs=True, destination=False)
+            animSource = self.fullname()
+            if self.isProxy():
+                animSource = self.listConnections(plugs=True, destination=False)
+            n = maya.cmds.listConnections(animSource, plugs=True, destination=False)
 
             if n and "animCurve" in maya.cmds.nodeType(n):
                 result = n

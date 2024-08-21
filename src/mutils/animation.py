@@ -1,11 +1,11 @@
 # Copyright 2020 by Kurt Rathjen. All Rights Reserved.
 #
-# This library is free software: you can redistribute it and/or modify it 
-# under the terms of the GNU Lesser General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. This library is distributed in the 
-# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+# This library is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version. This library is distributed in the
+# hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
@@ -57,7 +57,7 @@ class OutOfBoundsError(AnimationTransferError):
 def validateAnimLayers():
     """
     Check if the selected animation layer can be exported.
-    
+
     :raise: AnimationTransferError
     """
     if maya.cmds.about(q=True, batch=True):
@@ -98,12 +98,12 @@ def saveAnim(
     Example:
         import mutils
         mutils.saveAnim(
-            path="c:/example.anim", 
+            path="c:/example.anim",
             objects=["control1", "control2"]
             time=(1, 20),
             metadata={'description': 'Example anim'}
             )
-            
+
     :type path: str
     :type objects: None or list[str]
     :type time: (int, int) or None
@@ -113,7 +113,7 @@ def saveAnim(
     :type sequencePath: str
     :type metadata: dict or None
     :type bakeConnected: bool
-    
+
     :rtype: mutils.Animation
     """
     # Copy the icon path to the temp location
@@ -416,7 +416,7 @@ class Animation(mutils.Pose):
     def select(self, objects=None, namespaces=None, **kwargs):
         """
         Select the objects contained in the animation.
-        
+
         :type objects: list[str] or None
         :type namespaces: list[str] or None
         :rtype: None
@@ -597,7 +597,7 @@ class Animation(mutils.Pose):
         :type sampleBy: int
         :type fileType: str
         :type bakeConnected: bool
-        
+
         :rtype: None
         """
         objects = list(self.objects().keys())
@@ -651,8 +651,13 @@ class Animation(mutils.Pose):
                     if not FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR:
                         mutils.disconnectAll(dstNode)
 
-                    # Make sure we delete all proxy attributes, otherwise pasteKey will duplicate keys
-                    mutils.Attribute.deleteProxyAttrs(dstNode)
+                    # Collect all the proxy attributes and un-proxy them before export. This way they will be
+                    # saved as standard attributes and all their values will be pasted correctly when loaded back.
+                    proxyAttrs = mutils.Attribute.collectProxyAttrs(dstNode)
+                    for proxy in proxyAttrs:
+                        logger.debug("proxy attribute: %s", proxy)
+                        proxy.unProxy()
+                    # mutils.Attribute.deleteProxyAttrs(dstNode)
                     maya.cmds.pasteKey(dstNode)
 
                     attrs = maya.cmds.listAttr(dstNode, unlocked=True, keyable=True) or []
@@ -661,6 +666,7 @@ class Animation(mutils.Pose):
                     for attr in attrs:
                         dstAttr = mutils.Attribute(dstNode, attr)
                         dstCurve = dstAttr.animCurve()
+                        logging.debug("destination curve: %s", dstCurve)
 
                         if dstCurve:
 
@@ -669,6 +675,7 @@ class Animation(mutils.Pose):
 
                             srcAttr = mutils.Attribute(name, attr)
                             srcCurve = srcAttr.animCurve()
+                            logging.debug("source curve: %s", srcCurve)
 
                             if srcCurve:
                                 preInfinity = maya.cmds.getAttr(srcCurve + ".preInfinity")
@@ -811,9 +818,9 @@ class Animation(mutils.Pose):
                         logger.debug('Skipping attribute: The destination attribute "%s" does not exist!' % dstAttr.fullname())
                         continue
 
-                    if dstAttr.isProxy():
-                        logger.debug('Skipping attribute: The destination attribute "%s" is a proxy attribute!', dstAttr.fullname())
-                        continue
+                    # if dstAttr.isProxy():
+                    #     logger.debug('Skipping attribute: The destination attribute "%s" is a proxy attribute!', dstAttr.fullname())
+                    #     continue
 
                     srcCurve = self.animCurve(srcNode.name(), attr, withNamespace=True)
 
