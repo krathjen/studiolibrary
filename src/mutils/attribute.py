@@ -516,6 +516,9 @@ class Attribute(object):
 
         if self.exists():
 
+            # Find the keys connected to the current attribute. If the attribute is a proxy, the anim keys will
+            # actually be connected to the node where the source of the proxy attribute comes from, so traverse
+            # that to find the keys.
             animSource = self.fullname()
             if self.isProxy():
                 animSource = self.listConnections(plugs=True, destination=False)
