@@ -657,7 +657,6 @@ class Animation(mutils.Pose):
                     for proxy in proxyAttrs:
                         logger.debug("proxy attribute: %s", proxy)
                         proxy.unProxy()
-                    # mutils.Attribute.deleteProxyAttrs(dstNode)
                     maya.cmds.pasteKey(dstNode)
 
                     attrs = maya.cmds.listAttr(dstNode, unlocked=True, keyable=True) or []
