@@ -817,10 +817,6 @@ class Animation(mutils.Pose):
                         logger.debug('Skipping attribute: The destination attribute "%s" does not exist!' % dstAttr.fullname())
                         continue
 
-                    # if dstAttr.isProxy():
-                    #     logger.debug('Skipping attribute: The destination attribute "%s" is a proxy attribute!', dstAttr.fullname())
-                    #     continue
-
                     srcCurve = self.animCurve(srcNode.name(), attr, withNamespace=True)
 
                     if srcCurve:
