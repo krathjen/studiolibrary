@@ -449,10 +449,6 @@ class Attribute(object):
         fullname = self.fullname()
         startTime, endTime = time
 
-        # if self.isProxy():
-        #     logger.debug("Cannot set anim curve for proxy attribute")
-        #     return
-
         if not self.exists():
             logger.debug("Attr does not exists")
             return
