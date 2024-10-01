@@ -769,6 +769,13 @@ def read(path):
 
 
 def write(path, data):
+    if six.PY2:
+        write2(path, data)
+    else:
+        write3(path, data)
+
+
+def write2(path, data):
     """
     Write the given data to the given file on disc.
 
@@ -825,6 +832,41 @@ def write(path, data):
             os.rename(bak, path)
 
         raise
+
+
+def write3(path, data):
+    """
+    Writes the given data to a file atomically by first writing to a
+    temp file and then renaming it.
+    """
+    path = normPath(path)
+    data = relPath(data, path)
+
+    dirname = os.path.dirname(path)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    tmp = None
+
+    try:
+
+        with tempfile.NamedTemporaryFile(
+                mode='w',
+                dir=dirname,
+                delete=False,
+                suffix='.delete'
+        ) as f:
+            tmp = f.name
+            f.write(data)
+            f.flush()
+
+        # Introduced in python 3.3
+        os.replace(tmp, path)
+
+    finally:
+
+        if tmp and os.path.exists(tmp):
+            os.remove(tmp)
 
 
 def update(data, other):
