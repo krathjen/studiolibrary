@@ -20,6 +20,7 @@ import shutil
 import locale
 import logging
 import getpass
+import random
 import tempfile
 import platform
 import threading
@@ -838,6 +839,9 @@ def write3(path, data):
     """
     Writes the given data to a file atomically by first writing to a
     temp file and then renaming it.
+
+    This approach avoids using the tempfile module to keep permissions
+    consistent with the write2 function.
     """
     path = normPath(path)
     data = relPath(data, path)
@@ -850,13 +854,12 @@ def write3(path, data):
 
     try:
 
-        with tempfile.NamedTemporaryFile(
-                mode='w',
-                dir=dirname,
-                delete=False,
-                suffix='.delete'
-        ) as f:
-            tmp = f.name
+        # Create a temporary file with a random name
+        characters = "abcdefghijklmnopqrstuvwxyz0123456789_"
+        name = ''.join(random.choice(characters) for _ in range(8))
+        tmp = os.path.join(dirname, name + ".delete")
+
+        with open(tmp, "w") as f:
             f.write(data)
             f.flush()
 
@@ -864,7 +867,6 @@ def write3(path, data):
         os.replace(tmp, path)
 
     finally:
-
         if tmp and os.path.exists(tmp):
             os.remove(tmp)
 
