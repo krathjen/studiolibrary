@@ -467,7 +467,7 @@ class TreeWidget(ItemViewMixin, QtWidgets.QTreeWidget):
         items = self.items()
 
         def sortKey(item):
-            return item.itemData().get("Custom Order", 0)
+            return item.itemData().get("Custom Order", "00000")
 
         customOrder = sorted(items, key=sortKey)
 

@@ -354,6 +354,7 @@ class FolderItem(studiolibrary.LibraryItem):
 
             item = cls(path, libraryWindow=libraryWindow)
             item.safeSave()
+            libraryWindow.library().updatePermissions(path)
 
             if libraryWindow:
                 libraryWindow.refresh()
