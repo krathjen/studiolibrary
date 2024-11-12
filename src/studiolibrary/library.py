@@ -802,12 +802,12 @@ class Library(QtCore.QObject):
         try:
             os.chmod(dst, stat.st_mode)
         except OSError as e:
-            logger.error("Error changing permissions: %s", e)
+            logger.warning("Error changing permissions: %s", e)
 
         try:
-            os.chown(dst, stat.st_uid, os.stat(dst).st_gid)
+            os.chown(dst, -1, stat.st_gid)
         except OSError as e:
-            logger.error("Error changing group ownership: %s", e)
+            logger.warning("Error changing group ownership: %s", e)
 
     def removePath(self, path):
         """

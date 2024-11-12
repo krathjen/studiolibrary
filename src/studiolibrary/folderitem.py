@@ -101,6 +101,9 @@ class FolderItem(studiolibrary.LibraryItem):
 
         return data
 
+    def updatePermissionsEnabled(self):
+        return True
+
     def updateMetadata(self, metadata):
         """
         Overriding this method to support updating the library widget directly.
@@ -354,7 +357,6 @@ class FolderItem(studiolibrary.LibraryItem):
 
             item = cls(path, libraryWindow=libraryWindow)
             item.safeSave()
-            libraryWindow.library().updatePermissions(path)
 
             if libraryWindow:
                 libraryWindow.refresh()
