@@ -112,11 +112,11 @@ class BaseLoadWidget(QtWidgets.QWidget):
         titleWidget.setObjectName("titleWidget")
         titleWidget.ui = UI()
 
-        vlayout = QtWidgets.QVBoxLayout(self)
+        vlayout = QtWidgets.QVBoxLayout()
         vlayout.setSpacing(0)
         vlayout.setContentsMargins(0, 0, 0, 0)
 
-        hlayout = QtWidgets.QHBoxLayout(self)
+        hlayout = QtWidgets.QHBoxLayout()
         hlayout.setSpacing(0)
         hlayout.setContentsMargins(0, 0, 0, 0)
 

@@ -44,7 +44,7 @@ class ColorButton(QtWidgets.QPushButton):
 
         css = """
         ColorButton {
-            background-color: rgba(RGB);
+            background-color: rgb(RGB);
         }
         
         ColorButton:hover {
@@ -100,7 +100,7 @@ class ColorPickerAction(QtWidgets.QWidgetAction):
         widget = QtWidgets.QFrame(menu)
         widget.setObjectName("colorPickerAction")
 
-        actionLayout = QtWidgets.QHBoxLayout(widget)
+        actionLayout = QtWidgets.QHBoxLayout()
         actionLayout.setContentsMargins(0, 0, 0, 0)
         actionLayout.addWidget(self.picker(), stretch=1)
         widget.setLayout(actionLayout)

@@ -34,7 +34,7 @@ class GroupBoxWidget(QtWidgets.QFrame):
         self._widget = None
         self._persistent = None
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
@@ -56,7 +56,7 @@ class GroupBoxWidget(QtWidgets.QFrame):
         self._widgetFrame = QtWidgets.QFrame(self)
         self._widgetFrame.setObjectName("frame")
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 

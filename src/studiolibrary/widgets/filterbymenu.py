@@ -55,7 +55,7 @@ QCheckBox::indicator:unchecked {
     image: url(none.png)
 }
 """)
-        actionLayout = QtWidgets.QHBoxLayout(widget)
+        actionLayout = QtWidgets.QHBoxLayout()
         actionLayout.setContentsMargins(0, 0, 0, 0)
         actionLayout.addWidget(label, stretch=1)
         widget.setLayout(actionLayout)
@@ -112,7 +112,7 @@ class FilterByAction(QtWidgets.QWidgetAction):
         label2.setObjectName("actionCounter")
         label2.setText(count)
 
-        layout = QtWidgets.QHBoxLayout(widget)
+        layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(label, stretch=1)

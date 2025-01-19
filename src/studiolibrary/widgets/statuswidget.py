@@ -106,7 +106,7 @@ class StatusWidget(QtWidgets.QFrame):
         self._progressBar = ProgressBar(self)
         self._progressBar.hide()
 
-        layout = QtWidgets.QHBoxLayout(self)
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(1, 0, 0, 0)
 
         layout.addWidget(self._button)

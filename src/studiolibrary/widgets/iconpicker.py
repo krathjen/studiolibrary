@@ -100,7 +100,7 @@ class IconPickerAction(QtWidgets.QWidgetAction):
 
         self.picker().setParent(widget)
 
-        actionLayout = QtWidgets.QHBoxLayout(widget)
+        actionLayout = QtWidgets.QHBoxLayout()
         actionLayout.setContentsMargins(0, 0, 0, 0)
         actionLayout.addWidget(self.picker(), stretch=1)
         widget.setLayout(actionLayout)

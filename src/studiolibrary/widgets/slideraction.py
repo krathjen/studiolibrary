@@ -72,7 +72,7 @@ class SliderAction(QtWidgets.QWidgetAction):
         """
         actionWidget = self.widget()
 
-        actionLayout = QtWidgets.QHBoxLayout(actionWidget)
+        actionLayout = QtWidgets.QHBoxLayout()
         actionLayout.setContentsMargins(0, 0, 0, 0)
         actionLayout.addWidget(self.label())
         actionLayout.addWidget(self.slider())

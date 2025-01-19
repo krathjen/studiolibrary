@@ -73,7 +73,7 @@ class FormWidget(QtWidgets.QFrame):
         self._validator = None
         self._validatorEnabled = True
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
@@ -82,7 +82,7 @@ class FormWidget(QtWidgets.QFrame):
         self._fieldsFrame = QtWidgets.QFrame(self)
         self._fieldsFrame.setObjectName("optionsFrame")
 
-        layout = QtWidgets.QVBoxLayout(self._fieldsFrame)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
@@ -517,7 +517,7 @@ class FormDialog(QtWidgets.QFrame):
     def __init__(self, parent=None, form=None):
         super(FormDialog, self).__init__(parent)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
@@ -542,7 +542,7 @@ class FormDialog(QtWidgets.QFrame):
 
         self.layout().addStretch(1)
 
-        buttonLayout = QtWidgets.QHBoxLayout(self)
+        buttonLayout = QtWidgets.QHBoxLayout()
         buttonLayout.setContentsMargins(0, 0, 0, 0)
         buttonLayout.setSpacing(0)
 

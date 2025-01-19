@@ -75,12 +75,13 @@ class FieldWidget(QtWidgets.QFrame):
         direction = self._data.get("layout", self.DefaultLayout)
 
         if direction == "vertical":
-            layout = QtWidgets.QVBoxLayout(self)
+            layout = QtWidgets.QVBoxLayout()
         else:
-            layout = QtWidgets.QHBoxLayout(self)
+            layout = QtWidgets.QHBoxLayout()
 
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
+        self.setLayout(layout)
 
         self.setContentsMargins(0, 0, 0, 0)
 
@@ -93,7 +94,7 @@ class FieldWidget(QtWidgets.QFrame):
 
         layout.addWidget(self._label)
 
-        self._layout2 = QtWidgets.QHBoxLayout(self)
+        self._layout2 = QtWidgets.QHBoxLayout()
         layout.addLayout(self._layout2)
 
         if direction == "vertical":
@@ -104,6 +105,7 @@ class FieldWidget(QtWidgets.QFrame):
         widget = self.createWidget()
         if widget:
             self.setWidget(widget)
+
 
     def setValidateEnabled(self, v):
         self._validateEnabled = v
@@ -457,7 +459,7 @@ class FieldWidget(QtWidgets.QFrame):
         
         :type widget: QtWidgets.QWidget
         """
-        widgetLayout = QtWidgets.QHBoxLayout(self)
+        widgetLayout = QtWidgets.QHBoxLayout()
         widgetLayout.setContentsMargins(0, 0, 0, 0)
         widgetLayout.setSpacing(0)
 
@@ -481,7 +483,7 @@ class FieldWidget(QtWidgets.QFrame):
         widgetLayout.addWidget(self._widget)
         widgetLayout.addWidget(self._menuButton)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
@@ -898,7 +900,7 @@ class RangeFieldWidget(FieldWidget):
         super(RangeFieldWidget, self).__init__(*args, **kwargs)
 
         widget = QtWidgets.QFrame(self)
-        layout = QtWidgets.QHBoxLayout(self)
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(4)
         widget.setLayout(layout)
@@ -948,7 +950,7 @@ class StringDoubleFieldWidget(FieldWidget):
         super(StringDoubleFieldWidget, self).__init__(*args, **kwargs)
 
         widget = QtWidgets.QFrame(self)
-        layout = QtWidgets.QHBoxLayout(self)
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(4)
         widget.setLayout(layout)
@@ -1216,7 +1218,7 @@ class ButtonGroupFieldWidget(FieldWidget):
         items = self.data().get('items')
 
         widget = QtWidgets.QFrame()
-        layout = QtWidgets.QHBoxLayout(widget)
+        layout = QtWidgets.QHBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)

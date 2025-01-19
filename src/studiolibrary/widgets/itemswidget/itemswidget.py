@@ -100,7 +100,7 @@ class ItemsWidget(QtWidgets.QWidget):
         self._backgroundHoverColor = QtGui.QColor(255, 255, 255, 35)
         self._backgroundSelectedColor = QtGui.QColor(30, 150, 255)
 
-        layout = QtWidgets.QHBoxLayout(self)
+        layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._treeWidget)
         layout.addWidget(self._listView)

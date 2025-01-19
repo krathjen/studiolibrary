@@ -144,7 +144,7 @@ class ThumbnailCaptureDialog(QtWidgets.QDialog):
 
         self._modelPanelWidget = mutils.gui.modelpanelwidget.ModelPanelWidget(self)
 
-        vbox = QtWidgets.QVBoxLayout(self)
+        vbox = QtWidgets.QVBoxLayout()
         vbox.setObjectName(self.objectName() + "Layout")
         vbox.addWidget(self._modelPanelWidget)
         vbox.addWidget(self._captureButton)

@@ -65,7 +65,7 @@ class PoseLoadWidget(baseloadwidget.BaseLoadWidget):
 
         self.ui.blendFrame = QtWidgets.QFrame(self)
 
-        layout = QtWidgets.QHBoxLayout(self)
+        layout = QtWidgets.QHBoxLayout()
         self.ui.blendFrame.setLayout(layout)
 
         if self.item().libraryWindow():

@@ -35,7 +35,7 @@ class ModelPanelWidget(QtWidgets.QWidget):
         uniqueName = name + str(id(self))
         self.setObjectName(uniqueName + 'Widget')
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setObjectName(uniqueName + "Layout")
         self.setLayout(layout)

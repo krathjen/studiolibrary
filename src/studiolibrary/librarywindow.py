@@ -341,16 +341,16 @@ class LibraryWindow(QtWidgets.QWidget):
         # Setup Layout
         # -------------------------------------------------------------------
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 1, 0, 0)
         self._previewFrame.setLayout(layout)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 1, 0, 0)
 
         self._sidebarFrame.setLayout(layout)

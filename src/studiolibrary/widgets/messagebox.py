@@ -377,7 +377,7 @@ class MessageBox(QtWidgets.QDialog):
         self._title.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                   QtWidgets.QSizePolicy.Expanding)
 
-        hlayout = QtWidgets.QHBoxLayout(self._header)
+        hlayout = QtWidgets.QHBoxLayout()
         hlayout.setContentsMargins(15, 7, 15, 10)
         hlayout.setSpacing(10)
         hlayout.addWidget(self._icon)
@@ -385,7 +385,7 @@ class MessageBox(QtWidgets.QDialog):
 
         self._header.setLayout(hlayout)
 
-        bodyLayout = QtWidgets.QVBoxLayout(self)
+        bodyLayout = QtWidgets.QVBoxLayout()
 
         self._body = QtWidgets.QFrame(self)
         self._body.setObjectName("messageBoxBody")
@@ -424,7 +424,7 @@ class MessageBox(QtWidgets.QDialog):
         self._buttonBox.accepted.connect(self._accept)
         self._buttonBox.rejected.connect(self._reject)
 
-        vlayout1 = QtWidgets.QVBoxLayout(self)
+        vlayout1 = QtWidgets.QVBoxLayout()
         vlayout1.setContentsMargins(0, 0, 0, 0)
 
         vlayout1.addWidget(self._header)
