@@ -1513,6 +1513,11 @@ class LibraryWindow(QtWidgets.QWidget):
 
         # Check if the items are moving to another folder.
         for item in items:
+
+            if item.isVersionPath():
+                raise NameError("You can only save items that were "
+                                "created using Studio Library version 2!")
+
             if os.path.dirname(item.path()) == dst:
                 return
 

@@ -86,17 +86,26 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :rtype: dict
         """
+        import studiolibrary.library
+
         path = self.path()
-        itemData = dict(self.readMetadata())
+        path = studiolibrary.latestVersionPath(path) or path
 
-        dirname, basename, extension = studiolibrary.splitPath(path)
+        if studiolibrary.isVersionPath(path):
+            dirname = os.path.dirname(path)
+            name = os.path.basename(dirname)
+            dirname, basename, extension = studiolibrary.splitPath(dirname)
+        else:
+            dirname, basename, extension = studiolibrary.splitPath(path)
+            name = os.path.basename(path)
 
-        name = os.path.basename(path)
         category = os.path.basename(dirname) or dirname
         modified = ""
 
         if os.path.exists(path):
             modified = os.path.getmtime(path)
+
+        itemData = dict(self.readMetadata())
 
         itemData.update({
             "name": name,
@@ -390,6 +399,9 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         return widget
 
+    def isVersionPath(self):
+        return studiolibrary.isVersionPath(self.path())
+
     def contextEditMenu(self, menu, items=None):
         """
         Called when the user would like to edit the item from the menu.
@@ -401,18 +413,22 @@ class LibraryItem(studiolibrary.widgets.Item):
         """
         # Adding a blank icon fixes the text alignment issue when using Qt 5.12.+
         icon = studiolibrary.resource.icon("blank")
+        enabled = not self.isVersionPath()
 
         action = QtWidgets.QAction("Rename", menu)
-        action.triggered.connect(self.showRenameDialog)
+        action.setEnabled(enabled)
         action.setIcon(icon)
+        action.triggered.connect(self.showRenameDialog)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Move to", menu)
+        action.setEnabled(enabled)
         action.triggered.connect(self.showMoveDialog)
         menu.addAction(action)
 
         action = QtWidgets.QAction("Copy Path", menu)
         action.triggered.connect(self.copyPathToClipboard)
+        action.setEnabled(enabled)
         menu.addAction(action)
 
         if self.libraryWindow():
@@ -427,6 +443,7 @@ class LibraryItem(studiolibrary.widgets.Item):
         if self.isDeletable():
             menu.addSeparator()
             action = QtWidgets.QAction("Delete", menu)
+            action.setEnabled(enabled)
             action.triggered.connect(self.showDeleteDialog)
             menu.addAction(action)
 
@@ -439,8 +456,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         :type menu: QtWidgets.QMenu
         """
         if not self.isReadOnly():
+            enabled = not self.isVersionPath()
             menu.addSeparator()
             action = QtWidgets.QAction("Overwrite", menu)
+            action.setEnabled(enabled)
             action.triggered.connect(self.overwrite)
             menu.addAction(action)
 
@@ -650,7 +669,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         self.saving.emit(self)
 
         if os.path.exists(dst):
-            if self._ignoreExistsDialog:
+            if studiolibrary.latestVersionPath(self.path()):
+                raise NameError("You can only save items that were "
+                                "created using Studio Library version 2!")
+            elif self._ignoreExistsDialog:
                 self._moveToTrash()
             else:
                 self.showAlreadyExistsDialog()
@@ -761,6 +783,10 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :type parent: QtWidgets.QWidget
         """
+        if self.isVersionPath():
+            raise NameError("You can only rename items that were "
+                            "created using Studio Library version 2!")
+
         select = False
 
         if self.libraryWindow():
@@ -797,6 +823,10 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :type parent: QtWidgets.QWidget
         """
+        if self.isVersionPath():
+            raise NameError("You can only move items that were "
+                            "created using Studio Library version 2!")
+
         title = "Move To..."
         path = os.path.dirname(os.path.dirname(self.path()))
 
@@ -816,6 +846,9 @@ class LibraryItem(studiolibrary.widgets.Item):
 
         :rtype: None
         """
+        if self.isVersionPath():
+            raise NameError("You can only delete items that were "
+                            "created using Studio Library version 2!")
 
         text = 'Are you sure you want to delete this item?'
 
@@ -834,6 +867,10 @@ class LibraryItem(studiolibrary.widgets.Item):
         
         :rtype: None
         """
+        if self.isVersionPath():
+            raise NameError("You can only override items that were "
+                            "created using Studio Library version 2!")
+
         if not self.libraryWindow():
             raise ItemSaveError("Item already exists!")
 

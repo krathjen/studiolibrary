@@ -9,9 +9,10 @@
 # See the GNU Lesser General Public License for more details.
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
-
+import fnmatch
 import os
 import copy
+import re
 import time
 import logging
 import collections
@@ -333,8 +334,14 @@ class Library(QtCore.QObject):
         :type path: str
         :rtype: bool
         """
-        for ignore in studiolibrary.config.get('ignorePaths', []):
-            if ignore in path:
+        patterns = studiolibrary.config.get('ignorePaths', [])
+        patterns.append("*/.*")
+        patterns.append("*.python")
+        patterns.append("*.playblast")
+        patterns.append("*.playblast_settings")
+
+        for pattern in patterns:
+            if fnmatch.fnmatch(path, pattern):
                 return False
         return True
 
@@ -360,21 +367,20 @@ class Library(QtCore.QObject):
                 path = studiolibrary.normPath(os.path.join(root, filename))
 
                 # Ignore any paths that have been specified in the config
-                if not self.isValidPath(path):
-                    continue
-
-                # Match the path with a registered item
-                item = self.itemFromPath(path)
-
                 remove = False
-                if item:
+                if not self.isValidPath(path):
+                    remove = True
+                else:
+                    # Match the path with a registered item
+                    item = self.itemFromPath(path)
+                    if item:
 
-                    # Yield the item data that matches the current path
-                    yield item.createItemData()
+                        # Yield the item data that matches the current path
+                        yield item.createItemData()
 
-                    # Stop walking if the item doesn't support nested items
-                    if not item.ENABLE_NESTED_ITEMS:
-                        remove = True
+                        # Stop walking if the item doesn't support nested items
+                        if not item.ENABLE_NESTED_ITEMS:
+                            remove = True
 
                 if remove and filename in dirs:
                     dirs.remove(filename)

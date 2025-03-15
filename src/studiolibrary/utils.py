@@ -10,6 +10,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see <http://www.gnu.org/licenses/>.
 
+import re
 import os
 import sys
 import json
@@ -105,6 +106,8 @@ __all__ = [
     "registeredItems",
     "runTests",
     "findItemsInFolders",
+    "isVersionPath",
+    "latestVersionPath",
 ]
 
 
@@ -1212,6 +1215,25 @@ def stringToList(data):
     data = data.replace(' ', '')
     data = data.replace(',', '","')
     return eval(data)
+
+
+def isVersionPath(path):
+    last_component = path.rstrip('/').split('/')[-1]
+    if re.fullmatch(r'v\d+', last_component):
+        return True
+    return False
+
+
+def latestVersionPath(path):
+    version = ""
+
+    for name in sorted(os.listdir(path), reverse=True):
+        if name.startswith("v"):
+            version = name
+            break
+
+    if version:
+        return "{}/{}".format(path, version)
 
 
 def listPaths(path):
