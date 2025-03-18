@@ -674,8 +674,6 @@ def _wrapinstance(ptr, base=None):
             which should handle anything.
 
     """
-
-    assert isinstance(ptr, int), "Argument 'ptr' must be of type <int>"
     assert (base is None) or issubclass(base, Qt.QtCore.QObject), (
         "Argument 'base' must be of type <QObject>")
 
@@ -694,7 +692,7 @@ def _wrapinstance(ptr, base=None):
         if Qt.IsPyQt4 or Qt.IsPyQt5:
             base = Qt.QtCore.QObject
         else:
-            q_object = func(int(ptr), Qt.QtCore.QObject)
+            q_object = func(long(ptr), Qt.QtCore.QObject)
             meta_object = q_object.metaObject()
 
             while True:
@@ -711,7 +709,7 @@ def _wrapinstance(ptr, base=None):
 
                 break
 
-    return func(int(ptr), base)
+    return func(long(ptr), base)
 
 
 def _isvalid(object):

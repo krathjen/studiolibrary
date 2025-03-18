@@ -33,7 +33,7 @@ def mayaWindow():
     :rtype: QMainWindow
     """
     mainWindowPtr = omui.MQtUtil.mainWindow()
-    return QtCompat.wrapInstance(int(mainWindowPtr), QtWidgets.QMainWindow)
+    return QtCompat.wrapInstance(mainWindowPtr, QtWidgets.QMainWindow)
 
 
 def makeMayaStandaloneWindow(w):
