@@ -25,6 +25,7 @@ import random
 import tempfile
 import platform
 import threading
+import time
 import traceback
 import collections
 import distutils.version
@@ -800,9 +801,15 @@ def write2(path, data):
 
     # Use the tmp file to check for concurrent writes
     if os.path.exists(tmp):
-        msg = "The path is locked for writing and cannot be accessed {}"
-        msg = msg.format(tmp)
-        raise IOError(msg)
+        if time.time() - os.path.getmtime(tmp) > 60:
+            # file might remain after an abrupt program termination or partial
+            # synchronization with a remote storage, if the file is still
+            # open, there will be exception on deletion
+            silentRemove(tmp)
+        else:
+            msg = "The path is locked for writing and cannot be accessed {}"
+            msg = msg.format(tmp)
+            raise IOError(msg)
 
     # Safely write the data to a tmp file and then rename to the given path
     try:
