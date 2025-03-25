@@ -1218,8 +1218,8 @@ def stringToList(data):
 
 
 def isVersionPath(path):
-    last_component = path.rstrip('/').split('/')[-1]
-    if re.fullmatch(r'v\d+', last_component):
+    basename = path.rstrip('/').split('/')[-1]
+    if re.match(r'^v\d+$', basename):
         return True
     return False
 
