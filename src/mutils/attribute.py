@@ -82,12 +82,11 @@ class Attribute(object):
         return [cls(name, attr) for attr in attrs]
 
     @classmethod
-    def deleteProxyAttrs(cls, name):
-        """Delete all the proxy attributes for the given object name."""
+    def collectProxyAttrs(cls, name):
         attrs = cls.listAttr(name, unlocked=True, keyable=True) or []
         for attr in attrs:
             if attr.isProxy():
-                attr.delete()
+                yield attr
 
     def __init__(self, name, attr=None, value=None, type=None, cache=True):
         """
@@ -180,6 +179,28 @@ class Attribute(object):
             return False
 
         return maya.cmds.addAttr(self.fullname(), query=True, usedAsProxy=True)
+
+    def unProxy(self):
+        """
+        Converts the attribute from proxy back to dynamic.
+
+        :rtype: None
+        """
+        # Collect all the data before deleting the attribute, as that will require it to
+        # still be alive.
+        name = self.attr()
+        type_ = self.type()
+        value = self.value()
+        if self.isProxy():
+            self.delete()
+        # Re-create the attribute in non-proxy mode.
+        maya.cmds.addAttr(
+            self.name(),
+            longName=name,
+            attributeType=type_,
+            defaultValue=value,
+            keyable=True,
+        )
 
     def delete(self):
         """Delete the attribute"""
@@ -421,10 +442,6 @@ class Attribute(object):
         fullname = self.fullname()
         startTime, endTime = time
 
-        if self.isProxy():
-            logger.debug("Cannot set anim curve for proxy attribute")
-            return
-
         if not self.exists():
             logger.debug("Attr does not exists")
             return
@@ -492,7 +509,13 @@ class Attribute(object):
 
         if self.exists():
 
-            n = self.listConnections(plugs=True, destination=False)
+            # Find the keys connected to the current attribute. If the attribute is a proxy, the anim keys will
+            # actually be connected to the node where the source of the proxy attribute comes from, so traverse
+            # that to find the keys.
+            animSource = self.fullname()
+            if self.isProxy():
+                animSource = self.listConnections(plugs=True, destination=False)
+            n = maya.cmds.listConnections(animSource, plugs=True, destination=False)
 
             if n and "animCurve" in maya.cmds.nodeType(n):
                 result = n

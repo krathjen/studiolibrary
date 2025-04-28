@@ -651,8 +651,12 @@ class Animation(mutils.Pose):
                     if not FIX_SAVE_ANIM_REFERENCE_LOCKED_ERROR:
                         mutils.disconnectAll(dstNode)
 
-                    # Make sure we delete all proxy attributes, otherwise pasteKey will duplicate keys
-                    mutils.Attribute.deleteProxyAttrs(dstNode)
+                    # Collect all the proxy attributes and un-proxy them before export. This way they will be
+                    # saved as standard attributes and all their values will be pasted correctly when loaded back.
+                    proxyAttrs = mutils.Attribute.collectProxyAttrs(dstNode)
+                    for proxy in proxyAttrs:
+                        logger.debug("proxy attribute: %s", proxy)
+                        proxy.unProxy()
                     maya.cmds.pasteKey(dstNode)
 
                     attrs = maya.cmds.listAttr(dstNode, unlocked=True, keyable=True) or []
@@ -809,10 +813,6 @@ class Animation(mutils.Pose):
 
                     if not dstAttr.exists():
                         logger.debug('Skipping attribute: The destination attribute "%s" does not exist!' % dstAttr.fullname())
-                        continue
-
-                    if dstAttr.isProxy():
-                        logger.debug('Skipping attribute: The destination attribute "%s" is a proxy attribute!', dstAttr.fullname())
                         continue
 
                     srcCurve = self.animCurve(srcNode.name(), attr, withNamespace=True)
