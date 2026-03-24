@@ -299,7 +299,7 @@ def unproxyAttrs(node):
 
     for attr in maya.cmds.listAttr(node, unlocked=True, keyable=True, userDefined=True) or []:
 
-        plug = f"{node}.{attr}"
+        plug = "{0}.{1}".format(node, attr)
         proxy = maya.cmds.addAttr(plug, q=True, usedAsProxy=True)
 
         if not proxy:
