@@ -32,6 +32,11 @@ import distutils.version
 from datetime import datetime
 
 try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
+
+try:
     from collections import Mapping
 except ImportError:
     from collections.abc import Mapping
@@ -46,7 +51,6 @@ except ImportError:
 import studiolibrary
 
 from studiovendor import six
-from studiovendor.six.moves import urllib
 
 
 __all__ = [
@@ -236,9 +240,9 @@ def setLibraries(libraries):
         import studiolibrary
 
         libraries = [
-            {"name":"test1", "path":r"D:\LibraryData", "default":True}},
-            {"name":"test2", "path":r"D:\LibraryData2"},
-            {"name":"Temp", "path":r"C:\temp"},
+            {"name":"test1", "path": r"D:/LibraryData", "default":True},
+            {"name":"test2", "path": r"D:/LibraryData2"},
+            {"name":"Temp", "path": r"C:/temp"},
         ]
 
         studiolibrary.setLibraries(libraries)
@@ -1514,7 +1518,7 @@ def checkForUpdates():
             ul=ul,
         )
 
-        response = urllib.request.urlopen(url)
+        response = urlopen(url)
 
         # Check the HTTP status code
         if response.getcode() == 200:
