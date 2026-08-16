@@ -25,7 +25,7 @@ Studio Library is a python-based Qt tool for managing poses and animation in May
 
 1. Download and unzip the *studiolibrary.zip* file from [github releases](https://github.com/krathjen/studiolibrary/releases) or [website](http://www.studiolibrary.com/download).
 
-2. Drag and drop the "studiolibrary/install.mel" file onto the Maya viewport.
+2. Drag and drop the "studiolibrary/install.py" file onto the Maya viewport.
 
 3. Click the Studio Library icon on the shelf to run.
 

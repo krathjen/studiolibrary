@@ -334,11 +334,11 @@ class Library(QtCore.QObject):
         :type path: str
         :rtype: bool
         """
-        patterns = studiolibrary.config.get('ignorePaths', [])
+        patterns = studiolibrary.config.get('ignorePaths', [])[:]
         patterns.append("*/.*")
         patterns.append("*.theme")
         patterns.append("*.python")
-        patterns.append("*.playblast")
+        patterns.append("*.playblast_preset")
         patterns.append("*.playblast_settings")
         patterns.append("*.batch_poses")
 
