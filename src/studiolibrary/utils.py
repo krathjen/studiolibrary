@@ -1232,7 +1232,7 @@ def latestVersionPath(path):
     version = ""
 
     for name in sorted(os.listdir(path), reverse=True):
-        if name.startswith("v"):
+        if isVersionPath(name):
             version = name
             break
 
