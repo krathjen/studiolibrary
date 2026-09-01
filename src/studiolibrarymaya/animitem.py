@@ -123,7 +123,8 @@ class AnimItem(baseitem.BaseItem):
             option=kwargs.get("option"),
             connect=kwargs.get("connect"),
             mirrorTable=kwargs.get("mirrorTable"),
-            currentTime=kwargs.get("currentTime")
+            currentTime=kwargs.get("currentTime"),
+            bookmarks=kwargs.get("bookmarks")
         )
 
     def saveSchema(self):
@@ -200,6 +201,14 @@ class AnimItem(baseitem.BaseItem):
                 "label": {"visible": False}
             },
             {
+                "name": "bakeBookmarks",
+                "type": "bool",
+                "default": False,
+                "persistent": True,
+                "inline": True,
+                "label": {"visible": False}
+            },
+            {
                 "name": "objects",
                 "type": "objects",
                 "label": {
@@ -269,5 +278,7 @@ class AnimItem(baseitem.BaseItem):
             iconPath=kwargs.get("thumbnail"),
             metadata={"description": kwargs.get("comment", "")},
             sequencePath=sequencePath,
-            bakeConnected=kwargs.get("bakeConnected")
+            bakeConnected=kwargs.get("bakeConnected"),
+            bakeBookmarks=kwargs.get("bakeBookmarks")
+            #get the bookmark bool
         )
